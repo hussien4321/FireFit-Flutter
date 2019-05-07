@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'dart:ui';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:mira_mira/screens.dart';
+import 'package:mira_mira/helper_widgets.dart';
+import 'package:data_handler/data_handler.dart';
 
 class ExploreScreen extends StatefulWidget {
   @override
@@ -9,14 +12,7 @@ class ExploreScreen extends StatefulWidget {
 
 class _ExploreScreenState extends State<ExploreScreen> {
   
-  List<String> outfits = [
-    'assets/outfit1.jpg',
-    'assets/outfit2.jpg',
-    'assets/outfit3.jpg',
-    'assets/outfit4.jpg',
-    'assets/outfit5.jpg',
-    'assets/outfit6.jpg',
-  ];
+  List<Outfit> outfits = mockedOutfits;
 
   int currentIndex=0;
   int nextIndex=1;
@@ -34,8 +30,8 @@ class _ExploreScreenState extends State<ExploreScreen> {
             _searchTerms(),
             Expanded(
               child: MagicMirror(
-                imagePath: outfits[currentIndex],
-                nextImagePath: outfits[nextIndex],
+                currentOutfit: outfits[currentIndex],
+                nextOutfit: outfits[nextIndex],
                 thickness: 10,
                 onNextPicShown: _incrementIndexes,
               ),
@@ -47,7 +43,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
     );
   }
 
-  //ADD DIALOGS FOR TERMS
+  //TODO: OADD DIALOGS FOR TERMS
   Widget _searchTerms(){
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -55,6 +51,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
         Material(
           borderRadius: BorderRadius.circular(10.0),
           color: Colors.orangeAccent,
+          elevation: 3.0,
           child: InkWell(
             borderRadius: BorderRadius.circular(10.0),
             onTap: () {},
@@ -68,7 +65,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
                       style: Theme.of(context).textTheme.subtitle
                     ),
                     TextSpan(
-                      text: 'All',//DESIGN UI FOR STYLES (WHEEL??)
+                      text: 'All',//TODO: DESIGN UI FOR STYLES (WHEEL??)
                       style: Theme.of(context).textTheme.body1
                     )
                   ]
@@ -80,6 +77,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
         Material(
           borderRadius: BorderRadius.circular(10.0),
           color: Colors.amberAccent,
+          elevation: 3.0,
           child: InkWell(
             borderRadius: BorderRadius.circular(10.0),
             onTap: () {},
@@ -114,7 +112,6 @@ class _ExploreScreenState extends State<ExploreScreen> {
     });
   }
 
-  //LINK TO OUTFIT OBJECT
   Widget _buildActionBar() {
     return Padding(
       padding: EdgeInsets.all(0.0),
@@ -199,17 +196,17 @@ class _ExploreScreenState extends State<ExploreScreen> {
 }
 
 class MagicMirror extends StatefulWidget {
-  final String imagePath;
-  final String nextImagePath;
+  final Outfit currentOutfit;
+  final Outfit nextOutfit;
   final double thickness;
   final VoidCallback onNextPicShown;
 
   MagicMirror({
-    this.imagePath,
-    this.nextImagePath,
+    this.currentOutfit,
+    this.nextOutfit,
     this.thickness = 6,
     this.onNextPicShown,
-  }): assert(imagePath != null);
+  });
 
   @override
   _MagicMirrorState createState() => _MagicMirrorState();
@@ -217,7 +214,7 @@ class MagicMirror extends StatefulWidget {
 
 class _MagicMirrorState extends State<MagicMirror> with SingleTickerProviderStateMixin {
 
-  String currentImagePath;
+  int currentOutfitId;
 
   double thickness;
   AnimationController blurringTransitionController;
@@ -227,7 +224,7 @@ class _MagicMirrorState extends State<MagicMirror> with SingleTickerProviderStat
   @override
   void initState() {
     thickness = widget.thickness;
-    currentImagePath = widget.imagePath;
+    currentOutfitId = widget.currentOutfit.id;
     blurringTransitionController = new AnimationController(
       vsync: this,
       duration: Duration(milliseconds: 500),
@@ -235,7 +232,7 @@ class _MagicMirrorState extends State<MagicMirror> with SingleTickerProviderStat
     ..addStatusListener((status) {
       if(status == AnimationStatus.completed){
         blurringTransitionController.reverse();
-        currentImagePath = (currentImagePath == widget.imagePath) ? widget.nextImagePath : widget.imagePath;
+        currentOutfitId = (currentOutfitId == widget.currentOutfit.id) ? widget.nextOutfit.id : widget.currentOutfit.id;
       }
       if(status ==AnimationStatus.dismissed){
         widget.onNextPicShown();
@@ -252,9 +249,9 @@ class _MagicMirrorState extends State<MagicMirror> with SingleTickerProviderStat
 
   @override
   void didUpdateWidget(MagicMirror oldWidget) {
-    if(oldWidget.imagePath != widget.imagePath){
+    if(oldWidget.currentOutfit.id != widget.currentOutfit.id){
       setState(() {
-       currentImagePath = widget.imagePath; 
+       currentOutfitId = widget.currentOutfit.id; 
       });
     }
     super.didUpdateWidget(oldWidget);
@@ -270,44 +267,27 @@ class _MagicMirrorState extends State<MagicMirror> with SingleTickerProviderStat
             child: Row(
               children: <Widget>[
                 Expanded(
-                  child: Center(//MAKE MIRROR OUTLINE WITH ASPECT RATIO INTO NEW WIDGET!!
-                    child: Container(
-                      decoration: BoxDecoration(
-                        border: BorderDirectional(
-                          bottom: BorderSide(width: thickness, color: Colors.grey[600]),
-                          start: BorderSide(width: thickness, color: Colors.grey[500]),
-                          top: BorderSide(width: thickness, color: Colors.grey[350]),
-                          end: BorderSide(width: thickness, color: Colors.grey[300]),
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            offset: Offset(0, thickness),
-                            color: Colors.black.withOpacity(0.6),
-                            blurRadius: thickness,
-                            spreadRadius: -thickness/2
-                          )
-                        ],
-                        color: Color.fromRGBO(204, 187, 187,1.0),
-                      ),
-                      child: GestureDetector(
-                        onVerticalDragUpdate: (s) => _switchToNextImage(),
-                        onTap: openDetailedImage,
-                        child: AspectRatio(
-                          aspectRatio: 0.6,
+                  child: Center(
+                    child: GestureDetector(
+                      onVerticalDragUpdate: (s) => _switchToNextImage(),
+                      onTap: openDetailedImage,
+                      child: Hero(
+                        tag:widget.currentOutfit.images.first,
+                        child: MirrorFrame( 
                           child: Stack(
                             children: <Widget>[
-                              _buildPicture(widget.imagePath),
-                              _buildPicture(widget.nextImagePath),
+                              _buildPicture(widget.currentOutfit),
+                              _buildPicture(widget.nextOutfit),
                               SizedBox.expand(
                                 child: BackdropFilter(
                                   filter: ImageFilter.blur(sigmaX: _blurValue, sigmaY: _blurValue),
                                   child: Container(
-                                    color: Color.fromRGBO(204, 187, 187, _overlaySplashOpacityValue),
+                                    color: Color.fromRGBO(204, 187, 187, 0.0),
                                   )
                                 ),
                               ),
                             ],
-                          )
+                          ),
                         ),
                       ),
                     ),
@@ -322,16 +302,13 @@ class _MagicMirrorState extends State<MagicMirror> with SingleTickerProviderStat
     );
   }
 
-  Widget _buildPicture(String imagePath) {
+  Widget _buildPicture(Outfit outfit) {
     return Opacity(
-      opacity: currentImagePath == imagePath ? 1.0 : 0.0,
+      opacity: currentOutfitId == outfit.id ? 1.0 : 0.0,
       child: SizedBox.expand(
-        child: Hero(
-          tag: '$imagePath',
-          child: Image.asset(
-            imagePath,
-            fit: BoxFit.cover,
-          ),
+        child: Image.asset(
+          outfit.images.first,
+          fit: BoxFit.cover,
         ),
       ),
     );
@@ -345,11 +322,11 @@ class _MagicMirrorState extends State<MagicMirror> with SingleTickerProviderStat
 
   openDetailedImage(){
     Navigator.push(context, MaterialPageRoute(
-      builder: (context) => FullScreenImage(imagePath: widget.imagePath)
+      //TODO: CREATE NEW TRANSITION THAT FADES CURRENT PAGE TO WHITE THEN FADES IN NEXT PAGE
+      builder: (context) => OutfitDetailsScreen(outfit: widget.currentOutfit)
     ));
   }
 
-  //CREATE OBJECT TO STORE ALL OUTFIT DETAILS
   Widget _buildOutfitInfo() {
     return Opacity(
       opacity: _infoOpacityValue,
@@ -360,77 +337,83 @@ class _MagicMirrorState extends State<MagicMirror> with SingleTickerProviderStat
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.only(bottom: 8.0),
+            Transform.translate(
+              offset: Offset(_infoSlideUpValue ,0 ),
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 8.0),
+                child: Row(
+                  children: <Widget>[
+                    Expanded(
+                      child: Text(
+                        _currentOutfit.name,
+                        style: Theme.of(context).textTheme.title,
+                      ),
+                    ),
+                    Icon(
+                      _currentOutfit.poster.genderIsMale ? FontAwesomeIcons.male : FontAwesomeIcons.female,
+                      color: Colors.grey,
+                    ),
+                    Text(
+                      '${_currentOutfit.poster.age}',
+                      style: Theme.of(context).textTheme.title.apply(color: Colors.grey),
+                    )
+                  ],
+                ),
+              ),
+            ),
+            Transform.translate(
+              offset: Offset(_infoSlideUpValue,0),
               child: Row(
                 children: <Widget>[
                   Expanded(
-                    child: Text(
-                      "Hussien's O.O.T.D.",
-                      style: Theme.of(context).textTheme.title,
+                    child: RichText(
+                      text: TextSpan(
+                        children: [
+                          TextSpan(
+                            text: 'Style: ',
+                            style: Theme.of(context).textTheme.subtitle,
+                          ),
+                          TextSpan(
+                            text: _currentOutfit.style,
+                            style: Theme.of(context).textTheme.body1,
+                          )
+                        ]
+                      ),
                     ),
                   ),
-                  Icon(
-                    FontAwesomeIcons.male,
-                    color: Colors.grey,
-                  ),
-                  Text(
-                    '23',
-                    style: Theme.of(context).textTheme.title.apply(color: Colors.grey),
-                  )
-                ],
-              ),
-            ),
-            Row(
-              children: <Widget>[
-                Expanded(
-                  child: RichText(
-                    text: TextSpan(
-                      children: [
-                        TextSpan(
-                          text: 'Style: ',
-                          style: Theme.of(context).textTheme.subtitle,
+                  Padding(
+                    padding: const EdgeInsets.only(right: 8.0),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        Text(
+                          '${_currentOutfit.commentsCount} ',
+                          style: Theme.of(context).textTheme.subtitle.apply(color: Color.fromRGBO(208, 160, 88, 1.0)),
                         ),
-                        TextSpan(
-                          text: 'Casual',
-                          style: Theme.of(context).textTheme.body1,
-                        )
-                      ]
+                        Icon(
+                          Icons.comment,
+                          size: 16,
+                          color: Color.fromRGBO(208, 160, 88, 1.0),
+                        ),
+                      ],
                     ),
                   ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(right: 8.0),
-                  child: Row(
+                  Row(
                     mainAxisSize: MainAxisSize.min,
                     children: <Widget>[
                       Text(
-                        '4 ',
+                        '${_currentOutfit.likesCount} ',
                         style: Theme.of(context).textTheme.subtitle.apply(color: Color.fromRGBO(208, 160, 88, 1.0)),
                       ),
                       Icon(
-                        Icons.comment,
+                        Icons.thumb_up,
                         size: 16,
                         color: Color.fromRGBO(208, 160, 88, 1.0),
                       ),
-                    ],
+                    ]
                   ),
-                ),
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    Text(
-                      '200 ',
-                      style: Theme.of(context).textTheme.subtitle.apply(color: Color.fromRGBO(208, 160, 88, 1.0)),
-                    ),
-                    Icon(
-                      Icons.thumb_up,
-                      size: 16,
-                      color: Color.fromRGBO(208, 160, 88, 1.0),
-                    ),
-                  ]
-                ),
-              ],
+                ],
+              ),
             )
           ],
         ),
@@ -438,55 +421,14 @@ class _MagicMirrorState extends State<MagicMirror> with SingleTickerProviderStat
     );
   }
 
+  Outfit get _currentOutfit => currentOutfitId == widget.currentOutfit.id ? widget.currentOutfit : widget.nextOutfit;
+
   double get _blurValue => Tween<double>(
     begin: 0.0,
     end: maxBlurSigma
   ).lerp(blurringTransitionController.value);
 
   double get _overlaySplashOpacityValue => blurringTransitionController.value;
-  double get _infoOpacityValue => 1-blurringTransitionController.value;
-}
-
-//SEPARATE INTO NEW SCREEN
-class FullScreenImage extends StatelessWidget {
-  
-  String imagePath;
-
-  FullScreenImage({this.imagePath});
-
-
-  //MAKE STATELESS AND REMOVE APP STATUS BAR
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(),
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 0.0),
-                child: SizedBox(//TODO: ADD MIRROR OUTLINE TO THIS IMAGE 
-                  height: 400.0,
-                  width: double.infinity,
-                  child: Container(
-                    child: Hero(
-                      tag: '$imagePath',
-                      child: Image.asset(
-                        imagePath,
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
+  double get _infoOpacityValue => (1-blurringTransitionController.value*1.5).clamp(0.0,1.0);
+  double get _infoSlideUpValue => (blurringTransitionController.status == AnimationStatus.forward ? 1 : -1) * blurringTransitionController.value * 30 ;
 }

@@ -78,7 +78,7 @@ class _MainAppBarState extends State<MainAppBar> {
       backgroundColorAppBar: Colors.white,
       screens: screens,
       initPositionSelected: 0,
-      slidePercent: 85.0,
+      slidePercent: 90.0,
       verticalScalePercent: 60.0,
       isDraggable: false,
       actionsAppBar: <Widget>[
