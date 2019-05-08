@@ -12,8 +12,11 @@ class ExploreScreen extends StatefulWidget {
 
 class _ExploreScreenState extends State<ExploreScreen> {
   
+  final Color imageOverlayColor = Colors.white;
+
   List<Outfit> outfits = mockedOutfits;
 
+  int itemNumber = 1;
   int currentIndex=0;
   int nextIndex=1;
 
@@ -23,98 +26,102 @@ class _ExploreScreenState extends State<ExploreScreen> {
       width: double.infinity,
       height: double.infinity,
       color: Colors.transparent,
-      child: Padding(
-        padding: EdgeInsets.all(16.0),
-        child: Column(
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(10.0))
+        ),
+        padding: EdgeInsets.only(top: 16.0),
+        child: Stack(
           children: <Widget>[
-            _searchTerms(),
-            Expanded(
-              child: MagicMirror(
+            _buildOutfitViewAndOptions(
+              outfitView: OutfitDisplayer(
                 currentOutfit: outfits[currentIndex],
                 nextOutfit: outfits[nextIndex],
                 thickness: 10,
                 onNextPicShown: _incrementIndexes,
+                backgroundColor: imageOverlayColor,
               ),
+              options: _buildActionBar(),
             ),
-            _buildActionBar(),
+            _searchManipulatorButtons(),
           ],
         )
       ),
     );
   }
 
-  //TODO: OADD DIALOGS FOR TERMS
-  Widget _searchTerms(){
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: <Widget>[
-        Material(
-          borderRadius: BorderRadius.circular(10.0),
-          color: Colors.orangeAccent,
-          elevation: 3.0,
-          child: InkWell(
-            borderRadius: BorderRadius.circular(10.0),
-            onTap: () {},
-            child: Container(
-              padding: EdgeInsets.all(8.0),
-              child: RichText(
-                text: TextSpan(
-                  children: [
-                    TextSpan(
-                      text: 'Style: ',
-                      style: Theme.of(context).textTheme.subtitle
-                    ),
-                    TextSpan(
-                      text: 'All',//TODO: DESIGN UI FOR STYLES (WHEEL??)
-                      style: Theme.of(context).textTheme.body1
-                    )
-                  ]
-                ),
-              )
-            ),
+  Widget _buildOutfitViewAndOptions({
+    Widget outfitView,
+    Widget options,
+  }){
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(30.0)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.4),
+            blurRadius: 2,
+            offset: Offset(0, -1)
+          )
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(30.0)),
+        child: Container(
+          color: imageOverlayColor,
+          child: Column(
+            children: <Widget>[
+              Expanded(
+                child: outfitView
+              ),
+              options,
+            ],
           ),
         ),
-        Material(
-          borderRadius: BorderRadius.circular(10.0),
-          color: Colors.amberAccent,
-          elevation: 3.0,
-          child: InkWell(
-            borderRadius: BorderRadius.circular(10.0),
-            onTap: () {},
-            child: Container(
-              padding: EdgeInsets.all(8.0),
-              child: RichText(
-                text: TextSpan(
-                  children: [
-                    TextSpan(
-                      text: 'Sort by: ',
-                      style: Theme.of(context).textTheme.subtitle
-                    ),
-                    TextSpan(
-                      text: 'Newest',
-                      style: Theme.of(context).textTheme.body1
-                    )
-                  ]
-                ),
-              )
-            ),
+      ),
+    );
+  }
+
+  Widget _searchManipulatorButtons(){
+    return Row(
+      mainAxisSize: MainAxisSize.max,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: <Widget>[
+        RawMaterialButton(
+          onPressed: () {},
+          fillColor: Colors.black45,
+          child: Text(
+            '$itemNumber',
+            style: Theme.of(context).textTheme.subtitle.apply(color: Colors.white),
           ),
+          shape: CircleBorder(),
+        ),
+        RawMaterialButton(
+          onPressed: () {},
+          fillColor: Colors.black45,
+          child: Icon(
+            Icons.tune,
+            color: Colors.white,
+          ),
+          shape: CircleBorder(),
+          elevation: 10.0,
         ),
       ],
     );
   }
 
-
   _incrementIndexes(){
     setState(() {
       currentIndex = nextIndex;
       nextIndex = nextIndex==outfits.length-1? 0 : nextIndex+1; 
+      itemNumber = itemNumber+1;
     });
   }
 
   Widget _buildActionBar() {
-    return Padding(
-      padding: EdgeInsets.all(0.0),
+    return Container(
+      color: imageOverlayColor,
+      padding: EdgeInsets.only(bottom: 16.0, left: 16.0, right: 16.0, top: 8.0),
       child: Row(
         mainAxisSize: MainAxisSize.max,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -195,24 +202,26 @@ class _ExploreScreenState extends State<ExploreScreen> {
   }
 }
 
-class MagicMirror extends StatefulWidget {
+class OutfitDisplayer extends StatefulWidget {
   final Outfit currentOutfit;
   final Outfit nextOutfit;
   final double thickness;
   final VoidCallback onNextPicShown;
+  final Color backgroundColor;
 
-  MagicMirror({
+  OutfitDisplayer({
     this.currentOutfit,
     this.nextOutfit,
     this.thickness = 6,
     this.onNextPicShown,
+    this.backgroundColor,
   });
 
   @override
-  _MagicMirrorState createState() => _MagicMirrorState();
+  _OutfitDisplayerState createState() => _OutfitDisplayerState();
 }
 
-class _MagicMirrorState extends State<MagicMirror> with SingleTickerProviderStateMixin {
+class _OutfitDisplayerState extends State<OutfitDisplayer> with SingleTickerProviderStateMixin {
 
   int currentOutfitId;
 
@@ -220,7 +229,6 @@ class _MagicMirrorState extends State<MagicMirror> with SingleTickerProviderStat
   AnimationController blurringTransitionController;
   
   final double maxBlurSigma = 10.0;
-
   @override
   void initState() {
     thickness = widget.thickness;
@@ -248,7 +256,7 @@ class _MagicMirrorState extends State<MagicMirror> with SingleTickerProviderStat
   }
 
   @override
-  void didUpdateWidget(MagicMirror oldWidget) {
+  void didUpdateWidget(OutfitDisplayer oldWidget) {
     if(oldWidget.currentOutfit.id != widget.currentOutfit.id){
       setState(() {
        currentOutfitId = widget.currentOutfit.id; 
@@ -260,44 +268,36 @@ class _MagicMirrorState extends State<MagicMirror> with SingleTickerProviderStat
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.symmetric(vertical: 16.0),
-      child: Column(
+      // margin: EdgeInsets.symmetric(vertical: 16.0),
+      child: Stack(
         children: <Widget>[
-          Expanded(
-            child: Row(
-              children: <Widget>[
-                Expanded(
-                  child: Center(
-                    child: GestureDetector(
-                      onVerticalDragUpdate: (s) => _switchToNextImage(),
-                      onTap: openDetailedImage,
-                      child: Hero(
-                        tag:widget.currentOutfit.images.first,
-                        child: MirrorFrame( 
-                          child: Stack(
-                            children: <Widget>[
-                              _buildPicture(widget.currentOutfit),
-                              _buildPicture(widget.nextOutfit),
-                              SizedBox.expand(
-                                child: BackdropFilter(
-                                  filter: ImageFilter.blur(sigmaX: _blurValue, sigmaY: _blurValue),
-                                  child: Container(
-                                    color: Color.fromRGBO(204, 187, 187, 0.0),
-                                  )
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          _buildOutfitInfo(),
+          _buildOutfitSplash(),
+          _buildOutfitInfo()
         ],
+      ),
+    );
+  }
+
+  Widget _buildOutfitSplash() {
+    return GestureDetector(
+      onVerticalDragUpdate: (s) => _switchToNextImage(),
+      onTap: openDetailedImage,
+      child: Hero(
+        tag:widget.currentOutfit.images.first,
+        child: Stack(
+          children: <Widget>[
+            _buildPicture(widget.currentOutfit),
+            _buildPicture(widget.nextOutfit),
+            SizedBox.expand(
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: _blurValue, sigmaY: _blurValue),
+                child: Container(
+                  color: Color.fromRGBO(204, 187, 187, 0.0),
+                )
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -328,93 +328,119 @@ class _MagicMirrorState extends State<MagicMirror> with SingleTickerProviderStat
   }
 
   Widget _buildOutfitInfo() {
-    return Opacity(
-      opacity: _infoOpacityValue,
+    return Positioned(
+      bottom: 0,
+      left: 0,
+      right: 0,
       child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-        color: Colors.transparent,
-        width: double.infinity,
+        height:250,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              Colors.transparent,
+              widget.backgroundColor,
+            ],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          )
+        ),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            Transform.translate(
-              offset: Offset(_infoSlideUpValue ,0 ),
-              child: Padding(
-                padding: const EdgeInsets.only(bottom: 8.0),
-                child: Row(
+            Expanded(
+              child: Container(),
+            ),
+            Opacity(
+              opacity: _infoOpacityValue,
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                color: Colors.transparent,
+                width: double.infinity,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
-                    Expanded(
-                      child: Text(
-                        _currentOutfit.name,
-                        style: Theme.of(context).textTheme.title,
+                    Transform.translate(
+                      offset: Offset(_infoSlideUpValue ,0 ),
+                      child: Padding(
+                        padding: const EdgeInsets.only(bottom: 8.0),
+                        child: Row(
+                          children: <Widget>[
+                            Expanded(
+                              child: Text(
+                                _currentOutfit.name,
+                                style: Theme.of(context).textTheme.title,
+                              ),
+                            ),
+                            Icon(
+                              _currentOutfit.poster.genderIsMale ? FontAwesomeIcons.male : FontAwesomeIcons.female,
+                              color: Colors.black,
+                            ),
+                            Text(
+                              '${_currentOutfit.poster.age}',
+                              style: Theme.of(context).textTheme.title.apply(color: Colors.black),
+                            )
+                          ],
+                        ),
                       ),
                     ),
-                    Icon(
-                      _currentOutfit.poster.genderIsMale ? FontAwesomeIcons.male : FontAwesomeIcons.female,
-                      color: Colors.grey,
-                    ),
-                    Text(
-                      '${_currentOutfit.poster.age}',
-                      style: Theme.of(context).textTheme.title.apply(color: Colors.grey),
+                    Transform.translate(
+                      offset: Offset(_infoSlideUpValue,0),
+                      child: Row(
+                        children: <Widget>[
+                          Expanded(
+                            child: RichText(
+                              text: TextSpan(
+                                children: [
+                                  TextSpan(
+                                    text: 'Style: ',
+                                    style: Theme.of(context).textTheme.subtitle,
+                                  ),
+                                  TextSpan(
+                                    text: _currentOutfit.style,
+                                    style: Theme.of(context).textTheme.body1,
+                                  )
+                                ]
+                              ),
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.only(right: 8.0),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: <Widget>[
+                                Text(
+                                  '${_currentOutfit.commentsCount} ',
+                                  style: Theme.of(context).textTheme.subtitle,
+                                ),
+                                Icon(
+                                  Icons.comment,
+                                  size: 16,
+                                  color: Colors.black,
+                                ),
+                              ],
+                            ),
+                          ),
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: <Widget>[
+                              Text(
+                                '${_currentOutfit.likesCount} ',
+                                style: Theme.of(context).textTheme.subtitle,
+                              ),
+                              Icon(
+                                Icons.thumb_up,
+                                size: 16,
+                                color: Colors.black,
+                              ),
+                            ]
+                          ),
+                        ],
+                      ),
                     )
                   ],
                 ),
               ),
             ),
-            Transform.translate(
-              offset: Offset(_infoSlideUpValue,0),
-              child: Row(
-                children: <Widget>[
-                  Expanded(
-                    child: RichText(
-                      text: TextSpan(
-                        children: [
-                          TextSpan(
-                            text: 'Style: ',
-                            style: Theme.of(context).textTheme.subtitle,
-                          ),
-                          TextSpan(
-                            text: _currentOutfit.style,
-                            style: Theme.of(context).textTheme.body1,
-                          )
-                        ]
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(right: 8.0),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        Text(
-                          '${_currentOutfit.commentsCount} ',
-                          style: Theme.of(context).textTheme.subtitle.apply(color: Color.fromRGBO(208, 160, 88, 1.0)),
-                        ),
-                        Icon(
-                          Icons.comment,
-                          size: 16,
-                          color: Color.fromRGBO(208, 160, 88, 1.0),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: <Widget>[
-                      Text(
-                        '${_currentOutfit.likesCount} ',
-                        style: Theme.of(context).textTheme.subtitle.apply(color: Color.fromRGBO(208, 160, 88, 1.0)),
-                      ),
-                      Icon(
-                        Icons.thumb_up,
-                        size: 16,
-                        color: Color.fromRGBO(208, 160, 88, 1.0),
-                      ),
-                    ]
-                  ),
-                ],
-              ),
-            )
           ],
         ),
       ),
@@ -428,7 +454,6 @@ class _MagicMirrorState extends State<MagicMirror> with SingleTickerProviderStat
     end: maxBlurSigma
   ).lerp(blurringTransitionController.value);
 
-  double get _overlaySplashOpacityValue => blurringTransitionController.value;
   double get _infoOpacityValue => (1-blurringTransitionController.value*1.5).clamp(0.0,1.0);
   double get _infoSlideUpValue => (blurringTransitionController.status == AnimationStatus.forward ? 1 : -1) * blurringTransitionController.value * 30 ;
 }

@@ -22,23 +22,23 @@ class _MainAppBarState extends State<MainAppBar> {
   @override
   void initState() {
     itens.add(ScreenHiddenDrawer(
-      ItemHiddenMenu(name: "Explore", colorLineSelected: Colors.blue,),
+      ItemHiddenMenu(name: "INPSPIRATION", colorLineSelected: Colors.blue,),
       ExploreScreen()
     ));
     itens.add(ScreenHiddenDrawer(
-      ItemHiddenMenu(name: "Your Feed", colorLineSelected: Colors.blue,),
+      ItemHiddenMenu(name: "FASHION CIRCLE", colorLineSelected: Colors.blue,),
       ExploreScreen()
     ));
     itens.add(ScreenHiddenDrawer(
-      ItemHiddenMenu(name: "Lookbooks", colorLineSelected: Colors.blue,),
+      ItemHiddenMenu(name: "WARDROBE", colorLineSelected: Colors.blue,),
       ExploreScreen()
     ));
     itens.add(ScreenHiddenDrawer(
-      ItemHiddenMenu(name: "Saved outfits", colorLineSelected: Colors.blue,),
+      ItemHiddenMenu(name: "PROFILE", colorLineSelected: Colors.blue,),
       ExploreScreen()
     ));
     itens.add(ScreenHiddenDrawer(
-      ItemHiddenMenu(name: "Settings", colorLineSelected: Colors.blue,),
+      ItemHiddenMenu(name: "SETTINGS", colorLineSelected: Colors.blue,),
       ExploreScreen()
     ));
     super.initState();
@@ -79,8 +79,10 @@ class _MainAppBarState extends State<MainAppBar> {
       screens: screens,
       initPositionSelected: 0,
       slidePercent: 90.0,
+      elevationAppBar: 0.0,
       verticalScalePercent: 60.0,
       isDraggable: false,
+      styleAutoTittleName: TextStyle(),
       actionsAppBar: <Widget>[
         _buildIconButton(context),
       ],
