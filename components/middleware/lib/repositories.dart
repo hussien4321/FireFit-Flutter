@@ -1,0 +1,1 @@
+export 'repositories/outfit/outfit_repository.dart';

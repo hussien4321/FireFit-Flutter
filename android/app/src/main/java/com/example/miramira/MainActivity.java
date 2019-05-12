@@ -1,4 +1,4 @@
-package com.example.miramira;
+package com.progrs.software.miramira;
 
 import android.os.Bundle;
 import io.flutter.app.FlutterActivity;

@@ -1,4 +1,4 @@
-name: mira_mira
+name: front_end
 description: A new Flutter project.
 
 # The following defines the version and build number for your application.
@@ -15,10 +15,19 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  front_end:
-    path: components/front_end/
-  repository_impl:
-    path: components/repository_impl/
+  blocs:
+    path: ../blocs/
+  helpers:
+    path: ../helpers/
+  middleware:
+    path: ../middleware/
+
+  # The following adds the Cupertino Icons font to your application.
+  # Use with the CupertinoIcons class for iOS style icons.
+  cupertino_icons: ^0.1.2
+  font_awesome_flutter: ^8.4.0
+  hidden_drawer_menu: ^1.0.1
+  flutter_inner_drawer: ^0.2.5
 
 dev_dependencies:
   flutter_test:
@@ -37,8 +46,8 @@ flutter:
   uses-material-design: true
 
   # To add assets to your application, add an assets section, like this:
-  assets:
-   - assets/
+  # assets:
+  #  - assets/
   #  - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
