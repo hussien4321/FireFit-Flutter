@@ -2,13 +2,12 @@ name: helpers
 description: Helper functions for mira mira
 
 environment:
-  sdk: '>=2.0.0 <3.0.0'
+  sdk: ">=2.0.0-dev.68.0 <3.0.0"
 
 dependencies:
   intl: ^0.15.4
   flutter:
     sdk: flutter
-  path_provider: ^0.4.1
 
 dev_dependencies:
   test: ^1.3.0

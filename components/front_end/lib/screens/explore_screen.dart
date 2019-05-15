@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'dart:ui';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:front_end/screens.dart';
-import 'package:front_end/helper_widgets.dart';
+import 'package:blocs/blocs.dart';
 import 'package:middleware/middleware.dart';
+import 'package:front_end/providers.dart';
 
 class ExploreScreen extends StatefulWidget {
   @override
@@ -14,14 +15,24 @@ class _ExploreScreenState extends State<ExploreScreen> {
   
   final Color imageOverlayColor = Colors.white;
 
-  List<Outfit> outfits = mockedOutfits;
+  // List<Outfit> outfits = mockedOutfits;
 
   int itemNumber = 1;
   int currentIndex=0;
   int nextIndex=1;
 
+  NewOutfitBloc outfitBloc;
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
+    if(outfitBloc == null){
+      outfitBloc = OutfitBlocProvider.of(context);
+    }
     return Container(
       width: double.infinity,
       height: double.infinity,
@@ -31,20 +42,27 @@ class _ExploreScreenState extends State<ExploreScreen> {
           borderRadius: BorderRadius.vertical(top: Radius.circular(10.0))
         ),
         padding: EdgeInsets.only(top: 16.0),
-        child: Stack(
-          children: <Widget>[
-            _buildOutfitViewAndOptions(
-              outfitView: OutfitDisplayer(
-                currentOutfit: outfits[currentIndex],
-                nextOutfit: outfits[nextIndex],
-                thickness: 10,
-                onNextPicShown: _incrementIndexes,
-                backgroundColor: imageOverlayColor,
-              ),
-              options: _buildActionBar(),
-            ),
-            _searchManipulatorButtons(),
-          ],
+        child: StreamBuilder<List<Outfit>>(
+          stream: outfitBloc.outfits,
+          initialData: [],
+          builder: (ctx, snap) {
+            List<Outfit> outfits = snap.data;
+            return Stack(
+              children: <Widget>[
+                _buildOutfitViewAndOptions(
+                  outfitView: OutfitDisplayer(
+                    currentOutfit: outfits[0],
+                    nextOutfit: outfits[1],
+                    thickness: 10,
+                    onNextPicShown: () => _incrementIndexes(outfits),
+                    backgroundColor: imageOverlayColor,
+                  ),
+                  options: _buildActionBar(),
+                ),
+                _searchManipulatorButtons(),
+              ],
+            );
+          }
         )
       ),
     );
@@ -110,7 +128,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
     );
   }
 
-  _incrementIndexes(){
+  _incrementIndexes(List<Outfit> outfits){
     setState(() {
       currentIndex = nextIndex;
       nextIndex = nextIndex==outfits.length-1? 0 : nextIndex+1; 
@@ -268,11 +286,10 @@ class _OutfitDisplayerState extends State<OutfitDisplayer> with SingleTickerProv
   @override
   Widget build(BuildContext context) {
     return Container(
-      // margin: EdgeInsets.symmetric(vertical: 16.0),
       child: Stack(
         children: <Widget>[
           _buildOutfitSplash(),
-          _buildOutfitInfo()
+          // _buildOutfitInfo(),
         ],
       ),
     );
@@ -292,7 +309,7 @@ class _OutfitDisplayerState extends State<OutfitDisplayer> with SingleTickerProv
               child: BackdropFilter(
                 filter: ImageFilter.blur(sigmaX: _blurValue, sigmaY: _blurValue),
                 child: Container(
-                  color: Color.fromRGBO(204, 187, 187, 0.0),
+                  color: Colors.grey.withOpacity(blurringTransitionController.value/4),
                 )
               ),
             ),
@@ -305,12 +322,28 @@ class _OutfitDisplayerState extends State<OutfitDisplayer> with SingleTickerProv
   Widget _buildPicture(Outfit outfit) {
     return Opacity(
       opacity: currentOutfitId == outfit.outfit_id ? 1.0 : 0.0,
-      child: SizedBox.expand(
-        child: Image.asset(
-          outfit.images.first,
-          fit: BoxFit.cover,
+      child: Stack(
+          children: <Widget>[
+            SizedBox.expand(
+              child: Image.network(
+                outfit.images.first,
+                fit: BoxFit.cover,
+              ),
+            ),
+            BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+              child: Container(
+                color: Colors.grey.withOpacity(0.5),
+              )
+            ),
+            SizedBox.expand(
+              child: Image.network(
+                outfit.images.first,
+                fit: BoxFit.fitHeight,
+              ),
+            ),
+          ],
         ),
-      ),
     );
   }
 

@@ -4,7 +4,7 @@ List<Outfit> mockedOutfits = [ _outfit1, _outfit2, _outfit3, _outfit4, _outfit5,
 final _outfit1 =Outfit(
   outfit_id: 1,
   title: 'Shall I buy or not?',
-  images: ['assets/outfit1.jpg'],
+  images: ['https://s2.r29static.com//bin/entry/817/720x864,85/1835142/image.webp'],
   style: 'Casual',
   poster: user1,
   likesCount: 5,

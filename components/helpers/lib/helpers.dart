@@ -14,4 +14,4 @@ export 'src/theme.dart';
 export 'src/date_formatter.dart';
 export 'uuid.dart';
 export 'src/placeholder_image_urls.dart';
-export 'src/clothes_categories.dart';
+export 'src/styles.dart';

@@ -15,7 +15,8 @@ class MainAppBar extends StatefulWidget {
 }
 
 class _MainAppBarState extends State<MainAppBar> {
-  final GlobalKey<InnerDrawerState> _innerDrawerKey = GlobalKey<InnerDrawerState>();
+  final GlobalKey<InnerDrawerState> _dmDrawerKey = GlobalKey<InnerDrawerState>();
+  final GlobalKey<InnerDrawerState> _menuDrawerKey = GlobalKey<InnerDrawerState>();
 
   List<ScreenHiddenDrawer> itens = new List();
 
@@ -48,14 +49,14 @@ class _MainAppBarState extends State<MainAppBar> {
   Widget build(BuildContext context) {
     return _buildDMScaffold(
       body: _buildMenuScaffold(
-        screens: itens
+        body: ExploreScreen()
       )
     );
   }
 
   Widget _buildDMScaffold({Widget body}) {
     return InnerDrawer(
-      key: _innerDrawerKey,
+      key: _dmDrawerKey,
       position: InnerDrawerPosition.end,
       onTapClose: true,
       swipe: false,
@@ -67,37 +68,88 @@ class _MainAppBarState extends State<MainAppBar> {
     );
   }
 
-  Widget _buildMenuScaffold({List<ScreenHiddenDrawer> screens}){
-    return HiddenDrawerMenu(
-      backgroundMenu: DecorationImage(
-        image: AssetImage('assets/background_wall.jpg'),
-        fit: BoxFit.fitWidth
-      ),
-      backgroundColorMenu: Color.fromRGBO(255, 194, 88, 1.0),
-      curveAnimation: Curves.easeOut,
-      backgroundColorAppBar: Colors.white,
-      screens: screens,
-      initPositionSelected: 0,
-      slidePercent: 90.0,
-      elevationAppBar: 0.0,
-      verticalScalePercent: 60.0,
-      isDraggable: false,
-      styleAutoTittleName: TextStyle(),
-      actionsAppBar: <Widget>[
-        _buildIconButton(context),
-      ],
+  Widget _buildMenuScaffold({Widget body}){
+    return InnerDrawer(
+      key: _menuDrawerKey,
+      position: InnerDrawerPosition.start,
+      onTapClose: true,
+      swipe: false,
+      offset: 0.7,
+      colorTransition: Colors.red,
+      animationType: InnerDrawerAnimation.linear,
+      child: DMPreviewScreen(),
+      scaffold: _buildScaffold(
+        body: body
+      )
     );
   }
 
-  Widget _buildIconButton(BuildContext context) {
+  Widget _buildScaffold({Widget body}){
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        title: Text('MIRA MRIA'),
+        leading: IconButton(
+          icon: Icon(
+            Icons.menu
+          ),
+          onPressed: () => _menuDrawerKey.currentState.open(),
+        ),
+        centerTitle: true,
+        actions: <Widget>[
+          _buildUploadButton(),
+          _buildDMButton(),
+        ],
+        elevation: 0.0,
+        backgroundColor: Colors.transparent,
+      ),
+      body: body,
+    );
+  }
+
+  Widget _buildUploadButton(){
+    return IconButton(
+      icon: Icon(Icons.add_a_photo),
+      onPressed: () {
+      Navigator.push(context, MaterialPageRoute(
+        builder: (context) => UploadOutfitScreen()
+      ));
+
+      }
+    );
+  }
+
+  Widget _buildDMButton() {
     return Center(
       child: IconButton( 
         icon: NotificationIcon(
           iconData: Icons.chat,
           messages: 3,
         ),
-        onPressed: () => _innerDrawerKey.currentState.open()
+        onPressed: () => _dmDrawerKey.currentState.open()
       ),  
     );
   }
+  // Widget _buildMenuScaffold2({List<ScreenHiddenDrawer> screens}){
+  //   return HiddenDrawerMenu(
+  //     backgroundMenu: DecorationImage(
+  //       image: AssetImage('assets/background_wall.jpg'),
+  //       fit: BoxFit.fitWidth
+  //     ),
+  //     backgroundColorMenu: Color.fromRGBO(255, 194, 88, 1.0),
+  //     curveAnimation: Curves.easeOut,
+  //     backgroundColorAppBar: Colors.white,
+  //     screens: screens,
+  //     initPositionSelected: 0,
+  //     slidePercent: 90.0,
+  //     elevationAppBar: 0.0,
+  //     verticalScalePercent: 60.0,
+  //     isDraggable: false,
+  //     styleAutoTittleName: TextStyle(),
+  //     actionsAppBar: <Widget>[
+  //       _buildIconButton(context),
+  //     ],
+  //   );
+  // }
+
 }
