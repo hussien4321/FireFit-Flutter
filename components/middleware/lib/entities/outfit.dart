@@ -1,7 +1,7 @@
 import 'package:middleware/entities.dart';
 
 class Outfit {
-  
+
   int outfit_id;
   List<String> images;
   String title;
@@ -10,8 +10,7 @@ class Outfit {
   int likesCount;
   int commentsCount;
   User poster;
-  List<Comment> comments;
-  DateTime created_at;
+  DateTime createdAt;
 
   Outfit({
     this.outfit_id,
@@ -22,12 +21,12 @@ class Outfit {
     this.likesCount,
     this.commentsCount,
     this.poster,
-    this.comments,
+    this.createdAt,
   });
 
   Outfit.fromMap(Map<String, dynamic> map){
     outfit_id = map['outfit_id'];
-    created_at = DateTime.parse(map['created_at']);
+    createdAt = DateTime.parse(map['outfit_created_at']);
     title = map['title'];
     description = map['description'];
     List<String> _images = [];
@@ -39,6 +38,9 @@ class Outfit {
     }
     images = _images;
     style = map['style'];
+    likesCount = map['likes_count'] == null ? 0 : map['likes_count'];
+    commentsCount = map['comments_count'] == null ? 0 : map['comments_count'];
+    poster = User.fromMap(map);
   } 
 
   Map<String, dynamic> toJson() => {
@@ -49,6 +51,8 @@ class Outfit {
     'title' : title, 
     'description' : description, 
     'style' : style, 
-    'created_at' : created_at, 
+    'oufit_created_at' : createdAt, 
+    'likes_count':likesCount,
+    'comments_count':commentsCount,
   };
 }

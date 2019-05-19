@@ -1,16 +1,56 @@
 class User {
 
+
+  String userId;
   String name;
-  String profilePic;
+  String profilePicUrl;
   bool genderIsMale;
   DateTime dateOfBirth;
+  bool isSubscribed;
+  int boosts;
+  DateTime subscriptionEndDate;
+  DateTime createdAt;
+
 
   User({
+    this.userId,
     this.name,
-    this.profilePic,
+    this.profilePicUrl,
     this.genderIsMale,
     this.dateOfBirth,
+    this.isSubscribed,
+    this.boosts,
+    this.subscriptionEndDate,
+    this.createdAt,
   });
+
+
+
+  User.fromMap(Map<String, dynamic> map){
+    userId = map['user_id'];
+    name = map['name'];
+    profilePicUrl = map['profile_pic_url'];
+    dateOfBirth = DateTime.parse(map['date_of_birth']);
+    genderIsMale = map['gender_is_male'] != 0;
+    isSubscribed = map['is_subscribed'] != 0;
+    if(isSubscribed){
+      subscriptionEndDate = DateTime.parse(map['subscription_end_date']);
+    }
+    boosts = map['boosts'];
+    createdAt = DateTime.parse(map['user_created_at']);
+  } 
+
+  Map<String, dynamic> toJson() => {
+    'user_id' : userId, 
+    'name' : name,
+    'profile_pic_url' : profilePicUrl,
+    'date_of_birth' : dateOfBirth, 
+    'gender_is_male' : genderIsMale ? 1 : 0, 
+    'is_subscribed' : isSubscribed ? 1 : 0, 
+    'boosts' : boosts, 
+    'subscription_end_date' : subscriptionEndDate, 
+    'user_created_at' : createdAt, 
+  };
 
   int get age {
     DateTime dateMarker = DateTime.now();

@@ -17,7 +17,6 @@ class _UploadOutfitScreenState extends State<UploadOutfitScreen> {
         actions: <Widget>[
           _buildUploadButton()
         ],
-        // elevation: 0.0,
       ),
       body: _buildBody(),
     );
@@ -43,13 +42,8 @@ class _UploadOutfitScreenState extends State<UploadOutfitScreen> {
             _buildHeader('1. Upload some pics (max 3)',true),
             _buildImagesHolder(),
             _buildHeader('2. Choose the style!', true),
-            // _buildStyleInput(ClothesStyles.CASUAL),
-            // _buildStyleInput(ClothesStyles.HOME),
-            // _buildStyleInput(ClothesStyles.FORMAL),
-            // _buildStyleInput(ClothesStyles.OFFICE),
             _buildStyleInput(ClothesStyles.STREET),
-            // _buildStyleInput(ClothesStyles.SPORTS),
-            _buildHeader('3. Give it a cool title', false),
+            _buildHeader('3. Give it a cool title', true),
             _buildTitleField(),
             _buildHeader('4. Describe it further (optional)', true),
             _buildDescriptionField(),
@@ -61,7 +55,7 @@ class _UploadOutfitScreenState extends State<UploadOutfitScreen> {
   
   Widget _buildSummaryHeader() {
     return Container(
-      padding: EdgeInsets.all(8.0),
+      padding: EdgeInsets.only(top: 16.0),
       child: Center(
         child: Text(
           'Upload a new outfit in 4 quick steps!',

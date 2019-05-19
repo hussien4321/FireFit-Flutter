@@ -22,13 +22,13 @@ class FirebaseOutfitRepository implements OutfitRepository {
       'poster_user_id' : '0123456789',
     })
     .then((res) async {
-      print('res:${res['res'][0]['created_at']}');
+      // print('res:${res['res'][0]['outfit_created_at']}');
       List<Outfit> outfits = List<Outfit>.from(res['res'].map((data){
         Map<String, dynamic> formattedDoc = Map<String, dynamic>.from(data);
         return Outfit.fromMap(formattedDoc);
       }).toList());
 
-      print('res:${outfits[0].toJson()}');
+      print('number of outfits: ${outfits.length}');
       return outfits;
     })
     .catchError((err) {

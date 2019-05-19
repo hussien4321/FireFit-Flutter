@@ -17,7 +17,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
 
   // List<Outfit> outfits = mockedOutfits;
 
-  int itemNumber = 1;
+  int pageNumber = 1;
   int currentIndex=0;
   int nextIndex=1;
 
@@ -47,12 +47,15 @@ class _ExploreScreenState extends State<ExploreScreen> {
           initialData: [],
           builder: (ctx, snap) {
             List<Outfit> outfits = snap.data;
+            if(outfits.isEmpty){
+              return CircularProgressIndicator();
+            }
             return Stack(
               children: <Widget>[
                 _buildOutfitViewAndOptions(
                   outfitView: OutfitDisplayer(
-                    currentOutfit: outfits[0],
-                    nextOutfit: outfits[1],
+                    currentOutfit: outfits[currentIndex],
+                    nextOutfit: outfits[nextIndex],
                     thickness: 10,
                     onNextPicShown: () => _incrementIndexes(outfits),
                     backgroundColor: imageOverlayColor,
@@ -109,7 +112,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
           onPressed: () {},
           fillColor: Colors.black45,
           child: Text(
-            '$itemNumber',
+            '$pageNumber',
             style: Theme.of(context).textTheme.subtitle.apply(color: Colors.white),
           ),
           shape: CircleBorder(),
@@ -132,7 +135,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
     setState(() {
       currentIndex = nextIndex;
       nextIndex = nextIndex==outfits.length-1? 0 : nextIndex+1; 
-      itemNumber = itemNumber+1;
+      pageNumber = pageNumber+1;
     });
   }
 
@@ -226,6 +229,7 @@ class OutfitDisplayer extends StatefulWidget {
   final double thickness;
   final VoidCallback onNextPicShown;
   final Color backgroundColor;
+  final bool isComplete;
 
   OutfitDisplayer({
     this.currentOutfit,
@@ -233,6 +237,7 @@ class OutfitDisplayer extends StatefulWidget {
     this.thickness = 6,
     this.onNextPicShown,
     this.backgroundColor,
+    this.isComplete = false,
   });
 
   @override
@@ -289,7 +294,7 @@ class _OutfitDisplayerState extends State<OutfitDisplayer> with SingleTickerProv
       child: Stack(
         children: <Widget>[
           _buildOutfitSplash(),
-          // _buildOutfitInfo(),
+          _buildOutfitInfo(),
         ],
       ),
     );
@@ -320,6 +325,9 @@ class _OutfitDisplayerState extends State<OutfitDisplayer> with SingleTickerProv
   }
 
   Widget _buildPicture(Outfit outfit) {
+    if(outfit == null){
+      return widget.isComplete ? _buildCompletedView() : _buildCompletedView();
+    }
     return Opacity(
       opacity: currentOutfitId == outfit.outfit_id ? 1.0 : 0.0,
       child: Stack(
@@ -333,7 +341,7 @@ class _OutfitDisplayerState extends State<OutfitDisplayer> with SingleTickerProv
             BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
               child: Container(
-                color: Colors.grey.withOpacity(0.5),
+                color: Colors.grey.withOpacity(0.0),
               )
             ),
             SizedBox.expand(
@@ -345,6 +353,10 @@ class _OutfitDisplayerState extends State<OutfitDisplayer> with SingleTickerProv
           ],
         ),
     );
+  }
+
+  Widget _buildCompletedView() {
+    return Text('COMPLETED');
   }
 
   _switchToNextImage() {
@@ -393,7 +405,7 @@ class _OutfitDisplayerState extends State<OutfitDisplayer> with SingleTickerProv
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                     Transform.translate(
-                      offset: Offset(_infoSlideUpValue ,0 ),
+                      offset: Offset(_infoSlideValue ,0 ),
                       child: Padding(
                         padding: const EdgeInsets.only(bottom: 8.0),
                         child: Row(
@@ -417,7 +429,7 @@ class _OutfitDisplayerState extends State<OutfitDisplayer> with SingleTickerProv
                       ),
                     ),
                     Transform.translate(
-                      offset: Offset(_infoSlideUpValue,0),
+                      offset: Offset(_infoSlideValue,0),
                       child: Row(
                         children: <Widget>[
                           Expanded(
@@ -488,5 +500,5 @@ class _OutfitDisplayerState extends State<OutfitDisplayer> with SingleTickerProv
   ).lerp(blurringTransitionController.value);
 
   double get _infoOpacityValue => (1-blurringTransitionController.value*1.5).clamp(0.0,1.0);
-  double get _infoSlideUpValue => (blurringTransitionController.status == AnimationStatus.forward ? 1 : -1) * blurringTransitionController.value * 30 ;
+  double get _infoSlideValue => (blurringTransitionController.status == AnimationStatus.forward ? 1 : -1) * blurringTransitionController.value * 60 ;
 }
