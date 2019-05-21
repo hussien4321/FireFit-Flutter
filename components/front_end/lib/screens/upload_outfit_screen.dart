@@ -1,36 +1,106 @@
 import 'package:flutter/material.dart';
 import 'package:helpers/helpers.dart';
+import 'package:front_end/helper_widgets.dart';
+import 'package:middleware/middleware.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:front_end/screens.dart';
+import 'package:blocs/blocs.dart';
+import 'package:front_end/providers.dart';
+import 'dart:async';
+import 'dart:io';
 
 class UploadOutfitScreen extends StatefulWidget {
   @override
   _UploadOutfitScreenState createState() => _UploadOutfitScreenState();
 }
 
-class _UploadOutfitScreenState extends State<UploadOutfitScreen> {
+
+class _UploadOutfitScreenState extends State<UploadOutfitScreen> with OverlayLoading, SnackbarMessages {
+
+  CreateOutfit createOutfit;
+  TextEditingController titleTextEdit;
+  TextEditingController descriptionTextEdit;
+
+  OutfitBloc _outfitBloc;
+  List<StreamSubscription<dynamic>> _subscriptions;
+
+
+  @override
+  void initState() {
+    super.initState();
+    createOutfit = CreateOutfit();
+    titleTextEdit = TextEditingController(text: createOutfit.title);
+    descriptionTextEdit = TextEditingController(text: createOutfit.description);
+  }
+
+  @override
+  dispose(){
+    _subscriptions?.forEach((subscription) => subscription.cancel());
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
+    _initBlocs();
     return Scaffold(
+      key: scaffoldKey,
       appBar: AppBar(
         backgroundColor: Colors.white,
         title: Text('New Outfit'),
         centerTitle: true,
         actions: <Widget>[
-          _buildUploadButton()
+          UploadButton(
+            canBeUploaded: createOutfit.canBeUploaded,
+            onComplete: _uploadOutfit,
+            onError: () => displayNoticeSnackBar(context, 'Finish steps 1-3 first!')
+          )
         ],
       ),
       body: _buildBody(),
     );
   }
-  
-  Widget _buildUploadButton() {
-    return IconButton(
-      icon: Icon(Icons.send),
-      onPressed: () {
-        Navigator.pop(context);
-      },
-    );
+
+  _initBlocs() {
+    if(_outfitBloc==null){
+      _outfitBloc = OutfitBlocProvider.of(context);
+      _subscriptions = <StreamSubscription<dynamic>>[
+        _loadingListener(),
+        _successListener(),
+        _errorListener(),
+      ];
+    }
   }
 
+  StreamSubscription _loadingListener(){
+    return _outfitBloc.isLoading.listen((loadingStatus) {
+      if(loadingStatus){
+        startLoading("Uploading outfit", context);
+      }
+      else{
+        stopLoading(context);
+      }
+    });
+  }
+
+
+  StreamSubscription _successListener(){
+    return _outfitBloc.isSuccessful.listen((successStatus) {
+      if(successStatus){
+        Navigator.pop(context);
+      }
+    });
+  }
+
+  StreamSubscription _errorListener(){
+    return _outfitBloc.hasError.listen((errorMessage) {
+      displayErrorSnackBar(context, errorMessage);
+    });
+  }
+
+  
+  _uploadOutfit() => _outfitBloc.createOutfit.add(createOutfit);
+  
+  
   Widget _buildBody(){
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 8.0),
@@ -39,13 +109,13 @@ class _UploadOutfitScreenState extends State<UploadOutfitScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             _buildSummaryHeader(),
-            _buildHeader('1. Upload some pics (max 3)',true),
+            _buildHeader('1. Upload some pics (max 3)', createOutfit.imagesUploaded),
             _buildImagesHolder(),
-            _buildHeader('2. Choose the style!', true),
-            _buildStyleInput(ClothesStyles.STREET),
-            _buildHeader('3. Give it a cool title', true),
+            _buildHeader('2. Choose the style!', createOutfit.styleUploaded),
+            _buildStyleInput(),
+            _buildHeader('3. Give it a cool title', createOutfit.titleUploaded),
             _buildTitleField(),
-            _buildHeader('4. Describe it further (optional)', true),
+            _buildHeader('4. Describe it further (optional)', createOutfit.descriptionUploaded),
             _buildDescriptionField(),
           ],
         ),
@@ -70,32 +140,22 @@ class _UploadOutfitScreenState extends State<UploadOutfitScreen> {
     );
   }
 
-  Widget _buildStyleInput(ClothesStyles clothesStyle) {
-    Style style = Style(clothesStyle);
-    return Container(
-      width: double.infinity,
-      height: 70.0,
-      padding: EdgeInsets.symmetric(horizontal: 16.0),
-      decoration: BoxDecoration(
-        color: style.backgroundColor,
-        borderRadius: BorderRadius.circular(20.0),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: <Widget>[
-          Text(
-            style.name,
-            style: Theme.of(context).textTheme.display1.apply(color: style.textColor,),
-          ),
-          Image.asset(
-            style.asset,
-            width: 50.0,
-            height: 50.0,
-            fit: BoxFit.contain,
-          )
-        ],
-      ),
+  Widget _buildStyleInput() {
+    Style style = Style.fromStyleString(createOutfit.style);
+    return StyleTab(
+      style: style, 
+      onTap: _selectNewStyle
     );
+  }
+
+  _selectNewStyle() async {
+    String styleName = await Navigator.push(context, MaterialPageRoute(
+      builder: (context) => StyleSelectorScreen()
+    ));
+    if(!mounted || styleName == null) return;
+    setState(() {
+      createOutfit.style = styleName;    
+    });
   }
 
   Widget _buildTitleField() {
@@ -108,6 +168,12 @@ class _UploadOutfitScreenState extends State<UploadOutfitScreen> {
         color: Colors.grey[350]
       ),
       child: TextField(
+        controller: titleTextEdit,
+        onChanged: (newTitle) {
+          setState((){
+            createOutfit.title = newTitle;
+          });
+        },
         textCapitalization: TextCapitalization.words,
         style: Theme.of(context).textTheme.display1.apply(color: Colors.black),
         decoration: new InputDecoration.collapsed(
@@ -116,7 +182,7 @@ class _UploadOutfitScreenState extends State<UploadOutfitScreen> {
         ),
       ),
     );
-  }
+  } 
 
   Widget _buildDescriptionField() {
     return Container(
@@ -128,6 +194,12 @@ class _UploadOutfitScreenState extends State<UploadOutfitScreen> {
       padding: EdgeInsets.all(8.0),
       width: double.infinity,
       child: TextField(
+        controller: descriptionTextEdit,
+        onChanged: (newDesc) {
+          setState((){
+            createOutfit.description = newDesc;
+          });
+        },
         textCapitalization: TextCapitalization.sentences,
         maxLines: 5,
         maxLength: 300,
@@ -145,14 +217,6 @@ class _UploadOutfitScreenState extends State<UploadOutfitScreen> {
     return Container(
       padding: EdgeInsets.symmetric(vertical: 8.0),
       width: double.infinity,
-      decoration: BoxDecoration(
-        // border: BorderDirectional(
-        //   bottom: BorderSide(
-        //     color: Colors.grey.withOpacity(0.5),
-        //     width: 0.5
-        //   )
-        // )
-      ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
@@ -173,23 +237,26 @@ class _UploadOutfitScreenState extends State<UploadOutfitScreen> {
   }
   
   Widget _buildImagesHolder() {
+    List<Widget> tabs = [];
+    for(int i = 0; i < createOutfit.images.length ; i ++){
+      tabs.add(_displayImage(i));
+    }
+    if(createOutfit.images.length < 3){
+      tabs.add(_remainingAddImageSpace(3-createOutfit.images.length));
+    }
+  
     return Container(
       padding: EdgeInsets.symmetric(vertical: 4.0),
       width: double.infinity,
       height: 200.0,
       child: Row(
         mainAxisSize: MainAxisSize.max,
-        children: <Widget>[
-          _displayImage('https://metrouk2.files.wordpress.com/2011/11/article-1320581523573-0eb039e700000578-474750_323x650.jpg'),
-          _displayImage('https://qph.fs.quoracdn.net/main-qimg-c86ca0b2a2796a6a3b27798260be7d7b.webp'),
-          _displayImage('http://1.media.collegehumor.cvcdn.com/38/76/2fbf94ed6d3a5bcc3cf4296f086a332f.jpg'),
-          // _remainingAddImageSpace(1),
-        ],
+        children: tabs,
       )
     );
   }
 
-  Widget _displayImage(String url){
+  Widget _displayImage(int index){
     return Expanded(
       flex: 1,
       child: Stack(
@@ -205,8 +272,8 @@ class _UploadOutfitScreenState extends State<UploadOutfitScreen> {
             child: SizedBox.expand(
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(20.0),
-                child: Image.network(
-                  url,
+                child: Image.file(
+                  File(createOutfit.images[index]),
                   fit: BoxFit.cover,
                 ),
               ),
@@ -219,15 +286,23 @@ class _UploadOutfitScreenState extends State<UploadOutfitScreen> {
                 shape: BoxShape.circle,
                 color: Colors.black,
               ),
-              child: Icon(
-                Icons.close,
-                color: Colors.white,
+              child: GestureDetector(
+                onTap: () => _removeImage(index),
+                child: Icon(
+                  Icons.close,
+                  color: Colors.white,
+                ),
               ),
             ),
           ),
         ],
       )
     );
+  }
+
+  _removeImage(int index){
+    createOutfit.images.removeAt(index);
+    setState(() {});
   }
 
   Widget _remainingAddImageSpace(int remainingImages){
@@ -242,7 +317,7 @@ class _UploadOutfitScreenState extends State<UploadOutfitScreen> {
         ),
         child: InkWell(
           borderRadius: BorderRadius.circular(20.0,),
-          onTap: () {},
+          onTap: () => _addImages(remainingImages),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.center,
@@ -259,4 +334,16 @@ class _UploadOutfitScreenState extends State<UploadOutfitScreen> {
       )
     );
   }
+
+  _addImages(int remainingImages) async {
+    var image = await ImagePicker.pickImage(source: ImageSource.gallery);
+
+    if (!mounted || image == null)  return;
+
+    setState(() {
+      createOutfit.images = createOutfit.images..addAll([image.path]);
+    });
+  }
 }
+
+

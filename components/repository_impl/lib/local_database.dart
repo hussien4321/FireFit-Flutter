@@ -30,26 +30,33 @@ class LocalDatabase {
   }
 
   Future<Database> initDb() async {
-    Directory documentsDirectory = await getApplicationDocumentsDirectory();
-    String path = join(documentsDirectory.path, "mira_mira.db");
-    Database theDB = await openDatabase(path, version: 1, onCreate: _onCreate);
+    String path = join(await getDatabasesPath(), "mira_mira.db");
+    Database theDB = await openDatabase(path, version: 4, onCreate: _onCreate, onUpgrade: _onUpgrade);
     return theDB;
   }
 
-  
 
   void _onCreate(Database db, int version) async {
-    // print("Running SQL Command ${Outfit.toSqlCreate()}");
-    // await db.execute("CREATE TABLE users (${Outfit.toSqlCreate()})");
-    // await db.execute("CREATE TABLE posts (${Outfit.toSqlCreate()})");
-    // await db.execute("CREATE TABLE clothes");
-    // await db.execute("CREATE TABLE posts");
-    // await db.execute("CREATE TABLE conversations");
-    // await db.execute("CREATE TABLE messages");
-    // await db.execute("CREATE TABLE outfits");
-    // await db.execute("CREATE TABLE daily_outfits");
-    // await db.execute("CREATE TABLE notifications");
-    // await db.execute("CREATE TABLE alerts");
+    await db.execute("CREATE TABLE outfit (outfit_id INTEGER PRIMARY KEY, poster_user_id TEXT, image_url_1 TEXT, image_url_2 TEXT, image_url_3 TEXT, title TEXT, description TEXT, style TEXT, outfit_created_at DATETIME, likes_count INTEGER, comments_count INTEGER)");
+  }
+
+
+  void _onUpgrade(Database db, int versionFrom, int versionTo) async {
+    for(int i =versionFrom; i < versionTo; i++){
+      int nextVersion = i + 1;
+      await _applyMigration(db, nextVersion);
+    }
+  }
+
+  Future<void> _applyMigration(Database db, int version) async {
+    if(version == 3){
+      await db.execute("CREATE TABLE user (user_id INTEGER PRIMARY KEY, name TEXT, profile_pic_url TEXT, date_of_birth DATETIME, gender_is_male TINYINT, is_subscribed  TINYINT, boosts INTEGER, subscription_end_date DATETIME, user_created_at DATETIME)");
+    }
+    if(version == 4){
+      await db.execute("DROP TABLE user");
+      await db.execute("CREATE TABLE user (user_id STRING PRIMARY KEY, name TEXT, profile_pic_url TEXT, date_of_birth DATETIME, gender_is_male TINYINT, is_subscribed  TINYINT, boosts INTEGER, subscription_end_date DATETIME, user_created_at DATETIME)");
+
+    }
   }
 
 }

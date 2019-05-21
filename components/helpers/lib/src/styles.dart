@@ -11,16 +11,6 @@ enum ClothesStyles {
 
 class Style {
 
-
-  static List<ClothesStyles> allStyles = [
-    ClothesStyles.CASUAL,
-    ClothesStyles.SPORTS,
-    ClothesStyles.STREET,
-    ClothesStyles.OFFICE,
-    ClothesStyles.FORMAL,
-    ClothesStyles.HOME,
-  ];
-  
   String name;
   String asset;
   Color backgroundColor;

@@ -27,7 +27,7 @@ class User {
 
 
   User.fromMap(Map<String, dynamic> map){
-    userId = map['user_id'];
+    userId = map['user_id'].toString();
     name = map['name'];
     profilePicUrl = map['profile_pic_url'];
     dateOfBirth = DateTime.parse(map['date_of_birth']);
@@ -40,16 +40,16 @@ class User {
     createdAt = DateTime.parse(map['user_created_at']);
   } 
 
-  Map<String, dynamic> toJson() => {
+  Map<String, dynamic> toJson({bool cache = false}) => {
     'user_id' : userId, 
     'name' : name,
     'profile_pic_url' : profilePicUrl,
-    'date_of_birth' : dateOfBirth, 
+    'date_of_birth' : cache ? dateOfBirth?.toIso8601String() : dateOfBirth, 
     'gender_is_male' : genderIsMale ? 1 : 0, 
     'is_subscribed' : isSubscribed ? 1 : 0, 
     'boosts' : boosts, 
-    'subscription_end_date' : subscriptionEndDate, 
-    'user_created_at' : createdAt, 
+    'subscription_end_date' : cache ? subscriptionEndDate?.toIso8601String() : subscriptionEndDate, 
+    'user_created_at' : cache ? createdAt?.toIso8601String() : createdAt, 
   };
 
   int get age {

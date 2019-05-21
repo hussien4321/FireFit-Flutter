@@ -5,6 +5,8 @@ import 'package:front_end/screens.dart';
 import 'package:blocs/blocs.dart';
 import 'package:middleware/middleware.dart';
 import 'package:front_end/providers.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/gestures.dart';
 
 class ExploreScreen extends StatefulWidget {
   @override
@@ -21,7 +23,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
   int currentIndex=0;
   int nextIndex=1;
 
-  NewOutfitBloc outfitBloc;
+  OutfitBloc _outfitBloc;
 
   @override
   void initState() {
@@ -30,9 +32,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if(outfitBloc == null){
-      outfitBloc = OutfitBlocProvider.of(context);
-    }
+    _initBlocs();
     return Container(
       width: double.infinity,
       height: double.infinity,
@@ -42,23 +42,38 @@ class _ExploreScreenState extends State<ExploreScreen> {
           borderRadius: BorderRadius.vertical(top: Radius.circular(10.0))
         ),
         padding: EdgeInsets.only(top: 16.0),
-        child: StreamBuilder<List<Outfit>>(
-          stream: outfitBloc.outfits,
+        child: _buildOutfitLiveStream()
+      ),
+    );
+  }
+
+  _initBlocs() {
+    if(_outfitBloc==null){
+      _outfitBloc = OutfitBlocProvider.of(context);
+      _outfitBloc.exploreOutfits.add(null);
+    }
+  }
+
+  Widget _buildOutfitLiveStream() {
+    return StreamBuilder<bool>(
+      stream: _outfitBloc.isLoading,
+      initialData: true,
+      builder: (ctx, loadingSnap) {
+        return StreamBuilder<List<Outfit>>(
+          stream: _outfitBloc.outfits,
           initialData: [],
           builder: (ctx, snap) {
             List<Outfit> outfits = snap.data;
-            if(outfits.isEmpty){
-              return CircularProgressIndicator();
-            }
             return Stack(
               children: <Widget>[
                 _buildOutfitViewAndOptions(
                   outfitView: OutfitDisplayer(
-                    currentOutfit: outfits[currentIndex],
-                    nextOutfit: outfits[nextIndex],
+                    currentOutfit: outfitAtIndex(outfits, currentIndex),
+                    nextOutfit: outfitAtIndex(outfits, nextIndex),
                     thickness: 10,
                     onNextPicShown: () => _incrementIndexes(outfits),
                     backgroundColor: imageOverlayColor,
+                    isLoading: loadingSnap.data,
                   ),
                   options: _buildActionBar(),
                 ),
@@ -66,8 +81,8 @@ class _ExploreScreenState extends State<ExploreScreen> {
               ],
             );
           }
-        )
-      ),
+        );
+      }
     );
   }
 
@@ -103,6 +118,13 @@ class _ExploreScreenState extends State<ExploreScreen> {
     );
   }
 
+  Outfit outfitAtIndex(List<Outfit> allOutfits, int index) {
+    if(allOutfits == null || allOutfits.length <= index){
+      return null;
+    }
+    return allOutfits[index];
+  }
+
   Widget _searchManipulatorButtons(){
     return Row(
       mainAxisSize: MainAxisSize.max,
@@ -134,7 +156,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
   _incrementIndexes(List<Outfit> outfits){
     setState(() {
       currentIndex = nextIndex;
-      nextIndex = nextIndex==outfits.length-1? 0 : nextIndex+1; 
+      nextIndex = nextIndex+1; 
       pageNumber = pageNumber+1;
     });
   }
@@ -229,7 +251,7 @@ class OutfitDisplayer extends StatefulWidget {
   final double thickness;
   final VoidCallback onNextPicShown;
   final Color backgroundColor;
-  final bool isComplete;
+  final bool isLoading;
 
   OutfitDisplayer({
     this.currentOutfit,
@@ -237,7 +259,7 @@ class OutfitDisplayer extends StatefulWidget {
     this.thickness = 6,
     this.onNextPicShown,
     this.backgroundColor,
-    this.isComplete = false,
+    this.isLoading,
   });
 
   @override
@@ -255,7 +277,7 @@ class _OutfitDisplayerState extends State<OutfitDisplayer> with SingleTickerProv
   @override
   void initState() {
     thickness = widget.thickness;
-    currentOutfitId = widget.currentOutfit.outfit_id;
+    currentOutfitId = widget.currentOutfit?.outfit_id;
     blurringTransitionController = new AnimationController(
       vsync: this,
       duration: Duration(milliseconds: 500),
@@ -263,7 +285,7 @@ class _OutfitDisplayerState extends State<OutfitDisplayer> with SingleTickerProv
     ..addStatusListener((status) {
       if(status == AnimationStatus.completed){
         blurringTransitionController.reverse();
-        currentOutfitId = (currentOutfitId == widget.currentOutfit.outfit_id) ? widget.nextOutfit.outfit_id : widget.currentOutfit.outfit_id;
+        currentOutfitId = (currentOutfitId == widget.currentOutfit?.outfit_id) ? widget.nextOutfit?.outfit_id : widget.currentOutfit?.outfit_id;
       }
       if(status ==AnimationStatus.dismissed){
         widget.onNextPicShown();
@@ -271,6 +293,8 @@ class _OutfitDisplayerState extends State<OutfitDisplayer> with SingleTickerProv
     });
     super.initState();
   }
+
+  bool get haveOutfit => _currentOutfit != null;
 
   @override
   void dispose() {
@@ -280,9 +304,9 @@ class _OutfitDisplayerState extends State<OutfitDisplayer> with SingleTickerProv
 
   @override
   void didUpdateWidget(OutfitDisplayer oldWidget) {
-    if(oldWidget.currentOutfit.outfit_id != widget.currentOutfit.outfit_id){
+    if(oldWidget.currentOutfit?.outfit_id != widget.currentOutfit?.outfit_id){
       setState(() {
-       currentOutfitId = widget.currentOutfit.outfit_id; 
+       currentOutfitId = widget.currentOutfit?.outfit_id; 
       });
     }
     super.didUpdateWidget(oldWidget);
@@ -303,9 +327,9 @@ class _OutfitDisplayerState extends State<OutfitDisplayer> with SingleTickerProv
   Widget _buildOutfitSplash() {
     return GestureDetector(
       onVerticalDragUpdate: (s) => _switchToNextImage(),
-      onTap: openDetailedImage,
+      onTap: haveOutfit ? openDetailedImage : null,
       child: Hero(
-        tag:widget.currentOutfit.images.first,
+        tag: widget.currentOutfit?.images?.first == null? 'NULL' : widget.currentOutfit?.images?.first,
         child: Stack(
           children: <Widget>[
             _buildPicture(widget.currentOutfit),
@@ -326,7 +350,10 @@ class _OutfitDisplayerState extends State<OutfitDisplayer> with SingleTickerProv
 
   Widget _buildPicture(Outfit outfit) {
     if(outfit == null){
-      return widget.isComplete ? _buildCompletedView() : _buildCompletedView();
+      return Opacity(
+        opacity: currentOutfitId == null ? 1.0 : 0.0,
+        child: widget.isLoading ? _buildLoading() : _buildCompleted()
+      );
     }
     return Opacity(
       opacity: currentOutfitId == outfit.outfit_id ? 1.0 : 0.0,
@@ -345,8 +372,8 @@ class _OutfitDisplayerState extends State<OutfitDisplayer> with SingleTickerProv
               )
             ),
             SizedBox.expand(
-              child: Image.network(
-                outfit.images.first,
+              child: CachedNetworkImage(
+                imageUrl: outfit.images.first,
                 fit: BoxFit.fitHeight,
               ),
             ),
@@ -355,24 +382,83 @@ class _OutfitDisplayerState extends State<OutfitDisplayer> with SingleTickerProv
     );
   }
 
-  Widget _buildCompletedView() {
-    return Text('COMPLETED');
+  Widget _buildLoading() {
+    return Container(
+      width: double.infinity,
+      height: double.infinity,
+      color: Colors.transparent,
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Theme(
+              data: ThemeData(accentColor: Colors.blue),
+              child: CircularProgressIndicator(),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Text(
+                'Finding awesome outfits...',
+                style: Theme.of(context).textTheme.subhead.apply(color: Colors.blue),
+              ),
+            ),
+          ],
+        )
+      )
+    );
   }
 
+  Widget _buildCompleted() {
+    return Container(
+      width: double.infinity,
+      height: double.infinity,
+      color: Colors.transparent,
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Icon(
+              FontAwesomeIcons.sadCry,
+              color: Colors.pink,
+              size: 48,
+            ),
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Text(
+                'No more outfits to show...\n\nRefresh your search or try a different filter to discover new styles!',
+                style: Theme.of(context).textTheme.subhead.apply(color: Colors.pink),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ],
+        )
+      )
+    );
+  }
+
+
+
   _switchToNextImage() {
-    if(!blurringTransitionController.isAnimating){
-      blurringTransitionController.forward();
+    if(haveOutfit){
+      if(!blurringTransitionController.isAnimating){
+        blurringTransitionController.forward();
+      }
     }
   }
 
   openDetailedImage(){
-    Navigator.push(context, MaterialPageRoute(
-      //TODO: CREATE NEW TRANSITION THAT FADES CURRENT PAGE TO WHITE THEN FADES IN NEXT PAGE
-      builder: (context) => OutfitDetailsScreen(outfit: widget.currentOutfit)
-    ));
+    if(haveOutfit){
+      Navigator.push(context, MaterialPageRoute(
+        //TODO: CREATE NEW TRANSITION THAT FADES CURRENT PAGE TO WHITE THEN FADES IN NEXT PAGE
+        builder: (context) => OutfitDetailsScreen(outfit: widget.currentOutfit)
+      ));
+    }
   }
 
   Widget _buildOutfitInfo() {
+    if(!haveOutfit) {
+      return Container();
+    }
     return Positioned(
       bottom: 0,
       left: 0,
@@ -385,6 +471,7 @@ class _OutfitDisplayerState extends State<OutfitDisplayer> with SingleTickerProv
               Colors.transparent,
               widget.backgroundColor,
             ],
+            stops: [0.5,1.0],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           )
@@ -492,7 +579,7 @@ class _OutfitDisplayerState extends State<OutfitDisplayer> with SingleTickerProv
     );
   }
 
-  Outfit get _currentOutfit => currentOutfitId == widget.currentOutfit.outfit_id ? widget.currentOutfit : widget.nextOutfit;
+  Outfit get _currentOutfit => currentOutfitId == widget.currentOutfit?.outfit_id ? widget.currentOutfit : widget.nextOutfit;
 
   double get _blurValue => Tween<double>(
     begin: 0.0,

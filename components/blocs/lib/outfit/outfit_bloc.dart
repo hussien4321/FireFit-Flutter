@@ -2,7 +2,7 @@ import 'dart:async';
 import 'package:rxdart/rxdart.dart';
 import 'package:middleware/middleware.dart'
 ;
-class NewOutfitBloc{
+class OutfitBloc{
 
   final OutfitRepository repository;
   List<StreamSubscription<dynamic>> _subscriptions;
@@ -10,79 +10,57 @@ class NewOutfitBloc{
   final _outfitsController = BehaviorSubject<List<Outfit>>(seedValue: []);
   Stream<List<Outfit>> get outfits => _outfitsController.stream; 
   
-  final _loadOutfitsController = PublishSubject<Null>();
-  Sink<Null> get loadOutfits => _loadOutfitsController;
+  final _exploreOutfitsController = PublishSubject<Null>();
+  Sink<Null> get exploreOutfits => _exploreOutfitsController;
 
-  NewOutfitBloc(this.repository) {
-    _outfitsController.addStream(repository.getOutfits().asStream());
+  final _createOutfitsController = PublishSubject<CreateOutfit>();
+  Sink<CreateOutfit> get createOutfit => _createOutfitsController;
+
+  final _loadingController = PublishSubject<bool>();
+  Observable<bool> get isLoading => _loadingController.stream;
+
+  final _successController = PublishSubject<bool>();
+  Observable<bool> get isSuccessful => _successController.stream;
+
+  final _errorController = PublishSubject<String>();
+  Observable<String> get hasError => _errorController.stream;
+  
+  OutfitBloc(this.repository) {
+    _outfitsController.addStream(repository.getOutfits());
     _subscriptions = <StreamSubscription<dynamic>>[
-      _loadOutfitsController.listen(_loadClothes),
+      _exploreOutfitsController.listen(_exploreOutfits),
+      _createOutfitsController.listen(_uploadOutfit),
+      _outfitsController.listen((outfits) => print("FOUND ${outfits.length} OUTFITS")),
     ];
   }
 
-  _loadClothes([_]) async {
-    final list = await repository.getOutfits();
-    _outfitsController.add(_outfitsController.value..addAll(list));
+  _exploreOutfits([_]) async {
+    _loadingController.add(true);
+    final success = await repository.exploreOutfits();
+    _loadingController.add(false);
+    _successController.add(success);
+    if(!success){
+      _errorController.add("Failed to load outfits");
+    }
+  }
+
+  _uploadOutfit(CreateOutfit createOutfit) async {
+    _loadingController.add(true);
+    final success = await repository.uploadOutfit(createOutfit);
+    _loadingController.add(false);
+    _successController.add(success);
+    if(!success){
+      _errorController.add("Failed to create new outfit");
+    }
   }
 
   void dispose() {
     _outfitsController.close();
-    _loadOutfitsController.close();
+    _exploreOutfitsController.close();
+    _createOutfitsController.close();
+    _loadingController.close();
+    _successController.close();
+    _errorController.close();
     _subscriptions.forEach((subscription) => subscription.cancel());
   }
 }
-
-// class OutfitBloc {
-
-//   final List<StreamSubscription<dynamic>> _subscriptions;
-
-//   PublishSubject<Null> loadOutfits;
-
-//   Stream<List<Outfit>> outfits;
-  
-  
-//   factory OutfitBloc(OutfitRepository repository) {
-
-
-//     final loadOutfitsController = PublishSubject<Null>();
-
-//     final outfitsController = BehaviorSubject<List<Outfit>>(seedValue: []);
-//     outfitsController.addStream(repository.getOutfits().asStream());
-
-//     loadOutfitsController.doOnCancel(() {
-//       outfitsController.close();
-//     });
-
-//     void _loadClothes([_]) async {
-//       final list = await repository.getOutfits();
-//       outfitsController.add(outfitsController.value..addAll(list));
-//     }
-
-//     final subscriptions = <StreamSubscription<dynamic>>[
-//       loadOutfitsController.listen(_loadClothes)
-//     ];
-
-//     return OutfitBloc._(
-//       subscriptions,
-//       loadOutfits: loadOutfitsController,
-
-//       outfits: outfitsController.stream,
-//     );
-//   }
-
-//   OutfitBloc._(
-//     this._subscriptions,
-//   {
-//     this.loadOutfits,
-
-//     this.outfits,
-//   });
-
-
-  
-//   void close() {
-//     loadOutfits.close();
-//     _subscriptions.forEach((subscription) => subscription.cancel());
-//   }
-
-// }

@@ -114,10 +114,10 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
           tag: widget.outfit.images.first,  
           child: Container(
             child: Swiper(
-              itemCount: 3,
+              itemCount: widget.outfit.images.length,
               viewportFraction: 0.9,
               scale: 0.6,
-              itemBuilder: (context, index) => _loadImage(widget.outfit.images.first),
+              itemBuilder: (context, i) => _loadImage(widget.outfit.images[i]),
               loop: false,
               pagination: SwiperPagination(
                 margin: EdgeInsets.only(top: 20.0),

@@ -3,8 +3,8 @@ import 'package:cached_network_image/cached_network_image.dart';
 
 class ProfilePicWithShadow extends StatelessWidget {
   
-  String url;
-  double size;
+  final String url;
+  final double size;
   ProfilePicWithShadow({this.url, this.size = 40.0});
 
   @override

@@ -18,7 +18,7 @@ void main({
   runApp(Injector(
     outfitRepository: outfitRepository,
     child: OutfitBlocProvider(
-      bloc:  NewOutfitBloc(outfitRepository),
+      bloc:  OutfitBloc(outfitRepository),
       child:MaterialApp(
         title: BlocLocalizations().appTitle,
         debugShowCheckedModeBanner: false,

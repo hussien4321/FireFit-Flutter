@@ -19,15 +19,17 @@ void main() async {
   );
   FirebaseAuth auth = FirebaseAuth.instance;
   Database db = await LocalDatabase().db;
-  // StreamDatabase streamDatabase = StreamDatabase(db);
+  StreamDatabase streamDatabase = StreamDatabase(db);
+  CachedUserRepository userCache = CachedUserRepository(streamDatabase: streamDatabase);
 
   app.main(
     outfitRepository: FirebaseOutfitRepository(
       cloudFunctions: functions,
       imageUploader: imageUploader,
-      // cache: CachedOutfitRepository(
-      //   streamDatabase: streamDatabase,
-      // ),
+      cache: CachedOutfitRepository(
+        streamDatabase: streamDatabase,
+        userCache: userCache
+      ),
     ),
   );
 }

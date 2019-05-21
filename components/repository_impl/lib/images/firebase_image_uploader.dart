@@ -1,8 +1,6 @@
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:helpers/helpers.dart';
 import 'package:meta/meta.dart';
 import 'dart:io';
-import 'package:path/path.dart';
 
 class FirebaseImageUploader {
 
@@ -13,37 +11,25 @@ class FirebaseImageUploader {
     @required this.storage,
   });
 
-  Future<List<String>> uploadImages(List<String> imagePaths) async {
-    
-    List<String> imageUrls = [];
-
+  Future<Null> uploadImages(List<String> imagePaths, List<String> imageNames) async {    
     for(int i = 0; i < imagePaths.length; i++){
-      String imageUrl = await uploadImage(imagePaths[i]);  
-      imageUrls.add(imageUrl);
+      await uploadImage(imagePaths[i], imageNames[i]);  
     }
-
-    return imageUrls;
   }
 
 
-  Future<String> uploadImage(String image){
-    final String uuid = Uuid().generateV4();
-
-    String filename = '${uuid.toString()}-${basename(image)}';
+  Future<Null> uploadImage(String imagePath, String imageName) async {
     final StorageReference ref =
-        storage.ref().child(filename);
+        storage.ref().child(imageName);
     
     StorageUploadTask uploadTask = ref.putFile(
-      File(image),
+      File(imagePath),
       StorageMetadata(
         contentType: 'image/jpeg'
       ),
     );
     
-    return uploadTask.onComplete.then((snapshot) async {
-      String url = await snapshot.ref.getDownloadURL();
-      return url;
-    });
+    await uploadTask.onComplete;
   }
   
 }

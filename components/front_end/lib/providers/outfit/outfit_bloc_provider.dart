@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 
 class OutfitBlocProvider extends StatefulWidget {
   final Widget child;
-  final NewOutfitBloc bloc;
+  final OutfitBloc bloc;
 
   OutfitBlocProvider({Key key, @required this.child, @required this.bloc})
       : super(key: key);
@@ -16,7 +16,7 @@ class OutfitBlocProvider extends StatefulWidget {
   @override
   _OutfitBlocProviderState createState() => _OutfitBlocProviderState();
 
-  static NewOutfitBloc of(BuildContext context) {
+  static OutfitBloc of(BuildContext context) {
     return (context.inheritFromWidgetOfExactType(_OutfitBlocProvider)
             as _OutfitBlocProvider)
         .bloc;
@@ -37,7 +37,7 @@ class _OutfitBlocProviderState extends State<OutfitBlocProvider> {
 }
 
 class _OutfitBlocProvider extends InheritedWidget {
-  final NewOutfitBloc bloc;
+  final OutfitBloc bloc;
 
   _OutfitBlocProvider({
     Key key,
