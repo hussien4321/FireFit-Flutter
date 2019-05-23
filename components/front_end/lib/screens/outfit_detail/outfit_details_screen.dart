@@ -55,39 +55,32 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
     return Container(
       width: double.infinity,
       height: double.infinity,
+      color: Colors.white,
       child: SingleChildScrollView(
         child: Column(
-
           children: <Widget>[
             _buildOutfitImage(),
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  _buildInteractButtons(),
-                  Material(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 0.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: <Widget>[
-                          _buildTitleAndDate(),
-                          _buildPosterInfo(),
-                          _buildOutfitDescription(),
-                          _buildLikesSummary(),
-                          _buildCommentsCount(),
-                          _buildCommentField(),
-                          _buildCommentField(),
-                        ],
-                      ),
+            _buildImpressionsSummary(),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                _buildInteractButtons(),
+                Material(
+                  color: Colors.white,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 0.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        _buildTitleAndDate(),
+                        _buildPosterInfo(),
+                        _buildOutfitDescription(),
+                      ],
                     ),
-                  )
-                ],
-              ),
+                  ),
+                )
+              ],
             ),
           ],
         ),
@@ -97,7 +90,6 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
 
   Widget _buildOutfitImage() {
     return Container(
-      width: double.infinity,
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
@@ -115,8 +107,8 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
           child: Container(
             child: Swiper(
               itemCount: widget.outfit.images.length,
-              viewportFraction: 0.9,
-              scale: 0.6,
+              viewportFraction: 0.8,
+              scale: 0.9,
               itemBuilder: (context, i) => _loadImage(widget.outfit.images[i]),
               loop: false,
               pagination: SwiperPagination(
@@ -137,12 +129,95 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
   }
 
   Widget _loadImage(String url){
-    return Padding(
+    return Container(
       padding: const EdgeInsets.only(bottom: 20.0),
       child: CachedNetworkImage(
         imageUrl: url,
         fit: BoxFit.contain,
       ),
+    );
+  }
+
+
+
+  Widget _buildImpressionsSummary(){
+    return Container(
+      color: Colors.grey[300],
+      width: double.infinity,
+      padding: EdgeInsets.symmetric(vertical: 8.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          _buildLikesSummary(),
+          Padding(padding: EdgeInsets.symmetric(horizontal: 8.0),),
+          _buildCommentsSummary(),
+        ],
+      ),
+    );
+  }
+  Widget _buildLikesSummary() {
+    return Container(
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          Padding(
+            padding: const EdgeInsets.only(right: 8.0),
+            child: Icon(Icons.thumbs_up_down),
+          ),
+          RichText(
+            text: TextSpan(
+              children: [
+                TextSpan(
+                  text: '${widget.outfit.likesCount} ',
+                  style: TextStyle(
+                    color: Colors.black,
+                    letterSpacing: 1.5
+                  ),
+                ),
+                TextSpan(
+                  text: 'TOTAL LIKE${widget.outfit.likesCount==1?'':'S'}',
+                  style: TextStyle(
+                    color: Colors.black,
+                    letterSpacing: 1.5
+                  ),
+                ),
+              ]
+            ),
+          ),
+        ],
+      )
+    );
+  }
+
+  Widget _buildCommentsSummary(){
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        Padding(
+          padding: const EdgeInsets.only(right: 8.0),
+          child: Icon(Icons.comment),
+        ),
+        RichText(
+          text: TextSpan(
+            children: [
+              TextSpan(
+                text: '${widget.outfit.commentsCount} ',
+                  style: TextStyle(
+                    color: Colors.black,
+                    letterSpacing: 1.5
+                  ),
+              ),
+              TextSpan(
+                text: 'COMMENT${widget.outfit.likesCount==1?'':'S'}',
+                  style: TextStyle(
+                    color: Colors.black,
+                    letterSpacing: 1.5
+                  ),
+              ),
+            ]
+          ),
+        ),
+      ],
     );
   }
 
@@ -153,8 +228,8 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
         child: Row(
           children: <Widget>[
             _buildInteractButton('Dislike', Colors.pinkAccent[700], false),
-            _buildInteractButton('Save', Colors.amberAccent[700], false),
-            _buildInteractButton('Like', Colors.blueAccent[700], true),
+            _buildInteractButton('Save', Colors.amberAccent[700], true),
+            _buildInteractButton('Like', Colors.blueAccent[700], false),
           ],
         ),
       ),
@@ -302,53 +377,6 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildLikesSummary(){
-    return Padding(
-      padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-      child: RichText(
-        text: TextSpan(
-          children: [
-            TextSpan(
-              text: '${widget.outfit.likesCount} ',
-              style: Theme.of(context).textTheme.headline,
-            ),
-            TextSpan(
-              text: 'Overall like${widget.outfit.likesCount==1?'':'s'}',
-              style: Theme.of(context).textTheme.subhead,
-            ),
-          ]
-        ),
-      )
-    );
-  }
-  Widget _buildCommentsCount(){
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        border: BorderDirectional(
-          top: BorderSide(
-            color: Colors.grey
-          )
-        )
-      ),
-      padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-      child: RichText(
-        text: TextSpan(
-          children: [
-            TextSpan(
-              text: '${widget.outfit.commentsCount} ',
-              style: Theme.of(context).textTheme.headline,
-            ),
-            TextSpan(
-              text: 'Comment${widget.outfit.likesCount==1?'':'s'}${widget.outfit.likesCount==0?'':':'}',
-              style: Theme.of(context).textTheme.subhead,
-            ),
-          ]
-        ),
-      )
     );
   }
   Widget _buildCommentField() {

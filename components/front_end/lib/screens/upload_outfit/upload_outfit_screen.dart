@@ -49,10 +49,16 @@ class _UploadOutfitScreenState extends State<UploadOutfitScreen> with OverlayLoa
         title: Text('New Outfit'),
         centerTitle: true,
         actions: <Widget>[
-          UploadButton(
-            canBeUploaded: createOutfit.canBeUploaded,
-            onComplete: _uploadOutfit,
-            onError: () => displayNoticeSnackBar(context, 'Finish steps 1-3 first!')
+          IconButton(
+            icon: Icon(Icons.send),
+            color: createOutfit.canBeUploaded ? Colors.green : Colors.orange,
+            onPressed: () {
+              if(createOutfit.canBeUploaded){
+                _uploadOutfit();
+              }else{
+                displayNoticeSnackBar(context, 'Finish steps 1-3 first!');
+              }
+            },
           )
         ],
       ),
@@ -323,7 +329,10 @@ class _UploadOutfitScreenState extends State<UploadOutfitScreen> with OverlayLoa
             mainAxisAlignment: MainAxisAlignment.center,
             mainAxisSize: MainAxisSize.max,
             children: <Widget>[
-              Icon(Icons.add),
+              Hero(
+                tag: MMKeys.uploadButtonHero,
+                child: Icon(Icons.add_a_photo),
+              ),
               Text(
                 'Add ${remainingImages==3?'an':(remainingImages==2?'another':'a final')} image',
                 textAlign: TextAlign.center,

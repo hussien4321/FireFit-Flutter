@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:front_end/screens.dart';
 import 'package:front_end/helper_widgets.dart';
-import 'dart:ui';
+import 'package:helpers/helpers.dart';
 import 'package:hidden_drawer_menu/hidden_drawer/screen_hidden_drawer.dart';
-import 'package:hidden_drawer_menu/hidden_drawer/hidden_drawer_menu.dart';
 import 'package:hidden_drawer_menu/menu/item_hidden_menu.dart';
 import 'package:flutter_inner_drawer/inner_drawer.dart';
 
@@ -109,7 +108,10 @@ class _MainAppBarState extends State<MainAppBar> {
 
   Widget _buildUploadButton(){
     return IconButton(
-      icon: Icon(Icons.add_a_photo),
+      icon: Hero(
+        tag: MMKeys.uploadButtonHero,
+        child: Icon(Icons.add_a_photo),
+      ),
       onPressed: () {
       Navigator.push(context, MaterialPageRoute(
         builder: (context) => UploadOutfitScreen()

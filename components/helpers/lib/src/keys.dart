@@ -4,8 +4,10 @@
 
 import 'package:flutter/widgets.dart';
 
-class ArchSampleKeys {
+class MMKeys {
   // Home Screens
+  static final uploadButtonHero = const Key('__uploadButtonHero__');
+
   static final loadingScreen = const Key('__loadingScreen__');
   static final logInScreen = const Key('__logInScreen__');
   static final homeScreen = const Key('__homeScreen__');

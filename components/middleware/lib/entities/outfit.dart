@@ -24,6 +24,9 @@ class Outfit {
     this.createdAt,
   });
 
+
+  bool get hasMultipleImages => images.length > 1;
+
   Outfit.fromMap(Map<String, dynamic> map, {bool cache = false}){
     outfit_id = map['outfit_id'];
     createdAt = DateTime.parse(map['outfit_created_at']);
