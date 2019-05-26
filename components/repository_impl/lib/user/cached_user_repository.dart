@@ -10,6 +10,7 @@ class CachedUserRepository {
   CachedUserRepository({@required this.streamDatabase});
 
   addUser(User user) {
+    print("ADDING USER WITH ID: ${user.userId}");
     return streamDatabase.insert(
       'user',
       user.toJson(cache: true),
@@ -17,9 +18,14 @@ class CachedUserRepository {
     );
   }
   
-  Future<User> getUser(String userId){
-    return streamDatabase.createQuery('user', where: 'user_id = $userId', ).mapToOne((data) {
+  Stream<User> getUser(String userId){
+  return streamDatabase.createQuery('user', where: 'user_id = $userId', limit: 1).mapToOneOrDefault((data) {
       return User.fromMap(data);
-    }).first;
+    }, null).asBroadcastStream();
+  }
+
+  
+  Future<void> deleteAll() async {
+    await streamDatabase.executeAndTrigger(["user"], "DELETE FROM user");
   }
 }

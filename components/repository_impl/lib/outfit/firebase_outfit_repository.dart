@@ -35,6 +35,7 @@ class FirebaseOutfitRepository implements OutfitRepository {
     .then((res) async {
       List<Outfit> outfits = List<Outfit>.from(res['res'].map((data){
         Map<String, dynamic> formattedDoc = Map<String, dynamic>.from(data);
+        print("loading user data ${formattedDoc['user_id']}");
         return Outfit.fromMap(formattedDoc);
       }).toList());
 
@@ -49,13 +50,13 @@ class FirebaseOutfitRepository implements OutfitRepository {
   }
 
 
-  Future<bool> uploadOutfit(CreateOutfit createOutfit) async {
-    return cloudFunctions.call(functionName: 'uploadOutfit', parameters: createOutfit.toJson())
+  Future<bool> uploadOutfit(UploadOutfit uploadOutfit) async {
+    return cloudFunctions.call(functionName: 'uploadOutfit', parameters: uploadOutfit.toJson())
     .then((res) async {
 
       int outfitId = res['ref'];      
-      List<String> fileNames = _generateFileNames(createOutfit.images, outfitId, createOutfit);
-      await imageUploader.uploadImages(createOutfit.images, fileNames);
+      List<String> fileNames = _generateFileNames(uploadOutfit.images, outfitId, uploadOutfit);
+      await imageUploader.uploadImages(uploadOutfit.images, fileNames);
 
       return true;
     })
@@ -65,12 +66,30 @@ class FirebaseOutfitRepository implements OutfitRepository {
     });
   }
 
-  _generateFileNames(List<String> imagePaths, int outfitId, CreateOutfit createOutfit){
+  _generateFileNames(List<String> imagePaths, int outfitId, UploadOutfit uploadOutfit){
     List<String> imageFiles = [];
     for(int i = 0; i < imagePaths.length; i++){
       final String uuid = Uuid().generateV4();
-      imageFiles.add('$tempOutfitImagesFolder/$outfitId:${createOutfit.posterUserId}:${i+1}:${uuid.toString()}${extension(imagePaths[i])}');
+      imageFiles.add('$tempOutfitImagesFolder/$outfitId:${uploadOutfit.posterUserId}:${i+1}:${uuid.toString()}${extension(imagePaths[i])}');
     }
     return imageFiles;
   }
+
+  
+  Future<bool> deleteOutfit(Outfit outfit) async {
+    cache.deleteOutfit(outfit);
+    return cloudFunctions.call(functionName: 'deleteOutfit', parameters: {
+      'poster_user_id' : '0123456789',
+      'outfit_id': outfit.toJson()['outfit_id']
+    })
+    .then((res) async {
+      bool status = res['res'];
+      return status;
+    })
+    .catchError((err) {
+      print(err);
+      return false;
+    });
+  }
+
 }

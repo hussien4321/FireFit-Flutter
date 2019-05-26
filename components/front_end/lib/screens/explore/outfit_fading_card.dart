@@ -289,7 +289,7 @@ class _OutfitFadingCardState extends State<OutfitFadingCard> with SingleTickerPr
                             color: Colors.black,
                           ),
                           Text(
-                            '${_currentOutfit.poster.age}',
+                            _currentOutfit.poster.ageRange,
                             style: Theme.of(context).textTheme.title.apply(color: Colors.black),
                           )
                         ],

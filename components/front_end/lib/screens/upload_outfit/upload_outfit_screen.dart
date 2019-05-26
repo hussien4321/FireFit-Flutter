@@ -17,7 +17,7 @@ class UploadOutfitScreen extends StatefulWidget {
 
 class _UploadOutfitScreenState extends State<UploadOutfitScreen> with OverlayLoading, SnackbarMessages {
 
-  CreateOutfit createOutfit;
+  UploadOutfit uploadOutfit;
   TextEditingController titleTextEdit;
   TextEditingController descriptionTextEdit;
 
@@ -28,9 +28,9 @@ class _UploadOutfitScreenState extends State<UploadOutfitScreen> with OverlayLoa
   @override
   void initState() {
     super.initState();
-    createOutfit = CreateOutfit();
-    titleTextEdit = TextEditingController(text: createOutfit.title);
-    descriptionTextEdit = TextEditingController(text: createOutfit.description);
+    uploadOutfit = UploadOutfit();
+    titleTextEdit = TextEditingController(text: uploadOutfit.title);
+    descriptionTextEdit = TextEditingController(text: uploadOutfit.description);
   }
 
   @override
@@ -51,9 +51,9 @@ class _UploadOutfitScreenState extends State<UploadOutfitScreen> with OverlayLoa
         actions: <Widget>[
           IconButton(
             icon: Icon(Icons.send),
-            color: createOutfit.canBeUploaded ? Colors.green : Colors.orange,
+            color: uploadOutfit.canBeUploaded ? Colors.green : Colors.orange,
             onPressed: () {
-              if(createOutfit.canBeUploaded){
+              if(uploadOutfit.canBeUploaded){
                 _uploadOutfit();
               }else{
                 displayNoticeSnackBar(context, 'Finish steps 1-3 first!');
@@ -104,7 +104,7 @@ class _UploadOutfitScreenState extends State<UploadOutfitScreen> with OverlayLoa
   }
 
   
-  _uploadOutfit() => _outfitBloc.createOutfit.add(createOutfit);
+  _uploadOutfit() => _outfitBloc.uploadOutfit.add(uploadOutfit);
   
   
   Widget _buildBody(){
@@ -115,13 +115,13 @@ class _UploadOutfitScreenState extends State<UploadOutfitScreen> with OverlayLoa
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             _buildSummaryHeader(),
-            _buildHeader('1. Upload some pics (max 3)', createOutfit.imagesUploaded),
+            _buildHeader('1. Upload some pics (max 3)', uploadOutfit.imagesUploaded),
             _buildImagesHolder(),
-            _buildHeader('2. Choose the style!', createOutfit.styleUploaded),
+            _buildHeader('2. Choose the style!', uploadOutfit.styleUploaded),
             _buildStyleInput(),
-            _buildHeader('3. Give it a cool title', createOutfit.titleUploaded),
+            _buildHeader('3. Give it a cool title', uploadOutfit.titleUploaded),
             _buildTitleField(),
-            _buildHeader('4. Describe it further (optional)', createOutfit.descriptionUploaded),
+            _buildHeader('4. Describe it further (optional)', uploadOutfit.descriptionUploaded),
             _buildDescriptionField(),
           ],
         ),
@@ -147,7 +147,7 @@ class _UploadOutfitScreenState extends State<UploadOutfitScreen> with OverlayLoa
   }
 
   Widget _buildStyleInput() {
-    Style style = Style.fromStyleString(createOutfit.style);
+    Style style = Style.fromStyleString(uploadOutfit.style);
     return StyleTab(
       style: style, 
       onTap: _selectNewStyle
@@ -160,7 +160,7 @@ class _UploadOutfitScreenState extends State<UploadOutfitScreen> with OverlayLoa
     ));
     if(!mounted || styleName == null) return;
     setState(() {
-      createOutfit.style = styleName;    
+      uploadOutfit.style = styleName;    
     });
   }
 
@@ -177,7 +177,7 @@ class _UploadOutfitScreenState extends State<UploadOutfitScreen> with OverlayLoa
         controller: titleTextEdit,
         onChanged: (newTitle) {
           setState((){
-            createOutfit.title = newTitle;
+            uploadOutfit.title = newTitle;
           });
         },
         textCapitalization: TextCapitalization.words,
@@ -203,7 +203,7 @@ class _UploadOutfitScreenState extends State<UploadOutfitScreen> with OverlayLoa
         controller: descriptionTextEdit,
         onChanged: (newDesc) {
           setState((){
-            createOutfit.description = newDesc;
+            uploadOutfit.description = newDesc;
           });
         },
         textCapitalization: TextCapitalization.sentences,
@@ -244,11 +244,11 @@ class _UploadOutfitScreenState extends State<UploadOutfitScreen> with OverlayLoa
   
   Widget _buildImagesHolder() {
     List<Widget> tabs = [];
-    for(int i = 0; i < createOutfit.images.length ; i ++){
+    for(int i = 0; i < uploadOutfit.images.length ; i ++){
       tabs.add(_displayImage(i));
     }
-    if(createOutfit.images.length < 3){
-      tabs.add(_remainingAddImageSpace(3-createOutfit.images.length));
+    if(uploadOutfit.images.length < 3){
+      tabs.add(_remainingAddImageSpace(3-uploadOutfit.images.length));
     }
   
     return Container(
@@ -279,7 +279,7 @@ class _UploadOutfitScreenState extends State<UploadOutfitScreen> with OverlayLoa
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(20.0),
                 child: Image.file(
-                  File(createOutfit.images[index]),
+                  File(uploadOutfit.images[index]),
                   fit: BoxFit.cover,
                 ),
               ),
@@ -307,7 +307,7 @@ class _UploadOutfitScreenState extends State<UploadOutfitScreen> with OverlayLoa
   }
 
   _removeImage(int index){
-    createOutfit.images.removeAt(index);
+    uploadOutfit.images.removeAt(index);
     setState(() {});
   }
 
@@ -350,7 +350,7 @@ class _UploadOutfitScreenState extends State<UploadOutfitScreen> with OverlayLoa
     if (!mounted || image == null)  return;
 
     setState(() {
-      createOutfit.images = createOutfit.images..addAll([image.path]);
+      uploadOutfit.images = uploadOutfit.images..addAll([image.path]);
     });
   }
 }

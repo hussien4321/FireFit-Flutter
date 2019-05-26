@@ -20,6 +20,14 @@ class CachedOutfitRepository {
     );
   }
 
+  Future<int> deleteOutfit(Outfit outfitToDelete) async {
+    return streamDatabase.delete(
+      'outfit',
+      where: 'outfit_id = ?',
+      whereArgs: [outfitToDelete.outfit_id],
+    );
+  }
+
   Future<void> clearOutfits() async {
     await streamDatabase.execute("DELETE FROM outfit");
   }

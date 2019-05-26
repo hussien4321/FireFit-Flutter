@@ -57,7 +57,7 @@ class Outfit {
     'title' : title, 
     'description' : description, 
     'style' : style, 
-    'outfit_created_at' : cache ? createdAt.toIso8601String() : createdAt, 
+    'outfit_created_at' : createdAt.toIso8601String(), 
     'likes_count':likesCount,
     'comments_count':commentsCount,
   };

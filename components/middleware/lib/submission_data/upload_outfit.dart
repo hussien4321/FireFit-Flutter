@@ -1,4 +1,4 @@
-class CreateOutfit {
+class UploadOutfit {
 
   String posterUserId;
   List<String> images;
@@ -6,7 +6,7 @@ class CreateOutfit {
   String description;
   String style;
 
-  CreateOutfit({
+  UploadOutfit({
     this.posterUserId = '0123456789',
     this.images, 
     this.title, 

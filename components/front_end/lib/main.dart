@@ -14,19 +14,23 @@ import 'package:front_end/localization.dart';
 
 void main({
   @required OutfitRepository outfitRepository,
+  @required UserRepository userRepository,
 }) {
   runApp(Injector(
     outfitRepository: outfitRepository,
-    child: OutfitBlocProvider(
-      bloc:  OutfitBloc(outfitRepository),
-      child:MaterialApp(
-        title: BlocLocalizations().appTitle,
-        debugShowCheckedModeBanner: false,
-        theme: ThemeData(
-          primaryColorBrightness: Brightness.light,
-          primarySwatch: Colors.grey,
+    child: UserBlocProvider(
+      bloc:  UserBloc(userRepository),
+      child: OutfitBlocProvider(
+        bloc:  OutfitBloc(outfitRepository),
+        child:MaterialApp(
+          title: BlocLocalizations().appTitle,
+          debugShowCheckedModeBanner: false,
+          theme: ThemeData(
+            primaryColorBrightness: Brightness.light,
+            primarySwatch: Colors.grey,
+          ),
+          home: LoadingScreen(),
         ),
-        home: MainAppBar(),
       ),
     ),
   ));

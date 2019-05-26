@@ -13,8 +13,11 @@ class OutfitBloc{
   final _exploreOutfitsController = PublishSubject<Null>();
   Sink<Null> get exploreOutfits => _exploreOutfitsController;
 
-  final _createOutfitsController = PublishSubject<CreateOutfit>();
-  Sink<CreateOutfit> get createOutfit => _createOutfitsController;
+  final _uploadOutfitsController = PublishSubject<UploadOutfit>();
+  Sink<UploadOutfit> get uploadOutfit => _uploadOutfitsController;
+
+  final _deleteOutfitController = PublishSubject<Outfit>();
+  Sink<Outfit> get deleteOutfit => _deleteOutfitController;
 
   final _loadingController = PublishSubject<bool>();
   Observable<bool> get isLoading => _loadingController.stream;
@@ -29,7 +32,8 @@ class OutfitBloc{
     _outfitsController.addStream(repository.getOutfits());
     _subscriptions = <StreamSubscription<dynamic>>[
       _exploreOutfitsController.listen(_exploreOutfits),
-      _createOutfitsController.listen(_uploadOutfit),
+      _uploadOutfitsController.listen(_uploadOutfit),
+      _deleteOutfitController.listen(_deleteOutfit),
       _outfitsController.listen((outfits) => print("FOUND ${outfits.length} OUTFITS")),
     ];
   }
@@ -44,9 +48,9 @@ class OutfitBloc{
     }
   }
 
-  _uploadOutfit(CreateOutfit createOutfit) async {
+  _uploadOutfit(UploadOutfit uploadOutfit) async {
     _loadingController.add(true);
-    final success = await repository.uploadOutfit(createOutfit);
+    final success = await repository.uploadOutfit(uploadOutfit);
     _loadingController.add(false);
     _successController.add(success);
     if(!success){
@@ -54,10 +58,20 @@ class OutfitBloc{
     }
   }
 
+  _deleteOutfit(Outfit outfit) async {
+    _loadingController.add(true);
+    final success = await repository.deleteOutfit(outfit);
+    _loadingController.add(false);
+    _successController.add(success);
+    if(!success){
+      _errorController.add("Failed to delete outfit");
+    }
+  }
+
   void dispose() {
     _outfitsController.close();
     _exploreOutfitsController.close();
-    _createOutfitsController.close();
+    _uploadOutfitsController.close();
     _loadingController.close();
     _successController.close();
     _errorController.close();

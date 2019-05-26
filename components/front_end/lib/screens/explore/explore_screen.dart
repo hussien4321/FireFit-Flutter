@@ -205,7 +205,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
       options: <DropdownOption>[
         DropdownOption(
           child: Icon(
-            Icons.refresh,
+            Icons.repeat_one,
             color: Colors.white,
           ),
           tag: "Refresh & Restart",

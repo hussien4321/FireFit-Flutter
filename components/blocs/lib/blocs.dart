@@ -1,7 +1,4 @@
-// Copyright 2018 The Flutter Architecture Sample Authors. All rights reserved.
-// Use of this source code is governed by the MIT license that can be found
-// in the LICENSE file.
-
 library blocs;
 
 export 'outfit/outfit_bloc.dart';
+export 'user/user_bloc.dart';

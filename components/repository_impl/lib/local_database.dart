@@ -30,7 +30,7 @@ class LocalDatabase {
 
   Future<Database> initDb() async {
     String path = join(await getDatabasesPath(), "mira_mira.db");
-    Database theDB = await openDatabase(path, version: 1, onCreate: _onCreate, onUpgrade: _onUpgrade);
+    Database theDB = await openDatabase(path, version: 2, onCreate: _onCreate, onUpgrade: _onUpgrade);
     return theDB;
   }
 
@@ -51,6 +51,9 @@ class LocalDatabase {
     if(version == 1){
       await db.execute("CREATE TABLE outfit (outfit_id INTEGER PRIMARY KEY, poster_user_id TEXT, image_url_1 TEXT, image_url_2 TEXT, image_url_3 TEXT, title TEXT, description TEXT, style TEXT, outfit_created_at DATETIME, likes_count INTEGER, comments_count INTEGER)");
       await db.execute("CREATE TABLE user (user_id STRING PRIMARY KEY, name TEXT, profile_pic_url TEXT, date_of_birth DATETIME, gender_is_male TINYINT, is_subscribed  TINYINT, boosts INTEGER, subscription_end_date DATETIME, user_created_at DATETIME)");
+    }
+    if(version == 2){
+      await db.execute("ALTER TABLE user ADD COLUMN username TEXT AFTER name");
     }
   }
 

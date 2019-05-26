@@ -31,5 +31,11 @@ void main() async {
         userCache: userCache
       ),
     ),
+    userRepository: FirebaseUserRepository(
+      auth: auth,
+      cache: userCache,
+      cloudFunctions: functions,
+      imageUploader: imageUploader
+    )
   );
 }

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:front_end/helper_widgets.dart';
 import 'package:middleware/middleware.dart';
 import 'package:helpers/helpers.dart';
+import 'package:front_end/providers.dart';
+import 'package:blocs/blocs.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter_swiper/flutter_swiper.dart';
@@ -19,6 +20,8 @@ class OutfitDetailsScreen extends StatefulWidget {
 
 class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
 
+
+  OutfitBloc _outfitBloc;
   @override
   void initState() {
     super.initState();
@@ -33,6 +36,7 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    _initBlocs();
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -42,13 +46,22 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
         elevation: 0.0,
         actions: <Widget>[
           IconButton(
-            icon: Icon(Icons.more_vert),
-            onPressed: (){},
+            icon: Icon(Icons.delete),
+            onPressed: (){
+              _outfitBloc.deleteOutfit.add(widget.outfit);
+              Navigator.pop(context);
+            },
           )
         ],
       ),
       body: _buildMainBody(),
     );
+  }
+   
+  _initBlocs() {
+    if(_outfitBloc==null){
+      _outfitBloc = OutfitBlocProvider.of(context);
+    }
   }
 
   _buildMainBody() {
@@ -144,12 +157,11 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
     return Container(
       color: Colors.grey[300],
       width: double.infinity,
-      padding: EdgeInsets.symmetric(vertical: 8.0),
+      padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 32.0),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
           _buildLikesSummary(),
-          Padding(padding: EdgeInsets.symmetric(horizontal: 8.0),),
           _buildCommentsSummary(),
         ],
       ),
@@ -164,24 +176,11 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
             padding: const EdgeInsets.only(right: 8.0),
             child: Icon(Icons.thumbs_up_down),
           ),
-          RichText(
-            text: TextSpan(
-              children: [
-                TextSpan(
-                  text: '${widget.outfit.likesCount} ',
-                  style: TextStyle(
-                    color: Colors.black,
-                    letterSpacing: 1.5
-                  ),
-                ),
-                TextSpan(
-                  text: 'TOTAL LIKE${widget.outfit.likesCount==1?'':'S'}',
-                  style: TextStyle(
-                    color: Colors.black,
-                    letterSpacing: 1.5
-                  ),
-                ),
-              ]
+          Text(
+            '${widget.outfit.likesCount} LIKE${widget.outfit.likesCount==1?'':'S'}',
+            style: TextStyle(
+              color: Colors.black,
+              letterSpacing: 1.5
             ),
           ),
         ],
@@ -274,7 +273,7 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
           Expanded(
             child: Text(
               widget.outfit.title,
-              style: Theme.of(context).textTheme.display1,
+              style: Theme.of(context).textTheme.headline.apply(fontWeightDelta: 2),
             ),
           ),
           _drawMiniClothesStyle(Style.fromStyleString(widget.outfit.style)),
@@ -314,16 +313,26 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
 
   Widget _buildPosterInfo() {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8.0, left: 16.0, right: 16.0),
+      padding: const EdgeInsets.only(bottom: 16.0, left: 16.0, right: 16.0),
       child: Row(
         children: <Widget>[
           ProfilePicWithShadow(
             url: widget.outfit.poster.profilePicUrl,
+            size: 50.0,
           ),
           Expanded(
-            child: Text(
-              widget.outfit.poster.name,
-              style: Theme.of(context).textTheme.title,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text(
+                  widget.outfit.poster.name,
+                  style: Theme.of(context).textTheme.title,
+                ),
+                Text(
+                  '@'+widget.outfit.poster.username,
+                  style: Theme.of(context).textTheme.caption,
+                ),
+              ],
             ),
           ),
           Text(
