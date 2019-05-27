@@ -30,7 +30,7 @@ class LocalDatabase {
 
   Future<Database> initDb() async {
     String path = join(await getDatabasesPath(), "mira_mira.db");
-    Database theDB = await openDatabase(path, version: 2, onCreate: _onCreate, onUpgrade: _onUpgrade);
+    Database theDB = await openDatabase(path, version: 3, onCreate: _onCreate, onUpgrade: _onUpgrade);
     return theDB;
   }
 
@@ -54,6 +54,9 @@ class LocalDatabase {
     }
     if(version == 2){
       await db.execute("ALTER TABLE user ADD COLUMN username TEXT AFTER name");
+    }
+    if(version == 3){
+      await db.execute("ALTER TABLE user ADD COLUMN is_current_user TINYINT DEFAULT 0");
     }
   }
 

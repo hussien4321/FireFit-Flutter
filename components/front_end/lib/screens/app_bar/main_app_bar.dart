@@ -5,6 +5,10 @@ import 'package:helpers/helpers.dart';
 import 'package:hidden_drawer_menu/hidden_drawer/screen_hidden_drawer.dart';
 import 'package:hidden_drawer_menu/menu/item_hidden_menu.dart';
 import 'package:flutter_inner_drawer/inner_drawer.dart';
+import 'package:front_end/providers.dart';
+import 'package:blocs/blocs.dart';
+import 'dart:async';
+import 'package:middleware/middleware.dart';
 
 class MainAppBar extends StatefulWidget {
   MainAppBar({Key key}) : super(key: key);
@@ -18,6 +22,9 @@ class _MainAppBarState extends State<MainAppBar> {
   final GlobalKey<InnerDrawerState> _menuDrawerKey = GlobalKey<InnerDrawerState>();
 
   List<ScreenHiddenDrawer> itens = new List();
+
+  UserBloc _userBloc;
+  List<StreamSubscription<dynamic>> _subscriptions;
 
   @override
   void initState() {
@@ -45,12 +52,38 @@ class _MainAppBarState extends State<MainAppBar> {
   }
 
   @override
+  void dispose() {
+    super.dispose();
+    _subscriptions?.forEach((subscription) => subscription.cancel());
+  }
+
+  @override
   Widget build(BuildContext context) {
+    _initBlocs();
     return _buildDMScaffold(
       body: _buildMenuScaffold(
         body: ExploreScreen()
       )
     );
+  }
+
+  _initBlocs() {
+    if(_userBloc == null){
+      _userBloc = UserBlocProvider.of(context);
+      _subscriptions = <StreamSubscription<dynamic>>[
+        _logInStatusListener()
+      ];
+    }
+  }
+  
+  StreamSubscription _logInStatusListener(){
+    return _userBloc.accountStatus.listen((accountStatus) {
+      if(accountStatus == UserAccountStatus.LOGGED_OUT){
+        Navigator.pushReplacement(context, MaterialPageRoute(
+          builder: (ctx) => IntroScreen()
+        ));
+      }
+    });
   }
 
   Widget _buildDMScaffold({Widget body}) {
@@ -76,7 +109,9 @@ class _MainAppBarState extends State<MainAppBar> {
       offset: 0.7,
       colorTransition: Colors.red,
       animationType: InnerDrawerAnimation.linear,
-      child: DMPreviewScreen(),
+      child: MenuScreenNavigation(
+        onLogOut: () => _userBloc.logOut.add(null),
+      ),
       scaffold: _buildScaffold(
         body: body
       )

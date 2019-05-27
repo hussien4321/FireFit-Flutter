@@ -59,7 +59,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
       print('got status $status');
       if(status == UserAccountStatus.LOGGED_OUT){
         Navigator.pushReplacement(context, MaterialPageRoute(
-          builder: (context) => MainAppBar()
+          builder: (context) => IntroScreen()
         ));
       }
       if(status == UserAccountStatus.LOGGED_IN){

@@ -6,9 +6,9 @@ enum UserAccountStatus { LOGGED_OUT, PENDING_ONBOARDING, LOGGED_IN,}
 
 abstract class UserRepository {  
   Future<String> existingAuthId();
-  Future<bool> register(LogInForm logInData);
-  Future<bool> logIn(LogInForm logInData);
-  Future<bool> createAccount(OnboardUser onboardingData);
+  Future<bool> register(LogInForm logInForm);
+  Future<bool> logIn(LogInForm logInForm);
+  Future<bool> createAccount(OnboardUser onboardUser);
 
   Future<bool> hasEmailVerified();
   Future<void> resendVerificationEmail([_]);
@@ -17,5 +17,5 @@ abstract class UserRepository {
 
   Future<void> logOut();
 
-  Stream<User> getCurrentUser(String userId);
+  Stream<User> getCurrentUser();
 }

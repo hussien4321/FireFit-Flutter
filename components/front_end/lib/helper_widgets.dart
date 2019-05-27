@@ -6,5 +6,6 @@ export 'helper_widgets/style_tab.dart';
 export 'helper_widgets/input/custom_fab.dart';
 export 'helper_widgets/input/dropdown_buttons.dart';
 
+export 'helper_widgets/state/error_dialog.dart';
 export 'helper_widgets/state/overlay_loading.dart';
 export 'helper_widgets/state/snackbar_messages.dart';

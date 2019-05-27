@@ -31,9 +31,6 @@ class FirebaseUserRepository implements UserRepository {
 
 
   Future<String> existingAuthId() async {
-    print('start');
-    await Future.delayed(Duration(seconds: 3));
-    print('done');
     final user = await auth.currentUser();
     final hasAuth = user!=null;
     if(!hasAuth){
@@ -50,17 +47,19 @@ class FirebaseUserRepository implements UserRepository {
       return false;
     }
     return specificAuthInstance.register(fields: logInData.fields) 
-      .then((user) => _saveCurrentUser(user))
+      .then((user) => true)
       .catchError((e) => false);
   }
   
-  Future<bool> logIn(LogInForm logInData) async {
+  Future<bool> logIn(LogInForm logInData) {
     AuthInstance specificAuthInstance = _getSpecificAuthInstance(logInData.method);
     return specificAuthInstance.signIn(fields: logInData.fields) 
       .then((user) async {
-        return _saveCurrentUser(user);
+        await _saveCurrentUser(user);
+        return true;
       })
-      .catchError((Exception err) {
+      .catchError((err) {
+        print('catchError :$err');
         return false;
       });
   }
@@ -82,9 +81,8 @@ class FirebaseUserRepository implements UserRepository {
 
   Future<bool> _saveCurrentUser(FirebaseUser user) async {
     User currentUser = await _getUserAccountIfExisting(user.uid);
-    print('currentUser:$currentUser');
     if(currentUser !=null){
-      await cache.addUser(currentUser);
+      await cache.addUser(currentUser, isCurrentUser: true);
       return true;
     }
     return false;
@@ -162,11 +160,6 @@ class FirebaseUserRepository implements UserRepository {
     await cache.deleteAll();
   }
 
-  Stream<User> getCurrentUser(String userId) {
-    return cache.getUser(userId);
-  }
-
-
-
+  Stream<User> getCurrentUser() => cache.getCurrentUser();
 }
 
