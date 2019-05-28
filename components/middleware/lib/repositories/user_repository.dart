@@ -10,6 +10,8 @@ abstract class UserRepository {
   Future<bool> logIn(LogInForm logInForm);
   Future<bool> createAccount(OnboardUser onboardUser);
 
+  Future<void> registerNotificationToken(String userId);
+
   Future<bool> hasEmailVerified();
   Future<void> resendVerificationEmail([_]);
   Future<String> getVerificationEmail();

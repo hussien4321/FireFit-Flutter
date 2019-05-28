@@ -22,6 +22,9 @@ class UserBloc {
   final _logInController = PublishSubject<LogInForm>();
   Sink<LogInForm> get logIn => _logInController;
 
+  final _registerNotificationTokenController = PublishSubject<String>();
+  Sink<String> get registerNotificationToken => _registerNotificationTokenController;
+
   final _logOutController = PublishSubject<void>();
   Sink<void> get logOut => _logOutController;
 
@@ -63,6 +66,7 @@ class UserBloc {
     _subscriptions = <StreamSubscription<dynamic>>[
       _logInController.listen(_logInUser),
       _registerController.listen(_registerUser),
+      _registerNotificationTokenController.listen(repository.registerNotificationToken),
       _logOutController.listen(_logOutUser),
       _onboardController.listen(_onboardUser),
       _checkUsernameController.stream.listen((t) => _isUsernameTakenController.add(null)),
@@ -152,6 +156,7 @@ class UserBloc {
     _existingAuthController.close();
     _loadingController.close();
     _logInController.close();
+    _registerNotificationTokenController.close();
     _logOutController.close();
     _registerController.close();
     _errorController.close();

@@ -8,10 +8,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import './auth_instances.dart';
 import 'package:repository_impl/repository_impl.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:middleware/middleware.dart';
 import 'package:helpers/helpers.dart';
 import 'package:path/path.dart';
-
+import 'package:meta/meta.dart';
 
 class FirebaseUserRepository implements UserRepository {
   static const String dbPath = 'users';
@@ -21,13 +22,18 @@ class FirebaseUserRepository implements UserRepository {
   final CloudFunctions cloudFunctions;
   final FirebaseImageUploader imageUploader;
   final CachedUserRepository cache;
+  final FirebaseMessaging messaging;
 
-  const FirebaseUserRepository({
-    this.auth, 
-    this.cloudFunctions,
-    this.imageUploader,
-    this.cache,
+
+  FirebaseUserRepository({
+    @required this.auth, 
+    @required this.cloudFunctions,
+    @required this.imageUploader,
+    @required this.cache,
+    @required this.messaging,
   });
+
+  
 
 
   Future<String> existingAuthId() async {
@@ -156,9 +162,19 @@ class FirebaseUserRepository implements UserRepository {
     });
   } 
 
+  Future<void> registerNotificationToken(String userId) async {
+    String notificationToken = await messaging.getToken();
+    messaging.requestNotificationPermissions();
+    return cloudFunctions.call(functionName: 'registerNotificationToken', parameters: {
+      'user_id' : userId,
+      'notification_token' : notificationToken
+    });
+  }
+
   Future<void> logOut() async {
-    await auth.signOut();
-    await cache.deleteAll();
+    messaging.deleteInstanceID();
+    cache.deleteAll();
+    auth.signOut();
   }
 
   Stream<User> getCurrentUser() => cache.getCurrentUser();

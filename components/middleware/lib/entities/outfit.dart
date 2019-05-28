@@ -8,9 +8,11 @@ class Outfit {
   String description;
   String style;
   int likesCount;
+  int dislikesCount;
   int commentsCount;
   User poster;
   DateTime createdAt;
+  int userImpression;
 
   Outfit({
     this.outfit_id,
@@ -24,6 +26,7 @@ class Outfit {
     this.createdAt,
   });
 
+  int get likesOverallCount => likesCount - dislikesCount;
 
   bool get hasMultipleImages => images.length > 1;
 
@@ -42,7 +45,9 @@ class Outfit {
     images = _images;
     style = map['style'];
     likesCount = map['likes_count'] == null ? 0 : map['likes_count'];
+    dislikesCount = map['dislikes_count'] == null ? 0 : map['dislikes_count'];
     commentsCount = map['comments_count'] == null ? 0 : map['comments_count'];
+    userImpression = map['user_impression'] == null ? 0 : map['user_impression'];
     if(!cache){
       poster = User.fromMap(map);
     }
@@ -56,9 +61,11 @@ class Outfit {
     'image_url_3' : images.length > 2 ? images[2] : null, 
     'title' : title, 
     'description' : description, 
-    'style' : style, 
+    'style' : style,
+    'user_impression' : userImpression,
     'outfit_created_at' : createdAt.toIso8601String(), 
     'likes_count':likesCount,
+    'dislikes_count':dislikesCount,
     'comments_count':commentsCount,
   };
 

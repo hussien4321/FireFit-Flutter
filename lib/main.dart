@@ -5,6 +5,7 @@
 import 'package:front_end/main.dart' as app;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_functions/cloud_functions.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:repository_impl/repository_impl.dart';
 import 'package:sqflite/sqflite.dart';
@@ -17,25 +18,30 @@ void main() async {
   FirebaseImageUploader imageUploader = FirebaseImageUploader(
     storage: storage
   );
+  FirebaseMessaging messaging =FirebaseMessaging();
   FirebaseAuth auth = FirebaseAuth.instance;
   Database db = await LocalDatabase().db;
   StreamDatabase streamDatabase = StreamDatabase(db);
   CachedUserRepository userCache = CachedUserRepository(streamDatabase: streamDatabase);
+  CachedOutfitRepository outfitCache = CachedOutfitRepository(
+    streamDatabase: streamDatabase,
+    userCache: userCache,
+  );
+  FirebaseOutfitRepository outfitRepository = FirebaseOutfitRepository(
+    cloudFunctions: functions,
+    imageUploader: imageUploader,
+    cache: outfitCache,
+  );
+  FirebaseUserRepository userRepository= FirebaseUserRepository(
+    auth: auth,
+    cache: userCache,
+    cloudFunctions: functions,
+    imageUploader: imageUploader,
+    messaging: messaging,
+  );
 
   app.main(
-    outfitRepository: FirebaseOutfitRepository(
-      cloudFunctions: functions,
-      imageUploader: imageUploader,
-      cache: CachedOutfitRepository(
-        streamDatabase: streamDatabase,
-        userCache: userCache
-      ),
-    ),
-    userRepository: FirebaseUserRepository(
-      auth: auth,
-      cache: userCache,
-      cloudFunctions: functions,
-      imageUploader: imageUploader
-    )
+    outfitRepository: outfitRepository,
+    userRepository: userRepository,
   );
 }

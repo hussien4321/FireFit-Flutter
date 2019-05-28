@@ -22,14 +22,15 @@ class FirebaseOutfitRepository implements OutfitRepository {
 
   Stream<List<Outfit>> getOutfits() => cache.getOutfits();
 
-  Future<bool> exploreOutfits() async {
+  Stream<Outfit> getOutfit(int outfitId) => cache.getOutfit(outfitId);
+
+  Future<bool> exploreOutfits(ExploreOutfits explore) async {
     await cache.clearOutfits();
-    return exploreMoreOutfits();
+    return exploreMoreOutfits(explore);
   }
   
-  Future<bool> exploreMoreOutfits() {
-    return cloudFunctions.call(functionName: 'exploreOutfits', parameters: {
-    })
+  Future<bool> exploreMoreOutfits(ExploreOutfits explore) {
+    return cloudFunctions.call(functionName: 'exploreOutfits', parameters: explore.toJson())
     .then((res) async {
       List<Outfit> outfits = List<Outfit>.from(res['res'].map((data){
         Map<String, dynamic> formattedDoc = Map<String, dynamic>.from(data);
@@ -73,12 +74,26 @@ class FirebaseOutfitRepository implements OutfitRepository {
   }
 
   
+  
   Future<bool> deleteOutfit(Outfit outfit) async {
     cache.deleteOutfit(outfit);
     return cloudFunctions.call(functionName: 'deleteOutfit', parameters: {
       'poster_user_id' : outfit.poster.userId,
       'outfit_id': outfit.outfit_id
     })
+    .then((res) async {
+      bool status = res['res'];
+      return status;
+    })
+    .catchError((err) {
+      print(err);
+      return false;
+    });
+  }
+
+  Future<bool> impressOutfit(OutfitImpression outfitImpression) async {
+    cache.impressOutfit(outfitImpression);
+    return cloudFunctions.call(functionName: 'impressOutfit', parameters: outfitImpression.toJson())
     .then((res) async {
       bool status = res['res'];
       return status;

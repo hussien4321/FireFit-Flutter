@@ -7,12 +7,13 @@ import 'package:blocs/blocs.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter_swiper/flutter_swiper.dart';
+import 'package:rxdart/rxdart.dart';
 
 class OutfitDetailsScreen extends StatefulWidget {
 
-  final Outfit outfit;
+  final int outfitId;
 
-  OutfitDetailsScreen({this.outfit});
+  OutfitDetailsScreen({this.outfitId});
 
   @override
   _OutfitDetailsScreenState createState() => _OutfitDetailsScreenState();
@@ -22,6 +23,10 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
 
 
   OutfitBloc _outfitBloc;
+  Outfit outfit;
+
+  String userId;
+  
   @override
   void initState() {
     super.initState();
@@ -37,6 +42,39 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
   @override
   Widget build(BuildContext context) {
     _initBlocs();
+    return StreamBuilder<bool>(
+      stream: _outfitBloc.isLoading,
+      initialData: true,
+      builder: (ctx, isLoadingSnap){
+        if(isLoadingSnap.data){
+          return _scaffold(
+            body: _outfitLoadingPlaceholder()
+          );
+        }else{
+          return StreamBuilder<Outfit>(
+            stream: _outfitBloc.selectedOutfit,
+            builder: (ctx, snap) { 
+              if(!snap.hasData){            
+                return _scaffold(body: _outfitLoadingPlaceholder());
+              }
+              outfit = snap.data;
+              return _scaffold(body: _buildMainBody());
+            },
+          );
+        }
+      }
+    );
+  }
+
+  _initBlocs() async {
+    if(_outfitBloc==null){
+      _outfitBloc = OutfitBlocProvider.of(context);
+      _outfitBloc.selectOutfit.add(widget.outfitId);
+      userId = await UserBlocProvider.of(context).existingAuthId.first;
+    }
+  }
+
+  Widget _scaffold({Widget body}){
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -45,23 +83,23 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
         centerTitle: true,
         elevation: 0.0,
         actions: <Widget>[
-          widget.outfit.poster.isCurrentUser ? IconButton(
+          outfit?.poster?.isCurrentUser == true? IconButton(
             icon: Icon(Icons.delete),
             onPressed: (){
-              _outfitBloc.deleteOutfit.add(widget.outfit);
+              _outfitBloc.deleteOutfit.add(outfit);
               Navigator.pop(context);
             },
           ) : Container()
         ],
       ),
-      body: _buildMainBody(),
+      body: body,
     );
   }
-   
-  _initBlocs() {
-    if(_outfitBloc==null){
-      _outfitBloc = OutfitBlocProvider.of(context);
-    }
+
+  Widget _outfitLoadingPlaceholder(){
+    return Center(
+      child: CircularProgressIndicator(),
+    );
   }
 
   _buildMainBody() {
@@ -116,13 +154,13 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
       child: SizedBox(
         height: 300.0,
         child: Hero(
-          tag: widget.outfit.images.first,  
+          tag: outfit.images.first,  
           child: Container(
             child: Swiper(
-              itemCount: widget.outfit.images.length,
+              itemCount: outfit.images.length,
               viewportFraction: 0.8,
               scale: 0.9,
-              itemBuilder: (context, i) => _loadImage(widget.outfit.images[i]),
+              itemBuilder: (context, i) => _loadImage(outfit.images[i]),
               loop: false,
               pagination: SwiperPagination(
                 margin: EdgeInsets.only(top: 20.0),
@@ -161,8 +199,8 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
-          _buildLikesSummary(),
           _buildCommentsSummary(),
+          _buildLikesSummary(),
         ],
       ),
     );
@@ -176,11 +214,53 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
             padding: const EdgeInsets.only(right: 8.0),
             child: Icon(Icons.thumbs_up_down),
           ),
-          Text(
-            '${widget.outfit.likesCount} LIKE${widget.outfit.likesCount==1?'':'S'}',
-            style: TextStyle(
-              color: Colors.black,
-              letterSpacing: 1.5
+          RichText(
+            text: TextSpan(
+              children: [
+                TextSpan(
+                  text: '${outfit.likesOverallCount}',
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                TextSpan(
+                  text: ' (',
+                  style: TextStyle(
+                    letterSpacing: 1.5,
+                    color: Colors.black,
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
+                TextSpan(
+                  text: '${outfit.likesCount}',
+                  style: TextStyle(
+                    color: Colors.blueAccent[700],
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
+                TextSpan(
+                  text: ' : ',
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
+                TextSpan(
+                  text: '${outfit.dislikesCount}',
+                  style: TextStyle(
+                    color: Colors.pinkAccent[700],
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
+                TextSpan(
+                  text: ')',
+                  style: TextStyle(
+                    color: Colors.black,
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
+              ]
             ),
           ),
         ],
@@ -200,14 +280,14 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
           text: TextSpan(
             children: [
               TextSpan(
-                text: '${widget.outfit.commentsCount} ',
+                text: '${outfit.commentsCount} ',
                   style: TextStyle(
                     color: Colors.black,
-                    letterSpacing: 1.5
+                    fontWeight: FontWeight.bold,
                   ),
               ),
               TextSpan(
-                text: 'COMMENT${widget.outfit.likesCount==1?'':'S'}',
+                text: 'COMMENT${outfit.commentsCount==1?'':'S'}',
                   style: TextStyle(
                     color: Colors.black,
                     letterSpacing: 1.5
@@ -221,21 +301,34 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
   }
 
   Widget _buildInteractButtons() {
+    OutfitImpression _outfitImpression =OutfitImpression(
+      outfit: outfit,
+      userId: userId,
+    );
     return Container(
       color: Colors.green,
       child: Material(
         child: Row(
           children: <Widget>[
-            _buildInteractButton('Dislike', Colors.pinkAccent[700], false),
-            _buildInteractButton('Save', Colors.amberAccent[700], true),
-            _buildInteractButton('Like', Colors.blueAccent[700], false),
+            _buildInteractButton('Dislike', Colors.pinkAccent[700], 
+              selected: outfit.userImpression == -1,
+              onPressed: () => _outfitBloc.dislikeOutfit.add(_outfitImpression)
+            ),
+            _buildInteractButton('Save', Colors.amberAccent[700], 
+              selected: false,
+              onPressed: () {},
+            ),
+            _buildInteractButton('Like', Colors.blueAccent[700],
+              selected: outfit.userImpression == 1,
+              onPressed: () => _outfitBloc.likeOutfit.add(_outfitImpression)
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildInteractButton(String name, Color color, bool selected) {
+  Widget _buildInteractButton(String name, Color color, {bool selected, VoidCallback onPressed}) {
     Color background = Colors.white;
     return Expanded(
       child: Container(
@@ -259,7 +352,7 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
               ),
             )
           ),
-          onTap: () => print('aa'),
+          onTap: onPressed,
         ),
       ),
     );
@@ -272,11 +365,11 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
         children: <Widget>[
           Expanded(
             child: Text(
-              widget.outfit.title,
+              outfit.title,
               style: Theme.of(context).textTheme.headline.apply(fontWeightDelta: 2),
             ),
           ),
-          _drawMiniClothesStyle(Style.fromStyleString(widget.outfit.style)),
+          _drawMiniClothesStyle(Style.fromStyleString(outfit.style)),
         ],
       ),
     );
@@ -317,7 +410,7 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
       child: Row(
         children: <Widget>[
           ProfilePicWithShadow(
-            url: widget.outfit.poster.profilePicUrl,
+            url: outfit.poster.profilePicUrl,
             size: 50.0,
           ),
           Expanded(
@@ -325,18 +418,18 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Text(
-                  widget.outfit.poster.name,
+                  outfit.poster.name,
                   style: Theme.of(context).textTheme.title,
                 ),
                 Text(
-                  '@'+widget.outfit.poster.username,
+                  '@'+outfit.poster.username,
                   style: Theme.of(context).textTheme.caption,
                 ),
               ],
             ),
           ),
           Text(
-            DateFormatter.dateToRecentFormat(widget.outfit.createdAt),
+            DateFormatter.dateToRecentFormat(outfit.createdAt),
             style: Theme.of(context).textTheme.caption,
           ),
         ],
@@ -345,7 +438,7 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
   }
   
   Widget _buildOutfitDescription() {
-    if(widget.outfit.description == null){
+    if(outfit.description == null){
       return Center(
         child: Text(
           "No description has been added",
@@ -381,7 +474,7 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
             margin: EdgeInsets.only(bottom: 16.0),
             padding: EdgeInsets.all(8.0),
             child: Text(
-              widget.outfit.description,
+              outfit.description,
             ),
           ),
         ],
@@ -396,7 +489,7 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
           Padding(
             padding: const EdgeInsets.only(top: 16.0),
             child: ProfilePicWithShadow(
-              url: widget.outfit.poster.profilePicUrl,
+              url: outfit.poster.profilePicUrl,
             ),
           ),
           Expanded(
@@ -407,7 +500,7 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
                 Padding(
                   padding: EdgeInsets.only(left: 8.0, bottom: 2.0),
                   child: Text(
-                    widget.outfit.poster.name,
+                    outfit.poster.name,
                     style: Theme.of(context).textTheme.subtitle
                   ),
                 ),

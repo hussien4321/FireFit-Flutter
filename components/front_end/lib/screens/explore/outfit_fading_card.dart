@@ -248,7 +248,7 @@ class _OutfitFadingCardState extends State<OutfitFadingCard> with SingleTickerPr
     if(haveOutfit){
       Navigator.push(context, MaterialPageRoute(
         //TODO: CREATE NEW TRANSITION THAT FADES CURRENT PAGE TO WHITE THEN FADES IN NEXT PAGE
-        builder: (context) => OutfitDetailsScreen(outfit: widget.currentOutfit)
+        builder: (context) => OutfitDetailsScreen(outfitId: widget.currentOutfit.outfit_id)
       ));
     }
   }
@@ -329,11 +329,11 @@ class _OutfitFadingCardState extends State<OutfitFadingCard> with SingleTickerPr
                           mainAxisSize: MainAxisSize.min,
                           children: <Widget>[
                             Text(
-                              '${_currentOutfit.likesCount} ',
+                              '${_currentOutfit.likesOverallCount} ',
                               style: Theme.of(context).textTheme.subtitle,
                             ),
                             Icon(
-                              Icons.thumb_up,
+                              Icons.thumbs_up_down,
                               size: 16,
                               color: Colors.black,
                             ),

@@ -28,8 +28,36 @@ class CachedOutfitRepository {
     );
   }
 
+  Future<int> impressOutfit(OutfitImpression outfitImpression) async {
+    Outfit outfit = outfitImpression.outfit;
+    int impressionValue = outfitImpression.impressionValue;
+    if(outfit.userImpression == 1){
+      outfit.likesCount--;
+    }else if(outfit.userImpression == -1){
+      outfit.dislikesCount--;
+    }
+    if(impressionValue == 1){
+      outfit.likesCount++;
+    }
+    else if(impressionValue == -1){
+      outfit.dislikesCount++;
+    }
+    outfit.userImpression = impressionValue;
+    return streamDatabase.insert(
+      'outfit',
+      outfit.toJson(cache: true),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
   Future<void> clearOutfits() async {
     await streamDatabase.execute("DELETE FROM outfit");
+  }
+
+  Stream<Outfit> getOutfit(int outfitId){
+    return streamDatabase.createRawQuery(['outfit'], 'SELECT * FROM outfit, user WHERE user_id = poster_user_id AND outfit_id=$outfitId LIMIT 1').mapToOneOrDefault((data) {
+      return Outfit.fromMap(data);
+    }, null).asBroadcastStream();
   }
 
   Stream<List<Outfit>> getOutfits(){

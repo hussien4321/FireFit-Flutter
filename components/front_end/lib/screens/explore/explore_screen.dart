@@ -16,8 +16,10 @@ class _ExploreScreenState extends State<ExploreScreen> {
   
   final Color imageOverlayColor = Colors.white;
 
-  int adCounter = 50;
+  ExploreOutfits explore = ExploreOutfits();
+  String userId;
 
+  int adCounter = 50;
   int currentIndex=0;
   int get nextIndex => currentIndex + 1;
 
@@ -30,14 +32,11 @@ class _ExploreScreenState extends State<ExploreScreen> {
   @override
   void initState() {
     super.initState();
-    initValues();
   }
 
-  initValues(){
-    if(_outfitBloc!=null){
-      _outfitBloc.exploreOutfits.add(null);
-    }
+  restartSearch(){
     currentIndex=0;
+    _outfitBloc.exploreOutfits.add(explore);
   }
 
   @override
@@ -58,10 +57,12 @@ class _ExploreScreenState extends State<ExploreScreen> {
   }
 
 
-  _initBlocs() {
+  _initBlocs() async {
     if(_outfitBloc==null){
       _outfitBloc = OutfitBlocProvider.of(context);
-      _outfitBloc.exploreOutfits.add(null);
+      userId = await UserBlocProvider.of(context).existingAuthId.first;
+      explore.userId = userId;
+      restartSearch();
     }
   }
   Widget _buildOutfitLiveStream() {
@@ -209,7 +210,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
             color: Colors.white,
           ),
           tag: "Refresh & Restart",
-          onPressed: initValues
+          onPressed: restartSearch
         ),
         DropdownOption(
           child: Icon(
@@ -217,7 +218,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
             color: Colors.white,
           ),
           tag: "Go To Page",
-          onPressed: initValues
+          onPressed: restartSearch
         ),
       ],
       alignStart: true,
@@ -276,6 +277,10 @@ class _ExploreScreenState extends State<ExploreScreen> {
   _displayAd() => print('ad displayed');
 
   Widget _buildActionBar(Outfit currentOutfit) {
+    OutfitImpression _outfitImpression =OutfitImpression(
+      outfit: currentOutfit,
+      userId: userId,
+    );
     final allDisabled = currentOutfit == null;
     return Material(
       color: imageOverlayColor,
@@ -295,22 +300,23 @@ class _ExploreScreenState extends State<ExploreScreen> {
               color: Colors.pinkAccent,
               icon: Icons.thumb_down,
               largeIcon: true,
-              disabled: allDisabled,
-              onPressed: () {},
+              disabled: allDisabled || currentOutfit?.userImpression == 1,
+              selected: currentOutfit?.userImpression == -1,
+              onPressed: () => _outfitBloc.dislikeOutfit.add(_outfitImpression),
             ),
             CustomFab(
               color: Colors.greenAccent[700],
               icon: Icons.comment,
               disabled: allDisabled,
-              onPressed: () {},
+              onPressed: () {print('save');},
             ),
             CustomFab(
               color: Colors.blueAccent,
               icon: Icons.thumb_up,
               largeIcon: true,
-              disabled: allDisabled,
-              // selected: true,
-              onPressed: () {},
+              disabled: allDisabled || currentOutfit?.userImpression == -1,
+              selected: currentOutfit?.userImpression == 1,
+              onPressed: () => _outfitBloc.likeOutfit.add(_outfitImpression),
             ),
             CustomFab(
               color: Colors.amberAccent,

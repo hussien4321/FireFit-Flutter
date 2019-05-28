@@ -67,12 +67,14 @@ class _MainAppBarState extends State<MainAppBar> {
     );
   }
 
-  _initBlocs() {
+  _initBlocs() async {
     if(_userBloc == null){
       _userBloc = UserBlocProvider.of(context);
       _subscriptions = <StreamSubscription<dynamic>>[
         _logInStatusListener()
       ];
+      String userId = await _userBloc.existingAuthId.first;
+      _userBloc.registerNotificationToken.add(userId);
     }
   }
   
