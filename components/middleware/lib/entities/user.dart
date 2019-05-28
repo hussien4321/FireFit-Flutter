@@ -12,6 +12,8 @@ class User {
   DateTime subscriptionEndDate;
   DateTime createdAt;
 
+  bool isCurrentUser;
+
 
   User({
     this.userId,
@@ -29,7 +31,6 @@ class User {
 
 
   User.fromMap(Map<String, dynamic> map){
-    print("received user data with id ${map['user_id']}");
     userId = map['user_id'].toString();
     name = map['name'];
     username = map['username'];
@@ -40,6 +41,7 @@ class User {
     if(isSubscribed){
       subscriptionEndDate = DateTime.parse(map['subscription_end_date']);
     }
+    isCurrentUser = map['is_current_user'] == 1;
     boosts = map['boosts'];
     createdAt = DateTime.parse(map['user_created_at']);
   } 

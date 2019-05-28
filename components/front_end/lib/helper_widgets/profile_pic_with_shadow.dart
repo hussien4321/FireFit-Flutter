@@ -14,7 +14,7 @@ class ProfilePicWithShadow extends StatelessWidget {
       width: size,
       height: size,
       decoration: BoxDecoration(
-        image: DecorationImage(
+        image: url == null ? null : DecorationImage(
           image: CachedNetworkImageProvider(url),
           fit: BoxFit.cover,
         ),

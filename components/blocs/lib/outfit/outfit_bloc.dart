@@ -34,7 +34,6 @@ class OutfitBloc{
       _exploreOutfitsController.listen(_exploreOutfits),
       _uploadOutfitsController.listen(_uploadOutfit),
       _deleteOutfitController.listen(_deleteOutfit),
-      _outfitsController.listen((outfits) => print("FOUND ${outfits.length} OUTFITS")),
     ];
   }
 

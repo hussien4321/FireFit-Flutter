@@ -45,13 +45,13 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
         centerTitle: true,
         elevation: 0.0,
         actions: <Widget>[
-          IconButton(
+          widget.outfit.poster.isCurrentUser ? IconButton(
             icon: Icon(Icons.delete),
             onPressed: (){
               _outfitBloc.deleteOutfit.add(widget.outfit);
               Navigator.pop(context);
             },
-          )
+          ) : Container()
         ],
       ),
       body: _buildMainBody(),

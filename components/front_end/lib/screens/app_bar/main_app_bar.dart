@@ -78,9 +78,9 @@ class _MainAppBarState extends State<MainAppBar> {
   
   StreamSubscription _logInStatusListener(){
     return _userBloc.accountStatus.listen((accountStatus) {
-      if(accountStatus == UserAccountStatus.LOGGED_OUT){
+      if(accountStatus != UserAccountStatus.LOGGED_IN){
         Navigator.pushReplacement(context, MaterialPageRoute(
-          builder: (ctx) => IntroScreen()
+          builder: (ctx) => RouteConverters.getFromAccountStatus(accountStatus)
         ));
       }
     });

@@ -3,9 +3,13 @@ export 'helper_widgets/mirror_frame.dart';
 export 'helper_widgets/profile_pic_with_shadow.dart';
 export 'helper_widgets/style_tab.dart';
 
+export 'helper_widgets/animated/fade_in_and_slide_page_transformer.dart';
+
+export 'helper_widgets/functions/route_converters.dart';
+
 export 'helper_widgets/input/custom_fab.dart';
 export 'helper_widgets/input/dropdown_buttons.dart';
+export 'helper_widgets/input/yes_no_dialog.dart';
 
-export 'helper_widgets/state/error_dialog.dart';
-export 'helper_widgets/state/overlay_loading.dart';
+export 'helper_widgets/state/loading_and_error_dialogs.dart';
 export 'helper_widgets/state/snackbar_messages.dart';

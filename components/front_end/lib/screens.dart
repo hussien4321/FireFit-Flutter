@@ -6,6 +6,8 @@ export 'screens/app_bar/menu_screen_navigation.dart';
 export 'screens/explore/explore_screen.dart';
 export 'screens/explore/outfit_fading_card.dart';
 
+export 'screens/onboarding/onboard_screen.dart';
+
 export 'screens/outfit_detail/outfit_details_screen.dart';
 
 export 'screens/start/intro_screen.dart';

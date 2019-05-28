@@ -5,6 +5,7 @@ import 'package:front_end/providers.dart';
 import 'package:blocs/blocs.dart';
 import 'dart:async';
 import 'package:middleware/middleware.dart';
+import 'package:front_end/helper_widgets.dart';
 
 class IntroScreen extends StatefulWidget {
   @override
@@ -50,16 +51,9 @@ class _IntroScreenState extends State<IntroScreen> {
   
   StreamSubscription _logInStatusListener(){
     return _userBloc.accountStatus.listen((accountStatus) {
-      print('ACCOUNT STATUS: $accountStatus');
-      if(accountStatus == UserAccountStatus.LOGGED_IN){
+      if(accountStatus !=UserAccountStatus.LOGGED_OUT){
         Navigator.pushReplacement(context, MaterialPageRoute(
-          builder: (ctx) => MainAppBar()
-        ));
-      }
-      if(accountStatus == UserAccountStatus.PENDING_ONBOARDING){
-        print('onboarding');
-        Navigator.pushReplacement(context, MaterialPageRoute(
-          builder: (ctx) => MainAppBar()
+          builder: (ctx) => RouteConverters.getFromAccountStatus(accountStatus)
         ));
       }
     });

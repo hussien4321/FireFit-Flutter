@@ -28,10 +28,8 @@ class OnboardUser {
   Map<String, dynamic> toJson() => {
       'name': name,
       'username': username,
-      'profile_pic_url': profilePicUrl,
       'date_of_birth': dateOfBirth.toIso8601String(),
       'gender_is_male': genderIsMale,
-      'email': email,
   };
 
 }

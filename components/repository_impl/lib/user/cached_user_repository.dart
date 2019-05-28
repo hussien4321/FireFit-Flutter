@@ -13,7 +13,7 @@ class CachedUserRepository {
     return streamDatabase.insert(
       'user',
       user.toJson(cache: true, isCurrentUser: isCurrentUser),
-      conflictAlgorithm: ConflictAlgorithm.ignore,
+      conflictAlgorithm: isCurrentUser ? ConflictAlgorithm.replace : ConflictAlgorithm.ignore,
     );
   }
   

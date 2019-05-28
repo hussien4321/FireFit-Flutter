@@ -6,7 +6,6 @@ import 'package:blocs/blocs.dart';
 import 'package:front_end/providers.dart';
 import 'dart:async';
 import 'package:front_end/helper_widgets.dart';
-import 'package:front_end/screens.dart';
 
 class LogInScreen extends StatefulWidget {
 
@@ -18,7 +17,7 @@ class LogInScreen extends StatefulWidget {
   _LogInScreenState createState() => _LogInScreenState();
 }
 
-class _LogInScreenState extends State<LogInScreen> with ErrorDialog, OverlayLoading {
+class _LogInScreenState extends State<LogInScreen> with LoadingAndErrorDialogs {
   
   final GlobalKey<FormState> _formKey = new GlobalKey<FormState>();
 
@@ -72,31 +71,12 @@ class _LogInScreenState extends State<LogInScreen> with ErrorDialog, OverlayLoad
     if(_userBloc == null){
       _userBloc = UserBlocProvider.of(context);
       _subscriptions = <StreamSubscription<dynamic>>[
-        _logInStatusListener(),
         _loadingListener(),
         _successListener(),
         _errorListener(),
       ];
     }
   }
-
-  StreamSubscription _logInStatusListener(){
-    return _userBloc.accountStatus.listen((accountStatus) {
-      print('ACCOUNT STATUS: $accountStatus');
-      if(accountStatus == UserAccountStatus.LOGGED_IN){
-        Navigator.pushReplacement(context, MaterialPageRoute(
-          builder: (ctx) => MainAppBar()
-        ));
-      }
-      if(accountStatus == UserAccountStatus.PENDING_ONBOARDING){
-        print('onboarding');
-        Navigator.pushReplacement(context, MaterialPageRoute(
-          builder: (ctx) => MainAppBar()
-        ));
-      }
-    });
-  }
-
 
   StreamSubscription _loadingListener(){
     return _userBloc.isLoading.listen((loadingStatus) {

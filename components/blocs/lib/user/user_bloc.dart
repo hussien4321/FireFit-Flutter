@@ -25,6 +25,8 @@ class UserBloc {
   final _logOutController = PublishSubject<void>();
   Sink<void> get logOut => _logOutController;
 
+  final _onboardController = PublishSubject<OnboardUser>();
+  Sink<OnboardUser> get onboard => _onboardController;
 
   final _loadingController = PublishSubject<bool>();
   Observable<bool> get isLoading => _loadingController.stream;
@@ -36,31 +38,58 @@ class UserBloc {
   Observable<bool> get isSuccessful => _successController.stream;
 
 
+  final _resendEmailController = PublishSubject<void>();
+  Sink<void> get resendVerificationEmail => _resendEmailController;
+
+  final _refreshVerificationEmailController = PublishSubject<void>();
+  Sink<void> get refreshVerificationEmail => _refreshVerificationEmailController;
+
+  final _isEmailVerifiedController = PublishSubject<bool>();
+  Observable<bool> get isEmailVerified => _isEmailVerifiedController;
+
+  final _verificationEmailController = BehaviorSubject<String>();
+  Observable<String> get verificationEmail => _verificationEmailController;
+
+
+
+  final _checkUsernameController = PublishSubject<String>();
+  Sink<String> get checkUsername => _checkUsernameController;
+  
+  final _isUsernameTakenController = PublishSubject<bool>();
+  Observable<bool> get isUsernameTaken => _isUsernameTakenController;
+
 
   UserBloc(this.repository) {
     _subscriptions = <StreamSubscription<dynamic>>[
       _logInController.listen(_logInUser),
       _registerController.listen(_registerUser),
       _logOutController.listen(_logOutUser),
+      _onboardController.listen(_onboardUser),
+      _checkUsernameController.stream.listen((t) => _isUsernameTakenController.add(null)),
+      _checkUsernameController.stream.debounce(Duration(milliseconds: 500)).listen(_refreshUsernameCheck),
+      _refreshVerificationEmailController.stream.listen(_refreshVerifiedCheck),
+      _resendEmailController.stream.listen(repository.resendVerificationEmail),
     ];
     _accountStatusController = Observable.combineLatest2<String, User, UserAccountStatus>(existingAuthId, _currentUserController, _redirectPath).asBroadcastStream().debounce(Duration(milliseconds: 300));
-    _resetAuth();
+    _resetCurrentUserStatus();
     _currentUserController.addStream(repository.getCurrentUser());
   }
 
   UserAccountStatus _redirectPath(String authId, User currentUser){
     if(authId == null){
-      print('LOGGED OUT');
       return UserAccountStatus.LOGGED_OUT;
     }else{
       if(currentUser == null){
-        print('ONBOARDING');
         return UserAccountStatus.PENDING_ONBOARDING;
       }else{
-        print('LOGGED IN');
         return UserAccountStatus.LOGGED_IN;
       }
     }
+  }
+
+  _resetCurrentUserStatus() async {
+      String userId = await repository.existingAuthId();
+      _existingAuthController.add(userId);
   }
 
   _logInUser(LogInForm logInForm) async {
@@ -69,7 +98,7 @@ class UserBloc {
     _loadingController.add(false);
     if(success){
       _successController.add(true);
-      _resetAuth();
+      _resetCurrentUserStatus();
     }else{
       _errorController.add('Failed to log in');
     }
@@ -81,16 +110,11 @@ class UserBloc {
     _loadingController.add(false);
     if(success){
       _successController.add(true);
-      _resetAuth();
+      _resetCurrentUserStatus();
     }else{
       _errorController.add('Failed to register, this is probably because the account already exists.');
     }
   } 
-
-  _resetAuth() async {
-      String userId = await repository.existingAuthId();
-      _existingAuthController.add(userId);
-  }
   
   _logOutUser([_]) async {
       _existingAuthController.add(null);
@@ -98,6 +122,30 @@ class UserBloc {
   }
 
 
+  _onboardUser(OnboardUser onboardUser) async {
+    _loadingController.add(true);
+    bool success = await repository.createAccount(onboardUser);
+    _loadingController.add(false);
+    if(success){
+      _successController.add(true);
+    }else{
+      _errorController.add('Failed to create, this might be because the username has now been taken.');
+    }
+  } 
+
+  _refreshVerifiedCheck([_]) async {
+    bool isEmailVerified = await repository.hasEmailVerified();
+    String email = await repository.getVerificationEmail();
+    _isEmailVerifiedController.add(isEmailVerified);
+    _verificationEmailController.add(email);
+  }
+
+  _refreshUsernameCheck(String username) async {
+    _loadingController.add(true);
+    bool usernameExists = await repository.checkUsernameExists(username);
+    _loadingController.add(false);
+    _isUsernameTakenController.add(usernameExists);
+  }
 
   void dispose() {
     _currentUserController.close();

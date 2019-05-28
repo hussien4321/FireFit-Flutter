@@ -7,7 +7,6 @@ import 'package:path/path.dart';
 
 class FirebaseOutfitRepository implements OutfitRepository {
 
-  final String tempOutfitImagesFolder = 'temp';
   
   final int numberOfPosts = 15;
 
@@ -30,12 +29,10 @@ class FirebaseOutfitRepository implements OutfitRepository {
   
   Future<bool> exploreMoreOutfits() {
     return cloudFunctions.call(functionName: 'exploreOutfits', parameters: {
-      'poster_user_id' : '0123456789',
     })
     .then((res) async {
       List<Outfit> outfits = List<Outfit>.from(res['res'].map((data){
         Map<String, dynamic> formattedDoc = Map<String, dynamic>.from(data);
-        print("loading user data ${formattedDoc['user_id']}");
         return Outfit.fromMap(formattedDoc);
       }).toList());
 
@@ -70,7 +67,7 @@ class FirebaseOutfitRepository implements OutfitRepository {
     List<String> imageFiles = [];
     for(int i = 0; i < imagePaths.length; i++){
       final String uuid = Uuid().generateV4();
-      imageFiles.add('$tempOutfitImagesFolder/$outfitId:${uploadOutfit.posterUserId}:${i+1}:${uuid.toString()}${extension(imagePaths[i])}');
+      imageFiles.add('temp/outfit:$outfitId:${uploadOutfit.posterUserId}:${i+1}:${uuid.toString()}${extension(imagePaths[i])}');
     }
     return imageFiles;
   }
@@ -79,8 +76,8 @@ class FirebaseOutfitRepository implements OutfitRepository {
   Future<bool> deleteOutfit(Outfit outfit) async {
     cache.deleteOutfit(outfit);
     return cloudFunctions.call(functionName: 'deleteOutfit', parameters: {
-      'poster_user_id' : '0123456789',
-      'outfit_id': outfit.toJson()['outfit_id']
+      'poster_user_id' : outfit.poster.userId,
+      'outfit_id': outfit.outfit_id
     })
     .then((res) async {
       bool status = res['res'];

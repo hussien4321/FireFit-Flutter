@@ -92,27 +92,26 @@ class FirebaseUserRepository implements UserRepository {
   Future<User> _getUserAccountIfExisting(String userId) {
     return cloudFunctions.call(functionName: 'getUser', parameters: {'user_id': userId})
     .then((res) {
-      if(res.isEmpty){
+      final result = res['res'];
+      if(res.length == 0) {
         return null;
       }
-      Map<String, dynamic> data = Map<String, dynamic>.from(res[0]);
-      return User.fromMap(data);
+      Map<String, dynamic> formattedDoc = Map<String, dynamic>.from(result[0]);
+      return User.fromMap(formattedDoc);
     })
     .catchError((err) {
-      print('err:$err');
       return null;
     });
 
   }
 
   Future<bool> createAccount(OnboardUser onboardUser) async {
-
-    return cloudFunctions.call(functionName: 'createUser', parameters: onboardUser.toJson())
-    .then((res) async {
-      String userId = res['ref'];
-      String fileName = _generateFileName(onboardUser.profilePic, userId);
-      await imageUploader.uploadImage(fileName, onboardUser.profilePic);
+  return cloudFunctions.call(functionName: 'createUser', parameters: onboardUser.toJson())
+  .then((res) async {
       final user = await auth.currentUser();
+      String userId = user.uid;
+      String fileName = _generateFileName(onboardUser.profilePicUrl, userId);
+      await imageUploader.uploadImage(onboardUser.profilePicUrl, fileName);
       return _saveCurrentUser(user);
     })
     .catchError((err) => false);
@@ -120,7 +119,7 @@ class FirebaseUserRepository implements UserRepository {
 
   _generateFileName(String imagePath, String userId){
     final String uuid = Uuid().generateV4();
-    return 'profile:$userId:${uuid.toString()}${extension(imagePath)}';
+    return 'temp/profile:$userId:${uuid.toString()}${extension(imagePath)}';
   }
 
 
@@ -150,9 +149,11 @@ class FirebaseUserRepository implements UserRepository {
       'username' : username
     })
     .then((res) {
-      return res['ref'].toString() == 'true';
+      return res['res'].toString() == 'true';
     })
-    .catchError((err) => true);
+    .catchError((err) {
+      return true;
+    });
   } 
 
   Future<void> logOut() async {

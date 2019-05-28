@@ -15,13 +15,14 @@ class UploadOutfitScreen extends StatefulWidget {
 }
 
 
-class _UploadOutfitScreenState extends State<UploadOutfitScreen> with OverlayLoading, SnackbarMessages {
+class _UploadOutfitScreenState extends State<UploadOutfitScreen> with LoadingAndErrorDialogs, SnackbarMessages {
 
   UploadOutfit uploadOutfit;
   TextEditingController titleTextEdit;
   TextEditingController descriptionTextEdit;
 
   OutfitBloc _outfitBloc;
+  UserBloc _userBloc;
   List<StreamSubscription<dynamic>> _subscriptions;
 
 
@@ -66,9 +67,12 @@ class _UploadOutfitScreenState extends State<UploadOutfitScreen> with OverlayLoa
     );
   }
 
-  _initBlocs() {
+  _initBlocs() async {
     if(_outfitBloc==null){
       _outfitBloc = OutfitBlocProvider.of(context);
+      _userBloc = UserBlocProvider.of(context);
+      String userId = await _userBloc.existingAuthId.first;
+      uploadOutfit.posterUserId = userId;
       _subscriptions = <StreamSubscription<dynamic>>[
         _loadingListener(),
         _successListener(),
@@ -115,13 +119,25 @@ class _UploadOutfitScreenState extends State<UploadOutfitScreen> with OverlayLoa
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             _buildSummaryHeader(),
-            _buildHeader('1. Upload some pics (max 3)', uploadOutfit.imagesUploaded),
+            _buildHeader(
+              '1. Upload some pics (max 3)', 
+              isComplete: uploadOutfit.imagesUploaded
+            ),
             _buildImagesHolder(),
-            _buildHeader('2. Choose the style!', uploadOutfit.styleUploaded),
+            _buildHeader(
+              '2. Choose the style!', 
+              isComplete: uploadOutfit.styleUploaded
+            ),
             _buildStyleInput(),
-            _buildHeader('3. Give it a cool title', uploadOutfit.titleUploaded),
+            _buildHeader(
+              '3. Give it a cool title', 
+              isComplete: uploadOutfit.titleUploaded
+            ),
             _buildTitleField(),
-            _buildHeader('4. Describe it further (optional)', uploadOutfit.descriptionUploaded),
+            _buildHeader(
+              '4. Describe it further (optional)', 
+              isComplete: uploadOutfit.descriptionUploaded
+            ),
             _buildDescriptionField(),
           ],
         ),
@@ -219,7 +235,7 @@ class _UploadOutfitScreenState extends State<UploadOutfitScreen> with OverlayLoa
     );
   }
 
-  Widget _buildHeader(String title, bool completion){
+  Widget _buildHeader(String title, {bool isComplete}){
     return Container(
       padding: EdgeInsets.symmetric(vertical: 8.0),
       width: double.infinity,
@@ -233,8 +249,8 @@ class _UploadOutfitScreenState extends State<UploadOutfitScreen> with OverlayLoa
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 8.0),
             child: Icon(
-              completion ? Icons.check : Icons.create,
-              color: completion ? Colors.green : Colors.orange,
+              isComplete ? Icons.check : Icons.create,
+              color: isComplete ? Colors.green : Colors.orange,
             ),
           ),
         ],

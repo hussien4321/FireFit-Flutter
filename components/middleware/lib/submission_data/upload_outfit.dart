@@ -7,7 +7,7 @@ class UploadOutfit {
   String style;
 
   UploadOutfit({
-    this.posterUserId = '0123456789',
+    this.posterUserId,
     this.images, 
     this.title, 
     this.description, 
@@ -21,7 +21,7 @@ class UploadOutfit {
     }
   }
 
-  bool get canBeUploaded => imagesUploaded && titleUploaded && styleUploaded;
+  bool get canBeUploaded => posterUserId!=null && imagesUploaded && titleUploaded && styleUploaded;
 
   bool get imagesUploaded => images.length > 0;
   bool get styleUploaded => style != null;

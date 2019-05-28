@@ -127,9 +127,8 @@ class _OutfitFadingCardState extends State<OutfitFadingCard> with SingleTickerPr
         decoration: BoxDecoration(
           boxShadow: [
             BoxShadow(
-              offset: Offset(0, 3),
-              blurRadius: 6,
-              spreadRadius: 4,
+              offset: Offset(0, 1),
+              blurRadius: 2,
               color: Colors.black54
             )
           ],

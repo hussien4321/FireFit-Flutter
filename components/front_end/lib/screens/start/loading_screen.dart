@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:front_end/providers.dart';
 import 'package:blocs/blocs.dart';
 import 'dart:async';
-import 'package:middleware/middleware.dart';
-import 'package:front_end/screens.dart';
+import 'package:front_end/helper_widgets.dart';
 
 class LoadingScreen extends StatefulWidget {
   @override
@@ -55,23 +54,10 @@ class _LoadingScreenState extends State<LoadingScreen> {
   }
 
   StreamSubscription _navigationListener(){
-    return _userBloc.accountStatus.listen((status) {
-      print('got status $status');
-      if(status == UserAccountStatus.LOGGED_OUT){
-        Navigator.pushReplacement(context, MaterialPageRoute(
-          builder: (context) => IntroScreen()
-        ));
-      }
-      if(status == UserAccountStatus.LOGGED_IN){
-        Navigator.pushReplacement(context, MaterialPageRoute(
-          builder: (context) => MainAppBar()
-        ));
-      }
-      if(status == UserAccountStatus.PENDING_ONBOARDING){
-        Navigator.pushReplacement(context, MaterialPageRoute(
-          builder: (context) => MainAppBar()
-        ));
-      }
+    return _userBloc.accountStatus.listen((accountStatus) {
+      Navigator.pushReplacement(context, MaterialPageRoute(
+        builder: (ctx) => RouteConverters.getFromAccountStatus(accountStatus)
+      ));
     });
   }
 
