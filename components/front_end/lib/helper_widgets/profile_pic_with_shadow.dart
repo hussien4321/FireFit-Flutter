@@ -1,34 +1,56 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:front_end/screens.dart';
 
 class ProfilePicWithShadow extends StatelessWidget {
   
-  final String url;
+  final String url, userId;
   final double size;
-  ProfilePicWithShadow({this.url, this.size = 40.0});
-
+  final EdgeInsets margin;
+  final bool hasOnClick;
+  
+  ProfilePicWithShadow({
+    this.url, 
+    this.size = 40.0,
+    this.margin = const EdgeInsets.only(right: 8.0),
+    this.userId,
+    this.hasOnClick = true,
+  });
+  
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: EdgeInsets.only(right: 8.0),
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        image: url == null ? null : DecorationImage(
-          image: CachedNetworkImageProvider(url),
-          fit: BoxFit.cover,
+    return GestureDetector(
+      onTap: hasOnClick ? () => _navigateToProfileScreen(context) : null,
+      child: Hero(
+        tag: 'PROFILE-PIC-URL-$url',
+        child: Container(
+          margin: margin,
+          width: size,
+          height: size,
+          decoration: BoxDecoration(
+            image: url == null ? null : DecorationImage(
+              image: CachedNetworkImageProvider(url),
+              fit: BoxFit.cover,
+            ),
+            shape: BoxShape.circle,
+            color: Colors.grey,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black38,
+                offset: Offset(0, 2),
+                blurRadius: 2,
+                spreadRadius: 1
+              )
+            ]
+          ),
         ),
-        shape: BoxShape.circle,
-        color: Colors.grey,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black38,
-            offset: Offset(0, 2),
-            blurRadius: 2,
-            spreadRadius: 1
-          )
-        ]
       ),
     );
+  }
+
+  _navigateToProfileScreen(BuildContext context) {
+    Navigator.push(context, MaterialPageRoute(
+      builder: (ctx) => ProfileScreen(userId: userId,)
+    ));
   }
 }

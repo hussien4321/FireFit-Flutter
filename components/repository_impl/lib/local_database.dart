@@ -64,6 +64,9 @@ class LocalDatabase {
     if(version == 5){
       await db.execute("ALTER TABLE outfit ADD COLUMN dislikes_count INTEGER AFTER likes_count");
     }
+    if(version == 6){
+      await db.execute("ALTER TABLE user DROP COLUMN is_current_user");
+    }
   }
 
 }

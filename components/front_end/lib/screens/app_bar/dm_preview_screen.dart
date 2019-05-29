@@ -10,9 +10,13 @@ class _DMPreviewScreenState extends State<DMPreviewScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.grey[300],
         leading: null,
         automaticallyImplyLeading: false,
-        title: Text('Recent Messages (3)'),
+        title: Text(
+          'Recent Messages (3)',
+          style: Theme.of(context).textTheme.headline,
+        ),
         actions: <Widget>[
           IconButton(
             icon: Icon(Icons.add_comment),

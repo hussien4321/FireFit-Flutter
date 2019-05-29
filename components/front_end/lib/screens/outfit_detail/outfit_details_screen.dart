@@ -83,7 +83,7 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
         centerTitle: true,
         elevation: 0.0,
         actions: <Widget>[
-          outfit?.poster?.isCurrentUser == true? IconButton(
+          (outfit?.poster?.userId == userId) ? IconButton(
             icon: Icon(Icons.delete),
             onPressed: (){
               _outfitBloc.deleteOutfit.add(outfit);
@@ -410,6 +410,7 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
       child: Row(
         children: <Widget>[
           ProfilePicWithShadow(
+            userId: outfit.poster.userId,
             url: outfit.poster.profilePicUrl,
             size: 50.0,
           ),
@@ -489,6 +490,7 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
           Padding(
             padding: const EdgeInsets.only(top: 16.0),
             child: ProfilePicWithShadow(
+              userId: outfit.poster.userId,
               url: outfit.poster.profilePicUrl,
             ),
           ),

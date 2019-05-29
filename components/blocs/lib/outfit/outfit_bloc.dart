@@ -49,7 +49,6 @@ class OutfitBloc{
       _likeOutfitController.listen((outfitImpression) => _triggerImpression(outfitImpression, 1)),
       _dislikeOutfitController.listen((outfitImpression) => _triggerImpression(outfitImpression, -1)),
       _selectOutfitController.listen(_getOutfitStream),
-      _selectedOutfitController.listen((t) => print('got new outfit stream!'))
     ];
   }
 

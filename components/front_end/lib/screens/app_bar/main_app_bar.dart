@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:front_end/screens.dart';
 import 'package:front_end/helper_widgets.dart';
 import 'package:helpers/helpers.dart';
-import 'package:hidden_drawer_menu/hidden_drawer/screen_hidden_drawer.dart';
-import 'package:hidden_drawer_menu/menu/item_hidden_menu.dart';
 import 'package:flutter_inner_drawer/inner_drawer.dart';
 import 'package:front_end/providers.dart';
 import 'package:blocs/blocs.dart';
@@ -21,35 +19,18 @@ class _MainAppBarState extends State<MainAppBar> {
   final GlobalKey<InnerDrawerState> _dmDrawerKey = GlobalKey<InnerDrawerState>();
   final GlobalKey<InnerDrawerState> _menuDrawerKey = GlobalKey<InnerDrawerState>();
 
-  List<ScreenHiddenDrawer> itens = new List();
-
   UserBloc _userBloc;
   List<StreamSubscription<dynamic>> _subscriptions;
-
-  @override
-  void initState() {
-    itens.add(ScreenHiddenDrawer(
-      ItemHiddenMenu(name: "INPSPIRATION", colorLineSelected: Colors.blue,),//Discover new styles
-      ExploreScreen()
-    ));
-    itens.add(ScreenHiddenDrawer(
-      ItemHiddenMenu(name: "FASHION CIRCLE", colorLineSelected: Colors.blue,),//see what style your firends are rocking
-      ExploreScreen()
-    ));
-    itens.add(ScreenHiddenDrawer(
-      ItemHiddenMenu(name: "WARDROBE", colorLineSelected: Colors.blue,),//view your favourite outfits
-      ExploreScreen()
-    ));
-    itens.add(ScreenHiddenDrawer(
-      ItemHiddenMenu(name: "PROFILE", colorLineSelected: Colors.blue,),
-      ExploreScreen()
-    ));
-    itens.add(ScreenHiddenDrawer(
-      ItemHiddenMenu(name: "SETTINGS", colorLineSelected: Colors.blue,),
-      ExploreScreen()
-    ));
-    super.initState();
-  }
+  
+  Widget currentPage = ExploreScreen();
+  
+  List<String> pages = [
+      "INPSPIRATION",
+      "FASHION CIRCLE",
+      "WARDROBE",
+      "PROFILE",
+      "SETTINGS",
+  ];
 
   @override
   void dispose() {
@@ -73,8 +54,8 @@ class _MainAppBarState extends State<MainAppBar> {
       _subscriptions = <StreamSubscription<dynamic>>[
         _logInStatusListener()
       ];
-      String userId = await _userBloc.existingAuthId.first;
-      _userBloc.registerNotificationToken.add(userId);
+      _userBloc.loadCurrentUser.add(null);
+      _userBloc.registerNotificationToken.add(null);
     }
   }
   
@@ -111,9 +92,7 @@ class _MainAppBarState extends State<MainAppBar> {
       offset: 0.7,
       colorTransition: Colors.red,
       animationType: InnerDrawerAnimation.linear,
-      child: MenuScreenNavigation(
-        onLogOut: () => _userBloc.logOut.add(null),
-      ),
+      child: MenuScreenNavigation(),
       scaffold: _buildScaffold(
         body: body
       )
@@ -124,7 +103,14 @@ class _MainAppBarState extends State<MainAppBar> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text('MIRA MRIA'),
+        title: Text(
+          'INSPIRATION',
+          style: TextStyle(
+            fontWeight: FontWeight.normal,
+            // fontStyle: FontStyle.italic,
+            letterSpacing: 1.5
+          ),
+        ),
         leading: IconButton(
           icon: Icon(
             Icons.menu

@@ -12,13 +12,13 @@ class CachedUserRepository {
   addUser(User user, {bool isCurrentUser = false}) {
     return streamDatabase.insert(
       'user',
-      user.toJson(cache: true, isCurrentUser: isCurrentUser),
+      user.toJson(cache: true),
       conflictAlgorithm: isCurrentUser ? ConflictAlgorithm.replace : ConflictAlgorithm.ignore,
     );
   }
   
-  Stream<User> getCurrentUser(){
-  return streamDatabase.createQuery('user', where: "is_current_user = 1", limit: 1).mapToOneOrDefault((data) {
+  Stream<User> getUser(String userId){
+    return streamDatabase.createQuery('user', where: "user_id = '$userId'", limit: 1).mapToOneOrDefault((data) {
       return User.fromMap(data);
     }, null).asBroadcastStream();
   }

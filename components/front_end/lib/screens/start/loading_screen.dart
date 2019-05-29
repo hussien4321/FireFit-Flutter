@@ -20,6 +20,8 @@ class _LoadingScreenState extends State<LoadingScreen> {
     super.dispose();
   }
  
+  bool isLoading = false;
+
   @override
   Widget build(BuildContext context) {
     _initBlocs(context);
@@ -48,16 +50,25 @@ class _LoadingScreenState extends State<LoadingScreen> {
     if(_userBloc == null){
       _userBloc = UserBlocProvider.of(context);
       _subscriptions = <StreamSubscription<dynamic>>[
+        _loadingListener(),
         _navigationListener(),
       ];
     }
   }
 
+
+  StreamSubscription _loadingListener(){
+    return _userBloc.isLoading.listen((loadingStatus) {
+      isLoading =loadingStatus;
+    });
+  }
   StreamSubscription _navigationListener(){
     return _userBloc.accountStatus.listen((accountStatus) {
-      Navigator.pushReplacement(context, MaterialPageRoute(
-        builder: (ctx) => RouteConverters.getFromAccountStatus(accountStatus)
-      ));
+      if(!isLoading){
+        Navigator.pushReplacement(context, MaterialPageRoute(
+          builder: (ctx) => RouteConverters.getFromAccountStatus(accountStatus)
+        ));
+      }
     });
   }
 

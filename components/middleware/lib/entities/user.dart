@@ -12,8 +12,6 @@ class User {
   DateTime subscriptionEndDate;
   DateTime createdAt;
 
-  bool isCurrentUser;
-
 
   User({
     this.userId,
@@ -41,12 +39,11 @@ class User {
     if(isSubscribed){
       subscriptionEndDate = DateTime.parse(map['subscription_end_date']);
     }
-    isCurrentUser = map['is_current_user'] == 1;
     boosts = map['boosts'];
     createdAt = DateTime.parse(map['user_created_at']);
   } 
 
-  Map<String, dynamic> toJson({bool cache = false, bool isCurrentUser = false}) => {
+  Map<String, dynamic> toJson({bool cache = false}) => {
     'user_id' : userId, 
     'name' : name,
     'username': username,
@@ -55,7 +52,6 @@ class User {
     'gender_is_male' : genderIsMale ? 1 : 0, 
     'is_subscribed' : isSubscribed ? 1 : 0, 
     'boosts' : boosts, 
-    'is_current_user' : isCurrentUser ? 1 : 0,
     'subscription_end_date' : cache ? subscriptionEndDate?.toIso8601String() : subscriptionEndDate, 
     'user_created_at' : cache ? createdAt?.toIso8601String() : createdAt, 
   };

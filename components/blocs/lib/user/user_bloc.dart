@@ -7,8 +7,17 @@ class UserBloc {
 
   List<StreamSubscription<dynamic>> _subscriptions;
 
-  BehaviorSubject<User> _currentUserController = BehaviorSubject<User>(seedValue: null);
-  Stream<User> get currentUser => _currentUserController.stream; 
+  final _currentUserController =  BehaviorSubject<BehaviorSubject<User>>(seedValue: BehaviorSubject<User>(seedValue: null));
+  Stream<User> get currentUser => _currentUserController.value; 
+  
+  final _loadCurrentUserController = PublishSubject<Null>();
+  Sink<String> get loadCurrentUser => _loadCurrentUserController; 
+
+  final _selectedUserController = BehaviorSubject<Stream<User>>();
+  Stream<User> get selectedUser => _selectedUserController.value;
+
+  final _selectUserController = PublishSubject<String>();
+  Sink<String> get selectUser => _selectUserController; 
 
   final _existingAuthController = BehaviorSubject<String>(seedValue: null);
   Stream<String> get existingAuthId => _existingAuthController.stream; 
@@ -22,8 +31,8 @@ class UserBloc {
   final _logInController = PublishSubject<LogInForm>();
   Sink<LogInForm> get logIn => _logInController;
 
-  final _registerNotificationTokenController = PublishSubject<String>();
-  Sink<String> get registerNotificationToken => _registerNotificationTokenController;
+  final _registerNotificationTokenController = PublishSubject<Null>();
+  Sink<Null> get registerNotificationToken => _registerNotificationTokenController;
 
   final _logOutController = PublishSubject<void>();
   Sink<void> get logOut => _logOutController;
@@ -66,20 +75,23 @@ class UserBloc {
     _subscriptions = <StreamSubscription<dynamic>>[
       _logInController.listen(_logInUser),
       _registerController.listen(_registerUser),
-      _registerNotificationTokenController.listen(repository.registerNotificationToken),
+      _registerNotificationTokenController.listen(_registerNotificationToken),
       _logOutController.listen(_logOutUser),
       _onboardController.listen(_onboardUser),
       _checkUsernameController.stream.listen((t) => _isUsernameTakenController.add(null)),
       _checkUsernameController.stream.debounce(Duration(milliseconds: 500)).listen(_refreshUsernameCheck),
       _refreshVerificationEmailController.stream.listen(_refreshVerifiedCheck),
       _resendEmailController.stream.listen(repository.resendVerificationEmail),
+      _selectUserController.listen(_getUserStream),
+      _loadCurrentUserController.listen(_loadCurrentUser),
     ];
-    _accountStatusController = Observable.combineLatest2<String, User, UserAccountStatus>(existingAuthId, _currentUserController, _redirectPath).asBroadcastStream().debounce(Duration(milliseconds: 300));
+    _loadCurrentUser();
+    _accountStatusController = Observable.combineLatest2<String, BehaviorSubject<User>, UserAccountStatus>(existingAuthId, _currentUserController, _redirectPath).asBroadcastStream().debounce(Duration(milliseconds: 300));
     _resetCurrentUserStatus();
-    _currentUserController.addStream(repository.getCurrentUser());
   }
 
-  UserAccountStatus _redirectPath(String authId, User currentUser){
+  UserAccountStatus _redirectPath(String authId, BehaviorSubject<User> currentUserStream){
+    User currentUser = currentUserStream.value;
     if(authId == null){
       return UserAccountStatus.LOGGED_OUT;
     }else{
@@ -94,6 +106,7 @@ class UserBloc {
   _resetCurrentUserStatus() async {
       String userId = await repository.existingAuthId();
       _existingAuthController.add(userId);
+      await _loadCurrentUser();
   }
 
   _logInUser(LogInForm logInForm) async {
@@ -101,8 +114,8 @@ class UserBloc {
     bool success = await repository.logIn(logInForm);
     _loadingController.add(false);
     if(success){
+      await _resetCurrentUserStatus();
       _successController.add(true);
-      _resetCurrentUserStatus();
     }else{
       _errorController.add('Failed to log in');
     }
@@ -113,12 +126,17 @@ class UserBloc {
     bool success = await repository.register(logInForm);
     _loadingController.add(false);
     if(success){
+      await _resetCurrentUserStatus();
       _successController.add(true);
-      _resetCurrentUserStatus();
     }else{
       _errorController.add('Failed to register, this is probably because the account already exists.');
     }
   } 
+
+  _registerNotificationToken([_]) async {
+    final userId = await existingAuthId.first; 
+    repository.registerNotificationToken(userId);
+  }
   
   _logOutUser([_]) async {
       _existingAuthController.add(null);
@@ -151,9 +169,33 @@ class UserBloc {
     _isUsernameTakenController.add(usernameExists);
   }
 
+  _getUserStream(String userId) async {
+    _loadingController.add(true);
+    await repository.loadUserDetails(userId);
+    _selectedUserController.add(repository.getUser(userId));
+    _loadingController.add(false);
+  }
+
+  _loadCurrentUser([_]) async {
+    _loadingController.add(true);
+
+    String userId = await existingAuthId.first;
+    await repository.loadUserDetails(userId);
+
+    BehaviorSubject<User> userStream = BehaviorSubject<User>();
+    userStream.addStream(repository.getUser(userId));
+    await userStream.isEmpty; 
+    _loadingController.add(false);
+    _currentUserController.add(userStream);
+    
+  }
+
   void dispose() {
     _currentUserController.close();
     _existingAuthController.close();
+    _loadCurrentUserController.close();
+    _selectedUserController.close();
+    _selectUserController.close();
     _loadingController.close();
     _logInController.close();
     _registerNotificationTokenController.close();

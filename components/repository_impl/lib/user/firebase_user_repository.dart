@@ -33,9 +33,6 @@ class FirebaseUserRepository implements UserRepository {
     @required this.messaging,
   });
 
-  
-
-
   Future<String> existingAuthId() async {
     final user = await auth.currentUser();
     final hasAuth = user!=null;
@@ -61,7 +58,7 @@ class FirebaseUserRepository implements UserRepository {
     AuthInstance specificAuthInstance = _getSpecificAuthInstance(logInData.method);
     return specificAuthInstance.signIn(fields: logInData.fields) 
       .then((user) async {
-        await _saveCurrentUser(user);
+        await _loadCurrentUser(user);
         return true;
       })
       .catchError((err) {
@@ -85,8 +82,12 @@ class FirebaseUserRepository implements UserRepository {
     }
   }
 
-  Future<bool> _saveCurrentUser(FirebaseUser user) async {
-    User currentUser = await _getUserAccountIfExisting(user.uid);
+  Future<bool> _loadCurrentUser(FirebaseUser user) {
+    return loadUserDetails(user.uid);
+  }
+
+  Future<bool> loadUserDetails(String userId) async {
+    User currentUser = await _getUserAccountIfExisting(userId);
     if(currentUser !=null){
       await cache.addUser(currentUser, isCurrentUser: true);
       return true;
@@ -118,7 +119,7 @@ class FirebaseUserRepository implements UserRepository {
       String userId = user.uid;
       String fileName = _generateFileName(onboardUser.profilePicUrl, userId);
       await imageUploader.uploadImage(onboardUser.profilePicUrl, fileName);
-      return _saveCurrentUser(user);
+      return _loadCurrentUser(user);
     })
     .catchError((err) => false);
   }
@@ -177,6 +178,6 @@ class FirebaseUserRepository implements UserRepository {
     auth.signOut();
   }
 
-  Stream<User> getCurrentUser() => cache.getCurrentUser();
+  Stream<User> getUser(String userId) => cache.getUser(userId);
 }
 

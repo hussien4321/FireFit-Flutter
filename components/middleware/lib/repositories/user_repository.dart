@@ -19,5 +19,7 @@ abstract class UserRepository {
 
   Future<void> logOut();
 
-  Stream<User> getCurrentUser();
+  Future<bool> loadUserDetails(String userId);
+
+  Stream<User> getUser(String userId);
 }

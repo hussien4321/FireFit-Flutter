@@ -10,6 +10,10 @@ export 'screens/onboarding/onboard_screen.dart';
 
 export 'screens/outfit_detail/outfit_details_screen.dart';
 
+export 'screens/profile/profile_screen.dart';
+
+export 'screens/settings/settings_screen.dart';
+
 export 'screens/start/intro_screen.dart';
 export 'screens/start/loading_screen.dart';
 export 'screens/start/log_in_screen.dart';

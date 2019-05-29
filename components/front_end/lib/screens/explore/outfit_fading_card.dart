@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:middleware/middleware.dart';
 import 'dart:ui';
-import 'package:blocs/blocs.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:front_end/screens.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -44,7 +43,7 @@ class _OutfitFadingCardState extends State<OutfitFadingCard> with SingleTickerPr
     currentOutfitId = widget.currentOutfit?.outfit_id;
     blurringTransitionController = new AnimationController(
       vsync: this,
-      duration: Duration(milliseconds: 500),
+      duration: Duration(milliseconds: 200),
     )..addListener(() => setState((){}))
     ..addStatusListener((status) {
       if(status == AnimationStatus.completed){
