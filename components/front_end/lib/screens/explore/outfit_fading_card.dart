@@ -4,6 +4,7 @@ import 'dart:ui';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:front_end/screens.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:front_end/helper_widgets.dart';
 import 'package:flutter/gestures.dart';
 
 class OutfitFadingCard extends StatefulWidget {
@@ -135,45 +136,40 @@ class _OutfitFadingCardState extends State<OutfitFadingCard> with SingleTickerPr
         ),
         child: Stack(
             children: <Widget>[
-              SizedBox.expand(
-                child: CachedNetworkImage(
-                  imageUrl: outfit.images.first,
-                  fadeInDuration: Duration(milliseconds: 0),
-                  fit: BoxFit.cover,
-                ),
+              FitHeightBlurImage(
+                url: outfit.images.first,
               ),
-              BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-                child: Container(
-                  color: Colors.grey.withOpacity(0.0),
-                )
-              ),
-              SizedBox.expand(
-                child: CachedNetworkImage(
-                  imageUrl: outfit.images.first,
-                  fit: BoxFit.fitHeight,
-                ),
-              ),
-              outfit.hasMultipleImages? _displayMultiPicIndicator() : Container(),
+              outfit.hasAdditionalInfo? _displayMultiPicIndicator(outfit) : Container(),
             ],
           ),
       ),
     );
   }
 
-  Widget _displayMultiPicIndicator() {
+
+  Widget _displayMultiPicIndicator(Outfit outfit) {
     return Positioned(
-      right: 8,
-      bottom: 8,
+      right: 0,
+      bottom: 0,
       child: Container(
         padding: EdgeInsets.all(4.0),
         decoration: BoxDecoration(
           color: Colors.black45,
-          borderRadius: BorderRadius.circular(8.0)
+          borderRadius: BorderRadiusDirectional.only(
+            topStart: Radius.circular(4.0)
+          )
         ),
-        child: Icon(
-          Icons.photo_library,
-          color: Colors.white,
+        child: Row(
+          children: <Widget>[
+            outfit.hasDescription ? Icon(
+              Icons.description,
+              color: Colors.white,
+            ) : Container(),
+            outfit.hasMultipleImages ? Icon(
+              Icons.photo_library,
+              color: Colors.white,
+            ) : Container(),
+          ],
         ),
       ),
     );

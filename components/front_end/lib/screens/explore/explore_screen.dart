@@ -294,7 +294,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
               color: Colors.deepPurple,
               icon: Icons.person,
               disabled: allDisabled,
-              onPressed: () {},
+              onPressed: () => _openCurrentProfile(currentOutfit.poster.userId),
             ),
             CustomFab(
               color: Colors.pinkAccent,
@@ -328,5 +328,11 @@ class _ExploreScreenState extends State<ExploreScreen> {
         ),
       ),
     );
+  }
+
+  _openCurrentProfile(String userId) {
+    Navigator.push(context, MaterialPageRoute(
+      builder: (ctx) => ProfileScreen(userId: userId,)
+    ));
   }
 }

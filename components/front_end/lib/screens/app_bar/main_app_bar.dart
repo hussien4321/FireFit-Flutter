@@ -7,6 +7,7 @@ import 'package:front_end/providers.dart';
 import 'package:blocs/blocs.dart';
 import 'dart:async';
 import 'package:middleware/middleware.dart';
+import 'package:rxdart/rxdart.dart';
 
 class MainAppBar extends StatefulWidget {
   MainAppBar({Key key}) : super(key: key);
@@ -21,7 +22,9 @@ class _MainAppBarState extends State<MainAppBar> {
 
   UserBloc _userBloc;
   List<StreamSubscription<dynamic>> _subscriptions;
-  
+
+  BehaviorSubject<bool> _isSliderOpenController =BehaviorSubject<bool>(seedValue: false);
+
   Widget currentPage = ExploreScreen();
   
   List<String> pages = [
@@ -36,6 +39,7 @@ class _MainAppBarState extends State<MainAppBar> {
   void dispose() {
     super.dispose();
     _subscriptions?.forEach((subscription) => subscription.cancel());
+    _isSliderOpenController.close();
   }
 
   @override
@@ -76,9 +80,9 @@ class _MainAppBarState extends State<MainAppBar> {
       onTapClose: true,
       swipe: false,
       offset: 0.7,
-      colorTransition: Colors.red,
       animationType: InnerDrawerAnimation.linear,
       child: DMPreviewScreen(),
+      innerDrawerCallback: _updateMainScreenDimming,
       scaffold: body
     );
   }
@@ -90,42 +94,79 @@ class _MainAppBarState extends State<MainAppBar> {
       onTapClose: true,
       swipe: false,
       offset: 0.7,
-      colorTransition: Colors.red,
       animationType: InnerDrawerAnimation.linear,
       child: MenuScreenNavigation(),
-      scaffold: _buildScaffold(
+      innerDrawerCallback: _updateMainScreenDimming,
+      scaffold: _buildShading(
         body: body
       )
     );
   }
 
+  _updateMainScreenDimming(bool isOpen){
+    setState(() {
+      _isSliderOpenController.add(isOpen);
+    });
+  }
+
+  
+  Widget _buildShading({Widget body}){
+    return Stack(
+      children: <Widget>[
+        _buildScaffold(body: body),
+        StreamBuilder<bool>(
+          stream: _isSliderOpenController,
+          initialData: false,
+          builder: (ctx, snap) {
+            return Container(
+              color: snap.data ? Colors.black.withOpacity(0.5) : null
+            );
+          }
+        )
+      ],
+    );
+  }
+
   Widget _buildScaffold({Widget body}){
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        title: Text(
-          'INSPIRATION',
-          style: TextStyle(
-            fontWeight: FontWeight.normal,
-            // fontStyle: FontStyle.italic,
-            letterSpacing: 1.5
+    return Stack(
+      children: <Widget>[
+        Scaffold(
+          backgroundColor: Colors.white,
+          appBar: AppBar(
+            title: Text(
+              'INSPIRATION',
+              style: TextStyle(
+                fontWeight: FontWeight.normal,
+                // fontStyle: FontStyle.italic,
+                letterSpacing: 1.5
+              ),
+            ),
+            leading: IconButton(
+              icon: Icon(
+                Icons.menu
+              ),
+              onPressed: () => _menuDrawerKey.currentState.open(),
+            ),
+            centerTitle: true,
+            actions: <Widget>[
+              _buildUploadButton(),
+              _buildDMButton(),
+            ],
+            elevation: 0.0,
+            backgroundColor: Colors.transparent,
           ),
+          body: body
         ),
-        leading: IconButton(
-          icon: Icon(
-            Icons.menu
-          ),
-          onPressed: () => _menuDrawerKey.currentState.open(),
-        ),
-        centerTitle: true,
-        actions: <Widget>[
-          _buildUploadButton(),
-          _buildDMButton(),
-        ],
-        elevation: 0.0,
-        backgroundColor: Colors.transparent,
-      ),
-      body: body,
+        StreamBuilder<bool>(
+          stream: _isSliderOpenController,
+          initialData: false,
+          builder: (ctx, snap) {
+            return Container(
+              color: snap.data ? Colors.black.withOpacity(0.5) : null
+            );
+          }
+        )
+      ],
     );
   }
 
@@ -136,10 +177,9 @@ class _MainAppBarState extends State<MainAppBar> {
         child: Icon(Icons.add_a_photo),
       ),
       onPressed: () {
-      Navigator.push(context, MaterialPageRoute(
-        builder: (context) => UploadOutfitScreen()
-      ));
-
+        Navigator.push(context, MaterialPageRoute(
+          builder: (context) => UploadOutfitScreen()
+        ));
       }
     );
   }
@@ -155,26 +195,5 @@ class _MainAppBarState extends State<MainAppBar> {
       ),  
     );
   }
-  // Widget _buildMenuScaffold2({List<ScreenHiddenDrawer> screens}){
-  //   return HiddenDrawerMenu(
-  //     backgroundMenu: DecorationImage(
-  //       image: AssetImage('assets/background_wall.jpg'),
-  //       fit: BoxFit.fitWidth
-  //     ),
-  //     backgroundColorMenu: Color.fromRGBO(255, 194, 88, 1.0),
-  //     curveAnimation: Curves.easeOut,
-  //     backgroundColorAppBar: Colors.white,
-  //     screens: screens,
-  //     initPositionSelected: 0,
-  //     slidePercent: 90.0,
-  //     elevationAppBar: 0.0,
-  //     verticalScalePercent: 60.0,
-  //     isDraggable: false,
-  //     styleAutoTittleName: TextStyle(),
-  //     actionsAppBar: <Widget>[
-  //       _buildIconButton(context),
-  //     ],
-  //   );
-  // }
 
 }

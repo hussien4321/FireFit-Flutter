@@ -28,7 +28,10 @@ class Outfit {
 
   int get likesOverallCount => likesCount - dislikesCount;
 
+  bool get hasAdditionalInfo => hasMultipleImages || hasDescription;
+  
   bool get hasMultipleImages => images.length > 1;
+  bool get hasDescription => description != null && description.length > 0;
 
   Outfit.fromMap(Map<String, dynamic> map, {bool cache = false}){
     outfit_id = map['outfit_id'];
