@@ -8,6 +8,7 @@ class ProfilePicWithShadow extends StatelessWidget {
   final double size;
   final EdgeInsets margin;
   final bool hasOnClick;
+  final heroTag;
   
   ProfilePicWithShadow({
     this.url, 
@@ -15,14 +16,16 @@ class ProfilePicWithShadow extends StatelessWidget {
     this.margin = const EdgeInsets.only(right: 8.0),
     this.userId,
     this.hasOnClick = true,
+    this.heroTag,
   });
   
   @override
   Widget build(BuildContext context) {
+    String hero = heroTag != null ? heroTag : 'PROFILE-PIC-URL-$url';
     return GestureDetector(
-      onTap: hasOnClick ? () => _navigateToProfileScreen(context) : null,
+      onTap: hasOnClick ? () => _navigateToProfileScreen(context, hero) : null,
       child: Hero(
-        tag: 'PROFILE-PIC-URL-$url',
+        tag: hero,
         child: Container(
           margin: margin,
           width: size,
@@ -48,9 +51,12 @@ class ProfilePicWithShadow extends StatelessWidget {
     );
   }
 
-  _navigateToProfileScreen(BuildContext context) {
+  _navigateToProfileScreen(BuildContext context, String hero) {
     Navigator.push(context, MaterialPageRoute(
-      builder: (ctx) => ProfileScreen(userId: userId,)
+      builder: (ctx) => ProfileScreen(
+        userId: userId,
+        heroTag: hero,
+      )
     ));
   }
 }

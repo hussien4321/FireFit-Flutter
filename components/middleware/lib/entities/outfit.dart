@@ -56,7 +56,7 @@ class Outfit {
     }
   } 
 
-  Map<String, dynamic> toJson({bool cache = false}) => {
+  Map<String, dynamic> toJson() => {
     'outfit_id' : outfit_id, 
     'poster_user_id': poster.userId,
     'image_url_1' : images[0],

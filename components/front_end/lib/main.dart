@@ -20,14 +20,17 @@ void main({
       bloc:  UserBloc(userRepository),
       child: OutfitBlocProvider(
         bloc:  OutfitBloc(outfitRepository),
-        child:MaterialApp(
-          title: BlocLocalizations().appTitle,
-          debugShowCheckedModeBanner: false,
-          theme: ThemeData(
-            primaryColorBrightness: Brightness.light,
-            primarySwatch: Colors.grey,
+        child: CommentBlocProvider(
+          bloc: CommentBloc(outfitRepository),
+          child: MaterialApp(
+            title: BlocLocalizations().appTitle,
+            debugShowCheckedModeBanner: false,
+            theme: ThemeData(
+              primaryColorBrightness: Brightness.light,
+              primarySwatch: Colors.grey,
+            ),
+            home: LoadingScreen(),
           ),
-          home: LoadingScreen(),
         ),
       ),
     )

@@ -15,7 +15,7 @@ class CachedOutfitRepository {
     await userCache.addUser(outfit.poster);
     return streamDatabase.insert(
       'outfit',
-      outfit.toJson(cache: true),
+      outfit.toJson(),
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
   }
@@ -45,17 +45,22 @@ class CachedOutfitRepository {
     outfit.userImpression = impressionValue;
     return streamDatabase.insert(
       'outfit',
-      outfit.toJson(cache: true),
+      outfit.toJson(),
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
   }
+  
 
   Future<void> clearOutfits() async {
     await streamDatabase.execute("DELETE FROM outfit");
   }
 
+  Future<void> clearComments() async {
+    await streamDatabase.execute("DELETE FROM comment");
+  }
+
   Stream<Outfit> getOutfit(int outfitId){
-    return streamDatabase.createRawQuery(['outfit'], 'SELECT * FROM outfit, user WHERE user_id = poster_user_id AND outfit_id=$outfitId LIMIT 1').mapToOneOrDefault((data) {
+    return streamDatabase.createRawQuery(['outfit'], "SELECT * FROM outfit, user WHERE user_id = poster_user_id AND outfit_id=$outfitId LIMIT 1").mapToOneOrDefault((data) {
       return Outfit.fromMap(data);
     }, null).asBroadcastStream();
   }
@@ -63,6 +68,75 @@ class CachedOutfitRepository {
   Stream<List<Outfit>> getOutfits(){
     return streamDatabase.createRawQuery(['outfit'], 'SELECT * FROM outfit, user WHERE user_id = poster_user_id ORDER BY outfit_created_at desc').mapToList((data) {
       return Outfit.fromMap(data);
+    }).asBroadcastStream();
+  }
+
+
+
+
+  Future<int> _incrementCommentCount(AddComment addComment) async {
+    Outfit outfit = addComment.outfit;
+    outfit.commentsCount++;
+    return streamDatabase.insert(
+      'outfit',
+      outfit.toJson(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+  
+  Future<int> addComment(AddComment addComment, int tempCommentId) async { 
+    return streamDatabase.insert(
+      'comment',
+      {
+        'comment_id' : tempCommentId, 
+        'commenter_user_id': addComment.userId,
+        'comment_body': addComment.commentText,
+        'comment_likes_count': 0,
+        'comment_is_liked': 0,
+        'comment_created_at': DateTime.now().toIso8601String(),
+      },
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+  Future<int> updateComment(AddComment addComment, int tempCommentId, int actualCommentId) async { 
+    await streamDatabase.rawDelete([], 'DELETE FROM comment WHERE comment_id=$tempCommentId');
+    _incrementCommentCount(addComment);
+    return streamDatabase.insert(
+      'comment',
+      {
+        'comment_id' : actualCommentId,
+        'commenter_user_id': addComment.userId,
+        'comment_body': addComment.commentText,
+        'comment_likes_count': 0,
+        'comment_is_liked': 0,
+        'comment_created_at': DateTime.now().toIso8601String(),
+      },
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+  Future<int> insertComment(Comment comment) async { 
+    await userCache.addUser(comment.commenter);
+    return streamDatabase.insert(
+      'comment',
+      comment.toJson(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+  
+  Future<int> likeComment(CommentLike commentlike) async {
+    Comment modifiedComment = commentlike.comment;
+    modifiedComment.likesCount += modifiedComment.isLiked ? -1 : 1;
+    modifiedComment.isLiked=!modifiedComment.isLiked;
+    return streamDatabase.insert(
+      'comment',
+      modifiedComment.toJson(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+  
+  Stream<List<Comment>> getComments(){
+    return streamDatabase.createRawQuery(['comment'], 'SELECT * FROM comment, user WHERE user_id = commenter_user_id ORDER BY comment_created_at desc').mapToList((data) {
+      return Comment.fromMap(data);
     }).asBroadcastStream();
   }
 }

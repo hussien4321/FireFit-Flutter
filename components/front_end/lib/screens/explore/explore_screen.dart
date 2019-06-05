@@ -308,7 +308,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
               color: Colors.greenAccent[700],
               icon: Icons.comment,
               disabled: allDisabled,
-              onPressed: () {print('save');},
+              onPressed: () => _composeComment(currentOutfit.outfit_id),
             ),
             CustomFab(
               color: Colors.blueAccent,
@@ -328,6 +328,14 @@ class _ExploreScreenState extends State<ExploreScreen> {
         ),
       ),
     );
+  }
+
+  _composeComment(int outfitId){
+    Navigator.push(context, MaterialPageRoute(
+      //TODO: CREATE NEW TRANSITION THAT FADES CURRENT PAGE TO WHITE THEN FADES IN NEXT PAGE
+      builder: (context) => OutfitDetailsScreen(outfitId: outfitId)
+    ));
+
   }
 
   _openCurrentProfile(String userId) {

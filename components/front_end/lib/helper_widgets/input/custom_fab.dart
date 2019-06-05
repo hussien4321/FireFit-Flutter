@@ -44,7 +44,8 @@ class CustomFab extends StatelessWidget {
         icon: Icon(icon),
         iconSize: iconSize,
         splashColor: Colors.grey.withOpacity(0.5),
-        onPressed: onPressed,
+        disabledColor: Colors.white,
+        onPressed: disabled ? null : onPressed,
       ),
     );
   }

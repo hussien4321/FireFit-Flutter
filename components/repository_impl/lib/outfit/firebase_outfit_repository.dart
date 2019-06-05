@@ -4,6 +4,7 @@ import 'package:repository_impl/repository_impl.dart';
 import 'package:meta/meta.dart';
 import 'package:helpers/helpers.dart';
 import 'package:path/path.dart';
+import 'dart:math';
 
 class FirebaseOutfitRepository implements OutfitRepository {
 
@@ -23,6 +24,7 @@ class FirebaseOutfitRepository implements OutfitRepository {
   Stream<List<Outfit>> getOutfits() => cache.getOutfits();
 
   Stream<Outfit> getOutfit(int outfitId) => cache.getOutfit(outfitId);
+
 
   Future<bool> exploreOutfits(ExploreOutfits explore) async {
     await cache.clearOutfits();
@@ -103,5 +105,59 @@ class FirebaseOutfitRepository implements OutfitRepository {
       return false;
     });
   }
+  Future<bool> addComment(AddComment addComment) async {
+    Random tempIdGenerator =new Random();
+    int tempCommentId =tempIdGenerator.nextInt(1000000) * -1;
+    cache.addComment(addComment, tempCommentId);
 
+    return cloudFunctions.call(functionName: 'addComment', parameters: addComment.toJson())
+    .then((res) async {
+      int actualCommentId = res['res'];
+      await cache.updateComment(addComment, tempCommentId ,actualCommentId);
+      return true;
+    })
+    .catchError((err) {
+      print(err.message);
+      return false;
+    });
+  }
+
+
+  Future<bool> likeComment(CommentLike commentlike) async {
+    cache.likeComment(commentlike);
+    print('aaaa:${commentlike.comment.isLiked}');
+    return cloudFunctions.call(functionName: 'likeComment', parameters: commentlike.toJson())
+    .then((res) async {
+      bool status = res['res'];
+      return status;
+    })
+    .catchError((err) {
+      print(err);
+      return false;
+    });
+  }
+
+  
+  Stream<List<Comment>> getComments() => cache.getComments();
+
+  Future<bool> loadComments(LoadComments loadComments) async {
+    await cache.clearComments();
+    return loadMoreComments(loadComments);
+  }
+
+  Future<bool> loadMoreComments(LoadComments loadComments) async {
+    return cloudFunctions.call(functionName: 'loadComments', parameters: loadComments.toJson())
+    .then((res) async {
+      List<Comment> comments = List<Comment>.from(res['res'].map((data){
+        Map<String, dynamic> formattedDoc = Map<String, dynamic>.from(data);
+        return Comment.fromMap(formattedDoc);
+      }).toList());
+      comments.forEach((comment) => cache.insertComment(comment));
+      return true;
+    })
+    .catchError((err) {
+      print(err);
+      return false;
+    });
+  }
 }

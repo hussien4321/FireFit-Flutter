@@ -7,8 +7,9 @@ import 'package:front_end/providers.dart';
 
 class ProfileScreen extends StatefulWidget {
   final String userId;
+  final String heroTag;
 
-  ProfileScreen({this.userId});
+  ProfileScreen({this.userId, this.heroTag});
 
   @override
   _ProfileScreenState createState() => _ProfileScreenState();
@@ -144,6 +145,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           offset: Offset(0, 4 + profilePicSize/2),
           child: ProfilePicWithShadow(
             hasOnClick: false,
+            heroTag: widget.heroTag == null ? null : widget.heroTag,
             url: user.profilePicUrl,
             size: profilePicSize,
             margin: EdgeInsets.all(8.0),

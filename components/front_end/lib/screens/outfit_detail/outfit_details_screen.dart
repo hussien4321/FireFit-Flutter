@@ -7,13 +7,15 @@ import 'package:blocs/blocs.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter_swiper/flutter_swiper.dart';
-import 'package:rxdart/rxdart.dart';
+import 'package:front_end/screens.dart';
 
 class OutfitDetailsScreen extends StatefulWidget {
 
   final int outfitId;
 
-  OutfitDetailsScreen({this.outfitId});
+  OutfitDetailsScreen({
+    this.outfitId,
+  });
 
   @override
   _OutfitDetailsScreenState createState() => _OutfitDetailsScreenState();
@@ -26,6 +28,9 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
   Outfit outfit;
 
   String userId;
+
+  bool canSendComment = false;
+  TextEditingController commentTextController = new TextEditingController();
   
   @override
   void initState() {
@@ -41,6 +46,7 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    bool blocIsNull =_outfitBloc==null;
     _initBlocs();
     return StreamBuilder<bool>(
       stream: _outfitBloc.isLoading,
@@ -54,7 +60,8 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
           return StreamBuilder<Outfit>(
             stream: _outfitBloc.selectedOutfit,
             builder: (ctx, snap) { 
-              if(!snap.hasData){            
+              if(!snap.hasData){    
+                print('has no outfit');        
                 return _scaffold(body: _outfitLoadingPlaceholder());
               }
               outfit = snap.data;
@@ -89,7 +96,17 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
               _outfitBloc.deleteOutfit.add(outfit);
               Navigator.pop(context);
             },
-          ) : Container()
+          ) : Container(),
+          IconButton(
+            icon: Icon(FontAwesomeIcons.comment),
+            onPressed: () {
+              Navigator.push(context, MaterialPageRoute(
+                builder: (ctx) => CommentsScreen(
+                  outfit: outfit
+                )
+              ));
+            },
+          )
         ],
       ),
       body: body,
@@ -107,37 +124,46 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
       width: double.infinity,
       height: double.infinity,
       color: Colors.white,
-      child: SingleChildScrollView(
-        child: Column(
-          children: <Widget>[
-            _buildOutfitImage(),
-            _buildImpressionsSummary(),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                _buildInteractButtons(),
-                Material(
-                  color: Colors.white,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 0.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        _buildTitleAndDate(),
-                        _buildPosterInfo(),
-                        _buildOutfitDescription(),
-                      ],
-                    ),
+      child: Column(
+        children: <Widget>[
+          Expanded(
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  _buildOutfitImage(),
+                  _buildImpressionsSummary(),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      _buildInteractButtons(),
+                      Material(
+                        color: Colors.white,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 0.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: <Widget>[
+                              _buildTitleAndDate(),
+                              _buildPosterInfo(),
+                              _buildOutfitDescription(),
+                            ],
+                          ),
+                        ),
+                      )
+                    ],
                   ),
-                )
-              ],
+                ],
+              ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
+
+
 
   Widget _buildOutfitImage() {
     return Container(
@@ -476,58 +502,6 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
             padding: EdgeInsets.all(8.0),
             child: Text(
               outfit.description,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-  Widget _buildCommentField() {
-    return Container(
-      padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 8.0),
-      child: Row(
-        children: <Widget>[
-          Padding(
-            padding: const EdgeInsets.only(top: 16.0),
-            child: ProfilePicWithShadow(
-              userId: outfit.poster.userId,
-              url: outfit.poster.profilePicUrl,
-            ),
-          ),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                Padding(
-                  padding: EdgeInsets.only(left: 8.0, bottom: 2.0),
-                  child: Text(
-                    outfit.poster.name,
-                    style: Theme.of(context).textTheme.subtitle
-                  ),
-                ),
-                Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20.0),
-                    color: Colors.grey[350]
-                  ),
-                  width: double.infinity,
-                  padding: EdgeInsets.all(8.0),
-                  child: Text(
-                    'widget outfit description widget outfit description widget outfit description widget outfit description ',
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(top: 16.0),
-            child: IconButton(
-              icon: Icon(
-                FontAwesomeIcons.solidHeart,
-                color: Colors.redAccent,
-              ),
-              onPressed: () => print('aaa'),
             ),
           ),
         ],

@@ -8,6 +8,7 @@ export 'screens/explore/outfit_fading_card.dart';
 
 export 'screens/onboarding/onboard_screen.dart';
 
+export 'screens/outfit_detail/comments_screen.dart';
 export 'screens/outfit_detail/outfit_details_screen.dart';
 
 export 'screens/profile/profile_screen.dart';
