@@ -34,7 +34,8 @@ void main() async {
   );
   FirebaseUserRepository userRepository= FirebaseUserRepository(
     auth: auth,
-    cache: userCache,
+    outfitCache: outfitCache,
+    userCache: userCache,
     cloudFunctions: functions,
     imageUploader: imageUploader,
     messaging: messaging,

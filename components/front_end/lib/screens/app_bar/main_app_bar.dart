@@ -21,6 +21,7 @@ class _MainAppBarState extends State<MainAppBar> {
   final GlobalKey<InnerDrawerState> _menuDrawerKey = GlobalKey<InnerDrawerState>();
 
   UserBloc _userBloc;
+  NotificationBloc _notificationBloc;
   List<StreamSubscription<dynamic>> _subscriptions;
 
   BehaviorSubject<bool> _isSliderOpenController =BehaviorSubject<bool>(seedValue: false);
@@ -45,7 +46,7 @@ class _MainAppBarState extends State<MainAppBar> {
   @override
   Widget build(BuildContext context) {
     _initBlocs();
-    return _buildDMScaffold(
+    return _buildNotificationsScaffold(
       body: _buildMenuScaffold(
         body: ExploreScreen()
       )
@@ -55,11 +56,14 @@ class _MainAppBarState extends State<MainAppBar> {
   _initBlocs() async {
     if(_userBloc == null){
       _userBloc = UserBlocProvider.of(context);
+      _notificationBloc = NotificationBlocProvider.of(context);
       _subscriptions = <StreamSubscription<dynamic>>[
         _logInStatusListener()
       ];
       _userBloc.loadCurrentUser.add(null);
-      _userBloc.registerNotificationToken.add(null);
+      String userId = await _userBloc.existingAuthId.first;
+      _notificationBloc.registerNotificationToken.add(userId);
+      _notificationBloc.loadNotifications.add(userId);
     }
   }
   
@@ -73,7 +77,7 @@ class _MainAppBarState extends State<MainAppBar> {
     });
   }
 
-  Widget _buildDMScaffold({Widget body}) {
+  Widget _buildNotificationsScaffold({Widget body}) {
     return InnerDrawer(
       key: _dmDrawerKey,
       position: InnerDrawerPosition.end,
@@ -81,7 +85,7 @@ class _MainAppBarState extends State<MainAppBar> {
       swipe: false,
       offset: 0.7,
       animationType: InnerDrawerAnimation.linear,
-      child: DMPreviewScreen(),
+      child: NotificationsScreen(),
       innerDrawerCallback: _updateMainScreenDimming,
       scaffold: body
     );
@@ -97,7 +101,7 @@ class _MainAppBarState extends State<MainAppBar> {
       animationType: InnerDrawerAnimation.linear,
       child: MenuScreenNavigation(),
       innerDrawerCallback: _updateMainScreenDimming,
-      scaffold: _buildShading(
+      scaffold: _buildScaffold(
         body: body
       )
     );
@@ -107,24 +111,6 @@ class _MainAppBarState extends State<MainAppBar> {
     setState(() {
       _isSliderOpenController.add(isOpen);
     });
-  }
-
-  
-  Widget _buildShading({Widget body}){
-    return Stack(
-      children: <Widget>[
-        _buildScaffold(body: body),
-        StreamBuilder<bool>(
-          stream: _isSliderOpenController,
-          initialData: false,
-          builder: (ctx, snap) {
-            return Container(
-              color: snap.data ? Colors.black.withOpacity(0.5) : null
-            );
-          }
-        )
-      ],
-    );
   }
 
   Widget _buildScaffold({Widget body}){
@@ -137,7 +123,6 @@ class _MainAppBarState extends State<MainAppBar> {
               'INSPIRATION',
               style: TextStyle(
                 fontWeight: FontWeight.normal,
-                // fontStyle: FontStyle.italic,
                 letterSpacing: 1.5
               ),
             ),
@@ -150,23 +135,29 @@ class _MainAppBarState extends State<MainAppBar> {
             centerTitle: true,
             actions: <Widget>[
               _buildUploadButton(),
-              _buildDMButton(),
+              _buildNotificationsButton(),
             ],
             elevation: 0.0,
             backgroundColor: Colors.transparent,
           ),
           body: body
         ),
-        StreamBuilder<bool>(
-          stream: _isSliderOpenController,
-          initialData: false,
-          builder: (ctx, snap) {
-            return Container(
-              color: snap.data ? Colors.black.withOpacity(0.5) : null
-            );
-          }
-        )
+        _buildShading(),
       ],
+    );
+  }
+
+  Widget _buildShading(){
+    return SafeArea(
+      child: StreamBuilder<bool>(
+        stream: _isSliderOpenController,
+        initialData: false,
+        builder: (ctx, snap) {
+          return Container(
+            color: snap.data ? Colors.black.withOpacity(0.5) : null
+          );
+        }
+      ),
     );
   }
 
@@ -184,12 +175,12 @@ class _MainAppBarState extends State<MainAppBar> {
     );
   }
 
-  Widget _buildDMButton() {
+  Widget _buildNotificationsButton() {
     return Center(
       child: IconButton( 
         icon: NotificationIcon(
-          iconData: Icons.chat,
-          messages: 3,
+          iconData: Icons.notifications,
+          messages: 1,
         ),
         onPressed: () => _dmDrawerKey.currentState.open()
       ),  

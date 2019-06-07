@@ -9,13 +9,11 @@ class UserBloc {
 
   final _currentUserController =  BehaviorSubject<BehaviorSubject<User>>(seedValue: BehaviorSubject<User>(seedValue: null));
   Stream<User> get currentUser => _currentUserController.value; 
-  
   final _loadCurrentUserController = PublishSubject<Null>();
   Sink<String> get loadCurrentUser => _loadCurrentUserController; 
 
   final _selectedUserController = BehaviorSubject<Stream<User>>();
   Stream<User> get selectedUser => _selectedUserController.value;
-
   final _selectUserController = PublishSubject<String>();
   Sink<String> get selectUser => _selectUserController; 
 
@@ -27,46 +25,33 @@ class UserBloc {
 
   final _registerController = PublishSubject<LogInForm>();
   Sink<LogInForm> get register => _registerController;
-
   final _logInController = PublishSubject<LogInForm>();
   Sink<LogInForm> get logIn => _logInController;
-
-  final _registerNotificationTokenController = PublishSubject<Null>();
-  Sink<Null> get registerNotificationToken => _registerNotificationTokenController;
-
   final _logOutController = PublishSubject<void>();
   Sink<void> get logOut => _logOutController;
 
+  
   final _onboardController = PublishSubject<OnboardUser>();
   Sink<OnboardUser> get onboard => _onboardController;
 
   final _loadingController = PublishSubject<bool>();
   Observable<bool> get isLoading => _loadingController.stream;
-
   final _errorController = PublishSubject<String>();
   Observable<String> get hasError => _errorController.stream;
-
   final _successController = PublishSubject<bool>();
   Observable<bool> get isSuccessful => _successController.stream;
 
-
   final _resendEmailController = PublishSubject<void>();
   Sink<void> get resendVerificationEmail => _resendEmailController;
-
   final _refreshVerificationEmailController = PublishSubject<void>();
   Sink<void> get refreshVerificationEmail => _refreshVerificationEmailController;
-
   final _isEmailVerifiedController = PublishSubject<bool>();
   Observable<bool> get isEmailVerified => _isEmailVerifiedController;
-
   final _verificationEmailController = BehaviorSubject<String>();
   Observable<String> get verificationEmail => _verificationEmailController;
 
-
-
   final _checkUsernameController = PublishSubject<String>();
   Sink<String> get checkUsername => _checkUsernameController;
-  
   final _isUsernameTakenController = PublishSubject<bool>();
   Observable<bool> get isUsernameTaken => _isUsernameTakenController;
 
@@ -75,7 +60,6 @@ class UserBloc {
     _subscriptions = <StreamSubscription<dynamic>>[
       _logInController.listen(_logInUser),
       _registerController.listen(_registerUser),
-      _registerNotificationTokenController.listen(_registerNotificationToken),
       _logOutController.listen(_logOutUser),
       _onboardController.listen(_onboardUser),
       _checkUsernameController.stream.listen((t) => _isUsernameTakenController.add(null)),
@@ -132,11 +116,6 @@ class UserBloc {
       _errorController.add('Failed to register, this is probably because the account already exists.');
     }
   } 
-
-  _registerNotificationToken([_]) async {
-    final userId = await existingAuthId.first; 
-    repository.registerNotificationToken(userId);
-  }
   
   _logOutUser([_]) async {
       _existingAuthController.add(null);
@@ -198,7 +177,6 @@ class UserBloc {
     _selectUserController.close();
     _loadingController.close();
     _logInController.close();
-    _registerNotificationTokenController.close();
     _logOutController.close();
     _registerController.close();
     _errorController.close();

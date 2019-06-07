@@ -30,7 +30,7 @@ class LocalDatabase {
 
   Future<Database> initDb() async {
     String path = join(await getDatabasesPath(), "mira_mira.db");
-    Database theDB = await openDatabase(path, version: 9, onCreate: _onCreate, onUpgrade: _onUpgrade);
+    Database theDB = await openDatabase(path, version: 10, onCreate: _onCreate, onUpgrade: _onUpgrade);
     return theDB;
   }
 
@@ -66,6 +66,9 @@ class LocalDatabase {
     }
     if(version == 7){
       await db.execute("CREATE TABLE comment (comment_id INTEGER PRIMARY KEY, commenter_user_id TEXT, comment_body TEXT, comment_likes_count INTEGER, comment_is_liked TINYINT DEFAULT 0, comment_created_at DATETIME)");
+    }
+    if(version == 10){
+      await db.execute("CREATE TABLE notification (notification_id INTEGER PRIMARY KEY, notification_type TEXT, notification_created_at DATETIME, notification_reference_id TEXT)");
     }
   }
 

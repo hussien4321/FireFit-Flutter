@@ -46,7 +46,6 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    bool blocIsNull =_outfitBloc==null;
     _initBlocs();
     return StreamBuilder<bool>(
       stream: _outfitBloc.isLoading,
@@ -61,7 +60,6 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
             stream: _outfitBloc.selectedOutfit,
             builder: (ctx, snap) { 
               if(!snap.hasData){    
-                print('has no outfit');        
                 return _scaffold(body: _outfitLoadingPlaceholder());
               }
               outfit = snap.data;

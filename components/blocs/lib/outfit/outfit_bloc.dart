@@ -9,34 +9,28 @@ class OutfitBloc{
 
   final _outfitsController = BehaviorSubject<List<Outfit>>(seedValue: []);
   Stream<List<Outfit>> get outfits => _outfitsController.stream; 
-  
   final _exploreOutfitsController = PublishSubject<ExploreOutfits>();
   Sink<ExploreOutfits> get exploreOutfits => _exploreOutfitsController;
   
   final _selectedOutfitController = BehaviorSubject<Stream<Outfit>>();
   Stream<Outfit> get selectedOutfit => _selectedOutfitController.value;
-
   final _selectOutfitController = PublishSubject<int>();
   Sink<int> get selectOutfit => _selectOutfitController; 
   
   final _uploadOutfitsController = PublishSubject<UploadOutfit>();
   Sink<UploadOutfit> get uploadOutfit => _uploadOutfitsController;
-
   final _deleteOutfitController = PublishSubject<Outfit>();
   Sink<Outfit> get deleteOutfit => _deleteOutfitController;
 
   final _likeOutfitController = PublishSubject<OutfitImpression>();
   Sink<OutfitImpression> get likeOutfit => _likeOutfitController;
-
   final _dislikeOutfitController = PublishSubject<OutfitImpression>();
   Sink<OutfitImpression> get dislikeOutfit => _dislikeOutfitController;
 
   final _loadingController = PublishSubject<bool>();
   Observable<bool> get isLoading => _loadingController.stream;
-
   final _successController = PublishSubject<bool>();
   Observable<bool> get isSuccessful => _successController.stream;
-
   final _errorController = PublishSubject<String>();
   Observable<String> get hasError => _errorController.stream;
   
@@ -46,7 +40,6 @@ class OutfitBloc{
       _exploreOutfitsController.listen(_exploreOutfits),
       _uploadOutfitsController.listen(_uploadOutfit),
       _deleteOutfitController.listen(_deleteOutfit),
-      // _loadingController.listen((loading) => print('got loading = $loading')),
       _likeOutfitController.listen((outfitImpression) => _triggerImpression(outfitImpression, 1)),
       _dislikeOutfitController.listen((outfitImpression) => _triggerImpression(outfitImpression, -1)),
       _selectOutfitController.listen(_getOutfitStream),

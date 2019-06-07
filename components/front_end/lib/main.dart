@@ -4,7 +4,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:meta/meta.dart';
-import 'package:helpers/helpers.dart';
 import 'package:blocs/blocs.dart';
 import 'package:middleware/middleware.dart';
 import 'package:front_end/providers.dart';
@@ -22,14 +21,17 @@ void main({
         bloc:  OutfitBloc(outfitRepository),
         child: CommentBlocProvider(
           bloc: CommentBloc(outfitRepository),
-          child: MaterialApp(
-            title: BlocLocalizations().appTitle,
-            debugShowCheckedModeBanner: false,
-            theme: ThemeData(
-              primaryColorBrightness: Brightness.light,
-              primarySwatch: Colors.grey,
+          child: NotificationBlocProvider(
+            bloc: NotificationBloc(userRepository),
+            child: MaterialApp(
+              title: BlocLocalizations().appTitle,
+              debugShowCheckedModeBanner: false,
+              theme: ThemeData(
+                primaryColorBrightness: Brightness.light,
+                primarySwatch: Colors.grey,
+              ),
+              home: LoadingScreen(),
             ),
-            home: LoadingScreen(),
           ),
         ),
       ),

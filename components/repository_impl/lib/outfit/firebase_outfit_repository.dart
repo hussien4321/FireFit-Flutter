@@ -125,7 +125,6 @@ class FirebaseOutfitRepository implements OutfitRepository {
 
   Future<bool> likeComment(CommentLike commentlike) async {
     cache.likeComment(commentlike);
-    print('aaaa:${commentlike.comment.isLiked}');
     return cloudFunctions.call(functionName: 'likeComment', parameters: commentlike.toJson())
     .then((res) async {
       bool status = res['res'];

@@ -52,11 +52,11 @@ class CachedOutfitRepository {
   
 
   Future<void> clearOutfits() async {
-    await streamDatabase.execute("DELETE FROM outfit");
+    await streamDatabase.executeAndTrigger(['outfit'],"DELETE FROM outfit");
   }
 
   Future<void> clearComments() async {
-    await streamDatabase.execute("DELETE FROM comment");
+    await streamDatabase.executeAndTrigger(['comment'], "DELETE FROM comment");
   }
 
   Stream<Outfit> getOutfit(int outfitId){
@@ -71,8 +71,7 @@ class CachedOutfitRepository {
     }).asBroadcastStream();
   }
 
-
-
+  
 
   Future<int> _incrementCommentCount(AddComment addComment) async {
     Outfit outfit = addComment.outfit;
@@ -137,6 +136,26 @@ class CachedOutfitRepository {
   Stream<List<Comment>> getComments(){
     return streamDatabase.createRawQuery(['comment'], 'SELECT * FROM comment, user WHERE user_id = commenter_user_id ORDER BY comment_created_at desc').mapToList((data) {
       return Comment.fromMap(data);
+    }).asBroadcastStream();
+  }  
+  
+  Future<int> insertNotification(OutfitNotification notification) async { 
+    await userCache.addUser(notification.referencedUser);
+    addOutfit(notification.referencedOutfit);
+    return streamDatabase.insert(
+      'notification',
+      notification.toJson(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<void> clearNotifications() async {
+    await streamDatabase.executeAndTrigger(['notification'], "DELETE FROM notification");
+  }
+  
+  Stream<List<OutfitNotification>> getNotifications(){
+    return streamDatabase.createRawQuery(['notification'], 'SELECT * FROM notification, outfit, user WHERE user_id = poster_user_id AND notification_reference_id = outfit_id ORDER BY notification_created_at desc').mapToList((data) {
+      return OutfitNotification.fromMap(data);
     }).asBroadcastStream();
   }
 }

@@ -12,5 +12,7 @@ export 'helper_widgets/input/custom_fab.dart';
 export 'helper_widgets/input/dropdown_buttons.dart';
 export 'helper_widgets/input/yes_no_dialog.dart';
 
+export 'helper_widgets/notifications/notification_tab.dart';
+
 export 'helper_widgets/state/loading_and_error_dialogs.dart';
 export 'helper_widgets/state/snackbar_messages.dart';

@@ -60,7 +60,6 @@ class _CommentsScreenState extends State<CommentsScreen> {
                 stream: _commentBloc.comments,
                 initialData: [],
                 builder: (ctx, snap) {
-                  print('recieved ${snap.data.length} comments');
                   return Column(
                     children: snap.data.map((comment) => _buildCommentField(comment)).toList()..add(
                       StreamBuilder<bool>(

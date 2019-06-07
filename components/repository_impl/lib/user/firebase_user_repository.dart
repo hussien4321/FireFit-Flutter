@@ -21,7 +21,8 @@ class FirebaseUserRepository implements UserRepository {
   final FirebaseAuth auth;
   final CloudFunctions cloudFunctions;
   final FirebaseImageUploader imageUploader;
-  final CachedUserRepository cache;
+  final CachedOutfitRepository outfitCache;
+  final CachedUserRepository userCache;
   final FirebaseMessaging messaging;
 
 
@@ -29,7 +30,8 @@ class FirebaseUserRepository implements UserRepository {
     @required this.auth, 
     @required this.cloudFunctions,
     @required this.imageUploader,
-    @required this.cache,
+    @required this.outfitCache,
+    @required this.userCache,
     @required this.messaging,
   });
 
@@ -37,7 +39,7 @@ class FirebaseUserRepository implements UserRepository {
     final user = await auth.currentUser();
     final hasAuth = user!=null;
     if(!hasAuth){
-      await cache.deleteAll();
+      await userCache.deleteAll();
       return null;
     }
     return user.uid;
@@ -89,7 +91,7 @@ class FirebaseUserRepository implements UserRepository {
   Future<bool> loadUserDetails(String userId) async {
     User currentUser = await _getUserAccountIfExisting(userId);
     if(currentUser !=null){
-      await cache.addUser(currentUser, isCurrentUser: true);
+      await userCache.addUser(currentUser, isCurrentUser: true);
       return true;
     }
     return false;
@@ -174,10 +176,31 @@ class FirebaseUserRepository implements UserRepository {
 
   Future<void> logOut() async {
     messaging.deleteInstanceID();
-    cache.deleteAll();
+    userCache.deleteAll();
     auth.signOut();
   }
 
-  Stream<User> getUser(String userId) => cache.getUser(userId);
+  Stream<User> getUser(String userId) => userCache.getUser(userId);
+
+  Stream<List<OutfitNotification>> getNotifications() => outfitCache.getNotifications();
+
+  Future<bool> loadNotifications(String userId) {
+    outfitCache.clearNotifications();
+    return cloudFunctions.call(functionName: 'getNotifications', parameters: {
+      'user_id': userId
+    })
+    .then((res) async {
+      List<OutfitNotification> notifications = List<OutfitNotification>.from(res['res'].map((data){
+        Map<String, dynamic> formattedDoc = Map<String, dynamic>.from(data);
+        return OutfitNotification.fromMap(formattedDoc);
+      }).toList());
+      notifications.forEach((notification) => outfitCache.insertNotification(notification));
+      return true;
+    })
+    .catchError((err) {
+      print(err);
+      return false;
+    });
+  }
 }
 

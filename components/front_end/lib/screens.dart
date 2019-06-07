@@ -1,5 +1,5 @@
 
-export 'screens/app_bar/dm_preview_screen.dart';
+export 'screens/app_bar/notifications_screen.dart';
 export 'screens/app_bar/main_app_bar.dart';
 export 'screens/app_bar/menu_screen_navigation.dart';
 
