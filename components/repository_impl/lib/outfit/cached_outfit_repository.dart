@@ -28,6 +28,16 @@ class CachedOutfitRepository {
     );
   }
 
+  Future<int> saveOutfit(OutfitSave saveData) async {
+    Outfit outfit = saveData.outfit;
+    outfit.isSaved =!outfit.isSaved;
+    return streamDatabase.insert(
+      'outfit',
+      outfit.toJson(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
   Future<int> impressOutfit(OutfitImpression outfitImpression) async {
     Outfit outfit = outfitImpression.outfit;
     int impressionValue = outfitImpression.impressionValue;

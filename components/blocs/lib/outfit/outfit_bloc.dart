@@ -9,8 +9,12 @@ class OutfitBloc{
 
   final _outfitsController = BehaviorSubject<List<Outfit>>(seedValue: []);
   Stream<List<Outfit>> get outfits => _outfitsController.stream; 
-  final _exploreOutfitsController = PublishSubject<ExploreOutfits>();
-  Sink<ExploreOutfits> get exploreOutfits => _exploreOutfitsController;
+  final _exploreOutfitsController = PublishSubject<OutfitsSearch>();
+  Sink<OutfitsSearch> get exploreOutfits => _exploreOutfitsController;
+  final _loadMyOutfitsController = PublishSubject<OutfitsSearch>();
+  Sink<OutfitsSearch> get loadMyOutfits => _loadMyOutfitsController;
+  final _loadSavedOutfitsController = PublishSubject<OutfitsSearch>();
+  Sink<OutfitsSearch> get loadSavedOutfits => _loadSavedOutfitsController;
   
   final _selectedOutfitController = BehaviorSubject<Stream<Outfit>>();
   Stream<Outfit> get selectedOutfit => _selectedOutfitController.value;
@@ -22,6 +26,8 @@ class OutfitBloc{
   final _deleteOutfitController = PublishSubject<Outfit>();
   Sink<Outfit> get deleteOutfit => _deleteOutfitController;
 
+  final _saveOutfitController = PublishSubject<OutfitSave>();
+  Sink<OutfitSave> get saveOutfit => _saveOutfitController;
   final _likeOutfitController = PublishSubject<OutfitImpression>();
   Sink<OutfitImpression> get likeOutfit => _likeOutfitController;
   final _dislikeOutfitController = PublishSubject<OutfitImpression>();
@@ -38,17 +44,33 @@ class OutfitBloc{
     _outfitsController.addStream(repository.getOutfits());
     _subscriptions = <StreamSubscription<dynamic>>[
       _exploreOutfitsController.listen(_exploreOutfits),
+      _loadMyOutfitsController.listen(_loadMyOutfits),
+      _loadSavedOutfitsController.listen(_loadSavedOutfits),
       _uploadOutfitsController.listen(_uploadOutfit),
       _deleteOutfitController.listen(_deleteOutfit),
+      _saveOutfitController.listen(_saveOutfit),
       _likeOutfitController.listen((outfitImpression) => _triggerImpression(outfitImpression, 1)),
       _dislikeOutfitController.listen((outfitImpression) => _triggerImpression(outfitImpression, -1)),
       _selectOutfitController.listen(_getOutfitStream),
     ];
   }
 
-  _exploreOutfits(ExploreOutfits explore) async {
+  _exploreOutfits(OutfitsSearch outfitsSearch) async {
+    outfitsSearch.searchMode = 'explore';
+    await _loadOutfits(outfitsSearch);
+  }
+  _loadMyOutfits(OutfitsSearch outfitsSearch) async {
+    outfitsSearch.searchMode = 'mine';
+    await _loadOutfits(outfitsSearch);
+  }
+  _loadSavedOutfits(OutfitsSearch outfitsSearch) async {
+    outfitsSearch.searchMode = 'saved';
+    await _loadOutfits(outfitsSearch);
+  }
+
+  _loadOutfits(OutfitsSearch outfitsSearch) async {
     _loadingController.add(true);
-    final success = await repository.exploreOutfits(explore);
+    final success = await repository.loadOutfits(outfitsSearch);
     _loadingController.add(false);
     _successController.add(success);
     if(!success){
@@ -92,6 +114,13 @@ class OutfitBloc{
     }
   }
 
+  _saveOutfit(OutfitSave saveData) async {
+    final success = await repository.saveOutfit(saveData);
+    if(!success){
+      _errorController.add("Failed to react to outfit");
+    }
+  }
+
   _getOutfitStream(int outfitId) async {
     _loadingController.add(true);
     _selectedOutfitController.add(repository.getOutfit(outfitId));
@@ -101,9 +130,12 @@ class OutfitBloc{
   void dispose() {
     _outfitsController.close();
     _exploreOutfitsController.close();
+    _loadMyOutfitsController.close();
+    _loadSavedOutfitsController.close();
     _uploadOutfitsController.close();
     _selectedOutfitController.close();
     _selectOutfitController.close();
+    _saveOutfitController.close();
     _likeOutfitController.close();
     _dislikeOutfitController.close();
     _loadingController.close();

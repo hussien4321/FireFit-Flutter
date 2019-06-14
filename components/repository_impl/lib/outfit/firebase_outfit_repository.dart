@@ -26,29 +26,27 @@ class FirebaseOutfitRepository implements OutfitRepository {
   Stream<Outfit> getOutfit(int outfitId) => cache.getOutfit(outfitId);
 
 
-  Future<bool> exploreOutfits(ExploreOutfits explore) async {
+  Future<bool> loadOutfits(OutfitsSearch outfitsSearch) async {
     await cache.clearOutfits();
-    return exploreMoreOutfits(explore);
+    return loadMoreOutfits(outfitsSearch);
   }
   
-  Future<bool> exploreMoreOutfits(ExploreOutfits explore) {
-    return cloudFunctions.call(functionName: 'exploreOutfits', parameters: explore.toJson())
+  Future<bool> loadMoreOutfits(OutfitsSearch outfitsSearch) {
+    return cloudFunctions.call(functionName: 'getOutfits', parameters: outfitsSearch.toJson())
     .then((res) async {
-      List<Outfit> outfits = List<Outfit>.from(res['res'].map((data){
-        Map<String, dynamic> formattedDoc = Map<String, dynamic>.from(data);
-        return Outfit.fromMap(formattedDoc);
-      }).toList());
-
-      outfits.forEach((outfit) => cache.addOutfit(outfit));
-      
+      _saveOutfitsList(res);
       return true;
     })
-    .catchError((err) {
-      print(err);
-      return false;
-    });
+    .catchError((err) => false);
   }
 
+  _saveOutfitsList(dynamic response){
+    List<Outfit> outfits = List<Outfit>.from(response['res'].map((data){
+      Map<String, dynamic> formattedDoc = Map<String, dynamic>.from(data);
+      return Outfit.fromMap(formattedDoc);
+    }).toList());
+    outfits.forEach((outfit) => cache.addOutfit(outfit));
+  }
 
   Future<bool> uploadOutfit(UploadOutfit uploadOutfit) async {
     return cloudFunctions.call(functionName: 'uploadOutfit', parameters: uploadOutfit.toJson())
@@ -83,6 +81,19 @@ class FirebaseOutfitRepository implements OutfitRepository {
       'poster_user_id' : outfit.poster.userId,
       'outfit_id': outfit.outfit_id
     })
+    .then((res) async {
+      bool status = res['res'];
+      return status;
+    })
+    .catchError((err) {
+      print(err);
+      return false;
+    });
+  }
+
+  Future<bool> saveOutfit(OutfitSave saveData) async {
+    cache.saveOutfit(saveData);
+    return cloudFunctions.call(functionName: 'saveOutfit', parameters: saveData.toJson())
     .then((res) async {
       bool status = res['res'];
       return status;
@@ -147,11 +158,7 @@ class FirebaseOutfitRepository implements OutfitRepository {
   Future<bool> loadMoreComments(LoadComments loadComments) async {
     return cloudFunctions.call(functionName: 'loadComments', parameters: loadComments.toJson())
     .then((res) async {
-      List<Comment> comments = List<Comment>.from(res['res'].map((data){
-        Map<String, dynamic> formattedDoc = Map<String, dynamic>.from(data);
-        return Comment.fromMap(formattedDoc);
-      }).toList());
-      comments.forEach((comment) => cache.insertComment(comment));
+      _saveCommentsList(res);
       return true;
     })
     .catchError((err) {
@@ -159,4 +166,14 @@ class FirebaseOutfitRepository implements OutfitRepository {
       return false;
     });
   }
+
+  _saveCommentsList(dynamic response){
+    List<Comment> comments = List<Comment>.from(response['res'].map((data){
+      Map<String, dynamic> formattedDoc = Map<String, dynamic>.from(data);
+      return Comment.fromMap(formattedDoc);
+    }).toList());
+    comments.forEach((comment) => cache.insertComment(comment));
+  }
+
+
 }

@@ -21,3 +21,6 @@ export 'screens/start/log_in_screen.dart';
 
 export 'screens/upload_outfit/upload_outfit_screen.dart';
 export 'screens/upload_outfit/style_selector_screen.dart';
+
+export 'screens/wardrobe/wardrobe_screen.dart';
+export 'screens/wardrobe/outfits_grid.dart';

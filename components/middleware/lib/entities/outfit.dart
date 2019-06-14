@@ -13,6 +13,7 @@ class Outfit {
   User poster;
   DateTime createdAt;
   int userImpression;
+  bool isSaved;
 
   Outfit({
     this.outfit_id,
@@ -24,6 +25,7 @@ class Outfit {
     this.commentsCount,
     this.poster,
     this.createdAt,
+    this.isSaved
   });
 
   int get likesOverallCount => likesCount - dislikesCount;
@@ -51,6 +53,7 @@ class Outfit {
     dislikesCount = map['dislikes_count'] == null ? 0 : map['dislikes_count'];
     commentsCount = map['comments_count'] == null ? 0 : map['comments_count'];
     userImpression = map['user_impression'] == null ? 0 : map['user_impression'];
+    isSaved = map['is_saved'] == 1;
     if(!cache){
       poster = User.fromMap(map);
     }
@@ -70,6 +73,7 @@ class Outfit {
     'likes_count':likesCount,
     'dislikes_count':dislikesCount,
     'comments_count':commentsCount,
+    'is_saved': isSaved ? 1 : 0, 
   };
 
 }

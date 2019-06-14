@@ -9,6 +9,11 @@ import 'package:front_end/screens.dart';
 
 class MenuScreenNavigation extends StatefulWidget {
   
+  final int index;
+  final ValueChanged<int> onPageSelected;
+
+  MenuScreenNavigation({this.index, this.onPageSelected});
+
   @override
   _MenuScreenNavigationState createState() => _MenuScreenNavigationState();
 }
@@ -41,21 +46,25 @@ class _MenuScreenNavigationState extends State<MenuScreenNavigation> {
                   _menuOption(
                     title: 'INSPIRATION',
                     iconData: Icons.search,
-                    selected: true,
+                    selected: widget.index == 0,
+                    onPressed: () => widget.onPageSelected(0)
                   ),
                   _menuOption(
                     title: 'FASHION CIRCLE',
                     iconData: Icons.people,
+                    selected: widget.index == 1,
+                    onPressed: () => widget.onPageSelected(1)
                   ),
                   _menuOption(
                     title: 'WARDROBE',
                     iconData: FontAwesomeIcons.tshirt,
+                    selected: widget.index == 2,
+                    onPressed: () => widget.onPageSelected(2)
                   ),
                   _menuOption(
                     title: 'SETTINGS',
                     iconData: Icons.settings,
                     onPressed: () {
-                      Navigator.pop(context);
                       Navigator.push(context, MaterialPageRoute(
                         builder: (ctx) => SettingsScreen()
                       ));
@@ -139,7 +148,10 @@ class _MenuScreenNavigationState extends State<MenuScreenNavigation> {
     return Material(
       color: Colors.white,
       child: InkWell(
-        onTap: onPressed,
+        onTap: (){
+          Navigator.pop(context);
+          onPressed();
+        },
         child: Container(
           padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 8.0),
           child: Row(

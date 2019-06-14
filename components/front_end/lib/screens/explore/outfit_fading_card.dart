@@ -93,7 +93,7 @@ class _OutfitFadingCardState extends State<OutfitFadingCard> with SingleTickerPr
   Widget _buildOutfitSplash() {
     return GestureDetector(
       onVerticalDragUpdate: widget.enabled ? (s) => _switchToNextImage() : null,
-      onTap: widget.enabled && haveOutfit ? openDetailedImage : null,
+      onTap: widget.enabled && haveOutfit ? _openDetailedOutfit : null,
       child: Hero(
         tag: widget.currentOutfit?.images?.first == null? 'NULL' : widget.currentOutfit?.images?.first,
         child: Stack(
@@ -239,7 +239,7 @@ class _OutfitFadingCardState extends State<OutfitFadingCard> with SingleTickerPr
     }
   }
 
-  openDetailedImage(){
+  _openDetailedOutfit(){
     if(haveOutfit){
       Navigator.push(context, MaterialPageRoute(
         //TODO: CREATE NEW TRANSITION THAT FADES CURRENT PAGE TO WHITE THEN FADES IN NEXT PAGE

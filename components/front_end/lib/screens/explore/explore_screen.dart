@@ -16,7 +16,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
   
   final Color imageOverlayColor = Colors.white;
 
-  ExploreOutfits explore = ExploreOutfits();
+  OutfitsSearch explore = OutfitsSearch();
   String userId;
 
   int adCounter = 50;
@@ -277,7 +277,11 @@ class _ExploreScreenState extends State<ExploreScreen> {
   _displayAd() => print('ad displayed');
 
   Widget _buildActionBar(Outfit currentOutfit) {
-    OutfitImpression _outfitImpression =OutfitImpression(
+    OutfitImpression outfitImpression =OutfitImpression(
+      outfit: currentOutfit,
+      userId: userId,
+    );
+    OutfitSave saveData = OutfitSave(
       outfit: currentOutfit,
       userId: userId,
     );
@@ -302,7 +306,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
               largeIcon: true,
               disabled: allDisabled || currentOutfit?.userImpression == 1,
               selected: currentOutfit?.userImpression == -1,
-              onPressed: () => _outfitBloc.dislikeOutfit.add(_outfitImpression),
+              onPressed: () => _outfitBloc.dislikeOutfit.add(outfitImpression),
             ),
             CustomFab(
               color: Colors.greenAccent[700],
@@ -316,13 +320,14 @@ class _ExploreScreenState extends State<ExploreScreen> {
               largeIcon: true,
               disabled: allDisabled || currentOutfit?.userImpression == -1,
               selected: currentOutfit?.userImpression == 1,
-              onPressed: () => _outfitBloc.likeOutfit.add(_outfitImpression),
+              onPressed: () => _outfitBloc.likeOutfit.add(outfitImpression),
             ),
             CustomFab(
               color: Colors.amberAccent,
               icon: Icons.star,
               disabled: allDisabled,
-              onPressed: () {},
+              selected: currentOutfit?.isSaved == true,
+              onPressed: () => _outfitBloc.saveOutfit.add(saveData),
             ),
           ],
         ),

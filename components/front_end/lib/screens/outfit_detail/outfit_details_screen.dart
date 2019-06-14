@@ -325,7 +325,11 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
   }
 
   Widget _buildInteractButtons() {
-    OutfitImpression _outfitImpression =OutfitImpression(
+    OutfitImpression outfitImpression =OutfitImpression(
+      outfit: outfit,
+      userId: userId,
+    );
+    OutfitSave saveData = OutfitSave(
       outfit: outfit,
       userId: userId,
     );
@@ -336,15 +340,15 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
           children: <Widget>[
             _buildInteractButton('Dislike', Colors.pinkAccent[700], 
               selected: outfit.userImpression == -1,
-              onPressed: () => _outfitBloc.dislikeOutfit.add(_outfitImpression)
+              onPressed: () => _outfitBloc.dislikeOutfit.add(outfitImpression)
             ),
             _buildInteractButton('Save', Colors.amberAccent[700], 
-              selected: false,
-              onPressed: () {},
+              selected: outfit.isSaved,
+              onPressed: () => _outfitBloc.saveOutfit.add(saveData)
             ),
             _buildInteractButton('Like', Colors.blueAccent[700],
               selected: outfit.userImpression == 1,
-              onPressed: () => _outfitBloc.likeOutfit.add(_outfitImpression)
+              onPressed: () => _outfitBloc.likeOutfit.add(outfitImpression)
             ),
           ],
         ),

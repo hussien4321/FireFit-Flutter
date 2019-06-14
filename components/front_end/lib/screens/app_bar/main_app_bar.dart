@@ -27,7 +27,14 @@ class _MainAppBarState extends State<MainAppBar> {
   BehaviorSubject<bool> _isSliderOpenController =BehaviorSubject<bool>(seedValue: false);
 
   Widget currentPage = ExploreScreen();
-  
+
+  int currentIndex = 0;
+  List<Widget> currentPages = [
+    ExploreScreen(),
+    UnderConstructionNotice(),
+    WardrobeScreen(),
+  ];
+
   List<String> pages = [
       "INPSPIRATION",
       "FASHION CIRCLE",
@@ -48,7 +55,7 @@ class _MainAppBarState extends State<MainAppBar> {
     _initBlocs();
     return _buildNotificationsScaffold(
       body: _buildMenuScaffold(
-        body: ExploreScreen()
+        body: currentPages[currentIndex]
       )
     );
   }
@@ -99,7 +106,10 @@ class _MainAppBarState extends State<MainAppBar> {
       swipe: false,
       offset: 0.7,
       animationType: InnerDrawerAnimation.linear,
-      child: MenuScreenNavigation(),
+      child: MenuScreenNavigation(
+        index: currentIndex,
+        onPageSelected: (newIndex) => currentIndex = newIndex,
+      ),
       innerDrawerCallback: _updateMainScreenDimming,
       scaffold: _buildScaffold(
         body: body
@@ -120,7 +130,7 @@ class _MainAppBarState extends State<MainAppBar> {
           backgroundColor: Colors.white,
           appBar: AppBar(
             title: Text(
-              'INSPIRATION',
+              pages[currentIndex],
               style: TextStyle(
                 fontWeight: FontWeight.normal,
                 letterSpacing: 1.5
