@@ -30,7 +30,7 @@ class LocalDatabase {
 
   Future<Database> initDb() async {
     String path = join(await getDatabasesPath(), "mira_mira.db");
-    Database theDB = await openDatabase(path, version: 11, onCreate: _onCreate, onUpgrade: _onUpgrade);
+    Database theDB = await openDatabase(path, version: 13, onCreate: _onCreate, onUpgrade: _onUpgrade);
     return theDB;
   }
 
@@ -68,10 +68,22 @@ class LocalDatabase {
       await db.execute("CREATE TABLE comment (comment_id INTEGER PRIMARY KEY, commenter_user_id TEXT, comment_body TEXT, comment_likes_count INTEGER, comment_is_liked TINYINT DEFAULT 0, comment_created_at DATETIME)");
     }
     if(version == 10){
-      await db.execute("CREATE TABLE notification (notification_id INTEGER PRIMARY KEY, notification_type TEXT, notification_created_at DATETIME, notification_reference_id TEXT)");
+      await db.execute("CREATE TABLE notification (notification_id INTEGER PRIMARY KEY, notification_type TEXT, notification_created_at DATETIME, notification_ref_user_id TEXT, notification_ref_outfit_id INTEGER, notification_ref_comment_id INTEGER)");
     }
     if(version == 11){
       await db.execute("ALTER TABLE outfit ADD COLUMN is_saved TINYINT AFTER dislikes_count");
+    }
+    if(version == 12) {
+      await db.execute("ALTER TABLE user ADD COLUMN last_seen_notification_at DATETIME");
+      await db.execute("ALTER TABLE user ADD COLUMN number_of_followers INTEGER");
+      await db.execute("ALTER TABLE user ADD COLUMN number_of_following INTEGER");
+      await db.execute("ALTER TABLE user ADD COLUMN number_of_outfits INTEGER");
+      await db.execute("ALTER TABLE user ADD COLUMN number_of_likes INTEGER");
+      await db.execute("ALTER TABLE user ADD COLUMN number_of_new_notifications INTEGER");
+      await db.execute("ALTER TABLE user ADD COLUMN is_following TINYINT DEFAULT 0");
+    }
+    if(version == 13){
+      await db.execute("ALTER TABLE user ADD COLUMN bio TEXT AFTER username");
     }
   }
 

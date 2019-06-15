@@ -32,9 +32,9 @@ class FirebaseOutfitRepository implements OutfitRepository {
   }
   
   Future<bool> loadMoreOutfits(OutfitsSearch outfitsSearch) {
-    return cloudFunctions.call(functionName: 'getOutfits', parameters: outfitsSearch.toJson())
+    return cloudFunctions.getHttpsCallable(functionName: 'getOutfits').call(outfitsSearch.toJson())
     .then((res) async {
-      _saveOutfitsList(res);
+      _saveOutfitsList(res.data);
       return true;
     })
     .catchError((err) => false);
@@ -49,10 +49,9 @@ class FirebaseOutfitRepository implements OutfitRepository {
   }
 
   Future<bool> uploadOutfit(UploadOutfit uploadOutfit) async {
-    return cloudFunctions.call(functionName: 'uploadOutfit', parameters: uploadOutfit.toJson())
+    return cloudFunctions.getHttpsCallable(functionName: 'uploadOutfit').call(uploadOutfit.toJson())
     .then((res) async {
-
-      int outfitId = res['ref'];      
+      int outfitId = res.data['ref'];      
       List<String> fileNames = _generateFileNames(uploadOutfit.images, outfitId, uploadOutfit);
       await imageUploader.uploadImages(uploadOutfit.images, fileNames);
 
@@ -77,12 +76,12 @@ class FirebaseOutfitRepository implements OutfitRepository {
   
   Future<bool> deleteOutfit(Outfit outfit) async {
     cache.deleteOutfit(outfit);
-    return cloudFunctions.call(functionName: 'deleteOutfit', parameters: {
+    return cloudFunctions.getHttpsCallable(functionName: 'deleteOutfit').call({
       'poster_user_id' : outfit.poster.userId,
-      'outfit_id': outfit.outfit_id
+      'outfit_id': outfit.outfitId
     })
     .then((res) async {
-      bool status = res['res'];
+      bool status = res.data['res'];
       return status;
     })
     .catchError((err) {
@@ -93,9 +92,9 @@ class FirebaseOutfitRepository implements OutfitRepository {
 
   Future<bool> saveOutfit(OutfitSave saveData) async {
     cache.saveOutfit(saveData);
-    return cloudFunctions.call(functionName: 'saveOutfit', parameters: saveData.toJson())
+    return cloudFunctions.getHttpsCallable(functionName: 'saveOutfit').call(saveData.toJson())
     .then((res) async {
-      bool status = res['res'];
+      bool status = res.data['res'];
       return status;
     })
     .catchError((err) {
@@ -106,9 +105,9 @@ class FirebaseOutfitRepository implements OutfitRepository {
 
   Future<bool> impressOutfit(OutfitImpression outfitImpression) async {
     cache.impressOutfit(outfitImpression);
-    return cloudFunctions.call(functionName: 'impressOutfit', parameters: outfitImpression.toJson())
+    return cloudFunctions.getHttpsCallable(functionName: 'impressOutfit').call(outfitImpression.toJson())
     .then((res) async {
-      bool status = res['res'];
+      bool status = res.data['res'];
       return status;
     })
     .catchError((err) {
@@ -121,9 +120,9 @@ class FirebaseOutfitRepository implements OutfitRepository {
     int tempCommentId =tempIdGenerator.nextInt(1000000) * -1;
     cache.addComment(addComment, tempCommentId);
 
-    return cloudFunctions.call(functionName: 'addComment', parameters: addComment.toJson())
+    return cloudFunctions.getHttpsCallable(functionName: 'addComment').call(addComment.toJson())
     .then((res) async {
-      int actualCommentId = res['res'];
+      int actualCommentId = res.data['res'];
       await cache.updateComment(addComment, tempCommentId ,actualCommentId);
       return true;
     })
@@ -136,9 +135,9 @@ class FirebaseOutfitRepository implements OutfitRepository {
 
   Future<bool> likeComment(CommentLike commentlike) async {
     cache.likeComment(commentlike);
-    return cloudFunctions.call(functionName: 'likeComment', parameters: commentlike.toJson())
+    return cloudFunctions.getHttpsCallable(functionName: 'likeComment').call(commentlike.toJson())
     .then((res) async {
-      bool status = res['res'];
+      bool status = res.data['res'];
       return status;
     })
     .catchError((err) {
@@ -156,9 +155,9 @@ class FirebaseOutfitRepository implements OutfitRepository {
   }
 
   Future<bool> loadMoreComments(LoadComments loadComments) async {
-    return cloudFunctions.call(functionName: 'loadComments', parameters: loadComments.toJson())
+    return cloudFunctions.getHttpsCallable(functionName: 'loadComments').call(loadComments.toJson())
     .then((res) async {
-      _saveCommentsList(res);
+      _saveCommentsList(res.data);
       return true;
     })
     .catchError((err) {

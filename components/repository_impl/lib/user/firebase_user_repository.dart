@@ -85,11 +85,14 @@ class FirebaseUserRepository implements UserRepository {
   }
 
   Future<bool> _loadCurrentUser(FirebaseUser user) {
-    return loadUserDetails(user.uid);
+    return loadUserDetails(GetUser(
+      userId: user.uid,
+      currentUserId: user.uid,
+    ));
   }
 
-  Future<bool> loadUserDetails(String userId) async {
-    User currentUser = await _getUserAccountIfExisting(userId);
+  Future<bool> loadUserDetails(GetUser getUser) async {
+    User currentUser = await _getUserAccountIfExisting(getUser);
     if(currentUser !=null){
       await userCache.addUser(currentUser, isCurrentUser: true);
       return true;
@@ -98,11 +101,11 @@ class FirebaseUserRepository implements UserRepository {
   }
 
 
-  Future<User> _getUserAccountIfExisting(String userId) {
-    return cloudFunctions.call(functionName: 'getUser', parameters: {'user_id': userId})
+  Future<User> _getUserAccountIfExisting(GetUser getUser) {
+    return cloudFunctions.getHttpsCallable(functionName: 'getUser').call(getUser.toJson())
     .then((res) {
-      final result = res['res'];
-      if(res.length == 0) {
+      final result = res.data['res'];
+      if(res.data.length == 0) {
         return null;
       }
       Map<String, dynamic> formattedDoc = Map<String, dynamic>.from(result[0]);
@@ -115,7 +118,7 @@ class FirebaseUserRepository implements UserRepository {
   }
 
   Future<bool> createAccount(OnboardUser onboardUser) async {
-  return cloudFunctions.call(functionName: 'createUser', parameters: onboardUser.toJson())
+  return cloudFunctions.getHttpsCallable(functionName: 'createUser').call(onboardUser.toJson())
   .then((res) async {
       final user = await auth.currentUser();
       String userId = user.uid;
@@ -154,11 +157,11 @@ class FirebaseUserRepository implements UserRepository {
   }
 
   Future<bool> checkUsernameExists(String username) async {
-    return cloudFunctions.call(functionName: 'checkUsernameExists', parameters: {
+    return cloudFunctions.getHttpsCallable(functionName: 'checkUsernameExists').call({
       'username' : username
     })
     .then((res) {
-      return res['res'].toString() == 'true';
+      return res.data['res'].toString() == 'true';
     })
     .catchError((err) {
       return true;
@@ -168,7 +171,7 @@ class FirebaseUserRepository implements UserRepository {
   Future<void> registerNotificationToken(String userId) async {
     String notificationToken = await messaging.getToken();
     messaging.requestNotificationPermissions();
-    return cloudFunctions.call(functionName: 'registerNotificationToken', parameters: {
+    return cloudFunctions.getHttpsCallable(functionName: 'registerNotificationToken').call({
       'user_id' : userId,
       'notification_token' : notificationToken
     });
@@ -186,17 +189,39 @@ class FirebaseUserRepository implements UserRepository {
 
   Future<bool> loadNotifications(String userId) {
     outfitCache.clearNotifications();
-    return cloudFunctions.call(functionName: 'getNotifications', parameters: {
+    return cloudFunctions.getHttpsCallable(functionName: 'getNotifications').call({
       'user_id': userId
     })
     .then((res) async {
-      List<OutfitNotification> notifications = List<OutfitNotification>.from(res['res'].map((data){
+      List<OutfitNotification> notifications = List<OutfitNotification>.from(res.data['res'].map((data){
         Map<String, dynamic> formattedDoc = Map<String, dynamic>.from(data);
         return OutfitNotification.fromMap(formattedDoc);
       }).toList());
       notifications.forEach((notification) => outfitCache.insertNotification(notification));
       return true;
     })
+    .catchError((err) {
+      print(err);
+      return false;
+    });
+  }
+
+  Future<bool> markNotificationsSeen(MarkNotificationsSeen markSeen) async {
+    await userCache.markNotificationsSeen(markSeen);
+    return cloudFunctions.getHttpsCallable(functionName: 'markNotificationsSeen').call(markSeen.toJson())
+    .then((res) => res.data['res'])
+    .catchError((err) {
+      print(err);
+      return false;
+    });
+  }
+
+  Future<bool> followUser(FollowUser followUser) async {
+    print('isFollowing: ${followUser.followed.isFollowing}');
+    await userCache.followUser(followUser);
+    print('isFollowing: ${followUser.followed.isFollowing}');
+    return cloudFunctions.getHttpsCallable(functionName: 'followUser').call(followUser.toJson())
+    .then((res) => res.data['res'] == true)
     .catchError((err) {
       print(err);
       return false;

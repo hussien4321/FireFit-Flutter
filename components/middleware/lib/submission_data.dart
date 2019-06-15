@@ -9,6 +9,10 @@ export 'submission_data/outfit_save.dart';
 
 export 'submission_data/add_comment.dart';
 export 'submission_data/load_comments.dart';
-
 export 'submission_data/comment_like.dart';
 
+export 'submission_data/get_user.dart';
+
+export 'submission_data/mark_notifications_seen.dart';
+
+export 'submission_data/follow_user.dart';

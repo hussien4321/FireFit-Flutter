@@ -15,7 +15,7 @@ class AddComment {
   Map<String, dynamic> toJson() => {
     'commenter_user_id': userId,
     'poster_user_id': outfit.poster.userId,
-    'comment_outfit_id' : outfit.outfit_id,
+    'comment_outfit_id' : outfit.outfitId,
     'comment_body' :commentText,
   };
 }

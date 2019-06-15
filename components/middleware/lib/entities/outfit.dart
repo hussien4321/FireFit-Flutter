@@ -2,7 +2,7 @@ import 'package:middleware/entities.dart';
 
 class Outfit {
 
-  int outfit_id;
+  int outfitId;
   List<String> images;
   String title;
   String description;
@@ -16,7 +16,7 @@ class Outfit {
   bool isSaved;
 
   Outfit({
-    this.outfit_id,
+    this.outfitId,
     this.images, 
     this.title, 
     this.description, 
@@ -36,7 +36,7 @@ class Outfit {
   bool get hasDescription => description != null && description.length > 0;
 
   Outfit.fromMap(Map<String, dynamic> map, {bool cache = false}){
-    outfit_id = map['outfit_id'];
+    outfitId = map['outfit_id'];
     createdAt = DateTime.parse(map['outfit_created_at']);
     title = map['title'];
     description = map['description'];
@@ -60,7 +60,7 @@ class Outfit {
   } 
 
   Map<String, dynamic> toJson() => {
-    'outfit_id' : outfit_id, 
+    'outfit_id' : outfitId, 
     'poster_user_id': poster.userId,
     'image_url_1' : images[0],
     'image_url_2' : images.length > 1 ? images[1] : null,

@@ -41,7 +41,7 @@ class _OutfitFadingCardState extends State<OutfitFadingCard> with SingleTickerPr
   @override
   void initState() {
     thickness = widget.thickness;
-    currentOutfitId = widget.currentOutfit?.outfit_id;
+    currentOutfitId = widget.currentOutfit?.outfitId;
     blurringTransitionController = new AnimationController(
       vsync: this,
       duration: Duration(milliseconds: 200),
@@ -49,7 +49,7 @@ class _OutfitFadingCardState extends State<OutfitFadingCard> with SingleTickerPr
     ..addStatusListener((status) {
       if(status == AnimationStatus.completed){
         blurringTransitionController.reverse();
-        currentOutfitId = (currentOutfitId == widget.currentOutfit?.outfit_id) ? widget.nextOutfit?.outfit_id : widget.currentOutfit?.outfit_id;
+        currentOutfitId = (currentOutfitId == widget.currentOutfit?.outfitId) ? widget.nextOutfit?.outfitId : widget.currentOutfit?.outfitId;
       }
       if(status ==AnimationStatus.dismissed){
         widget.onNextPicShown();
@@ -68,9 +68,9 @@ class _OutfitFadingCardState extends State<OutfitFadingCard> with SingleTickerPr
 
   @override
   void didUpdateWidget(OutfitFadingCard oldWidget) {
-    if(oldWidget.currentOutfit?.outfit_id != widget.currentOutfit?.outfit_id){
+    if(oldWidget.currentOutfit?.outfitId != widget.currentOutfit?.outfitId){
       setState(() {
-       currentOutfitId = widget.currentOutfit?.outfit_id; 
+       currentOutfitId = widget.currentOutfit?.outfitId; 
       });
     }
     super.didUpdateWidget(oldWidget);
@@ -122,7 +122,7 @@ class _OutfitFadingCardState extends State<OutfitFadingCard> with SingleTickerPr
       );
     }
     return Opacity(
-      opacity: currentOutfitId == outfit.outfit_id ? 1.0 : 0.0,
+      opacity: currentOutfitId == outfit.outfitId ? 1.0 : 0.0,
       child: Container(
         decoration: BoxDecoration(
           boxShadow: [
@@ -243,7 +243,7 @@ class _OutfitFadingCardState extends State<OutfitFadingCard> with SingleTickerPr
     if(haveOutfit){
       Navigator.push(context, MaterialPageRoute(
         //TODO: CREATE NEW TRANSITION THAT FADES CURRENT PAGE TO WHITE THEN FADES IN NEXT PAGE
-        builder: (context) => OutfitDetailsScreen(outfitId: widget.currentOutfit.outfit_id)
+        builder: (context) => OutfitDetailsScreen(outfitId: widget.currentOutfit.outfitId)
       ));
     }
   }
@@ -346,7 +346,7 @@ class _OutfitFadingCardState extends State<OutfitFadingCard> with SingleTickerPr
     );
   }
 
-  Outfit get _currentOutfit => currentOutfitId == widget.currentOutfit?.outfit_id ? widget.currentOutfit : widget.nextOutfit;
+  Outfit get _currentOutfit => currentOutfitId == widget.currentOutfit?.outfitId ? widget.currentOutfit : widget.nextOutfit;
 
   double get _blurValue => Tween<double>(
     begin: 0.0,

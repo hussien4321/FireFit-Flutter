@@ -24,7 +24,7 @@ class CachedOutfitRepository {
     return streamDatabase.delete(
       'outfit',
       where: 'outfit_id = ?',
-      whereArgs: [outfitToDelete.outfit_id],
+      whereArgs: [outfitToDelete.outfitId],
     );
   }
 
@@ -150,8 +150,12 @@ class CachedOutfitRepository {
   }  
   
   Future<int> insertNotification(OutfitNotification notification) async { 
-    await userCache.addUser(notification.referencedUser);
-    addOutfit(notification.referencedOutfit);
+    if(notification.referencedUser != null){
+      await userCache.addUser(notification.referencedUser);
+    }
+    if(notification.referencedOutfit != null){
+      await addOutfit(notification.referencedOutfit);
+    }
     return streamDatabase.insert(
       'notification',
       notification.toJson(),
@@ -164,7 +168,7 @@ class CachedOutfitRepository {
   }
   
   Stream<List<OutfitNotification>> getNotifications(){
-    return streamDatabase.createRawQuery(['notification'], 'SELECT * FROM notification, outfit, user WHERE user_id = poster_user_id AND notification_reference_id = outfit_id ORDER BY notification_created_at desc').mapToList((data) {
+    return streamDatabase.createRawQuery(['notification'], 'SELECT * FROM notification LEFT JOIN outfit ON outfit_id=notification_ref_outfit_id LEFT JOIN user ON user_id=notification_ref_user_id LEFT JOIN comment ON comment_id=notification_ref_comment_id ORDER BY notification_created_at desc').mapToList((data) {
       return OutfitNotification.fromMap(data);
     }).asBroadcastStream();
   }

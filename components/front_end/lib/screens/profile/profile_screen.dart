@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:middleware/middleware.dart';
 import 'package:blocs/blocs.dart';
-import 'package:front_end/helper_widgets.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:front_end/providers.dart';
+import 'package:front_end/screens.dart';
 
 class ProfileScreen extends StatefulWidget {
   final String userId;
@@ -18,9 +19,14 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   
   UserBloc _userBloc;
+  OutfitBloc _outfitBloc;
+
+  FollowUser followUser =FollowUser();
+  
+  String currentUserId;
 
   final double splashSize = 200;
-  final double profilePicSize = 80; 
+  final double profilePicSize = 100; 
 
   @override
   Widget build(BuildContext context) {
@@ -36,6 +42,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               if(loadingSnap.data || !snap.hasData){
                 return Center(child: CircularProgressIndicator(),);
               }
+              followUser.followed = snap.data;
               return _profileScaffold(snap.data);
             },
           );
@@ -44,10 +51,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
   
-  _initBlocs(){
+  _initBlocs() async {
     if(_userBloc == null){
       _userBloc = UserBlocProvider.of(context);
       _userBloc.selectUser.add(widget.userId);
+      currentUserId = await _userBloc.existingAuthId.first;
+      _outfitBloc = OutfitBlocProvider.of(context);
+      _outfitBloc.loadMyOutfits.add(
+        OutfitsSearch(
+          userId: widget.userId
+        )
+      );
+      followUser.followerUserId = currentUserId;
     }
   }
 
@@ -58,36 +73,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
           child: Column(
             children: <Widget>[
               Expanded(
-                              child: ListView(
+                child: ListView(
                   children: <Widget>[
-                    Container(
-                      decoration: BoxDecoration(
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black,
-                            offset: Offset(0, 2),
-                            blurRadius: 2,
-                            spreadRadius: -2
-                          )
-                        ]
-                      ),
-                      margin: EdgeInsets.only(bottom: profilePicSize/2 + 4),
-                      child: Stack(
-                        children: <Widget>[
-                          _splashImage(),
-                          _profilePic(user),
-                        ],
-                      ),
-                    ),
-                    _userInfo(user),
+                    _biometricInfo(user),
                     _spaceSeparator(),
                     _overallStatistics(user),
                     _spaceSeparator(),
                     _buildOutfitDescription(user),
+                    _spaceSeparator(),
+                    _outfitsOverview(user),
                   ],
                 ),
               ),
-              _buildInteractButtons(user),
+              isCurrentUser ? Container() : _buildInteractButtons(user),
             ],
           ),
         ),
@@ -95,9 +93,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
+  bool get isCurrentUser => currentUserId == widget.userId;
+
   Widget _spaceSeparator(){
     return Padding(
-      padding: EdgeInsets.only(bottom: 16.0),
+      padding: EdgeInsets.only(bottom: 24.0),
     );
   }
 
@@ -108,87 +108,115 @@ class _ProfileScreenState extends State<ProfileScreen> {
         Positioned(
           top: 8,
           left: 8,
-          child: Container(
-            decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.5),
-              shape: BoxShape.circle,
+          child: IconButton(
+            icon: Icon(
+              Icons.close,
+              color: Colors.black,
             ),
-            child: IconButton(
-              icon: Icon(
-                Icons.close,
-                color: Colors.white,
-              ),
-              onPressed: Navigator.of(context).pop,
-            ),
+            onPressed: Navigator.of(context).pop,
           ),
         )
       ],
     );
   }
-
-  Widget _splashImage(){
-    return Container(
-      height: splashSize,
-      width: double.infinity,
-      child: FitHeightBlurImage(
-        url: 'https://images-na.ssl-images-amazon.com/images/I/61V5dWx7MRL._SX425_.jpg',
+  Widget _biometricInfo(User user) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          _profilePic(user),
+          _userInfo(user),
+        ],
       ),
     );
   }
+
   Widget _profilePic(User user){
-    return Positioned(
-      bottom: 0,
-      left: 0,
-      child: Padding(
-        padding: const EdgeInsets.only(left: 8.0),
-        child: Transform.translate(
-          offset: Offset(0, 4 + profilePicSize/2),
-          child: ProfilePicWithShadow(
-            hasOnClick: false,
-            heroTag: widget.heroTag == null ? null : widget.heroTag,
-            url: user.profilePicUrl,
-            size: profilePicSize,
+    return Center(
+      child: Hero(
+        tag: widget.heroTag == null ? 'null' : widget.heroTag,
+        child: Container(
             margin: EdgeInsets.all(8.0),
+            width: profilePicSize,
+            height: profilePicSize,
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: CachedNetworkImageProvider(user.profilePicUrl),
+                fit: BoxFit.cover,
+              ),
+              shape: BoxShape.circle,
+              color: Colors.grey,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black12,
+                  offset: Offset(0, 0),
+                  blurRadius: 0,
+                  spreadRadius: 3
+                )
+              ]
+            ),
           ),
-        ),
-      ),
+      ), 
     );
   }
 
   Widget _userInfo(User user){
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 8.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: <Widget>[
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Text(
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: <Widget>[
+        Row(
+          mainAxisSize: MainAxisSize.max,
+          children: <Widget>[
+            Opacity(
+              opacity: 0.0,
+              child: _demographic(user),
+            ),
+            Expanded(
+              child: Text(
                 user.name,
-                style: Theme.of(context).textTheme.title,
+                style: TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.normal,
+                  letterSpacing: 1.2
+                ),
+                textAlign: TextAlign.center,
               ),
-              Text(
-                '@'+user.username,
-                style: Theme.of(context).textTheme.caption,
-              ),
-            ],
+            ),
+            _demographic(user),
+          ],
+        ),
+        Text(
+          '@'+user.username,
+          style: Theme.of(context).textTheme.caption,
+        ),
+      ],
+    );
+  }
+
+  Widget _demographic(User user){
+    Color color = user.genderIsMale ? Colors.blue : Colors.pink;
+    return Container(
+      padding: EdgeInsets.all(4.0),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(8),
+        color: color
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Icon(
+            user.genderIsMale ? FontAwesomeIcons.male : FontAwesomeIcons.female,
+            color: Colors.white,
+            size: 16,
           ),
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              Icon(
-                user.genderIsMale ? FontAwesomeIcons.male : FontAwesomeIcons.female,
-                color: Colors.black,
-              ),
-              Text(
-                user.ageRange,
-                style: Theme.of(context).textTheme.title.apply(color: Colors.black),
-              )
-            ],
-          ),
+          Text(
+            user.ageRange,
+            style: Theme.of(context).textTheme.body2.apply(color: Colors.white),
+          )
         ],
       ),
     );
@@ -198,37 +226,87 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: <Widget>[
-        _buildStatisticTab(0, 'Followers'),
-        _buildStatisticTab(0, 'Following'),
-        _buildStatisticTab(0, 'Outfits'),
-        _buildStatisticTab(0, 'Points', isEnd: true),
+        _buildStatisticTab(
+          count: user.numberOfFollowers, 
+          name: 'Follower${user.numberOfFollowers==1?'':'s'}',
+        ),
+        _buildStatisticTab(
+          count: user.numberOfFollowing, 
+          name: 'Following',
+          onTap: () => _showFollowers(user),
+        ),
+        _buildStatisticTab(
+          count: user.numberOfOutfits, 
+          name: 'Outfit${user.numberOfOutfits==1?'':'s'}'
+        ),
+        _buildStatisticTab(
+          count: user.numberOfLikes, 
+          name: 'Like${user.numberOfLikes==1?'':'s'}', 
+          isEnd: true
+        ),
       ],
     );
   }
-  Widget _buildStatisticTab(int count, String name, {bool isEnd = false}){
+  Widget _buildStatisticTab({int count, String name, VoidCallback onTap, bool isEnd = false}){
     return Expanded(
+      child: Material(
+        shape: CircleBorder(),
+        child: InkWell(
+          onTap: onTap,
           child: Container(
-        decoration: isEnd ? null :BoxDecoration(
-          border: BorderDirectional(
-            end: BorderSide(
-              color: Colors.grey[300],
-              width: 0.5
-            )
-          )
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            Text('$count', style: Theme.of(context).textTheme.title),
-            Text(name, style: Theme.of(context).textTheme.subhead),
-          ],
+            decoration: isEnd ? null :BoxDecoration(
+              border: BorderDirectional(
+                end: BorderSide(
+                  color: Colors.grey[300],
+                  width: 0.5
+                )
+              )
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                Text('$count', style: Theme.of(context).textTheme.title),
+                Text(name, style: Theme.of(context).textTheme.subhead),
+              ],
+            ),
+          ),
         ),
       ),
     );
   }
 
+  _showFollowers(User user){
+    Navigator.of(context).push(MaterialPageRoute(
+      builder: (ctx) => _page(user)
+    ));
+  }
+
+  _page(User user) {
+    return Scaffold(
+      appBar: AppBar(
+        centerTitle: true,
+        title: Text('Followers'),
+        backgroundColor: Colors.white,
+        elevation: 1.0,
+      ),
+      body: Container(
+        child:ListView.builder(
+          itemCount: 50,
+          itemBuilder: (ctx, i) => _mockUser(user),
+        )
+      ),
+    );
+  }
+
+  Widget _mockUser(User user){
+    return Container(
+      child: Text(
+        user.name,
+      ),
+    );
+  }
+
   Widget _buildOutfitDescription(User user) {
-    //TODO: ADD USER BIO FIELD!!!
     String bio = "Hi there, my name is hussien! I enjoy trying new clothes and discovering new types of fashion! Looking forward to seeing all the cool outfits people come up with on this app :D";
     if(bio == null){
       return Center(
@@ -247,89 +325,97 @@ class _ProfileScreenState extends State<ProfileScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          Padding(
-            padding: EdgeInsets.only(left: 8.0, bottom: 4.0),
-            child: Text(
-              "Bio:",
-              style: TextStyle(
-                color: Colors.grey,
-                fontStyle: FontStyle.italic
-              ),
-            ),
-          ),
-          Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20.0),
-              color: Colors.grey[350]
-            ),
-            width: double.infinity,
-            margin: EdgeInsets.only(bottom: 16.0),
-            padding: EdgeInsets.all(8.0),
-            child: Text(
-              bio,
-              textScaleFactor: 1.2,
-            ),
+          _sectionHeader("User Bio"),
+          Text(
+            bio,
+            style: Theme.of(context).textTheme.caption,
           ),
         ],
       ),
     );
   }
 
-  Widget _buildInteractButtons(User user){
+  Widget _sectionHeader(String header) {
     return Container(
-      color: Colors.grey[300],
-      child: Row(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        border: BorderDirectional(
+          bottom: BorderSide(
+            color: Colors.grey[300],
+            width: 0.5
+          )
+        )
+      ),
+      margin: const EdgeInsets.only(bottom:8.0),
+      child: Text(
+        header,
+        style: Theme.of(context).textTheme.subhead.apply(fontWeightDelta: 3)
+      ),
+    );
+  }
+
+  Widget _outfitsOverview(User user){
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          Expanded(
-            child: FlatButton(
-              padding: EdgeInsets.all(8.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  Icon(
-                    Icons.message,
-                    color: Colors.green,
-                  ),
-                  Text(
-                    'Message user',
-                    style: TextStyle(color: Colors.green),
-                  )
-                ],
-              ),
-              onPressed: () {},
-            ),
-          ),
-          Expanded(
-            child: Container(
-              decoration: BoxDecoration(
-                border: BorderDirectional(
-                  start: BorderSide(
-                    color: Colors.grey.withOpacity(0.5),
-                    width: 0.5
-                  )
-                )
-              ),
-              child: FlatButton(
-                padding: EdgeInsets.all(8.0),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    Icon(
-                      Icons.person_add,
-                      color: Colors.blue,
-                    ),
-                    Text(
-                      'Follow user',
-                      style: TextStyle(color: Colors.blue),
-                    )
-                  ],
-                ),
-                onPressed: () {},
-              ),
-            ),
-          ),
+          _sectionHeader("Outfits"),
+          _outfitsGrid(),
         ],
       ),
     );
   }
+
+  Widget _outfitsGrid() {
+    return StreamBuilder<bool>(
+      stream: _outfitBloc.isLoading,
+      initialData: false,
+      builder: (ctx, loadingSnap) => StreamBuilder<List<Outfit>>(
+        stream: _outfitBloc.outfits,
+        initialData: [],
+        builder: (ctx, outfitsSnap) => OutfitsGrid(
+          isLoading: loadingSnap.data,
+          outfits: outfitsSnap.data,
+          hideTitle: true,
+        ),
+      )
+    );
+  }
+  Widget _buildInteractButtons(User user){
+    return Container(
+      decoration: BoxDecoration(
+        border: BorderDirectional(
+          start: BorderSide(
+            color: Colors.grey.withOpacity(0.5),
+            width: 0.5
+          )
+        ),
+        color: user.isFollowing ? Colors.purpleAccent : Colors.grey,
+      ),
+      width: double.infinity,
+      child: FlatButton(
+        padding: EdgeInsets.symmetric(vertical: 16.0),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Padding(
+              padding: const EdgeInsets.only(right: 8.0),
+              child: Text(
+                user.isFollowing ? 'Following' : 'Follow User',
+                style: TextStyle(color: Colors.white, fontSize: 20),
+              ),
+            ),
+            Icon(
+              user.isFollowing ? Icons.check : Icons.person_add,
+              color: Colors.white,
+            ),
+          ],
+        ),
+        onPressed: () => _userBloc.followUser.add(followUser),
+      ),
+    );
+  }
+
 }

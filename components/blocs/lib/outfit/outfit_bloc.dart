@@ -60,7 +60,7 @@ class OutfitBloc{
     await _loadOutfits(outfitsSearch);
   }
   _loadMyOutfits(OutfitsSearch outfitsSearch) async {
-    outfitsSearch.searchMode = 'mine';
+    outfitsSearch.searchMode = 'user';
     await _loadOutfits(outfitsSearch);
   }
   _loadSavedOutfits(OutfitsSearch outfitsSearch) async {

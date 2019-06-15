@@ -39,8 +39,6 @@ class _MainAppBarState extends State<MainAppBar> {
       "INPSPIRATION",
       "FASHION CIRCLE",
       "WARDROBE",
-      "PROFILE",
-      "SETTINGS",
   ];
 
   @override
@@ -187,13 +185,17 @@ class _MainAppBarState extends State<MainAppBar> {
 
   Widget _buildNotificationsButton() {
     return Center(
-      child: IconButton( 
-        icon: NotificationIcon(
-          iconData: Icons.notifications,
-          messages: 1,
+      child: StreamBuilder<int>(
+        stream: _userBloc.currentUser.map((user) => user.numberOfNewNotifications),
+        initialData: 0,
+        builder: (ctx, countSnap) => IconButton( 
+          icon: NotificationIcon(
+            iconData: Icons.notifications,
+            messages: countSnap.data,
+          ),
+          onPressed: () => _dmDrawerKey.currentState.open()
         ),
-        onPressed: () => _dmDrawerKey.currentState.open()
-      ),  
+      )  
     );
   }
 

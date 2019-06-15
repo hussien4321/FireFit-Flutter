@@ -84,7 +84,7 @@ class _CommentsScreenState extends State<CommentsScreen> {
       userId = await UserBlocProvider.of(context).existingAuthId.first;
       _commentBloc.loadComments.add(LoadComments(
         userId: userId,
-        outfitId: widget.outfit.outfit_id,
+        outfitId: widget.outfit.outfitId,
       ));
     }
   }
@@ -153,7 +153,7 @@ class _CommentsScreenState extends State<CommentsScreen> {
           Padding(
             padding: const EdgeInsets.only(top: 8.0),
             child: ProfilePicWithShadow(
-              heroTag: '${widget.outfit.outfit_id}-'+widget.outfit.poster.profilePicUrl,
+              heroTag: '${widget.outfit.outfitId}-'+widget.outfit.poster.profilePicUrl,
               userId: widget.outfit.poster.userId,
               url: widget.outfit.poster.profilePicUrl,
             ),
@@ -285,7 +285,7 @@ class _CommentsScreenState extends State<CommentsScreen> {
   _likeComment(Comment comment) {
     CommentLike commentLike =CommentLike(
       comment: comment,
-      outfitId: widget.outfit.outfit_id,
+      outfitId: widget.outfit.outfitId,
       userId: userId
     );
     _commentBloc.likeComment.add(commentLike);

@@ -19,9 +19,11 @@ class TwitterAuthInstance implements AuthInstance {
   Future<FirebaseUser> signIn({
     LogInFields fields
   }){
-    return auth.signInWithTwitter(
-      authToken: fields.twitterToken,
-      authTokenSecret: fields.twitterTokenSecret
+    return auth.signInWithCredential(
+      TwitterAuthProvider.getCredential(
+        authToken: fields.twitterToken,
+        authTokenSecret: fields.twitterTokenSecret
+      )
     );
   }
 

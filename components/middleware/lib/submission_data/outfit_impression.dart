@@ -15,7 +15,7 @@ class OutfitImpression {
   Map<String, dynamic> toJson() => {
     'impression_user_id': userId,
     'poster_user_id': outfit.poster.userId,
-    'outfit_id' : outfit.outfit_id,
+    'outfit_id' : outfit.outfitId,
     'impression_value' :impressionValue,
   };
 }

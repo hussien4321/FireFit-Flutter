@@ -19,9 +19,11 @@ class GoogleAuthInstance implements AuthInstance {
   Future<FirebaseUser> signIn({
     LogInFields fields
   }){
-    return auth.signInWithGoogle(
-      idToken: fields.googleIdToken,
-      accessToken: fields.googleAccessToken
+    return auth.signInWithCredential(
+      GoogleAuthProvider.getCredential(
+        accessToken: fields.googleAccessToken,
+        idToken: fields.googleIdToken
+      )
     );
   }
 

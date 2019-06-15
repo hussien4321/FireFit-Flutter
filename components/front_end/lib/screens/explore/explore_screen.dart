@@ -312,7 +312,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
               color: Colors.greenAccent[700],
               icon: Icons.comment,
               disabled: allDisabled,
-              onPressed: () => _composeComment(currentOutfit.outfit_id),
+              onPressed: () => _composeComment(currentOutfit.outfitId),
             ),
             CustomFab(
               color: Colors.blueAccent,

@@ -10,11 +10,11 @@ dependencies:
   helpers:
     path: ../helpers
 # Firebase services    
-  cloud_functions: ^0.0.5
-  firebase_auth: ^0.6.6
-  firebase_storage: ^1.0.4
+  cloud_functions: ^0.4.0
+  firebase_auth: ^0.11.1+6
+  firebase_storage: ^3.0.1
   streamqflite: ^1.0.0
-  firebase_messaging: ^2.1.0
+  firebase_messaging: ^5.0.3
   flutter_image_compress: ^0.2.4
 
 dev_dependencies:

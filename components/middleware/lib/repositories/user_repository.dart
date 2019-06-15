@@ -12,8 +12,11 @@ abstract class UserRepository {
 
   Future<void> registerNotificationToken(String userId);
   Future<bool> loadNotifications(String userId);
+  Future<bool> markNotificationsSeen(MarkNotificationsSeen markSeen);
   Stream<List<OutfitNotification>> getNotifications();
   
+  Future<bool> followUser(FollowUser followUser);
+
   Future<bool> hasEmailVerified();
   Future<void> resendVerificationEmail([_]);
   Future<String> getVerificationEmail();
@@ -21,6 +24,6 @@ abstract class UserRepository {
 
   Future<void> logOut();
 
-  Future<bool> loadUserDetails(String userId);
+  Future<bool> loadUserDetails(GetUser getUser);
   Stream<User> getUser(String userId);
 }

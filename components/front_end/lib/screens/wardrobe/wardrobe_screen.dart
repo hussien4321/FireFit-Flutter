@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:blocs/blocs.dart';
 import 'package:front_end/providers.dart';
 import 'package:middleware/middleware.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:front_end/screens.dart';
 
 class WardrobeScreen extends StatelessWidget {
@@ -22,6 +21,7 @@ class WardrobeScreen extends StatelessWidget {
               ),
               Expanded(
                 child: TabBarView(
+                  physics: NeverScrollableScrollPhysics(),
                   children: [
                     CustomOutfitsGrid(
                       isSavedOutfits: false,

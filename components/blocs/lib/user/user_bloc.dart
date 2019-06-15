@@ -54,6 +54,9 @@ class UserBloc {
   Sink<String> get checkUsername => _checkUsernameController;
   final _isUsernameTakenController = PublishSubject<bool>();
   Observable<bool> get isUsernameTaken => _isUsernameTakenController;
+  
+  final _followUserController = PublishSubject<FollowUser>();
+  Sink<FollowUser> get followUser => _followUserController;
 
 
   UserBloc(this.repository) {
@@ -68,6 +71,7 @@ class UserBloc {
       _resendEmailController.stream.listen(repository.resendVerificationEmail),
       _selectUserController.listen(_getUserStream),
       _loadCurrentUserController.listen(_loadCurrentUser),
+      _followUserController.listen(_followUser)
     ];
     _loadCurrentUser();
     _accountStatusController = Observable.combineLatest2<String, BehaviorSubject<User>, UserAccountStatus>(existingAuthId, _currentUserController, _redirectPath).asBroadcastStream().debounce(Duration(milliseconds: 300));
@@ -148,25 +152,36 @@ class UserBloc {
     _isUsernameTakenController.add(usernameExists);
   }
 
+  String get _currentUserId => _existingAuthController.value;
+
   _getUserStream(String userId) async {
     _loadingController.add(true);
-    await repository.loadUserDetails(userId);
+    await repository.loadUserDetails(GetUser(
+      userId: userId,
+      currentUserId: _currentUserId
+    ));
     _selectedUserController.add(repository.getUser(userId));
     _loadingController.add(false);
   }
 
   _loadCurrentUser([_]) async {
     _loadingController.add(true);
-
-    String userId = await existingAuthId.first;
-    await repository.loadUserDetails(userId);
-
+    await repository.loadUserDetails(GetUser(
+      userId: _currentUserId,
+      currentUserId: _currentUserId
+    ));
     BehaviorSubject<User> userStream = BehaviorSubject<User>();
-    userStream.addStream(repository.getUser(userId));
+    userStream.addStream(repository.getUser(_currentUserId));
     await userStream.isEmpty; 
     _loadingController.add(false);
     _currentUserController.add(userStream);
-    
+  }
+
+  _followUser(FollowUser followUser) async {
+    bool success = await repository.followUser(followUser);
+    if(!success){
+      _errorController.add("Failed to complete task");
+    }
   }
 
   void dispose() {
@@ -174,6 +189,7 @@ class UserBloc {
     _existingAuthController.close();
     _loadCurrentUserController.close();
     _selectedUserController.close();
+    _followUserController.close();
     _selectUserController.close();
     _loadingController.close();
     _logInController.close();

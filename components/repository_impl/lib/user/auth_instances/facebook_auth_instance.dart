@@ -19,8 +19,10 @@ class FacebookAuthInstance implements AuthInstance {
   Future<FirebaseUser> signIn({
     LogInFields fields
   }){
-    return auth.signInWithFacebook(
-      accessToken: fields.facebookToken
+    return auth.signInWithCredential(
+      FacebookAuthProvider.getCredential(
+        accessToken: fields.facebookToken
+      )
     );
   }
 

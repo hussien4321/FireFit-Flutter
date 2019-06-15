@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:helpers/helpers.dart';
 import 'package:front_end/helper_widgets.dart';
 import 'package:middleware/middleware.dart';
-import 'package:image_picker/image_picker.dart';
+import 'package:multi_image_picker/multi_image_picker.dart';
 import 'package:front_end/screens.dart';
 import 'package:blocs/blocs.dart';
 import 'package:front_end/providers.dart';
 import 'dart:async';
+import 'package:flutter/services.dart';
 import 'dart:io';
+import 'package:path_provider/path_provider.dart';
 
 class UploadOutfitScreen extends StatefulWidget {
   @override
@@ -16,6 +18,7 @@ class UploadOutfitScreen extends StatefulWidget {
 
 
 class _UploadOutfitScreenState extends State<UploadOutfitScreen> with LoadingAndErrorDialogs, SnackbarMessages {
+  List<Asset> images = List<Asset>();
 
   UploadOutfit uploadOutfit;
   TextEditingController titleTextEdit;
@@ -24,7 +27,10 @@ class _UploadOutfitScreenState extends State<UploadOutfitScreen> with LoadingAnd
   OutfitBloc _outfitBloc;
   UserBloc _userBloc;
   List<StreamSubscription<dynamic>> _subscriptions;
+  
+  bool loadingImages = false;
 
+  String dirPath;
 
   @override
   void initState() {
@@ -32,6 +38,16 @@ class _UploadOutfitScreenState extends State<UploadOutfitScreen> with LoadingAnd
     uploadOutfit = UploadOutfit();
     titleTextEdit = TextEditingController(text: uploadOutfit.title);
     descriptionTextEdit = TextEditingController(text: uploadOutfit.description);
+
+    _initTempGallery();
+    
+  }
+
+  _initTempGallery() async{ 
+    Directory extDir = await getApplicationDocumentsDirectory();
+    dirPath = '${extDir.path}/Pictures/temp';
+    await Directory(dirPath).delete(recursive: true);
+    await Directory(dirPath).create(recursive: true);
   }
 
   @override
@@ -324,6 +340,7 @@ class _UploadOutfitScreenState extends State<UploadOutfitScreen> with LoadingAnd
 
   _removeImage(int index){
     uploadOutfit.images.removeAt(index);
+    images.removeAt(index);
     setState(() {});
   }
 
@@ -339,18 +356,18 @@ class _UploadOutfitScreenState extends State<UploadOutfitScreen> with LoadingAnd
         ),
         child: InkWell(
           borderRadius: BorderRadius.circular(20.0,),
-          onTap: () => _addImages(remainingImages),
+          onTap: loadingImages ? null : _addImages,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             mainAxisAlignment: MainAxisAlignment.center,
             mainAxisSize: MainAxisSize.max,
             children: <Widget>[
-              Hero(
+              loadingImages ? CircularProgressIndicator() : Hero(
                 tag: MMKeys.uploadButtonHero,
                 child: Icon(Icons.add_a_photo),
               ),
               Text(
-                'Add ${remainingImages==3?'an':(remainingImages==2?'another':'a final')} image',
+                loadingImages ? 'Loading...' : 'Add ${remainingImages==3?'an':(remainingImages==2?'another':'a final')} image',
                 textAlign: TextAlign.center,
               )
             ],
@@ -360,14 +377,60 @@ class _UploadOutfitScreenState extends State<UploadOutfitScreen> with LoadingAnd
     );
   }
 
-  _addImages(int remainingImages) async {
-    var image = await ImagePicker.pickImage(source: ImageSource.gallery);
 
-    if (!mounted || image == null)  return;
+  Future<void> _addImages() async {
+    List<Asset> resultList = List<Asset>();
+    try {
+      resultList = await _pickImages();
+    } on PlatformException catch (e) {
+      print('FAILED: ${e.message}');
+    }
+    if (!mounted) return;    
+    _saveImages(resultList);
+  }
 
+  Future<List<Asset>> _pickImages() => MultiImagePicker.pickImages(
+    maxImages: 3,
+    enableCamera: true,
+    selectedAssets: images,
+    cupertinoOptions: CupertinoOptions(
+      backgroundColor: "#D3D3D3",
+    ),
+    materialOptions: MaterialOptions(
+      actionBarColor: "#808080",
+      statusBarColor: "#808080",
+      lightStatusBar: true,
+      actionBarTitle: 'Select outfit'
+    )
+  );
+  
+
+  _saveImages(List<Asset> resultList) async {
+    setState(() => loadingImages = true);
+
+    for(Asset result in resultList){
+      await _saveImage(result);
+    }
+    
     setState(() {
-      uploadOutfit.images = uploadOutfit.images..addAll([image.path]);
+      uploadOutfit.images = uploadOutfit.images;
+      loadingImages = false;
     });
+  }
+
+  String get timestamp => DateTime.now().millisecondsSinceEpoch.toString();
+
+  _saveImage(Asset result) async {
+    if(!images.any((Asset image) => result.identifier==image.identifier)){
+      images.add(result);
+      ByteData imageData = await result.requestOriginal(quality: 50);
+      if(imageData != null){
+        String filename = '$dirPath/$timestamp.jpg';
+        File filePath = File(filename);
+        await filePath.writeAsBytes(imageData.buffer.asInt8List());
+        uploadOutfit.images.add(filename);
+      }
+    }
   }
 }
 

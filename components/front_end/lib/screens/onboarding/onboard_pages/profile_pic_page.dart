@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:middleware/middleware.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:image_picker/image_picker.dart';
 import 'onboard_details.dart';
 
 class ProfilePicPage extends StatelessWidget {
@@ -73,10 +72,10 @@ class ProfilePicPage extends StatelessWidget {
   bool get _hasProfilePicture => onboardUser.profilePicUrl != null;
 
   _uploadSinglePicture(BuildContext context) async {
-    var image = await ImagePicker.pickImage(source: ImageSource.gallery);
-    if (image != null){
-      onboardUser.profilePicUrl = image.path;
-      onSave(onboardUser);
-    }
+    // var image = await ImagePicker.pickImage(source: ImageSource.gallery);
+    // if (image != null){
+    //   onboardUser.profilePicUrl = image.path;
+    //   onSave(onboardUser);
+    // }
   }
 }

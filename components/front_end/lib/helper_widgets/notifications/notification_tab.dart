@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:helpers/helpers.dart';
-import 'package:front_end/helper_widgets.dart';
+import 'package:front_end/screens.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:middleware/middleware.dart';
 
@@ -18,12 +18,15 @@ class _NotificationTabState extends State<NotificationTab> {
 
   User get refUser => widget.notification.referencedUser;
   Outfit get refOutfit => widget.notification.referencedOutfit;
-  
+  bool get hasRefOutfit => refOutfit != null;
+
+
   @override
   Widget build(BuildContext context) {
     return Material(
+      color: Colors.grey[100],
       child: InkWell(
-        onTap: () {},
+        onTap: _openNotification,
         child: Container(
           margin: EdgeInsets.symmetric(horizontal: 8.0),
           padding: EdgeInsets.symmetric(vertical: 8.0),
@@ -46,6 +49,14 @@ class _NotificationTabState extends State<NotificationTab> {
                     image: CachedNetworkImageProvider(refUser.profilePicUrl),
                     fit: BoxFit.cover
                   ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black,
+                      blurRadius: 4,
+                      spreadRadius: -2,
+                      offset: Offset(0, 2)
+                    )
+                  ],
                   color: Colors.grey
                 ),
               ),
@@ -54,13 +65,13 @@ class _NotificationTabState extends State<NotificationTab> {
                   mainAxisSize: MainAxisSize.min,
                   children: <Widget>[
                     Padding(
-                      padding: EdgeInsets.only(bottom: 8.0),
+                      padding: EdgeInsets.only(bottom: 4.0),
                       child: Row(
                         children: <Widget>[
                           Expanded(
                             child: Text(
                               widget.notification.getNotificationTitle,
-                              style: Theme.of(context).textTheme.subtitle,
+                              style: Theme.of(context).textTheme.subhead.apply(fontWeightDelta: 3),
                             )
                           ),
                           Text(
@@ -70,35 +81,75 @@ class _NotificationTabState extends State<NotificationTab> {
                         ],
                       ),
                     ),
-                    Container(
-                      width: double.infinity,
-                      child: RichText(
-                        text: TextSpan(
-                          children: [
-                            TextSpan(
-                              text: refUser.name,
-                              style: Theme.of(context).textTheme.subtitle
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Expanded(
+                          child: Container(
+                            width: double.infinity,
+                            child: RichText(
+                              text: TextSpan(
+                                children: [
+                                   TextSpan(
+                                    text: refUser?.name,
+                                    style: Theme.of(context).textTheme.subtitle
+                                  ),
+                                  TextSpan(
+                                    text: ' ${widget.notification.getNotificationDescription} ',
+                                    style: Theme.of(context).textTheme.body1
+                                  ),
+                                  TextSpan(
+                                    text: refOutfit?.title,
+                                    style: Theme.of(context).textTheme.body2
+                                  ),
+                                ]
+                              ),
                             ),
-                            TextSpan(
-                              text: ' ${widget.notification.getNotificationDescription} ',
-                              style: Theme.of(context).textTheme.body1
-                            ),
-                            TextSpan(
-                              text: refOutfit.title,
-                              style: Theme.of(context).textTheme.body2
-                            ),
-                          ]
+                          ),
                         ),
-                      ),
+                        hasRefOutfit ? Container(
+                          margin: EdgeInsets.only(right: 8.0),
+                          width: 35.0,
+                          height: 60.0,
+                          decoration: BoxDecoration(
+                            image: DecorationImage(
+                              image: CachedNetworkImageProvider(refOutfit.images.first),
+                              fit: BoxFit.cover
+                            ),
+                            border: Border.all(
+                              width: 0.5
+                            ),
+                            color: Colors.grey
+                          ),
+                        ) : Container(),
+                      ],
                     ),
                   ],
                 ),
-              )
+              ),
+              
             ],
           )
         ),
       ),
     );
+  }
+
+  _openNotification() {
+    if(widget.notification.type == NotificationType.OUTFIT_LIKE || widget.notification.type == NotificationType.NEW_COMMENT || widget.notification.type == NotificationType.COMMENT_LIKE){
+      Navigator.push(context, MaterialPageRoute(
+        builder: (ctx) => OutfitDetailsScreen(
+          outfitId: refOutfit.outfitId,
+        )
+      ));
+    }
+    if(widget.notification.type == NotificationType.NEW_FOLLOW){
+      Navigator.push(context, MaterialPageRoute(
+        builder: (ctx) => ProfileScreen(
+          userId: refUser.userId,
+         )
+      ));
+    }
   }
 
 }

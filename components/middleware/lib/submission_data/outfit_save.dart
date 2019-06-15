@@ -12,7 +12,7 @@ class OutfitSave {
 
   Map<String, dynamic> toJson() => {
     'save_user_id': userId,
-    'outfit_id' : outfit.outfit_id,
+    'outfit_id' : outfit.outfitId,
     'is_saved' : outfit.isSaved,
   };
 }
