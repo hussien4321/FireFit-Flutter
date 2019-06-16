@@ -14,6 +14,8 @@ class Outfit {
   DateTime createdAt;
   int userImpression;
   bool isSaved;
+  SearchOutfit searchOutfit;
+  Save save;
 
   Outfit({
     this.outfitId,
@@ -35,7 +37,7 @@ class Outfit {
   bool get hasMultipleImages => images.length > 1;
   bool get hasDescription => description != null && description.length > 0;
 
-  Outfit.fromMap(Map<String, dynamic> map, {bool cache = false}){
+  Outfit.fromMap(Map<String, dynamic> map){
     outfitId = map['outfit_id'];
     createdAt = DateTime.parse(map['outfit_created_at']);
     title = map['title'];
@@ -54,9 +56,9 @@ class Outfit {
     commentsCount = map['comments_count'] == null ? 0 : map['comments_count'];
     userImpression = map['user_impression'] == null ? 0 : map['user_impression'];
     isSaved = map['is_saved'] == 1;
-    if(!cache){
-      poster = User.fromMap(map);
-    }
+    poster = User.fromMap(map);
+    searchOutfit = SearchOutfit.fromMap(map);
+    save = Save.fromMap(map);
   } 
 
   Map<String, dynamic> toJson() => {

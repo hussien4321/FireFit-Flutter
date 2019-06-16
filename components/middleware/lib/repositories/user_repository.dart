@@ -16,6 +16,8 @@ abstract class UserRepository {
   Stream<List<OutfitNotification>> getNotifications();
   
   Future<bool> followUser(FollowUser followUser);
+  Future<bool> loadFollowers(LoadUser userId);
+  Future<bool> loadFollowing(LoadUser userId);
 
   Future<bool> hasEmailVerified();
   Future<void> resendVerificationEmail([_]);
@@ -24,6 +26,7 @@ abstract class UserRepository {
 
   Future<void> logOut();
 
-  Future<bool> loadUserDetails(GetUser getUser);
-  Stream<User> getUser(String userId);
+  Future<bool> loadUserDetails(LoadUser loadUser, SearchModes searchMode);
+  Stream<User> loadUser(SearchModes searchMode);
+  Stream<List<User>> loadUsers(SearchModes searchMode);
 }

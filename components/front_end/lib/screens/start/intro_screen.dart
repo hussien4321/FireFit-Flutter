@@ -51,8 +51,8 @@ class _IntroScreenState extends State<IntroScreen> {
   
   StreamSubscription _logInStatusListener(){
     return _userBloc.accountStatus.listen((accountStatus) {
-      if(accountStatus !=UserAccountStatus.LOGGED_OUT){
-        print('push');
+      if(accountStatus!=null && accountStatus !=UserAccountStatus.LOGGED_OUT){
+        print('got status = $accountStatus');
         Navigator.pushReplacement(context, MaterialPageRoute(
           builder: (ctx) => RouteConverters.getFromAccountStatus(accountStatus)
         ));

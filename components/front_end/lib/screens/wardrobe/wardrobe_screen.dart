@@ -55,7 +55,7 @@ class _CustomOutfitsGridState extends State<CustomOutfitsGrid> {
 
   OutfitBloc _outfitBloc;
   String userId;
-  OutfitsSearch searchParams = OutfitsSearch(); 
+  LoadOutfits searchParams = LoadOutfits(); 
 
   bool isMyOutfits = true;
   
@@ -73,7 +73,7 @@ class _CustomOutfitsGridState extends State<CustomOutfitsGrid> {
       initialData: false,
       builder: (ctx, isLoadingSnap) {
         return StreamBuilder<List<Outfit>>(
-          stream: _outfitBloc.outfits,
+          stream: isMyOutfits ? _outfitBloc.myOutfits : _outfitBloc.savedOutfits,
           initialData: [],
           builder: (ctx, outfitsSnap) {
             return OutfitsGrid(

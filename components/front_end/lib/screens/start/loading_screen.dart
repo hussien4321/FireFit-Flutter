@@ -19,8 +19,6 @@ class _LoadingScreenState extends State<LoadingScreen> {
     _subscriptions?.forEach((subscription) => subscription.cancel());
     super.dispose();
   }
- 
-  bool isLoading = false;
 
   @override
   Widget build(BuildContext context) {
@@ -50,21 +48,14 @@ class _LoadingScreenState extends State<LoadingScreen> {
     if(_userBloc == null){
       _userBloc = UserBlocProvider.of(context);
       _subscriptions = <StreamSubscription<dynamic>>[
-        _loadingListener(),
         _navigationListener(),
       ];
     }
   }
 
-
-  StreamSubscription _loadingListener(){
-    return _userBloc.isLoading.listen((loadingStatus) {
-      isLoading =loadingStatus;
-    });
-  }
   StreamSubscription _navigationListener(){
     return _userBloc.accountStatus.listen((accountStatus) {
-      if(!isLoading){
+      if(accountStatus!=null){
         Navigator.pushReplacement(context, MaterialPageRoute(
           builder: (ctx) => RouteConverters.getFromAccountStatus(accountStatus)
         ));

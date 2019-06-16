@@ -1,11 +1,14 @@
-class GetUser {
+import 'package:middleware/middleware.dart';
+class LoadUser {
 
+  SearchModes searchMode;
   String userId;
   String currentUserId;
 
-  GetUser({
+  LoadUser({
     this.userId,
     this.currentUserId,
+    this.searchMode,
   });
 
   Map<String, dynamic> toJson() => {

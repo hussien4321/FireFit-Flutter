@@ -7,15 +7,26 @@ class OutfitBloc{
   final OutfitRepository repository;
   List<StreamSubscription<dynamic>> _subscriptions;
 
-  final _outfitsController = BehaviorSubject<List<Outfit>>(seedValue: []);
-  Stream<List<Outfit>> get outfits => _outfitsController.stream; 
-  final _exploreOutfitsController = PublishSubject<OutfitsSearch>();
-  Sink<OutfitsSearch> get exploreOutfits => _exploreOutfitsController;
-  final _loadMyOutfitsController = PublishSubject<OutfitsSearch>();
-  Sink<OutfitsSearch> get loadMyOutfits => _loadMyOutfitsController;
-  final _loadSavedOutfitsController = PublishSubject<OutfitsSearch>();
-  Sink<OutfitsSearch> get loadSavedOutfits => _loadSavedOutfitsController;
-  
+  final _exploredOutfitsController = BehaviorSubject<List<Outfit>>(seedValue: []);
+  Stream<List<Outfit>> get exploredOutfits => _exploredOutfitsController.stream; 
+  final _savedOutfitsController = BehaviorSubject<List<Outfit>>(seedValue: []);
+  Stream<List<Outfit>> get savedOutfits => _savedOutfitsController.stream; 
+  final _myOutfitsController = BehaviorSubject<List<Outfit>>(seedValue: []);
+  Stream<List<Outfit>> get myOutfits => _myOutfitsController.stream; 
+  final _selectedOutfitsController = BehaviorSubject<List<Outfit>>(seedValue: []);
+  Stream<List<Outfit>> get selectedOutfits => _selectedOutfitsController.stream; 
+  final _feedOutfitsController = BehaviorSubject<List<Outfit>>(seedValue: []);
+  Stream<List<Outfit>> get feedOutfits => _feedOutfitsController.stream; 
+
+  final _exploreOutfitsController = PublishSubject<LoadOutfits>();
+  Sink<LoadOutfits> get exploreOutfits => _exploreOutfitsController;
+  final _loadMyOutfitsController = PublishSubject<LoadOutfits>();
+  Sink<LoadOutfits> get loadMyOutfits => _loadMyOutfitsController;
+  final _loadUserOutfitsController = PublishSubject<LoadOutfits>();
+  Sink<LoadOutfits> get loadUserOutfits => _loadUserOutfitsController;
+  final _loadSavedOutfitsController = PublishSubject<LoadOutfits>();
+  Sink<LoadOutfits> get loadSavedOutfits => _loadSavedOutfitsController;
+
   final _selectedOutfitController = BehaviorSubject<Stream<Outfit>>();
   Stream<Outfit> get selectedOutfit => _selectedOutfitController.value;
   final _selectOutfitController = PublishSubject<int>();
@@ -41,10 +52,16 @@ class OutfitBloc{
   Observable<String> get hasError => _errorController.stream;
   
   OutfitBloc(this.repository) {
-    _outfitsController.addStream(repository.getOutfits());
+    _exploredOutfitsController.addStream(repository.getOutfits(SearchModes.EXPLORE));
+    _myOutfitsController.addStream(repository.getOutfits(SearchModes.MINE));
+    _savedOutfitsController.addStream(repository.getOutfits(SearchModes.SAVED));
+    _selectedOutfitsController.addStream(repository.getOutfits(SearchModes.SELECTED));
+    _feedOutfitsController.addStream(repository.getOutfits(SearchModes.FEED));
+
     _subscriptions = <StreamSubscription<dynamic>>[
       _exploreOutfitsController.listen(_exploreOutfits),
       _loadMyOutfitsController.listen(_loadMyOutfits),
+      _loadUserOutfitsController.distinct().listen(_loadUserOutfits),
       _loadSavedOutfitsController.listen(_loadSavedOutfits),
       _uploadOutfitsController.listen(_uploadOutfit),
       _deleteOutfitController.listen(_deleteOutfit),
@@ -55,22 +72,26 @@ class OutfitBloc{
     ];
   }
 
-  _exploreOutfits(OutfitsSearch outfitsSearch) async {
-    outfitsSearch.searchMode = 'explore';
-    await _loadOutfits(outfitsSearch);
+  _exploreOutfits(LoadOutfits loadOutfits) async {
+    loadOutfits.searchMode = SearchModes.EXPLORE;
+    await _loadOutfits(loadOutfits);
   }
-  _loadMyOutfits(OutfitsSearch outfitsSearch) async {
-    outfitsSearch.searchMode = 'user';
-    await _loadOutfits(outfitsSearch);
+  _loadMyOutfits(LoadOutfits loadOutfits) async {
+    loadOutfits.searchMode = SearchModes.MINE;
+    await _loadOutfits(loadOutfits);
   }
-  _loadSavedOutfits(OutfitsSearch outfitsSearch) async {
-    outfitsSearch.searchMode = 'saved';
-    await _loadOutfits(outfitsSearch);
+  _loadUserOutfits(LoadOutfits loadOutfits) async {
+    loadOutfits.searchMode = SearchModes.SELECTED;
+    await _loadOutfits(loadOutfits);
+  }
+  _loadSavedOutfits(LoadOutfits loadOutfits) async {
+    loadOutfits.searchMode = SearchModes.SAVED;
+    await _loadOutfits(loadOutfits);
   }
 
-  _loadOutfits(OutfitsSearch outfitsSearch) async {
+  _loadOutfits(LoadOutfits LoadOutfits) async {
     _loadingController.add(true);
-    final success = await repository.loadOutfits(outfitsSearch);
+    final success = await repository.loadOutfits(LoadOutfits);
     _loadingController.add(false);
     _successController.add(success);
     if(!success){
@@ -128,9 +149,14 @@ class OutfitBloc{
   }
 
   void dispose() {
-    _outfitsController.close();
+    _exploredOutfitsController.close();
+    _myOutfitsController.close();
+    _savedOutfitsController.close();
+    _selectedOutfitsController.close();
+    _feedOutfitsController.close();
     _exploreOutfitsController.close();
     _loadMyOutfitsController.close();
+    _loadUserOutfitsController.close();
     _loadSavedOutfitsController.close();
     _uploadOutfitsController.close();
     _selectedOutfitController.close();

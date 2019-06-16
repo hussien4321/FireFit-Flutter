@@ -7,15 +7,23 @@ class UserBloc {
 
   List<StreamSubscription<dynamic>> _subscriptions;
 
-  final _currentUserController =  BehaviorSubject<BehaviorSubject<User>>(seedValue: BehaviorSubject<User>(seedValue: null));
-  Stream<User> get currentUser => _currentUserController.value; 
+  final _currentUserController =  BehaviorSubject<User>();
+  Stream<User> get currentUser => _currentUserController; 
   final _loadCurrentUserController = PublishSubject<Null>();
   Sink<String> get loadCurrentUser => _loadCurrentUserController; 
 
-  final _selectedUserController = BehaviorSubject<Stream<User>>();
-  Stream<User> get selectedUser => _selectedUserController.value;
+  final _selectedUserController = BehaviorSubject<User>();
+  Stream<User> get selectedUser => _selectedUserController;
   final _selectUserController = PublishSubject<String>();
   Sink<String> get selectUser => _selectUserController; 
+
+
+  final _followUsersController = BehaviorSubject<List<User>>();
+  Stream<List<User>> get followUsers => _followUsersController;
+  final _loadFollowersController = PublishSubject<String>();
+  Sink<String> get loadFollowers => _loadFollowersController; 
+  final _loadFollowingController = PublishSubject<String>();
+  Sink<String> get loadFollowing => _loadFollowingController; 
 
   final _existingAuthController = BehaviorSubject<String>(seedValue: null);
   Stream<String> get existingAuthId => _existingAuthController.stream; 
@@ -69,17 +77,24 @@ class UserBloc {
       _checkUsernameController.stream.debounce(Duration(milliseconds: 500)).listen(_refreshUsernameCheck),
       _refreshVerificationEmailController.stream.listen(_refreshVerifiedCheck),
       _resendEmailController.stream.listen(repository.resendVerificationEmail),
-      _selectUserController.listen(_getUserStream),
+      _selectUserController.distinct().listen(_loadSelectedUser),
       _loadCurrentUserController.listen(_loadCurrentUser),
-      _followUserController.listen(_followUser)
+      _followUserController.listen(_followUser),
+      _loadFollowersController.listen(_loadFollowers),
+      _loadFollowingController.listen(_loadFollowing),
     ];
     _loadCurrentUser();
-    _accountStatusController = Observable.combineLatest2<String, BehaviorSubject<User>, UserAccountStatus>(existingAuthId, _currentUserController, _redirectPath).asBroadcastStream().debounce(Duration(milliseconds: 300));
+    _selectedUserController.addStream(repository.loadUser(SearchModes.SELECTED));
+    _currentUserController.addStream(repository.loadUser(SearchModes.MINE));
+    _followUsersController.addStream(repository.loadUsers(SearchModes.FOLLOW));
+    _accountStatusController = Observable.combineLatest3<String, User, bool, UserAccountStatus>(existingAuthId, _currentUserController, _loadingController, _redirectPath).asBroadcastStream().debounce(Duration(milliseconds: 300));
     _resetCurrentUserStatus();
   }
 
-  UserAccountStatus _redirectPath(String authId, BehaviorSubject<User> currentUserStream){
-    User currentUser = currentUserStream.value;
+  UserAccountStatus _redirectPath(String authId, User currentUser, bool isLoading){
+    if(isLoading){
+      return null;
+    }
     if(authId == null){
       return UserAccountStatus.LOGGED_OUT;
     }else{
@@ -154,27 +169,28 @@ class UserBloc {
 
   String get _currentUserId => _existingAuthController.value;
 
-  _getUserStream(String userId) async {
+  _loadSelectedUser(String userId) async {
     _loadingController.add(true);
-    await repository.loadUserDetails(GetUser(
-      userId: userId,
-      currentUserId: _currentUserId
-    ));
-    _selectedUserController.add(repository.getUser(userId));
+    await repository.loadUserDetails(
+      LoadUser(
+        userId: userId,
+        currentUserId: _currentUserId
+      ),
+      SearchModes.SELECTED
+    );
     _loadingController.add(false);
   }
 
   _loadCurrentUser([_]) async {
     _loadingController.add(true);
-    await repository.loadUserDetails(GetUser(
-      userId: _currentUserId,
-      currentUserId: _currentUserId
-    ));
-    BehaviorSubject<User> userStream = BehaviorSubject<User>();
-    userStream.addStream(repository.getUser(_currentUserId));
-    await userStream.isEmpty; 
+    await repository.loadUserDetails(
+      LoadUser(
+        userId: _currentUserId,
+        currentUserId: _currentUserId
+      ),
+      SearchModes.MINE
+    );
     _loadingController.add(false);
-    _currentUserController.add(userStream);
   }
 
   _followUser(FollowUser followUser) async {
@@ -184,9 +200,35 @@ class UserBloc {
     }
   }
 
+  _loadFollowers(String userId) async {
+    _loadingController.add(true);
+    await repository.loadFollowers(
+      LoadUser(
+        userId: userId,
+        currentUserId: _currentUserId,
+        searchMode: SearchModes.FOLLOW
+      )
+    );
+    _loadingController.add(false);
+  }
+  _loadFollowing(String userId) async {
+    _loadingController.add(true);
+    await repository.loadFollowing(
+      LoadUser(
+        userId: userId,
+        currentUserId: _currentUserId,
+        searchMode: SearchModes.FOLLOW
+      ),
+    );
+    _loadingController.add(false);
+  }
+
   void dispose() {
     _currentUserController.close();
     _existingAuthController.close();
+    _followUsersController.close();
+    _loadFollowersController.close();
+    _loadFollowingController.close();
     _loadCurrentUserController.close();
     _selectedUserController.close();
     _followUserController.close();

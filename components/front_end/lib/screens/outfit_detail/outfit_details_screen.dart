@@ -84,6 +84,10 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
+        leading: IconButton(
+          icon: Icon(Icons.close),
+          onPressed: Navigator.of(context).pop,
+        ),
         title: Text("Outfit details"),
         centerTitle: true,
         elevation: 0.0,

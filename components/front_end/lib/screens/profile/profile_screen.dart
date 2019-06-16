@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:middleware/middleware.dart';
 import 'package:blocs/blocs.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:front_end/helper_widgets.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:front_end/providers.dart';
 import 'package:front_end/screens.dart';
@@ -34,7 +35,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Scaffold(
       body: StreamBuilder<bool>(
         stream: _userBloc.isLoading,
-        initialData: true,
+        initialData: false,
         builder: (ctx, loadingSnap){
           return StreamBuilder<User>(
             stream: _userBloc.selectedUser,
@@ -57,8 +58,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
       _userBloc.selectUser.add(widget.userId);
       currentUserId = await _userBloc.existingAuthId.first;
       _outfitBloc = OutfitBlocProvider.of(context);
-      _outfitBloc.loadMyOutfits.add(
-        OutfitsSearch(
+      _outfitBloc.loadUserOutfits.add(
+        LoadOutfits(
           userId: widget.userId
         )
       );
@@ -106,8 +107,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
       children: <Widget>[
         child,
         Positioned(
-          top: 8,
-          left: 8,
+          top: 4,
+          left: 4,
           child: IconButton(
             icon: Icon(
               Icons.close,
@@ -229,11 +230,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _buildStatisticTab(
           count: user.numberOfFollowers, 
           name: 'Follower${user.numberOfFollowers==1?'':'s'}',
+          onTap: () => _showFollowers(user.userId),
         ),
         _buildStatisticTab(
           count: user.numberOfFollowing, 
           name: 'Following',
-          onTap: () => _showFollowers(user),
+          onTap: () => _showFollowing(user.userId),
         ),
         _buildStatisticTab(
           count: user.numberOfOutfits, 
@@ -275,35 +277,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  _showFollowers(User user){
+  _showFollowing(String userId){
     Navigator.of(context).push(MaterialPageRoute(
-      builder: (ctx) => _page(user)
+      builder: (ctx) => FollowUsersScreen(
+        selectedUserId: userId,
+        isFollowers: false,
+      )
     ));
   }
-
-  _page(User user) {
-    return Scaffold(
-      appBar: AppBar(
-        centerTitle: true,
-        title: Text('Followers'),
-        backgroundColor: Colors.white,
-        elevation: 1.0,
-      ),
-      body: Container(
-        child:ListView.builder(
-          itemCount: 50,
-          itemBuilder: (ctx, i) => _mockUser(user),
-        )
-      ),
-    );
-  }
-
-  Widget _mockUser(User user){
-    return Container(
-      child: Text(
-        user.name,
-      ),
-    );
+  _showFollowers(String userId){
+    Navigator.of(context).push(MaterialPageRoute(
+      builder: (ctx) => FollowUsersScreen(
+        selectedUserId: userId,
+        isFollowers: true,
+      )
+    ));
   }
 
   Widget _buildOutfitDescription(User user) {
@@ -373,7 +361,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       stream: _outfitBloc.isLoading,
       initialData: false,
       builder: (ctx, loadingSnap) => StreamBuilder<List<Outfit>>(
-        stream: _outfitBloc.outfits,
+        stream: _outfitBloc.selectedOutfits,
         initialData: [],
         builder: (ctx, outfitsSnap) => OutfitsGrid(
           isLoading: loadingSnap.data,

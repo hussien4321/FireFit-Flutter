@@ -182,10 +182,8 @@ class _MenuScreenNavigationState extends State<MenuScreenNavigation> {
   }
 
   _openUserProfile(String userId){
-    Navigator.push(context, MaterialPageRoute(
-      builder: (ctx) => ProfileScreen(
-        userId: userId
-      )
-    ));
+    CustomNavigator.goToProfileScreen(context, true,
+      userId: userId,
+    );
   }
 }

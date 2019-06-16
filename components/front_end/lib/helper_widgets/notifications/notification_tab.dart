@@ -3,6 +3,7 @@ import 'package:helpers/helpers.dart';
 import 'package:front_end/screens.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:middleware/middleware.dart';
+import 'package:front_end/helper_widgets.dart';
 
 class NotificationTab extends StatefulWidget {
 
@@ -137,18 +138,14 @@ class _NotificationTabState extends State<NotificationTab> {
 
   _openNotification() {
     if(widget.notification.type == NotificationType.OUTFIT_LIKE || widget.notification.type == NotificationType.NEW_COMMENT || widget.notification.type == NotificationType.COMMENT_LIKE){
-      Navigator.push(context, MaterialPageRoute(
-        builder: (ctx) => OutfitDetailsScreen(
-          outfitId: refOutfit.outfitId,
-        )
-      ));
+      CustomNavigator.goToOutfitDetailsScreen(context, false, 
+        outfitId: refOutfit.outfitId
+      );
     }
     if(widget.notification.type == NotificationType.NEW_FOLLOW){
-      Navigator.push(context, MaterialPageRoute(
-        builder: (ctx) => ProfileScreen(
-          userId: refUser.userId,
-         )
-      ));
+      CustomNavigator.goToProfileScreen(context, false,
+        userId: refUser.userId,
+      );
     }
   }
 

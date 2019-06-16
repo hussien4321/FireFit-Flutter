@@ -1,5 +1,6 @@
-class User {
+import 'package:middleware/middleware.dart';
 
+class User {
 
   String userId;
   String name;
@@ -15,6 +16,7 @@ class User {
   DateTime lastSeenNotificationAt;
   int numberOfFollowers, numberOfFollowing, numberOfOutfits, numberOfLikes, numberOfNewNotifications;
   bool isFollowing;
+  SearchUser searchUser;
 
   User({
     this.userId,
@@ -29,7 +31,7 @@ class User {
     this.createdAt,
   });
 
-
+  bool get hasFullData => numberOfFollowers != null;
 
   User.fromMap(Map<String, dynamic> map){
     userId = map['user_id'].toString();
@@ -52,6 +54,7 @@ class User {
     numberOfLikes = map['number_of_likes'];
     numberOfNewNotifications = map['number_of_new_notifications'];
     isFollowing = map['is_following'] == 1;
+    searchUser = SearchUser.fromMap(map);
   } 
 
   Map<String, dynamic> toJson() => {

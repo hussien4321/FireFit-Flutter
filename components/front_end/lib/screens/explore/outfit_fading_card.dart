@@ -241,10 +241,9 @@ class _OutfitFadingCardState extends State<OutfitFadingCard> with SingleTickerPr
 
   _openDetailedOutfit(){
     if(haveOutfit){
-      Navigator.push(context, MaterialPageRoute(
-        //TODO: CREATE NEW TRANSITION THAT FADES CURRENT PAGE TO WHITE THEN FADES IN NEXT PAGE
-        builder: (context) => OutfitDetailsScreen(outfitId: widget.currentOutfit.outfitId)
-      ));
+      CustomNavigator.goToOutfitDetailsScreen(context, false, 
+        outfitId: widget.currentOutfit.outfitId
+      );
     }
   }
 

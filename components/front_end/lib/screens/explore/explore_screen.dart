@@ -16,7 +16,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
   
   final Color imageOverlayColor = Colors.white;
 
-  OutfitsSearch explore = OutfitsSearch();
+  LoadOutfits explore = LoadOutfits();
   String userId;
 
   int adCounter = 50;
@@ -71,7 +71,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
       initialData: true,
       builder: (ctx, loadingSnap) {
         return StreamBuilder<List<Outfit>>(
-          stream: _outfitBloc.outfits,
+          stream: _outfitBloc.exploredOutfits,
           initialData: [],
           builder: (ctx, snap) {
             List<Outfit> outfits = snap.data;
@@ -336,16 +336,14 @@ class _ExploreScreenState extends State<ExploreScreen> {
   }
 
   _composeComment(int outfitId){
-    Navigator.push(context, MaterialPageRoute(
-      //TODO: CREATE NEW TRANSITION THAT FADES CURRENT PAGE TO WHITE THEN FADES IN NEXT PAGE
-      builder: (context) => OutfitDetailsScreen(outfitId: outfitId)
-    ));
-
+    CustomNavigator.goToOutfitDetailsScreen(context, false, 
+      outfitId: outfitId
+    );
   }
 
   _openCurrentProfile(String userId) {
-    Navigator.push(context, MaterialPageRoute(
-      builder: (ctx) => ProfileScreen(userId: userId,)
-    ));
+    CustomNavigator.goToProfileScreen(context, false,
+      userId: userId
+    );
   }
 }

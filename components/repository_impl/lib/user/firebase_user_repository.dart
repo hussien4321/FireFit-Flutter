@@ -39,7 +39,7 @@ class FirebaseUserRepository implements UserRepository {
     final user = await auth.currentUser();
     final hasAuth = user!=null;
     if(!hasAuth){
-      await userCache.deleteAll();
+      await userCache.clearAllUsers();
       return null;
     }
     return user.uid;
@@ -85,24 +85,28 @@ class FirebaseUserRepository implements UserRepository {
   }
 
   Future<bool> _loadCurrentUser(FirebaseUser user) {
-    return loadUserDetails(GetUser(
-      userId: user.uid,
-      currentUserId: user.uid,
-    ));
+    return loadUserDetails(
+      LoadUser(
+        userId: user.uid,
+        currentUserId: user.uid,
+      ),
+      SearchModes.MINE,
+    );
   }
 
-  Future<bool> loadUserDetails(GetUser getUser) async {
-    User currentUser = await _getUserAccountIfExisting(getUser);
-    if(currentUser !=null){
-      await userCache.addUser(currentUser, isCurrentUser: true);
+  Future<bool> loadUserDetails(LoadUser loadUser, SearchModes searchMode) async {
+    await userCache.clearUsers(searchMode);
+    User user = await _getUserAccountIfExisting(loadUser);
+    if(user !=null){
+      await userCache.addUser(user, searchMode);
       return true;
     }
     return false;
   }
 
 
-  Future<User> _getUserAccountIfExisting(GetUser getUser) {
-    return cloudFunctions.getHttpsCallable(functionName: 'getUser').call(getUser.toJson())
+  Future<User> _getUserAccountIfExisting(LoadUser loadUser) {
+    return cloudFunctions.getHttpsCallable(functionName: 'getUser').call(loadUser.toJson())
     .then((res) {
       final result = res.data['res'];
       if(res.data.length == 0) {
@@ -179,11 +183,13 @@ class FirebaseUserRepository implements UserRepository {
 
   Future<void> logOut() async {
     messaging.deleteInstanceID();
-    userCache.deleteAll();
+    userCache.clearAllUsers();
     auth.signOut();
   }
 
-  Stream<User> getUser(String userId) => userCache.getUser(userId);
+  Stream<User> loadUser(SearchModes searchMode) => userCache.loadUser(searchMode);
+  
+  Stream<List<User>> loadUsers(SearchModes searchMode) => userCache.loadUsers(searchMode);
 
   Stream<List<OutfitNotification>> getNotifications() => outfitCache.getNotifications();
 
@@ -197,7 +203,7 @@ class FirebaseUserRepository implements UserRepository {
         Map<String, dynamic> formattedDoc = Map<String, dynamic>.from(data);
         return OutfitNotification.fromMap(formattedDoc);
       }).toList());
-      notifications.forEach((notification) => outfitCache.insertNotification(notification));
+      notifications.forEach((notification) => outfitCache.addNotification(notification));
       return true;
     })
     .catchError((err) {
@@ -217,15 +223,34 @@ class FirebaseUserRepository implements UserRepository {
   }
 
   Future<bool> followUser(FollowUser followUser) async {
-    print('isFollowing: ${followUser.followed.isFollowing}');
     await userCache.followUser(followUser);
-    print('isFollowing: ${followUser.followed.isFollowing}');
     return cloudFunctions.getHttpsCallable(functionName: 'followUser').call(followUser.toJson())
     .then((res) => res.data['res'] == true)
     .catchError((err) {
       print(err);
       return false;
     });
+  }
+  
+  Future<bool> loadFollowing(LoadUser loadUser) => _loadFollowUsers(loadUser, functionName: 'getFollowing');
+  Future<bool> loadFollowers(LoadUser loadUser) => _loadFollowUsers(loadUser, functionName: 'getFollowers');
+  
+  Future<bool> _loadFollowUsers(LoadUser loadUser, {String functionName}){
+    userCache.clearUsers(loadUser.searchMode);
+    return cloudFunctions.getHttpsCallable(functionName: functionName).call(loadUser.toJson())
+    .then((res) async {
+      List<User> users = List<User>.from(res.data['res'].map((data){
+        Map<String, dynamic> formattedDoc = Map<String, dynamic>.from(data);
+        return User.fromMap(formattedDoc);
+      }).toList());
+      users.forEach((user) => userCache.addUser(user, loadUser.searchMode));
+      return true;
+    })
+    .catchError((err) {
+      print(err);
+      return false;
+    });
+
   }
 }
 

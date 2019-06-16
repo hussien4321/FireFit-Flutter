@@ -74,7 +74,7 @@ class _MainAppBarState extends State<MainAppBar> {
   
   StreamSubscription _logInStatusListener(){
     return _userBloc.accountStatus.listen((accountStatus) {
-      if(accountStatus != UserAccountStatus.LOGGED_IN){
+      if(accountStatus!=null && accountStatus != UserAccountStatus.LOGGED_IN){
         Navigator.pushReplacement(context, MaterialPageRoute(
           builder: (ctx) => RouteConverters.getFromAccountStatus(accountStatus)
         ));
@@ -191,7 +191,7 @@ class _MainAppBarState extends State<MainAppBar> {
         builder: (ctx, countSnap) => IconButton( 
           icon: NotificationIcon(
             iconData: Icons.notifications,
-            messages: countSnap.data,
+            messages: 0,//countSnap.data,
           ),
           onPressed: () => _dmDrawerKey.currentState.open()
         ),

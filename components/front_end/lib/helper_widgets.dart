@@ -14,6 +14,8 @@ export 'helper_widgets/input/yes_no_dialog.dart';
 
 export 'helper_widgets/misc/under_construction_notice.dart';
 
+export 'helper_widgets/navigation/custom_navigator.dart';
+
 export 'helper_widgets/notifications/notification_tab.dart';
 
 export 'helper_widgets/state/loading_and_error_dialogs.dart';

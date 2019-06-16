@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:front_end/screens.dart';
+import 'package:front_end/helper_widgets.dart';
 
 class ProfilePicWithShadow extends StatelessWidget {
   
@@ -52,11 +52,9 @@ class ProfilePicWithShadow extends StatelessWidget {
   }
 
   _navigateToProfileScreen(BuildContext context, String hero) {
-    Navigator.push(context, MaterialPageRoute(
-      builder: (ctx) => ProfileScreen(
-        userId: userId,
-        heroTag: hero,
-      )
-    ));
+    CustomNavigator.goToProfileScreen(context, true,
+      userId: userId,
+      heroTag: heroTag,
+    );
   }
 }

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:middleware/middleware.dart';
-import 'package:front_end/screens.dart';
+import 'package:front_end/helper_widgets.dart';
 
 class OutfitsGrid extends StatelessWidget {
 
@@ -84,9 +84,9 @@ class OutfitsGrid extends StatelessWidget {
   }
 
   _openDetailedOutfit(Outfit outfit, BuildContext ctx){
-    Navigator.push(ctx, MaterialPageRoute(
-      builder: (context) => OutfitDetailsScreen(outfitId: outfit.outfitId)
-    ));
+    CustomNavigator.goToOutfitDetailsScreen(ctx, true, 
+      outfitId: outfit.outfitId
+    );
   }
 
 }

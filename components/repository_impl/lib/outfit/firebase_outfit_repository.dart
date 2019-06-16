@@ -21,31 +21,31 @@ class FirebaseOutfitRepository implements OutfitRepository {
     @required this.cache
   });
 
-  Stream<List<Outfit>> getOutfits() => cache.getOutfits();
+  Stream<List<Outfit>> getOutfits(SearchModes searchMode) => cache.getOutfits(searchMode);
 
   Stream<Outfit> getOutfit(int outfitId) => cache.getOutfit(outfitId);
 
 
-  Future<bool> loadOutfits(OutfitsSearch outfitsSearch) async {
-    await cache.clearOutfits();
-    return loadMoreOutfits(outfitsSearch);
+  Future<bool> loadOutfits(LoadOutfits loadOutfits) async {
+    await cache.clearOutfits(loadOutfits.searchMode);
+    return loadMoreOutfits(loadOutfits);
   }
   
-  Future<bool> loadMoreOutfits(OutfitsSearch outfitsSearch) {
-    return cloudFunctions.getHttpsCallable(functionName: 'getOutfits').call(outfitsSearch.toJson())
+  Future<bool> loadMoreOutfits(LoadOutfits loadOutfits) {
+    return cloudFunctions.getHttpsCallable(functionName: 'getOutfits').call(loadOutfits.toJson())
     .then((res) async {
-      _saveOutfitsList(res.data);
+      _saveOutfitsList(res.data, loadOutfits.searchMode);
       return true;
     })
     .catchError((err) => false);
   }
 
-  _saveOutfitsList(dynamic response){
+  _saveOutfitsList(dynamic response, SearchModes searchMode){
     List<Outfit> outfits = List<Outfit>.from(response['res'].map((data){
       Map<String, dynamic> formattedDoc = Map<String, dynamic>.from(data);
       return Outfit.fromMap(formattedDoc);
     }).toList());
-    outfits.forEach((outfit) => cache.addOutfit(outfit));
+    outfits.forEach((outfit) => cache.addOutfit(outfit, searchMode));
   }
 
   Future<bool> uploadOutfit(UploadOutfit uploadOutfit) async {
@@ -118,7 +118,7 @@ class FirebaseOutfitRepository implements OutfitRepository {
   Future<bool> addComment(AddComment addComment) async {
     Random tempIdGenerator =new Random();
     int tempCommentId =tempIdGenerator.nextInt(1000000) * -1;
-    cache.addComment(addComment, tempCommentId);
+    cache.addNewComment(addComment, tempCommentId);
 
     return cloudFunctions.getHttpsCallable(functionName: 'addComment').call(addComment.toJson())
     .then((res) async {
@@ -171,7 +171,7 @@ class FirebaseOutfitRepository implements OutfitRepository {
       Map<String, dynamic> formattedDoc = Map<String, dynamic>.from(data);
       return Comment.fromMap(formattedDoc);
     }).toList());
-    comments.forEach((comment) => cache.insertComment(comment));
+    comments.forEach((comment) => cache.addComment(comment));
   }
 
 
