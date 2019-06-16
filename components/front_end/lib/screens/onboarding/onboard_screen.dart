@@ -7,6 +7,9 @@ import 'dart:async';
 import 'package:middleware/middleware.dart';
 import 'package:front_end/helper_widgets.dart';
 import 'package:front_end/providers.dart';
+import 'dart:io';
+import 'package:path_provider/path_provider.dart';
+import 'package:multi_image_picker/multi_image_picker.dart';
 
 class OnboardScreen extends StatefulWidget {
   @override
@@ -28,9 +31,28 @@ class _OnboardScreenState extends State<OnboardScreen> with SnackbarMessages, Lo
 
   List<StreamSubscription<dynamic>> _subscriptions;
   
+  bool loadingImages = false;
+
+  Asset selectedAsset;
+
+  String dirPath;
+
+  @override
+  void initState() {
+    super.initState();
+    _initTempGallery();    
+  }
+
+  _initTempGallery() async{ 
+    Directory extDir = await getApplicationDocumentsDirectory();
+    dirPath = '${extDir.path}/Pictures/temp';
+    await Directory(dirPath).create(recursive: true);
+  }
+
   @override
   dispose(){
     _subscriptions?.forEach((subscription) => subscription.cancel());
+    Directory(dirPath).deleteSync(recursive: true);
     super.dispose();
   }
 
@@ -260,6 +282,9 @@ class _OnboardScreenState extends State<OnboardScreen> with SnackbarMessages, Lo
       ProfilePicPage(
         onboardUser:onboardUser,
         onSave: _onSave,
+        dirPath:dirPath,
+        selectedAsset: selectedAsset,
+        onUpdateAsset: (asset) => selectedAsset=asset,
       ),
       BiometricsPage(
         onboardUser:onboardUser,

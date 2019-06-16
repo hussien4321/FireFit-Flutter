@@ -188,13 +188,19 @@ class _MainAppBarState extends State<MainAppBar> {
       child: StreamBuilder<int>(
         stream: _userBloc.currentUser.map((user) => user.numberOfNewNotifications),
         initialData: 0,
-        builder: (ctx, countSnap) => IconButton( 
-          icon: NotificationIcon(
-            iconData: Icons.notifications,
-            messages: 0,//countSnap.data,
-          ),
-          onPressed: () => _dmDrawerKey.currentState.open()
-        ),
+        builder: (ctx, countSnap) { 
+          int messages = 0;
+          if(countSnap.data != null){
+            messages =countSnap.data;
+          }
+          return IconButton( 
+            icon: NotificationIcon(
+              iconData: Icons.notifications,
+              messages: messages,
+            ),
+            onPressed: () => _dmDrawerKey.currentState.open()
+          );
+        }
       )  
     );
   }

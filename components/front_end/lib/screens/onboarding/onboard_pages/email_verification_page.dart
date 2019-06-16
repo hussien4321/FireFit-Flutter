@@ -97,7 +97,7 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> with Snac
                     ),
                     TextSpan(
                       text: widget.onboardUser.isEmailVerified ? 'Verified' : 'Pending',
-                      style: Theme.of(context).textTheme.subhead.apply(color: widget.onboardUser.isEmailVerified ? Theme.of(context).accentColor : Theme.of(context).indicatorColor ),
+                      style: Theme.of(context).textTheme.subhead.apply(color: widget.onboardUser.isEmailVerified ? Colors.blue : Colors.grey ),
                     ),
                   ],
                 ),

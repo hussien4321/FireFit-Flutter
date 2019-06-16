@@ -10,6 +10,7 @@ export 'helper_widgets/functions/route_converters.dart';
 
 export 'helper_widgets/input/custom_fab.dart';
 export 'helper_widgets/input/dropdown_buttons.dart';
+export 'helper_widgets/input/select_images.dart';
 export 'helper_widgets/input/yes_no_dialog.dart';
 
 export 'helper_widgets/misc/under_construction_notice.dart';

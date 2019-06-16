@@ -46,13 +46,13 @@ class _UploadOutfitScreenState extends State<UploadOutfitScreen> with LoadingAnd
   _initTempGallery() async{ 
     Directory extDir = await getApplicationDocumentsDirectory();
     dirPath = '${extDir.path}/Pictures/temp';
-    await Directory(dirPath).delete(recursive: true);
     await Directory(dirPath).create(recursive: true);
   }
 
   @override
   dispose(){
     _subscriptions?.forEach((subscription) => subscription.cancel());
+    Directory(dirPath).deleteSync(recursive: true);
     super.dispose();
   }
 
@@ -339,9 +339,11 @@ class _UploadOutfitScreenState extends State<UploadOutfitScreen> with LoadingAnd
   }
 
   _removeImage(int index){
-    uploadOutfit.images.removeAt(index);
-    images.removeAt(index);
-    setState(() {});
+    if(!loadingImages){
+      uploadOutfit.images.removeAt(index);
+      images.removeAt(index);
+      setState(() {});
+    }
   }
 
   Widget _remainingAddImageSpace(int remainingImages){
@@ -379,58 +381,19 @@ class _UploadOutfitScreenState extends State<UploadOutfitScreen> with LoadingAnd
 
 
   Future<void> _addImages() async {
-    List<Asset> resultList = List<Asset>();
-    try {
-      resultList = await _pickImages();
-    } on PlatformException catch (e) {
-      print('FAILED: ${e.message}');
-    }
-    if (!mounted) return;    
-    _saveImages(resultList);
-  }
-
-  Future<List<Asset>> _pickImages() => MultiImagePicker.pickImages(
-    maxImages: 3,
-    enableCamera: true,
-    selectedAssets: images,
-    cupertinoOptions: CupertinoOptions(
-      backgroundColor: "#D3D3D3",
-    ),
-    materialOptions: MaterialOptions(
-      actionBarColor: "#808080",
-      statusBarColor: "#808080",
-      lightStatusBar: true,
-      actionBarTitle: 'Select outfit'
-    )
-  );
-  
-
-  _saveImages(List<Asset> resultList) async {
     setState(() => loadingImages = true);
-
-    for(Asset result in resultList){
-      await _saveImage(result);
-    }
+    List<String> takenImages = await SelectImages.addImages(
+      count: 3,
+      dirPath: dirPath,
+      isStillOpen: () => mounted,
+      selectedAssets: images,
+      currentImages: uploadOutfit.images,
+    );
     
     setState(() {
-      uploadOutfit.images = uploadOutfit.images;
+      uploadOutfit.images = takenImages;
       loadingImages = false;
     });
-  }
-
-  String get timestamp => DateTime.now().millisecondsSinceEpoch.toString();
-
-  _saveImage(Asset result) async {
-    if(!images.any((Asset image) => result.identifier==image.identifier)){
-      images.add(result);
-      ByteData imageData = await result.requestOriginal(quality: 50);
-      if(imageData != null){
-        String filename = '$dirPath/$timestamp.jpg';
-        File filePath = File(filename);
-        await filePath.writeAsBytes(imageData.buffer.asInt8List());
-        uploadOutfit.images.add(filename);
-      }
-    }
   }
 }
 
