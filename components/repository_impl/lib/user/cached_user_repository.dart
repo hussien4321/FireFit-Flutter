@@ -68,14 +68,19 @@ class CachedUserRepository {
 
 
   Future<void> markNotificationsSeen(MarkNotificationsSeen markSeen) {
-    streamDatabase.executeAndTrigger(['notification'], "UPDATE user SET last_seen_notification_at=?, number_of_new_notifications=0 WHERE user_id=?", [ markSeen.lastSeenNotificationAt.toIso8601String(), markSeen.userId]);
+    return streamDatabase.executeAndTrigger(['notification'], "UPDATE user SET last_seen_notification_at=?, number_of_new_notifications=0 WHERE user_id=?", [ markSeen.lastSeenNotificationAt.toIso8601String(), markSeen.userId]);
   }
 
-  Future<void> followUser(FollowUser followUser){
+  Future<void> followUser(FollowUser followUser) async {
     User user = followUser.followed;
     int numberOfFollowsChange = user.isFollowing ? -1 : 1;
     bool isFollowing = !user.isFollowing;
-    streamDatabase.executeAndTrigger(['user'], "UPDATE user SET is_following=?, number_of_followers=number_of_followers+? WHERE user_id=?", [isFollowing ? 1 : 0, numberOfFollowsChange, user.userId]);
-    streamDatabase.executeAndTrigger(['user'], "UPDATE user SET number_of_following=number_of_following+? WHERE user_id=?", [numberOfFollowsChange, followUser.followerUserId]);
+    await streamDatabase.executeAndTrigger(['user'], "UPDATE user SET is_following=?, number_of_followers=number_of_followers+? WHERE user_id=?", [isFollowing ? 1 : 0, numberOfFollowsChange, user.userId]);
+    return streamDatabase.executeAndTrigger(['user'], "UPDATE user SET number_of_following=number_of_following+? WHERE user_id=?", [numberOfFollowsChange, followUser.followerUserId]);
+  }
+
+  Future<void> clearNewFeed() {
+    String searchModeString =searchModeToString(SearchModes.MINE);
+    return streamDatabase.executeAndTrigger(['user'], "UPDATE user SET has_new_feed_outfits=0 WHERE user_id=(SELECT search_user_id FROM user_search WHERE search_user_mode=? LIMIT 1)", [searchModeString]);
   }
 }

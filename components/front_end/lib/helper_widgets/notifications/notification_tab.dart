@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:helpers/helpers.dart';
-import 'package:front_end/screens.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:middleware/middleware.dart';
 import 'package:front_end/helper_widgets.dart';

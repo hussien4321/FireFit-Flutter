@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:blocs/blocs.dart';
 import 'package:front_end/providers.dart';
-import 'dart:async';
 
 class SettingsScreen extends StatefulWidget {
   @override

@@ -1,9 +1,4 @@
-// Copyright 2018 The Flutter Architecture Sample Authors. All rights reserved.
-// Use of this source code is governed by the MIT license that can be found
-// in the LICENSE file.
-
 import 'dart:async';
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import './auth_instances.dart';
@@ -84,6 +79,63 @@ class FirebaseUserRepository implements UserRepository {
     }
   }
 
+  Future<bool> createAccount(OnboardUser onboardUser) async {
+  return cloudFunctions.getHttpsCallable(functionName: 'createUser').call(onboardUser.toJson())
+  .then((res) async {
+      final user = await auth.currentUser();
+      String userId = user.uid;
+      String fileName = _generateFileName(onboardUser.profilePicUrl, userId);
+      await imageUploader.uploadImage(onboardUser.profilePicUrl, fileName);
+
+      return _checkImageUploaded(userId);
+    })
+    .catchError((err) => false);
+  }
+
+  _generateFileName(String imagePath, String userId){
+    final String uuid = Uuid().generateV4();
+    return 'temp/profile:$userId:${uuid.toString()}${extension(imagePath)}';
+  }
+  List<User> _resToUserList(HttpsCallableResult res){
+    return List<User>.from(res.data['res'].map((data){
+      Map<String, dynamic> formattedDoc = Map<String, dynamic>.from(data);
+      return User.fromMap(formattedDoc);
+    }).toList());
+  }
+  
+  Future<bool> _checkImageUploaded(String userId) async {
+    LoadUser loadUser = LoadUser(
+      userId: userId,
+      currentUserId: userId,
+      searchMode: SearchModes.MINE,
+    );
+    for(int i = 0; i < AppConfig.NUMBER_OF_POLL_ATTEMPTS; i++){
+      print('polling for profile pic attempt: $i time=${DateTime.now()}');
+      bool success = await _getExistingUser(loadUser);
+      if(success){
+        return true;
+      }
+      await Future.delayed(Duration(milliseconds: AppConfig.DURATION_PER_POLL_ATTEMPT));
+    }
+    return false;
+  }
+
+  Future<bool> _getExistingUser(LoadUser loadUser) async {
+    return cloudFunctions.getHttpsCallable(functionName: 'getUser').call(loadUser.toJson())
+    .then((res) async {
+      List<User> userList = _resToUserList(res);
+      if(userList.isEmpty){
+        return false;
+      }
+      User user = userList.first;
+      await userCache.addUser(user, loadUser.searchMode);
+      return true;
+    })
+    .catchError((err) {
+      return false;
+    });
+  }
+
   Future<bool> _loadCurrentUser(FirebaseUser user) {
     return loadUserDetails(
       LoadUser(
@@ -108,36 +160,16 @@ class FirebaseUserRepository implements UserRepository {
   Future<User> _getUserAccountIfExisting(LoadUser loadUser) {
     return cloudFunctions.getHttpsCallable(functionName: 'getUser').call(loadUser.toJson())
     .then((res) {
-      final result = res.data['res'];
-      if(res.data.length == 0) {
+      List<User> userList = _resToUserList(res);
+      if(userList.isEmpty){
         return null;
       }
-      Map<String, dynamic> formattedDoc = Map<String, dynamic>.from(result[0]);
-      return User.fromMap(formattedDoc);
+      return userList.first;
     })
     .catchError((err) {
       return null;
     });
-
   }
-
-  Future<bool> createAccount(OnboardUser onboardUser) async {
-  return cloudFunctions.getHttpsCallable(functionName: 'createUser').call(onboardUser.toJson())
-  .then((res) async {
-      final user = await auth.currentUser();
-      String userId = user.uid;
-      String fileName = _generateFileName(onboardUser.profilePicUrl, userId);
-      await imageUploader.uploadImage(onboardUser.profilePicUrl, fileName);
-      return _loadCurrentUser(user);
-    })
-    .catchError((err) => false);
-  }
-
-  _generateFileName(String imagePath, String userId){
-    final String uuid = Uuid().generateV4();
-    return 'temp/profile:$userId:${uuid.toString()}${extension(imagePath)}';
-  }
-
 
   Future<bool> hasEmailVerified() async {
     (await auth.currentUser()).reload();
@@ -239,10 +271,7 @@ class FirebaseUserRepository implements UserRepository {
     userCache.clearUsers(loadUser.searchMode);
     return cloudFunctions.getHttpsCallable(functionName: functionName).call(loadUser.toJson())
     .then((res) async {
-      List<User> users = List<User>.from(res.data['res'].map((data){
-        Map<String, dynamic> formattedDoc = Map<String, dynamic>.from(data);
-        return User.fromMap(formattedDoc);
-      }).toList());
+      List<User> users = _resToUserList(res);
       users.forEach((user) => userCache.addUser(user, loadUser.searchMode));
       return true;
     })

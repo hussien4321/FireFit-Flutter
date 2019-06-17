@@ -18,7 +18,7 @@ class MMKeys {
   // Todos
   static final todoList = const Key('__todoList__');
   static final todosLoading = const Key('__todosLoading__');
-  static final todoItem = (String id) => Key('TodoItem__${id}');
+  static final todoItem = (String id) => Key('TodoItem__$id');
   static final todoItemCheckbox =
       (String id) => Key('TodoItem__${id}__Checkbox');
   static final todoItemTask = (String id) => Key('TodoItem__${id}__Task');

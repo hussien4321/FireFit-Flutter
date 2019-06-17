@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:meta/meta.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:middleware/middleware.dart';
 import 'package:blocs/blocs.dart';
@@ -7,18 +6,18 @@ import 'package:front_end/providers.dart';
 import 'package:front_end/helper_widgets.dart';
 import 'package:front_end/screens.dart';
 
-class MenuScreenNavigation extends StatefulWidget {
+class MenuNavigationScreen extends StatefulWidget {
   
   final int index;
   final ValueChanged<int> onPageSelected;
 
-  MenuScreenNavigation({this.index, this.onPageSelected});
+  MenuNavigationScreen({this.index, this.onPageSelected});
 
   @override
-  _MenuScreenNavigationState createState() => _MenuScreenNavigationState();
+  _MenuNavigationScreenState createState() => _MenuNavigationScreenState();
 }
 
-class _MenuScreenNavigationState extends State<MenuScreenNavigation> {
+class _MenuNavigationScreenState extends State<MenuNavigationScreen> {
 
   UserBloc _userBloc;
 
@@ -49,11 +48,18 @@ class _MenuScreenNavigationState extends State<MenuScreenNavigation> {
                     selected: widget.index == 0,
                     onPressed: () => widget.onPageSelected(0)
                   ),
-                  _menuOption(
-                    title: 'FASHION CIRCLE',
-                    iconData: Icons.people,
-                    selected: widget.index == 1,
-                    onPressed: () => widget.onPageSelected(1)
+                  StreamBuilder<bool>(
+                    stream: _userBloc.currentUser.map((user) => user.hasNewFeedOutfits),
+                    initialData: false,
+                    builder: (context, hasFeedSnap) {
+                      return _menuOption(
+                        title: 'FASHION CIRCLE',
+                        iconData: Icons.people,
+                        selected: widget.index == 1,
+                        onPressed: () => widget.onPageSelected(1),
+                        showNotificationBubble: hasFeedSnap.data == true
+                      );
+                    }
                   ),
                   _menuOption(
                     title: 'WARDROBE',
@@ -137,13 +143,19 @@ class _MenuScreenNavigationState extends State<MenuScreenNavigation> {
     IconData iconData,
     bool selected = false,
     VoidCallback onPressed,
+    bool showNotificationBubble = false,
   }){
     Color selectedColor = Colors.blue;
     Color unselectedColor = Colors.grey[700];
     Color color =selected ? selectedColor :unselectedColor;
-    Widget icon = Icon(
-      iconData,
-      color: color,
+    Widget icon = SizedBox(
+      width: 32.0,
+      height: 32.0,
+      child: NotificationIcon(
+        iconData: iconData,
+        displayNum: !showNotificationBubble,
+        color: color,
+      )
     );
     return Material(
       color: Colors.white,
@@ -169,10 +181,6 @@ class _MenuScreenNavigationState extends State<MenuScreenNavigation> {
                   ),
                   textAlign: TextAlign.center,
                 ),
-              ),
-              Opacity(
-                opacity: 0.0,
-                child: icon
               ),
             ],
           ),

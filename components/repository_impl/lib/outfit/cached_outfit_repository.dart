@@ -3,6 +3,7 @@ import 'package:middleware/middleware.dart';
 import 'package:streamqflite/streamqflite.dart';
 import 'package:repository_impl/repository_impl.dart';
 import 'package:meta/meta.dart';
+import 'dart:async';
 
 class CachedOutfitRepository {
 
@@ -93,6 +94,9 @@ class CachedOutfitRepository {
     if(searchMode==SearchModes.SAVED){
       await _clearSaves();
     }
+    if(searchMode==SearchModes.FEED){
+      await userCache.clearNewFeed();
+    }
     await _clearOutfitSearches(searchMode);
     await _clearOutfits(searchMode);
     if(searchMode!=SearchModes.MINE){
@@ -164,7 +168,7 @@ class CachedOutfitRepository {
       'comment_is_liked': 0,
       'comment_created_at': DateTime.now().toIso8601String(),
     };
-    await _addComment(newComment);
+    return _addComment(newComment);
   }
   Future<int> _addComment(Map<String, dynamic> commentMap) async {
     return streamDatabase.insert(
@@ -232,4 +236,10 @@ class CachedOutfitRepository {
       return OutfitNotification.fromMap(data);
     }).asBroadcastStream();
   }
+
+  Future<void> incrementOutfitCount(String userId){
+    return streamDatabase.executeAndTrigger(['user'], "UPDATE user SET number_of_outfits=number_of_outfits+1 WHERE user_id=?", [userId]);
+  }
+    
+
 }

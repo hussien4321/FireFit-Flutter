@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import './auth_instance.dart';
 import 'package:middleware/middleware.dart';
+import 'dart:async';
 
 class TwitterAuthInstance implements AuthInstance {
   

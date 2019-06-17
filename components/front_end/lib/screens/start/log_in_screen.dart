@@ -31,6 +31,8 @@ class _LogInScreenState extends State<LogInScreen> with LoadingAndErrorDialogs {
   UserBloc _userBloc;
   List<StreamSubscription<dynamic>> _subscriptions;
 
+  bool isOverlayShowing = false;
+
   @override
   dispose(){
     _subscriptions?.forEach((subscription) => subscription.cancel());
@@ -80,10 +82,12 @@ class _LogInScreenState extends State<LogInScreen> with LoadingAndErrorDialogs {
 
   StreamSubscription _loadingListener(){
     return _userBloc.isLoading.listen((loadingStatus) {
-      if(loadingStatus){
+      if(loadingStatus && !isOverlayShowing){
         startLoading(widget.isRegistering ? "Creating account" : "Logging in", context);
+        isOverlayShowing = true;
       }
-      else{
+      if(!loadingStatus && isOverlayShowing){
+        isOverlayShowing = false;
         stopLoading(context);
       }
     });

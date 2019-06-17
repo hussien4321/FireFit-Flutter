@@ -104,7 +104,7 @@ class _MainAppBarState extends State<MainAppBar> {
       swipe: false,
       offset: 0.7,
       animationType: InnerDrawerAnimation.linear,
-      child: MenuScreenNavigation(
+      child: MenuNavigationScreen(
         index: currentIndex,
         onPageSelected: (newIndex) => currentIndex = newIndex,
       ),
@@ -127,18 +127,13 @@ class _MainAppBarState extends State<MainAppBar> {
         Scaffold(
           backgroundColor: Colors.white,
           appBar: AppBar(
+            leading: _buildMenuButton(),
             title: Text(
               pages[currentIndex],
               style: TextStyle(
                 fontWeight: FontWeight.normal,
                 letterSpacing: 1.5
               ),
-            ),
-            leading: IconButton(
-              icon: Icon(
-                Icons.menu
-              ),
-              onPressed: () => _menuDrawerKey.currentState.open(),
             ),
             centerTitle: true,
             actions: <Widget>[
@@ -155,17 +150,19 @@ class _MainAppBarState extends State<MainAppBar> {
     );
   }
 
-  Widget _buildShading(){
-    return SafeArea(
-      child: StreamBuilder<bool>(
-        stream: _isSliderOpenController,
-        initialData: false,
-        builder: (ctx, snap) {
-          return Container(
-            color: snap.data ? Colors.black.withOpacity(0.5) : null
-          );
-        }
-      ),
+  Widget _buildMenuButton() {
+    return StreamBuilder<bool>(
+      stream: _userBloc.currentUser.map((user) => user.hasNewFeedOutfits),
+      initialData: false,
+      builder: (context, hasFeedSnap) {
+        return IconButton(
+          icon: NotificationIcon(
+              iconData: Icons.menu,
+              displayNum: hasFeedSnap.data != true,
+            ),
+          onPressed: () => _menuDrawerKey.currentState.open(),
+        );
+      }
     );
   }
 
@@ -202,6 +199,20 @@ class _MainAppBarState extends State<MainAppBar> {
           );
         }
       )  
+    );
+  }
+
+  Widget _buildShading(){
+    return SafeArea(
+      child: StreamBuilder<bool>(
+        stream: _isSliderOpenController,
+        initialData: false,
+        builder: (ctx, snap) {
+          return Container(
+            color: snap.data ? Colors.black.withOpacity(0.5) : null
+          );
+        }
+      ),
     );
   }
 

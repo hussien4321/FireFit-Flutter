@@ -1,7 +1,7 @@
 
 export 'screens/app_bar/notifications_screen.dart';
 export 'screens/app_bar/main_app_bar.dart';
-export 'screens/app_bar/menu_screen_navigation.dart';
+export 'screens/app_bar/menu_navigation_screen.dart';
 
 export 'screens/explore/explore_screen.dart';
 export 'screens/explore/outfit_fading_card.dart';

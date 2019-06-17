@@ -4,12 +4,7 @@ import 'package:middleware/middleware.dart';
 import 'package:helpers/helpers.dart';
 import 'package:front_end/providers.dart';
 import 'package:blocs/blocs.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:flutter_swiper/flutter_swiper.dart';
-import 'package:rxdart/rxdart.dart';
-import 'package:helpers/helpers.dart';
-
 
 class CommentsScreen extends StatefulWidget {
 

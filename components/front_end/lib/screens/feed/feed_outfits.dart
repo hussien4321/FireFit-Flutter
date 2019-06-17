@@ -103,6 +103,7 @@ class FeedOutfits extends StatelessWidget {
       width: 120,
       height: 200,
       decoration: BoxDecoration(
+        color: Colors.white,
         boxShadow: [
           BoxShadow(
             color: Colors.black45,
@@ -116,6 +117,7 @@ class FeedOutfits extends StatelessWidget {
         child: CachedNetworkImage(
           imageUrl: outfit.images[0],
           fit: BoxFit.fitHeight,
+          fadeInDuration: Duration(),
         ),
       ),
     );

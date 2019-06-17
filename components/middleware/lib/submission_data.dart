@@ -3,6 +3,7 @@ export 'submission_data/onboard_user.dart';
 
 export 'submission_data/upload_outfit.dart';
 export 'submission_data/load_outfits.dart';
+export 'submission_data/load_outfit.dart';
 
 export 'submission_data/outfit_impression.dart';
 export 'submission_data/outfit_save.dart';

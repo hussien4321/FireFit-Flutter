@@ -29,6 +29,8 @@ class _OnboardScreenState extends State<OnboardScreen> with SnackbarMessages, Lo
   UserBloc userBloc;
   bool isLoading = true;
 
+  bool isOverlayShowing = false;
+
   List<StreamSubscription<dynamic>> _subscriptions;
   
   bool loadingImages = false;
@@ -74,6 +76,7 @@ class _OnboardScreenState extends State<OnboardScreen> with SnackbarMessages, Lo
                     opacity: 0.0,
                     child: FlatButton(
                       child: Text(''),
+                      onPressed: (){},
                     ),
                   ),
                   Container(
@@ -88,6 +91,7 @@ class _OnboardScreenState extends State<OnboardScreen> with SnackbarMessages, Lo
                     opacity: 0.0,
                     child: FlatButton(
                       child: Text(''),
+                      onPressed: (){},
                     ),
                   ),
                 ],
@@ -240,10 +244,13 @@ class _OnboardScreenState extends State<OnboardScreen> with SnackbarMessages, Lo
   StreamSubscription _listenForOnboardCompletion(){
     return userBloc.isLoading.listen((loadingStatus) {
       if(currentIndex ==_onboardingPages.length-1){
-        if(loadingStatus){
+        print('Loading has found $loadingStatus!!!');
+        if(loadingStatus && !isOverlayShowing){
           startLoading('Creating account', context);
+          isOverlayShowing=true;
         }
-        else{
+        if(!loadingStatus && isOverlayShowing){
+          isOverlayShowing = false;
           stopLoading(context);
         }
       }

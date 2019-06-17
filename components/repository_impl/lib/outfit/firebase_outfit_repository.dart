@@ -5,9 +5,9 @@ import 'package:meta/meta.dart';
 import 'package:helpers/helpers.dart';
 import 'package:path/path.dart';
 import 'dart:math';
+import 'dart:async';
 
 class FirebaseOutfitRepository implements OutfitRepository {
-
   
   final int numberOfPosts = 15;
 
@@ -34,18 +34,18 @@ class FirebaseOutfitRepository implements OutfitRepository {
   Future<bool> loadMoreOutfits(LoadOutfits loadOutfits) {
     return cloudFunctions.getHttpsCallable(functionName: 'getOutfits').call(loadOutfits.toJson())
     .then((res) async {
-      _saveOutfitsList(res.data, loadOutfits.searchMode);
+      List<Outfit> outfits = _resToOutfitList(res);
+      outfits.forEach((outfit) => cache.addOutfit(outfit, loadOutfits.searchMode));
       return true;
     })
     .catchError((err) => false);
   }
 
-  _saveOutfitsList(dynamic response, SearchModes searchMode){
-    List<Outfit> outfits = List<Outfit>.from(response['res'].map((data){
+  List<Outfit> _resToOutfitList(HttpsCallableResult res){
+    return List<Outfit>.from(res.data['res'].map((data){
       Map<String, dynamic> formattedDoc = Map<String, dynamic>.from(data);
       return Outfit.fromMap(formattedDoc);
     }).toList());
-    outfits.forEach((outfit) => cache.addOutfit(outfit, searchMode));
   }
 
   Future<bool> uploadOutfit(UploadOutfit uploadOutfit) async {
@@ -55,10 +55,10 @@ class FirebaseOutfitRepository implements OutfitRepository {
       List<String> fileNames = _generateFileNames(uploadOutfit.images, outfitId, uploadOutfit);
       await imageUploader.uploadImages(uploadOutfit.images, fileNames);
 
-      return true;
+      return _checkOutfitImageUploaded(outfitId, uploadOutfit.posterUserId);
     })
     .catchError((err) {
-      print(err);
+      print(err.message);
       return false;
     });
   }
@@ -72,7 +72,36 @@ class FirebaseOutfitRepository implements OutfitRepository {
     return imageFiles;
   }
 
-  
+  Future<bool> _checkOutfitImageUploaded(int outfitId, String userId) async {
+    LoadOutfit loadOutfit = LoadOutfit(
+      outfitId: outfitId,
+      userId: userId,
+    );
+    for(int i = 0; i < AppConfig.NUMBER_OF_POLL_ATTEMPTS; i++){
+      print('polling for outfit attempt:$i time=${DateTime.now()}');
+      bool success = await _getUploadedOutfit(loadOutfit);
+      if(success){
+        return true;
+      }
+      await Future.delayed(Duration(milliseconds: AppConfig.DURATION_PER_POLL_ATTEMPT));
+    }
+    return false;
+  }
+
+  Future<bool> _getUploadedOutfit(LoadOutfit loadOutfit) {
+    return cloudFunctions.getHttpsCallable(functionName: 'getOutfit').call(loadOutfit.toJson())
+    .then((res) async {
+      List<Outfit> outfits = _resToOutfitList(res);
+      if(outfits.isEmpty){
+        return false;
+      }
+      Outfit newOutfit = outfits.first;
+      await cache.addOutfit(newOutfit, SearchModes.MINE);
+      await cache.incrementOutfitCount(loadOutfit.userId);
+      return true;
+    })
+    .catchError((err) => false);
+  }
   
   Future<bool> deleteOutfit(Outfit outfit) async {
     cache.deleteOutfit(outfit);

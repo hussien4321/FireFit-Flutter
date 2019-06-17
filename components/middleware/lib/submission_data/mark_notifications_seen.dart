@@ -1,5 +1,3 @@
-import 'package:middleware/middleware.dart';
-
 class MarkNotificationsSeen {
 
   String userId;
