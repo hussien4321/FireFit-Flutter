@@ -173,7 +173,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           children: <Widget>[
             Opacity(
               opacity: 0.0,
-              child: _demographic(user),
+              child: DemographicSticker(user),
             ),
             Expanded(
               child: Text(
@@ -186,7 +186,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 textAlign: TextAlign.center,
               ),
             ),
-            _demographic(user),
+            DemographicSticker(user),
           ],
         ),
         Text(
@@ -197,31 +197,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _demographic(User user){
-    Color color = user.genderIsMale ? Colors.blue : Colors.pink;
-    return Container(
-      padding: EdgeInsets.all(4.0),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(8),
-        color: color
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          Icon(
-            user.genderIsMale ? FontAwesomeIcons.male : FontAwesomeIcons.female,
-            color: Colors.white,
-            size: 16,
-          ),
-          Text(
-            user.ageRange,
-            style: Theme.of(context).textTheme.body2.apply(color: Colors.white),
-          )
-        ],
-      ),
-    );
-  }
 
   Widget _overallStatistics(User user){
     return Row(

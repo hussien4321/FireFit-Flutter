@@ -20,7 +20,7 @@ class FitHeightBlurImage extends StatelessWidget {
           ),
         ),
         BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+          filter: ImageFilter.blur(sigmaX: 3, sigmaY: 1),
           child: Container(
             color: Colors.grey.withOpacity(0.0),
           )

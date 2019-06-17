@@ -6,6 +6,9 @@ export 'screens/app_bar/menu_screen_navigation.dart';
 export 'screens/explore/explore_screen.dart';
 export 'screens/explore/outfit_fading_card.dart';
 
+export 'screens/feed/feed_outfits.dart';
+export 'screens/feed/feed_screen.dart';
+
 export 'screens/onboarding/onboard_screen.dart';
 
 export 'screens/outfit_detail/comments_screen.dart';

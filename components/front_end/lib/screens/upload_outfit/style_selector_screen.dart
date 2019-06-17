@@ -35,7 +35,7 @@ class StyleSelectorScreen  extends StatelessWidget {
     return Expanded(
       child: Container(
         margin: const EdgeInsets.all(8.0),
-        child: StyleTab(
+        child: StyleBanner(
           style: style,
           onTap: () => _saveCategory(ctx, style),
         ),

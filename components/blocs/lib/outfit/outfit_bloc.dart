@@ -24,6 +24,8 @@ class OutfitBloc{
   Sink<LoadOutfits> get loadMyOutfits => _loadMyOutfitsController;
   final _loadUserOutfitsController = PublishSubject<LoadOutfits>();
   Sink<LoadOutfits> get loadUserOutfits => _loadUserOutfitsController;
+  final _loadFeedOutfitsController = PublishSubject<LoadOutfits>();
+  Sink<LoadOutfits> get loadFeedOutfits => _loadFeedOutfitsController;
   final _loadSavedOutfitsController = PublishSubject<LoadOutfits>();
   Sink<LoadOutfits> get loadSavedOutfits => _loadSavedOutfitsController;
 
@@ -62,6 +64,7 @@ class OutfitBloc{
       _exploreOutfitsController.listen(_exploreOutfits),
       _loadMyOutfitsController.listen(_loadMyOutfits),
       _loadUserOutfitsController.distinct().listen(_loadUserOutfits),
+      _loadFeedOutfitsController.listen(_loadFeedOutfits),
       _loadSavedOutfitsController.listen(_loadSavedOutfits),
       _uploadOutfitsController.listen(_uploadOutfit),
       _deleteOutfitController.listen(_deleteOutfit),
@@ -78,6 +81,10 @@ class OutfitBloc{
   }
   _loadMyOutfits(LoadOutfits loadOutfits) async {
     loadOutfits.searchMode = SearchModes.MINE;
+    await _loadOutfits(loadOutfits);
+  }
+  _loadFeedOutfits(LoadOutfits loadOutfits) async {
+    loadOutfits.searchMode = SearchModes.FEED;
     await _loadOutfits(loadOutfits);
   }
   _loadUserOutfits(LoadOutfits loadOutfits) async {
@@ -156,6 +163,7 @@ class OutfitBloc{
     _feedOutfitsController.close();
     _exploreOutfitsController.close();
     _loadMyOutfitsController.close();
+    _loadFeedOutfitsController.close();
     _loadUserOutfitsController.close();
     _loadSavedOutfitsController.close();
     _uploadOutfitsController.close();

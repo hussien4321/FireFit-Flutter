@@ -31,7 +31,7 @@ class _MainAppBarState extends State<MainAppBar> {
   int currentIndex = 0;
   List<Widget> currentPages = [
     ExploreScreen(),
-    UnderConstructionNotice(),
+    FeedScreen(),
     WardrobeScreen(),
   ];
 

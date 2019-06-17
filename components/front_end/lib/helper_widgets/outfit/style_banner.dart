@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:helpers/helpers.dart';
 
-class StyleTab extends StatelessWidget {
+class StyleBanner extends StatelessWidget {
   final Style style;
   final VoidCallback onTap;
   
-  StyleTab({this.style, this.onTap});
+  StyleBanner({this.style, this.onTap});
 
   @override
   Widget build(BuildContext context) {

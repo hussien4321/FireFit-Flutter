@@ -259,7 +259,7 @@ class _OutfitFadingCardState extends State<OutfitFadingCard> with SingleTickerPr
           Opacity(
             opacity: _infoOpacityValue,
             child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+              padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 4.0),
               color: Colors.transparent,
               width: double.infinity,
               child: Column(
@@ -277,64 +277,14 @@ class _OutfitFadingCardState extends State<OutfitFadingCard> with SingleTickerPr
                               style: Theme.of(context).textTheme.title,
                             ),
                           ),
-                          Icon(
-                            _currentOutfit.poster.genderIsMale ? FontAwesomeIcons.male : FontAwesomeIcons.female,
-                            color: Colors.black,
-                          ),
-                          Text(
-                            _currentOutfit.poster.ageRange,
-                            style: Theme.of(context).textTheme.title.apply(color: Colors.black),
-                          )
+                          DemographicSticker(_currentOutfit.poster),
                         ],
                       ),
                     ),
                   ),
                   Transform.translate(
                     offset: Offset(_infoSlideValue,0),
-                    child: Row(
-                      children: <Widget>[
-                        Expanded(
-                          child: Text(
-                            _currentOutfit.style,
-                            style:TextStyle(
-                              fontStyle: FontStyle.italic,
-                              letterSpacing: 1.5,
-                            ),
-                          )
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.only(right: 8.0),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: <Widget>[
-                              Text(
-                                '${_currentOutfit.commentsCount} ',
-                                style: Theme.of(context).textTheme.subtitle,
-                              ),
-                              Icon(
-                                Icons.comment,
-                                size: 16,
-                                color: Colors.black,
-                              ),
-                            ],
-                          ),
-                        ),
-                        Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: <Widget>[
-                            Text(
-                              '${_currentOutfit.likesOverallCount} ',
-                              style: Theme.of(context).textTheme.subtitle,
-                            ),
-                            Icon(
-                              Icons.thumbs_up_down,
-                              size: 16,
-                              color: Colors.black,
-                            ),
-                          ]
-                        ),
-                      ],
-                    ),
+                    child: OutfitStats(outfit: _currentOutfit),
                   )
                 ],
               ),

@@ -180,7 +180,7 @@ class _UploadOutfitScreenState extends State<UploadOutfitScreen> with LoadingAnd
 
   Widget _buildStyleInput() {
     Style style = Style.fromStyleString(uploadOutfit.style);
-    return StyleTab(
+    return StyleBanner(
       style: style, 
       onTap: _selectNewStyle
     );

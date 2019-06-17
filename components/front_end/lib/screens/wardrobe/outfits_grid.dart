@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:middleware/middleware.dart';
 import 'package:front_end/helper_widgets.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class OutfitsGrid extends StatelessWidget {
 
@@ -22,10 +23,9 @@ class OutfitsGrid extends StatelessWidget {
   }
 
   Widget _buildNoOutfitsMessage() {
-    return Center(
-      child: Text(
-        'You have no outfits saved, check the inspiration page for new outfit ideas to save!'
-      ),
+    return CustomBanner(
+      icon: FontAwesomeIcons.boxOpen,
+      text: 'No outfits found'
     );
   }
 
