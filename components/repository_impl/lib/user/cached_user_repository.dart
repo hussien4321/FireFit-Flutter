@@ -34,14 +34,14 @@ class CachedUserRepository {
     );
   }
 
-  Stream<User> loadUser(SearchModes searchMode){
+  Stream<User> getUser(SearchModes searchMode){
     String searchModeString = searchModeToString(searchMode);
     return streamDatabase.createRawQuery(['user'], 'SELECT * FROM user, user_search WHERE user_id=search_user_id AND search_user_mode=? LIMIT 1',[searchModeString]).mapToOneOrDefault((data) {
       return User.fromMap(data);
     }, null).asBroadcastStream();
   }
 
-  Stream<List<User>> loadUsers(SearchModes searchMode) {
+  Stream<List<User>> getUsers(SearchModes searchMode) {
     String searchModeString = searchModeToString(searchMode);
     return streamDatabase.createRawQuery(['user'], 'SELECT * FROM user, user_search WHERE user_id=search_user_id AND search_user_mode=?',[searchModeString]).mapToList((data) {
       return User.fromMap(data);
@@ -49,11 +49,20 @@ class CachedUserRepository {
   }
 
   
-  Future<void> clearAllUsers() async {
-    await streamDatabase.executeAndTrigger(["user"], "DELETE FROM user");
+  Future<void> clearEverything() async {
+    await streamDatabase.executeAndTrigger(["save"], "DELETE FROM save");
+    await streamDatabase.executeAndTrigger(["comment"], "DELETE FROM comment");
+    await streamDatabase.executeAndTrigger(["user_search"], "DELETE FROM user_search");
+    await streamDatabase.executeAndTrigger(["outfit_search"], "DELETE FROM outfit_search");
+    await streamDatabase.executeAndTrigger(["notification"], "DELETE FROM notification");
+    await streamDatabase.executeAndTrigger(["outfit"], "DELETE FROM outfit");
+    return streamDatabase.executeAndTrigger(["user"], "DELETE FROM user");
   }
   
   Future<void> clearUsers(SearchModes searchMode) async {
+    if(searchMode ==SearchModes.FOLLOWERS){
+      await markUserHasSeenFollowers();
+    }
     await _clearUserSearches(searchMode);
     await _clearUsers(searchMode);
   }
@@ -69,6 +78,16 @@ class CachedUserRepository {
 
   Future<void> markNotificationsSeen(MarkNotificationsSeen markSeen) {
     return streamDatabase.executeAndTrigger(['notification'], "UPDATE user SET last_seen_notification_at=?, number_of_new_notifications=0 WHERE user_id=?", [ markSeen.lastSeenNotificationAt.toIso8601String(), markSeen.userId]);
+  }
+
+  
+  Future<void> updateUserHasNewFollower() async {
+    String searchModeString = searchModeToString(SearchModes.MINE);
+    return streamDatabase.executeAndTrigger(['user'], "UPDATE user SET has_new_followers=1 WHERE user_id=(SELECT search_user_id FROM user_search WHERE search_user_mode=? LIMIT 1)", [searchModeString]);
+  }
+  Future<void> markUserHasSeenFollowers() async {
+    String searchModeString = searchModeToString(SearchModes.MINE);
+    return streamDatabase.executeAndTrigger(['user'], "UPDATE user SET has_new_followers=0 WHERE user_id=(SELECT search_user_id FROM user_search WHERE search_user_mode=? LIMIT 1)", [searchModeString]);
   }
 
   Future<void> followUser(FollowUser followUser) async {

@@ -44,5 +44,6 @@ void main() async {
   app.main(
     outfitRepository: outfitRepository,
     userRepository: userRepository,
+    messaging: messaging
   );
 }

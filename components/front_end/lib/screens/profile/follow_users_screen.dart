@@ -39,7 +39,7 @@ class _FollowUsersScreenState extends State<FollowUsersScreen> {
       ),
       body: Container(
         child: StreamBuilder<List<User>>(
-          stream: _userBloc.followUsers,
+          stream: widget.isFollowers? _userBloc.followers : _userBloc.following,
           initialData: [],
           builder: (ctx, snap){
             List<User> users = snap.data;
@@ -135,12 +135,6 @@ class _FollowUsersScreenState extends State<FollowUsersScreen> {
 
 
   _openProfile(User user){
-    Navigator.pushAndRemoveUntil(context, MaterialPageRoute(
-      builder: (ctx) => ProfileScreen(
-          userId: user.userId
-        )
-      ),
-      (Route<dynamic> route)=>route.isFirst
-    );
+    CustomNavigator.goToProfileScreen(context, true, userId: user.userId);
   }
 }

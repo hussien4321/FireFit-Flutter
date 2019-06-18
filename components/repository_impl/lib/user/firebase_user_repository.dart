@@ -34,7 +34,7 @@ class FirebaseUserRepository implements UserRepository {
     final user = await auth.currentUser();
     final hasAuth = user!=null;
     if(!hasAuth){
-      await userCache.clearAllUsers();
+      await userCache.clearEverything();
       return null;
     }
     return user.uid;
@@ -215,27 +215,31 @@ class FirebaseUserRepository implements UserRepository {
 
   Future<void> logOut() async {
     messaging.deleteInstanceID();
-    userCache.clearAllUsers();
+    userCache.clearEverything();
     auth.signOut();
   }
 
-  Stream<User> loadUser(SearchModes searchMode) => userCache.loadUser(searchMode);
+  Stream<User> getUser(SearchModes searchMode) => userCache.getUser(searchMode);
   
-  Stream<List<User>> loadUsers(SearchModes searchMode) => userCache.loadUsers(searchMode);
+  Stream<List<User>> getUsers(SearchModes searchMode) => userCache.getUsers(searchMode);
 
   Stream<List<OutfitNotification>> getNotifications() => outfitCache.getNotifications();
 
-  Future<bool> loadNotifications(String userId) {
+  Future<bool> loadNotifications(LoadNotifications loadNotifications){
     outfitCache.clearNotifications();
-    return cloudFunctions.getHttpsCallable(functionName: 'getNotifications').call({
-      'user_id': userId
-    })
+    return cloudFunctions.getHttpsCallable(functionName: 'getNotifications').call(loadNotifications.toJson())
     .then((res) async {
       List<OutfitNotification> notifications = List<OutfitNotification>.from(res.data['res'].map((data){
         Map<String, dynamic> formattedDoc = Map<String, dynamic>.from(data);
         return OutfitNotification.fromMap(formattedDoc);
       }).toList());
-      notifications.forEach((notification) => outfitCache.addNotification(notification));
+      notifications.forEach((notification) {
+        outfitCache.addNotification(notification);
+        if(loadNotifications.isLive){
+          outfitCache.updateLiveNotification(notification);
+        }
+      });
+
       return true;
     })
     .catchError((err) {

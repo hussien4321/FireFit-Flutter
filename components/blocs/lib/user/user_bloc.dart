@@ -18,8 +18,10 @@ class UserBloc {
   Sink<String> get selectUser => _selectUserController; 
 
 
-  final _followUsersController = BehaviorSubject<List<User>>();
-  Stream<List<User>> get followUsers => _followUsersController;
+  final _followersController = BehaviorSubject<List<User>>();
+  Stream<List<User>> get followers => _followersController;
+  final _followingController = BehaviorSubject<List<User>>();
+  Stream<List<User>> get following => _followingController;
   final _loadFollowersController = PublishSubject<String>();
   Sink<String> get loadFollowers => _loadFollowersController; 
   final _loadFollowingController = PublishSubject<String>();
@@ -84,9 +86,10 @@ class UserBloc {
       _loadFollowingController.listen(_loadFollowing),
     ];
     _loadCurrentUser();
-    _selectedUserController.addStream(repository.loadUser(SearchModes.SELECTED));
-    _currentUserController.addStream(repository.loadUser(SearchModes.MINE));
-    _followUsersController.addStream(repository.loadUsers(SearchModes.FOLLOW));
+    _selectedUserController.addStream(repository.getUser(SearchModes.SELECTED));
+    _currentUserController.addStream(repository.getUser(SearchModes.MINE));
+    _followersController.addStream(repository.getUsers(SearchModes.FOLLOWERS));
+    _followingController.addStream(repository.getUsers(SearchModes.FOLLOWING));
     _accountStatusController = Observable.combineLatest3<String, User, bool, UserAccountStatus>(existingAuthId, _currentUserController, _loadingController, _redirectPath).asBroadcastStream().debounce(Duration(milliseconds: 300));
     _resetCurrentUserStatus();
   }
@@ -206,7 +209,7 @@ class UserBloc {
       LoadUser(
         userId: userId,
         currentUserId: _currentUserId,
-        searchMode: SearchModes.FOLLOW
+        searchMode: SearchModes.FOLLOWERS
       )
     );
     _loadingController.add(false);
@@ -217,7 +220,7 @@ class UserBloc {
       LoadUser(
         userId: userId,
         currentUserId: _currentUserId,
-        searchMode: SearchModes.FOLLOW
+        searchMode: SearchModes.FOLLOWING
       ),
     );
     _loadingController.add(false);
@@ -226,7 +229,8 @@ class UserBloc {
   void dispose() {
     _currentUserController.close();
     _existingAuthController.close();
-    _followUsersController.close();
+    _followersController.close();
+    _followingController.close();
     _loadFollowersController.close();
     _loadFollowingController.close();
     _loadCurrentUserController.close();

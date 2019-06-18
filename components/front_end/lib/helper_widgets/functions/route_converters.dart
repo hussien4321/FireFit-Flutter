@@ -16,4 +16,24 @@ class RouteConverters {
         return null;
     }
   }
+
+  static RouteSettings getSettingsFromAccountStatus(UserAccountStatus accountStatus){
+    String name;
+    switch (accountStatus) {
+      case UserAccountStatus.LOGGED_OUT:
+        name = '/start';
+        break;
+      case UserAccountStatus.LOGGED_IN:
+        name = '/home';
+        break;
+      case UserAccountStatus.PENDING_ONBOARDING:
+        name = '/onboard';
+        break;
+      default:
+        break;
+    }
+    return RouteSettings(
+      name: name
+    );
+  }
 }

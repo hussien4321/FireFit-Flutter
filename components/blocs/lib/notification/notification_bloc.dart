@@ -10,8 +10,10 @@ class NotificationBloc {
 
   final _registerNotificationTokenController = PublishSubject<String>();
   Sink<String> get registerNotificationToken => _registerNotificationTokenController;
-  final _loadNotificationsController = PublishSubject<String>();
-  Sink<String> get loadNotifications => _loadNotificationsController;
+  final _loadStaticNotificationsController = PublishSubject<String>();
+  Sink<String> get loadStaticNotifications => _loadStaticNotificationsController;
+  final _loadLiveNotificationsController = PublishSubject<String>();
+  Sink<String> get loadLiveNotifications => _loadLiveNotificationsController;
   final _notificationsController = BehaviorSubject<List<OutfitNotification>>(seedValue: []);
   Stream<List<OutfitNotification>> get notifications => _notificationsController.stream; 
 
@@ -26,7 +28,8 @@ class NotificationBloc {
   NotificationBloc(this.repository) {
     _subscriptions = <StreamSubscription<dynamic>>[
       _registerNotificationTokenController.listen(_registerNotificationToken),
-      _loadNotificationsController.listen(_loadNotifications),
+      _loadStaticNotificationsController.listen(_loadStaticNotifications),
+      _loadLiveNotificationsController.listen(_loadLiveNotifications),
     ];
     _notificationsController.addStream(repository.getNotifications());
   }
@@ -35,9 +38,20 @@ class NotificationBloc {
     repository.registerNotificationToken(userId);
   }
 
-  _loadNotifications(String userId) async {
+  _loadStaticNotifications(String userId) async {
+    _loadNotifications(userId, false);
+  }
+  _loadLiveNotifications(String userId) async {
+    _loadNotifications(userId, true);
+  }
+
+  _loadNotifications(String userId, bool isLive) async {
+    LoadNotifications loadNotifications = LoadNotifications(
+      userId: userId,
+      isLive: isLive
+    );
     _loadingController.add(true);
-    bool success = await repository.loadNotifications(userId);
+    bool success = await repository.loadNotifications(loadNotifications);
     _loadingController.add(false);
     if(!success){
       _errorController.add('Failed to load notifications');
@@ -46,7 +60,8 @@ class NotificationBloc {
 
   void dispose() {
     _registerNotificationTokenController.close();
-    _loadNotificationsController.close();
+    _loadStaticNotificationsController.close();
+    _loadLiveNotificationsController.close();
     _notificationsController.close();
     _loadingController.close();
     _errorController.close();

@@ -32,13 +32,13 @@ class FeedOutfits extends StatelessWidget {
   Widget _buildScrollableGrid(BuildContext ctx) {
     return ListView.builder(
       itemCount: outfits.length,
-      itemBuilder: (ctx, i) => _buildOutfitCard(i, outfits[i], ctx),
+      itemBuilder: (ctx, i) => _buildOutfitCard(i, outfits[i], ctx, i==0),
     );
   }
 
-  Widget _buildOutfitCard(int index, Outfit outfit, BuildContext ctx) {
+  Widget _buildOutfitCard(int index, Outfit outfit, BuildContext ctx, bool isFirst) {
     return Container(
-      margin: EdgeInsets.symmetric(vertical: 32.0),
+      margin: EdgeInsets.only(top: isFirst ? 32 : 0 , bottom: 32.0),
       child: GestureDetector(
         onTap: () => _openDetailedOutfit(outfit, ctx),
         child: Container(

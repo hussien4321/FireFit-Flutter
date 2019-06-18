@@ -54,7 +54,8 @@ class _IntroScreenState extends State<IntroScreen> {
       if(accountStatus!=null && accountStatus !=UserAccountStatus.LOGGED_OUT){
         print('got status = $accountStatus');
         Navigator.pushReplacement(context, MaterialPageRoute(
-          builder: (ctx) => RouteConverters.getFromAccountStatus(accountStatus)
+          builder: (ctx) => RouteConverters.getFromAccountStatus(accountStatus),
+          settings: RouteConverters.getSettingsFromAccountStatus(accountStatus)
         ));
       }
     });

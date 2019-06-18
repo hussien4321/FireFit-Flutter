@@ -1,7 +1,3 @@
-// Copyright 2018 The Flutter Architecture Sample Authors. All rights reserved.
-// Use of this source code is governed by the MIT license that can be found
-// in the LICENSE file.
-
 import 'package:flutter/material.dart';
 import 'package:meta/meta.dart';
 import 'package:blocs/blocs.dart';
@@ -9,10 +5,12 @@ import 'package:middleware/middleware.dart';
 import 'package:front_end/providers.dart';
 import 'package:front_end/screens.dart';
 import 'package:front_end/localization.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 void main({
   @required OutfitRepository outfitRepository,
   @required UserRepository userRepository,
+  @required FirebaseMessaging messaging,
 }) {
   runApp(
     UserBlocProvider(
@@ -26,11 +24,18 @@ void main({
             child: MaterialApp(
               title: BlocLocalizations().appTitle,
               debugShowCheckedModeBanner: false,
-              theme: ThemeData(
-                primaryColorBrightness: Brightness.light,
-                primarySwatch: Colors.grey,
+              home: NewNotificationsOverlayScreen(
+                messaging: messaging,
+                body: MaterialApp(
+                  title: BlocLocalizations().appTitle,
+                  debugShowCheckedModeBanner: false,
+                  theme: ThemeData(
+                    primaryColorBrightness: Brightness.light,
+                    primarySwatch: Colors.grey,
+                  ),
+                  home: LoadingScreen(),
+                ),
               ),
-              home: LoadingScreen(),
             ),
           ),
         ),

@@ -9,6 +9,8 @@ export 'screens/explore/outfit_fading_card.dart';
 export 'screens/feed/feed_outfits.dart';
 export 'screens/feed/feed_screen.dart';
 
+export 'screens/notification/new_notifications_overlay_screen.dart';
+
 export 'screens/onboarding/onboard_screen.dart';
 
 export 'screens/outfit_detail/comments_screen.dart';

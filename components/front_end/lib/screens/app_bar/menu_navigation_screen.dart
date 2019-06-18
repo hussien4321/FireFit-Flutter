@@ -111,11 +111,23 @@ class _MenuNavigationScreenState extends State<MenuNavigationScreen> {
           onTap: () => _openUserProfile(user.userId),
           child: Row(
             children: <Widget>[
-              ProfilePicWithShadow(
-                url: user.profilePicUrl,
-                userId: user.userId,
-                size: 64,
-                margin: EdgeInsets.all(8.0),
+              Container(
+                padding: EdgeInsets.symmetric(vertical: 8),
+                child: StreamBuilder<bool>(
+                  stream: _userBloc.currentUser.map((user) => user.hasNewFollowers),
+                  initialData: false,
+                  builder: (context, hasFollowers) {
+                    return NotificationIcon(
+                      child: ProfilePicWithShadow(
+                        url: user.profilePicUrl,
+                        userId: user.userId,
+                        size: 64,
+                        margin: EdgeInsets.all(8.0),
+                      ),
+                      showBubble: hasFollowers.data == true,
+                    );
+                  }
+                ),
               ),
               Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -153,7 +165,7 @@ class _MenuNavigationScreenState extends State<MenuNavigationScreen> {
       height: 32.0,
       child: NotificationIcon(
         iconData: iconData,
-        displayNum: !showNotificationBubble,
+        showBubble: showNotificationBubble,
         color: color,
       )
     );

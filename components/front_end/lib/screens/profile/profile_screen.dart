@@ -206,6 +206,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           count: user.numberOfFollowers, 
           name: 'Follower${user.numberOfFollowers==1?'':'s'}',
           onTap: () => _showFollowers(user.userId),
+          isFollowersTab: true,
         ),
         _buildStatisticTab(
           count: user.numberOfFollowing, 
@@ -224,7 +225,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ],
     );
   }
-  Widget _buildStatisticTab({int count, String name, VoidCallback onTap, bool isEnd = false}){
+  Widget _buildStatisticTab({int count, String name, VoidCallback onTap, bool isFollowersTab = false, bool isEnd = false}){
     return Expanded(
       child: Material(
         shape: CircleBorder(),
@@ -242,7 +243,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
-                Text('$count', style: Theme.of(context).textTheme.title),
+                StreamBuilder<bool>(
+                  stream: _userBloc.currentUser.map((user)=>user.hasNewFollowers),
+                  initialData: false,
+                  builder: (context, hasFollowersSnap) {
+                    return NotificationIcon(child: Text('$count', style: Theme.of(context).textTheme.title), showBubble: isFollowersTab && hasFollowersSnap.data == true);
+                  }
+                ),
                 Text(name, style: Theme.of(context).textTheme.subhead),
               ],
             ),

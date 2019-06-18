@@ -68,7 +68,7 @@ class _MainAppBarState extends State<MainAppBar> {
       _userBloc.loadCurrentUser.add(null);
       String userId = await _userBloc.existingAuthId.first;
       _notificationBloc.registerNotificationToken.add(userId);
-      _notificationBloc.loadNotifications.add(userId);
+      _notificationBloc.loadStaticNotifications.add(userId);
     }
   }
   
@@ -76,7 +76,8 @@ class _MainAppBarState extends State<MainAppBar> {
     return _userBloc.accountStatus.listen((accountStatus) {
       if(accountStatus!=null && accountStatus != UserAccountStatus.LOGGED_IN){
         Navigator.pushReplacement(context, MaterialPageRoute(
-          builder: (ctx) => RouteConverters.getFromAccountStatus(accountStatus)
+          builder: (ctx) => RouteConverters.getFromAccountStatus(accountStatus),
+          settings: RouteConverters.getSettingsFromAccountStatus(accountStatus)
         ));
       }
     });
@@ -152,13 +153,13 @@ class _MainAppBarState extends State<MainAppBar> {
 
   Widget _buildMenuButton() {
     return StreamBuilder<bool>(
-      stream: _userBloc.currentUser.map((user) => user.hasNewFeedOutfits),
+      stream: _userBloc.currentUser.map((user) => user.hasNewFeedOutfits || user.hasNewFollowers),
       initialData: false,
       builder: (context, hasFeedSnap) {
         return IconButton(
           icon: NotificationIcon(
               iconData: Icons.menu,
-              displayNum: hasFeedSnap.data != true,
+              showBubble: hasFeedSnap.data == true,
             ),
           onPressed: () => _menuDrawerKey.currentState.open(),
         );

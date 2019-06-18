@@ -18,10 +18,15 @@ class CachedOutfitRepository {
     if(searchMode ==SearchModes.SAVED){
       await _addOutfitSave(outfit.save);
     }
+
+    ConflictAlgorithm conflictAlgorithm = ConflictAlgorithm.replace;
+    if(searchMode ==SearchModes.NOTIFICATIONS){
+      conflictAlgorithm =ConflictAlgorithm.ignore;
+    }
     return streamDatabase.insert(
       'outfit',
       outfit.toJson(),
-      conflictAlgorithm: ConflictAlgorithm.replace,
+      conflictAlgorithm: conflictAlgorithm,
     );
   }
 
@@ -147,16 +152,16 @@ class CachedOutfitRepository {
     }).asBroadcastStream();
   }
 
+  Future<void> _incrementOutfitLikes(Outfit outfit) async {
+    return streamDatabase.executeAndTrigger(['outfit'], "UPDATE outfit SET likes_count=likes_count+1 WHERE outfit_id=?", [outfit.outfitId]);
+  }
   
-
-  Future<int> _incrementCommentCount(AddComment addComment) async {
-    Outfit outfit = addComment.outfit;
-    outfit.commentsCount++;
-    return streamDatabase.insert(
-      'outfit',
-      outfit.toJson(),
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
+  Future<void> _incrementCommentsCount(Outfit outfit) async {
+    return streamDatabase.executeAndTrigger(['outfit'], "UPDATE outfit SET comments_count=comments_count+1 WHERE outfit_id=?", [outfit.outfitId]);
+  }
+  
+  Future<void> _incrementCommentLikesCount(Comment comment) async {
+    return streamDatabase.executeAndTrigger(['comment'], "UPDATE comment SET comment_likes_count=comment_likes_count+1 WHERE comment_id=?", [comment.commentId]);
   }
   
   Future<int> addNewComment(AddComment addComment, int tempCommentId) async {
@@ -179,7 +184,7 @@ class CachedOutfitRepository {
   }
   Future<int> updateComment(AddComment addComment, int tempCommentId, int actualCommentId) async { 
     await streamDatabase.rawDelete([], 'DELETE FROM comment WHERE comment_id=$tempCommentId');
-    _incrementCommentCount(addComment);
+    _incrementCommentsCount(addComment.outfit);
     return addNewComment(addComment, actualCommentId);
   }
   Future<int> addComment(Comment comment) async { 
@@ -216,13 +221,20 @@ class CachedOutfitRepository {
       await addOutfit(notification.referencedOutfit, SearchModes.NOTIFICATIONS);
     }
     if(notification.referencedComment != null){
-      await _addComment(notification.referencedComment.toJson());
+      //TODO: ADD A COMMENT SEARCH AS WELL
+      // await _addComment(notification.referencedComment.toJson());
     }
     return streamDatabase.insert(
       'notification',
       notification.toJson(),
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
+  }
+
+  Future<void> updateLiveNotification(OutfitNotification notification) async { 
+    if(notification.type == NotificationType.NEW_FOLLOW){
+      await userCache.updateUserHasNewFollower();
+    }
   }
 
   Future<void> clearNotifications() async {

@@ -2,22 +2,25 @@ import 'package:flutter/material.dart';
 
 class NotificationIcon extends StatelessWidget {
 
+  final Widget child;
   final IconData iconData;
   final int messages;
   final Color color;
-  final bool displayNum;
+  final bool showBubble;
 
-  NotificationIcon({this.iconData, this.displayNum = true, this.color, this.messages = 0});
+  NotificationIcon({this.child, this.iconData, this.showBubble = false, this.color, this.messages = 0});
+
   @override
   Widget build(BuildContext context) {
+    
     return Container(
       child: Stack(
         children: <Widget>[
-          Center(child: Icon(
+           Center(child: child != null? child: Icon(
             iconData,
             color: color,
           )),
-          shouldShowBubble ? Positioned(
+          showBubble || messages > 0 ? Positioned(
             top: 0,
             right: 0,
             child: new Container(
@@ -30,7 +33,7 @@ class NotificationIcon extends StatelessWidget {
                 minHeight: 12,
               ),
               child: Center(
-                child: displayNum ? Text(
+                child: messages > 0 ? Text(
                   "${messages > 9 ? 9 : messages}${messages>9?'+':''}",
                   style: new TextStyle(
                     color: Colors.white,
@@ -46,6 +49,4 @@ class NotificationIcon extends StatelessWidget {
       ),
     );
   }
-
-  bool get shouldShowBubble => messages > 0 || !displayNum;
 }

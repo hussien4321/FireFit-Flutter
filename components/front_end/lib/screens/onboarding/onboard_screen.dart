@@ -235,7 +235,8 @@ class _OnboardScreenState extends State<OnboardScreen> with SnackbarMessages, Lo
     return userBloc.accountStatus.listen((accountStatus) {
       if(accountStatus!=null && accountStatus !=UserAccountStatus.PENDING_ONBOARDING){
         Navigator.pushReplacement(context, MaterialPageRoute(
-          builder: (ctx) => RouteConverters.getFromAccountStatus(accountStatus)
+          builder: (ctx) => RouteConverters.getFromAccountStatus(accountStatus),
+          settings: RouteConverters.getSettingsFromAccountStatus(accountStatus)
         ));
       }
     });

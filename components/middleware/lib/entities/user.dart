@@ -13,6 +13,7 @@ class User {
   int boosts;
   DateTime subscriptionEndDate;
   bool hasNewFeedOutfits;
+  bool hasNewFollowers;
   DateTime createdAt;
   DateTime lastSeenNotificationAt;
   int numberOfFollowers, numberOfFollowing, numberOfOutfits, numberOfLikes, numberOfNewNotifications;
@@ -50,6 +51,7 @@ class User {
     createdAt = DateTime.parse(map['user_created_at']);
     lastSeenNotificationAt = DateTime.parse(map['last_seen_notification_at']);
     hasNewFeedOutfits = map['has_new_feed_outfits'] == 1;
+    hasNewFollowers = map['has_new_followers'] == 1;
     numberOfFollowers = map['number_of_followers'];
     numberOfFollowing = map['number_of_following'];
     numberOfOutfits = map['number_of_outfits'];
@@ -73,6 +75,7 @@ class User {
     'user_created_at' : createdAt?.toIso8601String(), 
     'last_seen_notification_at' : lastSeenNotificationAt?.toIso8601String(),
     'has_new_feed_outfits' :hasNewFeedOutfits? 1:0,
+    'has_new_followers' :hasNewFollowers? 1:0,
     'number_of_followers' : numberOfFollowers,
     'number_of_following' : numberOfFollowing,
     'number_of_outfits' : numberOfOutfits,

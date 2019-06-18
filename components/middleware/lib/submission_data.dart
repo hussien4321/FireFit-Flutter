@@ -14,6 +14,7 @@ export 'submission_data/comment_like.dart';
 
 export 'submission_data/load_user.dart';
 
+export 'submission_data/load_notifications.dart';
 export 'submission_data/mark_notifications_seen.dart';
 
 export 'submission_data/follow_user.dart';

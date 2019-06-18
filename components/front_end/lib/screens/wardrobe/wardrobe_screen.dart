@@ -13,11 +13,16 @@ class WardrobeScreen extends StatelessWidget {
         body: Container(
           child: Column(
             children: <Widget>[
-              TabBar(
-                tabs: <Widget>[
-                  Tab(text: 'MY UPLOADS',),
-                  Tab(text: 'SAVED',),
-                ],
+              Container(
+                color: Colors.white,
+                child: TabBar(
+                  indicatorColor: Colors.black,
+                  unselectedLabelColor: Colors.grey,
+                  tabs: <Widget>[
+                    Tab(text: 'MY UPLOADS',),
+                    Tab(text: 'SAVED',),
+                  ],
+                ),
               ),
               Expanded(
                 child: TabBarView(

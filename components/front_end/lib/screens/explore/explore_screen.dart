@@ -298,6 +298,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
               color: Colors.deepPurple,
               icon: Icons.person,
               disabled: allDisabled,
+              selected: currentOutfit?.poster?.userId == userId,
               onPressed: () => _openCurrentProfile(currentOutfit.poster.userId),
             ),
             CustomFab(

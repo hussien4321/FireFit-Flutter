@@ -11,7 +11,7 @@ abstract class UserRepository {
   Future<bool> createAccount(OnboardUser onboardUser);
 
   Future<void> registerNotificationToken(String userId);
-  Future<bool> loadNotifications(String userId);
+  Future<bool> loadNotifications(LoadNotifications loadNotifications);
   Future<bool> markNotificationsSeen(MarkNotificationsSeen markSeen);
   Stream<List<OutfitNotification>> getNotifications();
   
@@ -27,6 +27,6 @@ abstract class UserRepository {
   Future<void> logOut();
 
   Future<bool> loadUserDetails(LoadUser loadUser, SearchModes searchMode);
-  Stream<User> loadUser(SearchModes searchMode);
-  Stream<List<User>> loadUsers(SearchModes searchMode);
+  Stream<User> getUser(SearchModes searchMode);
+  Stream<List<User>> getUsers(SearchModes searchMode);
 }

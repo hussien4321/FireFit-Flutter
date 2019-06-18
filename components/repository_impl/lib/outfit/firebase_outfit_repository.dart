@@ -1,6 +1,7 @@
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:middleware/middleware.dart';
 import 'package:repository_impl/repository_impl.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:meta/meta.dart';
 import 'package:helpers/helpers.dart';
 import 'package:path/path.dart';
@@ -18,7 +19,7 @@ class FirebaseOutfitRepository implements OutfitRepository {
   const FirebaseOutfitRepository({
     @required this.cloudFunctions,
     @required this.imageUploader,
-    @required this.cache
+    @required this.cache,
   });
 
   Stream<List<Outfit>> getOutfits(SearchModes searchMode) => cache.getOutfits(searchMode);
