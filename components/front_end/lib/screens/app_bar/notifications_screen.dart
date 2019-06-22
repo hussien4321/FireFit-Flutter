@@ -13,7 +13,10 @@ class NotificationsScreen extends StatefulWidget {
 class _NotificationsScreenState extends State<NotificationsScreen> {
 
   NotificationBloc _notificationBloc;
+  UserBloc _userBloc;
   
+  String userId;
+
   @override
   Widget build(BuildContext context) {
     _initBlocs();
@@ -49,28 +52,35 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
       ),
     );
   }
-  _initBlocs(){
+  _initBlocs() async {
     if(_notificationBloc == null){
       _notificationBloc =NotificationBlocProvider.of(context);
+      _userBloc =UserBlocProvider.of(context);
+      userId = await _userBloc.existingAuthId.first;
     }
   }
 
   _clearNotifications() {
     return showDialog(
       context: context,
-      builder: (secondContext) => YesNoDialog(
-        title: 'Mark as seen',
-        description: 'Are you sure you want to mark all notifications as seen?',
-        yesText: 'Yes',
-        noText: 'No',
-        onYes: () {
-          Navigator.pop(context);
-        },
-        onDone: () {
-          Navigator.pop(context);
-        },
-
-      ),
+      builder: (secondContext) {
+          MarkNotificationsSeen markSeen = MarkNotificationsSeen(
+            userId: userId,
+          );
+          return YesNoDialog(
+          title: 'Mark as seen',
+          description: 'Are you sure you want to mark all notifications as seen?',
+          yesText: 'Yes',
+          noText: 'No',
+          onYes: () {
+            _notificationBloc.markNotificationsSeen.add(markSeen);
+            Navigator.pop(context);
+          },
+          onDone: () {
+            Navigator.pop(context);
+          },
+        );
+      }
     ) ?? false;
   }
 

@@ -234,10 +234,7 @@ class _OnboardScreenState extends State<OnboardScreen> with SnackbarMessages, Lo
   StreamSubscription _listenForChangesToAuthStatus(){
     return userBloc.accountStatus.listen((accountStatus) {
       if(accountStatus!=null && accountStatus !=UserAccountStatus.PENDING_ONBOARDING){
-        Navigator.pushReplacement(context, MaterialPageRoute(
-          builder: (ctx) => RouteConverters.getFromAccountStatus(accountStatus),
-          settings: RouteConverters.getSettingsFromAccountStatus(accountStatus)
-        ));
+        Navigator.pushReplacementNamed(context, RouteConverters.getFromAccountStatus(accountStatus));
       }
     });
   }
@@ -245,7 +242,6 @@ class _OnboardScreenState extends State<OnboardScreen> with SnackbarMessages, Lo
   StreamSubscription _listenForOnboardCompletion(){
     return userBloc.isLoading.listen((loadingStatus) {
       if(currentIndex ==_onboardingPages.length-1){
-        print('Loading has found $loadingStatus!!!');
         if(loadingStatus && !isOverlayShowing){
           startLoading('Creating account', context);
           isOverlayShowing=true;

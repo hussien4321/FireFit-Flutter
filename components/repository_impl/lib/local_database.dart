@@ -27,7 +27,7 @@ class LocalDatabase {
 
   Future<Database> initDb() async {
     String path = join(await getDatabasesPath(), "mira_mira.db");
-    Database theDB = await openDatabase(path, version: 3, onCreate: _onCreate, onUpgrade: _onUpgrade);
+    Database theDB = await openDatabase(path, version: 4, onCreate: _onCreate, onUpgrade: _onUpgrade);
     return theDB;
   }
 
@@ -59,6 +59,9 @@ class LocalDatabase {
     }
     if(version == 3){
       await db.execute("ALTER TABLE user ADD COLUMN has_new_followers TINYINT DEFAULT 0");
+    }
+    if(version == 4) {
+      await db.execute("ALTER TABLE notification ADD COLUMN notification_is_seen TINYINT DEFAULT 0");
     }
   }
 

@@ -2,6 +2,7 @@ class LoadNotifications {
 
   String userId;
   bool isLive;
+  DateTime lastNotificationCreatedAt;
   
   LoadNotifications({
     this.userId,
@@ -10,5 +11,6 @@ class LoadNotifications {
 
   Map<String, dynamic> toJson() => {
     'user_id': userId,
+    'last_notification_created_at':lastNotificationCreatedAt?.toIso8601String()
   };
 }

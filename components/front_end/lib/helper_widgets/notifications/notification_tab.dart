@@ -3,6 +3,8 @@ import 'package:helpers/helpers.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:middleware/middleware.dart';
 import 'package:front_end/helper_widgets.dart';
+import 'package:blocs/blocs.dart';
+import 'package:front_end/providers.dart';
 
 class NotificationTab extends StatefulWidget {
 
@@ -16,15 +18,20 @@ class NotificationTab extends StatefulWidget {
 
 class _NotificationTabState extends State<NotificationTab> {
 
+  NotificationBloc _notificationBloc;
+  UserBloc _userBloc;
+
+  String userId;
+
   User get refUser => widget.notification.referencedUser;
   Outfit get refOutfit => widget.notification.referencedOutfit;
   bool get hasRefOutfit => refOutfit != null;
 
-
   @override
   Widget build(BuildContext context) {
+    initBlocs();
     return Material(
-      color: Colors.grey[100],
+      color: widget.notification.isSeen ? Colors.white: Colors.grey[200],
       child: InkWell(
         onTap: _openNotification,
         child: Container(
@@ -135,8 +142,23 @@ class _NotificationTabState extends State<NotificationTab> {
     );
   }
 
+  initBlocs() async {
+    if(_notificationBloc ==null){
+      _notificationBloc =NotificationBlocProvider.of(context);
+      _userBloc =UserBlocProvider.of(context);
+      userId = await _userBloc.existingAuthId.first;
+    }
+  }
+
   _openNotification() {
-    if(widget.notification.type == NotificationType.OUTFIT_LIKE || widget.notification.type == NotificationType.NEW_COMMENT || widget.notification.type == NotificationType.COMMENT_LIKE){
+    if(!widget.notification.isSeen){
+      MarkNotificationsSeen markSeen = MarkNotificationsSeen(
+        userId: userId,
+        notificationId: widget.notification.notificationId,
+      );
+      _notificationBloc.markNotificationsSeen.add(markSeen);
+    }
+    if(widget.notification.type == NotificationType.OUTFIT_LIKE || widget.notification.type == NotificationType.NEW_COMMENT || widget.notification.type == NotificationType.COMMENT_LIKE || widget.notification.type == NotificationType.NEW_OUTFIT){
       CustomNavigator.goToOutfitDetailsScreen(context, false, 
         outfitId: refOutfit.outfitId
       );

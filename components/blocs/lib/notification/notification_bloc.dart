@@ -17,6 +17,9 @@ class NotificationBloc {
   final _notificationsController = BehaviorSubject<List<OutfitNotification>>(seedValue: []);
   Stream<List<OutfitNotification>> get notifications => _notificationsController.stream; 
 
+  final _markNotificationsSeenController = PublishSubject<MarkNotificationsSeen>();
+  Sink<MarkNotificationsSeen> get markNotificationsSeen => _markNotificationsSeenController;
+
   final _loadingController = PublishSubject<bool>();
   Observable<bool> get isLoading => _loadingController.stream;
   final _errorController = PublishSubject<String>();
@@ -30,6 +33,7 @@ class NotificationBloc {
       _registerNotificationTokenController.listen(_registerNotificationToken),
       _loadStaticNotificationsController.listen(_loadStaticNotifications),
       _loadLiveNotificationsController.listen(_loadLiveNotifications),
+      _markNotificationsSeenController.listen(_markNotificationsSeen)
     ];
     _notificationsController.addStream(repository.getNotifications());
   }
@@ -58,11 +62,16 @@ class NotificationBloc {
     };
   }
 
+  _markNotificationsSeen(MarkNotificationsSeen markSeen){
+    repository.markNotificationsSeen(markSeen);
+  }
+
   void dispose() {
     _registerNotificationTokenController.close();
     _loadStaticNotificationsController.close();
     _loadLiveNotificationsController.close();
     _notificationsController.close();
+    _markNotificationsSeenController.close();
     _loadingController.close();
     _errorController.close();
     _successController.close();

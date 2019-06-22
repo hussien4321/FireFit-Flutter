@@ -235,6 +235,20 @@ class CachedOutfitRepository {
     if(notification.type == NotificationType.NEW_FOLLOW){
       await userCache.updateUserHasNewFollower();
     }
+    if(notification.type == NotificationType.NEW_OUTFIT){
+      await userCache.updateUserHasNewFeed();
+    }
+  }
+
+  Future<DateTime> getLatestNotificationTime() async {
+    return streamDatabase.query('notification', columns: ['notification_created_at'], orderBy: 'notification_created_at DESC', limit: 1).then(
+      (res) {
+        if (res.isEmpty) {
+          return null;
+        }
+        return DateTime.parse(res[0]['notification_created_at']);
+      }
+    );
   }
 
   Future<void> clearNotifications() async {

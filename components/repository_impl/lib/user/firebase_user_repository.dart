@@ -225,8 +225,13 @@ class FirebaseUserRepository implements UserRepository {
 
   Stream<List<OutfitNotification>> getNotifications() => outfitCache.getNotifications();
 
-  Future<bool> loadNotifications(LoadNotifications loadNotifications){
-    outfitCache.clearNotifications();
+  Future<bool> loadNotifications(LoadNotifications loadNotifications) async {
+    if(loadNotifications.isLive){
+      DateTime latestNotificationTime = await outfitCache.getLatestNotificationTime();
+      loadNotifications.lastNotificationCreatedAt = latestNotificationTime;
+    }else{
+      outfitCache.clearNotifications();
+    }
     return cloudFunctions.getHttpsCallable(functionName: 'getNotifications').call(loadNotifications.toJson())
     .then((res) async {
       List<OutfitNotification> notifications = List<OutfitNotification>.from(res.data['res'].map((data){
@@ -239,7 +244,9 @@ class FirebaseUserRepository implements UserRepository {
           outfitCache.updateLiveNotification(notification);
         }
       });
-
+      if(loadNotifications.isLive){
+        userCache.incrementUserNewNotifications(notifications.length);
+      }
       return true;
     })
     .catchError((err) {
@@ -251,7 +258,9 @@ class FirebaseUserRepository implements UserRepository {
   Future<bool> markNotificationsSeen(MarkNotificationsSeen markSeen) async {
     await userCache.markNotificationsSeen(markSeen);
     return cloudFunctions.getHttpsCallable(functionName: 'markNotificationsSeen').call(markSeen.toJson())
-    .then((res) => res.data['res'])
+    .then((res) {
+      return true;
+    })
     .catchError((err) {
       print(err);
       return false;

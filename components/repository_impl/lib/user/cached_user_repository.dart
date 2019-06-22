@@ -76,14 +76,28 @@ class CachedUserRepository {
   }
 
 
-  Future<void> markNotificationsSeen(MarkNotificationsSeen markSeen) {
-    return streamDatabase.executeAndTrigger(['notification'], "UPDATE user SET last_seen_notification_at=?, number_of_new_notifications=0 WHERE user_id=?", [ markSeen.lastSeenNotificationAt.toIso8601String(), markSeen.userId]);
+  Future<void> markNotificationsSeen(MarkNotificationsSeen markSeen) async {
+    if(markSeen.isMarkingAll){
+      await streamDatabase.executeAndTrigger(['user'],"UPDATE user SET number_of_new_notifications=0, has_new_followers=0, has_new_feed_outfits=0 WHERE user_id=?", [ markSeen.userId]);
+      return streamDatabase.executeAndTrigger(['notification'], "UPDATE notification SET notification_is_seen=1 WHERE notification_id>0");
+    }else{
+      await streamDatabase.executeAndTrigger(['user'],"UPDATE user SET number_of_new_notifications=number_of_new_notifications-1 WHERE user_id=?", [ markSeen.userId]);
+      return streamDatabase.executeAndTrigger(['notification'], "UPDATE notification SET notification_is_seen=1 WHERE notification_id=?", [ markSeen.notificationId]);
+    }
   }
 
   
+  Future<void> incrementUserNewNotifications(int newNotificationsCount) async {
+    String searchModeString = searchModeToString(SearchModes.MINE);
+    return streamDatabase.executeAndTrigger(['user'], "UPDATE user SET number_of_new_notifications=number_of_new_notifications+? WHERE user_id=(SELECT search_user_id FROM user_search WHERE search_user_mode=? LIMIT 1)", [newNotificationsCount, searchModeString]);
+  }
   Future<void> updateUserHasNewFollower() async {
     String searchModeString = searchModeToString(SearchModes.MINE);
     return streamDatabase.executeAndTrigger(['user'], "UPDATE user SET has_new_followers=1 WHERE user_id=(SELECT search_user_id FROM user_search WHERE search_user_mode=? LIMIT 1)", [searchModeString]);
+  }
+  Future<void> updateUserHasNewFeed() async {
+    String searchModeString = searchModeToString(SearchModes.MINE);
+    return streamDatabase.executeAndTrigger(['user'], "UPDATE user SET has_new_feed_outfits=1 WHERE user_id=(SELECT search_user_id FROM user_search WHERE search_user_mode=? LIMIT 1)", [searchModeString]);
   }
   Future<void> markUserHasSeenFollowers() async {
     String searchModeString = searchModeToString(SearchModes.MINE);

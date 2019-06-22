@@ -56,10 +56,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
   StreamSubscription _navigationListener(){
     return _userBloc.accountStatus.listen((accountStatus) {
       if(accountStatus!=null){
-        Navigator.pushReplacement(context, MaterialPageRoute(
-          builder: (ctx) => RouteConverters.getFromAccountStatus(accountStatus),
-          settings: RouteConverters.getSettingsFromAccountStatus(accountStatus)
-        ));
+        Navigator.pushReplacementNamed(context, RouteConverters.getFromAccountStatus(accountStatus));
       }
     });
   }

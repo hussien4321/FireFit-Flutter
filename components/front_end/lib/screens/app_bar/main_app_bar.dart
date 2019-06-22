@@ -8,9 +8,16 @@ import 'package:blocs/blocs.dart';
 import 'dart:async';
 import 'package:middleware/middleware.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:overlay_support/overlay_support.dart';
 
 class MainAppBar extends StatefulWidget {
-  MainAppBar({Key key}) : super(key: key);
+
+  FirebaseMessaging messaging;
+
+  MainAppBar({Key key,
+    @required this.messaging,
+  }) : super(key: key);
 
   @override
   _MainAppBarState createState() => _MainAppBarState();
@@ -25,6 +32,8 @@ class _MainAppBarState extends State<MainAppBar> {
   List<StreamSubscription<dynamic>> _subscriptions;
 
   BehaviorSubject<bool> _isSliderOpenController =BehaviorSubject<bool>(seedValue: false);
+
+  String userId;
 
   Widget currentPage = ExploreScreen();
 
@@ -62,23 +71,34 @@ class _MainAppBarState extends State<MainAppBar> {
     if(_userBloc == null){
       _userBloc = UserBlocProvider.of(context);
       _notificationBloc = NotificationBlocProvider.of(context);
+      widget.messaging.configure(
+        onMessage: (res) => _loadNewNotifications(),
+      );
       _subscriptions = <StreamSubscription<dynamic>>[
         _logInStatusListener()
       ];
       _userBloc.loadCurrentUser.add(null);
-      String userId = await _userBloc.existingAuthId.first;
+      userId = await _userBloc.existingAuthId.first;
       _notificationBloc.registerNotificationToken.add(userId);
       _notificationBloc.loadStaticNotifications.add(userId);
     }
+  }
+
+  _loadNewNotifications() {
+    _notificationBloc.loadLiveNotifications.add(userId);
+    showSimpleNotification(
+      Text(
+        'New notification!',
+        style: Theme.of(context).textTheme.title.apply(color: Colors.white),
+      ),
+      background: Colors.grey,
+    );
   }
   
   StreamSubscription _logInStatusListener(){
     return _userBloc.accountStatus.listen((accountStatus) {
       if(accountStatus!=null && accountStatus != UserAccountStatus.LOGGED_IN){
-        Navigator.pushReplacement(context, MaterialPageRoute(
-          builder: (ctx) => RouteConverters.getFromAccountStatus(accountStatus),
-          settings: RouteConverters.getSettingsFromAccountStatus(accountStatus)
-        ));
+        Navigator.pushReplacementNamed(context, RouteConverters.getFromAccountStatus(accountStatus));
       }
     });
   }
@@ -217,4 +237,33 @@ class _MainAppBarState extends State<MainAppBar> {
     );
   }
 
+}
+
+class MessageNotification extends StatelessWidget {
+  final VoidCallback onReplay;
+
+  const MessageNotification({Key key, this.onReplay}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: const EdgeInsets.symmetric(horizontal: 4),
+      child: SafeArea(
+        child: ListTile(
+          leading: SizedBox.fromSize(
+              size: const Size(40, 40),
+              child: ClipOval(child: Image.asset('assets/avatar.png'))),
+          title: Text('Lily MacDonald'),
+          subtitle: Text('Do you want to see a movie?'),
+          trailing: IconButton(
+              icon: Icon(Icons.reply),
+              onPressed: () {
+                ///TODO i'm not sure it should be use this widget' BuildContext to create a Dialog
+                ///maybe i will give the answer in the future
+                if (onReplay != null) onReplay();
+              }),
+        ),
+      ),
+    );
+  }
 }

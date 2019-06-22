@@ -1,17 +1,16 @@
 import 'package:middleware/middleware.dart';
-import 'package:front_end/screens.dart';
 import 'package:flutter/material.dart';
 
 class RouteConverters {
 
-  static Widget getFromAccountStatus(UserAccountStatus accountStatus) {
+  static String getFromAccountStatus(UserAccountStatus accountStatus) {
     switch (accountStatus) {
       case UserAccountStatus.LOGGED_OUT:
-        return IntroScreen();
+        return '/login';
       case UserAccountStatus.LOGGED_IN:
-        return MainAppBar();
+        return '/home';
       case UserAccountStatus.PENDING_ONBOARDING:
-        return OnboardScreen();
+        return '/onboard';
       default:
         return null;
     }

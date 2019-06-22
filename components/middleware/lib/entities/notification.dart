@@ -1,12 +1,12 @@
 import 'package:middleware/entities.dart';
 
-enum NotificationType { OUTFIT_LIKE, NEW_COMMENT, COMMENT_LIKE, NEW_FOLLOW }
+enum NotificationType { OUTFIT_LIKE, NEW_COMMENT, COMMENT_LIKE, NEW_FOLLOW, NEW_OUTFIT }
 
 class OutfitNotification {
   int notificationId;
   NotificationType type;
   DateTime createdAt;
-
+  bool isSeen;
   User referencedUser;
   Outfit referencedOutfit;
   Comment referencedComment;
@@ -27,6 +27,8 @@ class OutfitNotification {
         return NotificationType.OUTFIT_LIKE;
       case 'new-user-follow':
         return NotificationType.NEW_FOLLOW;
+      case 'new-outfit':
+        return NotificationType.NEW_OUTFIT;
       default:
         return null;
     }
@@ -42,6 +44,8 @@ class OutfitNotification {
         return 'new-outfit-like';
       case NotificationType.NEW_FOLLOW:
         return 'new-user-follow';
+      case NotificationType.NEW_OUTFIT:
+        return 'new-outfit';
       default:
         return null;
     }
@@ -50,6 +54,7 @@ class OutfitNotification {
   OutfitNotification.fromMap(Map<String, dynamic> map){
     notificationId = map['notification_id'];
     type = _toNotificationType(map['notification_type']);
+    isSeen = map['notification_is_seen'] == 1;
     createdAt = DateTime.parse(map['notification_created_at']);
     if(map['user_id'] != null){
       referencedUser = User.fromMap(map);
@@ -65,6 +70,7 @@ class OutfitNotification {
   Map<String, dynamic> toJson() => {
     'notification_id' :  notificationId, 
     'notification_type': _fromNotificationType(type),
+    'notification_is_seen': isSeen ? 1 : 0,
     'notification_created_at': createdAt.toIso8601String(),
     'notification_ref_user_id':referencedUser?.userId,
     'notification_ref_outfit_id':referencedOutfit?.outfitId,
@@ -82,6 +88,8 @@ class OutfitNotification {
         return 'Outfit liked';
       case NotificationType.NEW_FOLLOW:
         return 'New Follower';
+      case NotificationType.NEW_OUTFIT:
+        return 'New Outfit';
       default:
         return null;
     }
@@ -97,6 +105,8 @@ class OutfitNotification {
         return 'has liked your outfit';
       case NotificationType.NEW_FOLLOW:
         return 'has started following you';
+      case NotificationType.NEW_OUTFIT:
+        return 'has uploaded a new outfit:';
       default:
         return null;
     }

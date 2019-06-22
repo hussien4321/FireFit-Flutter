@@ -38,6 +38,7 @@ class _NewNotificationsOverlayScreenState extends State<NewNotificationsOverlayS
   Widget build(BuildContext context) {
     _initBlocs();
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: Stack(
         children: <Widget>[
           widget.body,
@@ -78,7 +79,7 @@ class _NewNotificationsOverlayScreenState extends State<NewNotificationsOverlayS
         onVerticalDragUpdate: (details)=> _endNotificationAnimation(),
         onTap: _endNotificationAnimation,
         child: AnimatedContainer(
-          transform: Matrix4.translationValues(0, height, 0),
+          transform: Matrix4.translationValues(0, 0, 0),
           decoration: BoxDecoration(
             color: Colors.blueGrey[700],
             borderRadius: BorderRadius.vertical(

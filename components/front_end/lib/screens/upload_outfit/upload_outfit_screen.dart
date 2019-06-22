@@ -29,6 +29,7 @@ class _UploadOutfitScreenState extends State<UploadOutfitScreen> with LoadingAnd
   List<StreamSubscription<dynamic>> _subscriptions;
   
   bool loadingImages = false;
+  bool isOverlayShowing = false;
 
   String dirPath;
 
@@ -99,10 +100,12 @@ class _UploadOutfitScreenState extends State<UploadOutfitScreen> with LoadingAnd
 
   StreamSubscription _loadingListener(){
     return _outfitBloc.isLoading.listen((loadingStatus) {
-      if(loadingStatus){
+      if(loadingStatus && !isOverlayShowing){
         startLoading("Uploading outfit", context);
+        isOverlayShowing = true;
       }
-      else{
+      if(!loadingStatus && isOverlayShowing){
+        isOverlayShowing = false;
         stopLoading(context);
       }
     });

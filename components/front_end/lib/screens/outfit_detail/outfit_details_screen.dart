@@ -253,37 +253,9 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
                   ),
                 ),
                 TextSpan(
-                  text: ' (',
+                  text: ' LIKES',
                   style: TextStyle(
                     letterSpacing: 1.5,
-                    color: Colors.black,
-                    fontStyle: FontStyle.italic,
-                  ),
-                ),
-                TextSpan(
-                  text: '${outfit.likesCount}',
-                  style: TextStyle(
-                    color: Colors.blueAccent[700],
-                    fontStyle: FontStyle.italic,
-                  ),
-                ),
-                TextSpan(
-                  text: ' : ',
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontStyle: FontStyle.italic,
-                  ),
-                ),
-                TextSpan(
-                  text: '${outfit.dislikesCount}',
-                  style: TextStyle(
-                    color: Colors.pinkAccent[700],
-                    fontStyle: FontStyle.italic,
-                  ),
-                ),
-                TextSpan(
-                  text: ')',
-                  style: TextStyle(
                     color: Colors.black,
                     fontStyle: FontStyle.italic,
                   ),

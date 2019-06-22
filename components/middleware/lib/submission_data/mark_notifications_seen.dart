@@ -1,19 +1,17 @@
 class MarkNotificationsSeen {
 
   String userId;
-  DateTime lastSeenNotificationAt;
+  int notificationId;
 
   MarkNotificationsSeen({
     this.userId,
-    this.lastSeenNotificationAt,
-  }){
-    if(lastSeenNotificationAt == null){
-      lastSeenNotificationAt = new DateTime.now();
-    }
-  }
+    this.notificationId
+  });
+
+  bool get isMarkingAll => notificationId == null;
 
   Map<String, dynamic> toJson() => {
     'user_id': userId,
-    'last_seen_notification_at' : lastSeenNotificationAt.toIso8601String(),
+    'notification_id' : notificationId,
   };
 }
