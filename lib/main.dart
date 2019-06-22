@@ -4,6 +4,7 @@
 
 import 'package:front_end/main.dart' as app;
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:front_end/services.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -13,6 +14,7 @@ import 'package:streamqflite/streamqflite.dart';
 
 void main() async {
   
+  new Preferences();
   CloudFunctions functions = CloudFunctions.instance;
   FirebaseStorage storage = FirebaseStorage.instance;
   FirebaseImageUploader imageUploader = FirebaseImageUploader(

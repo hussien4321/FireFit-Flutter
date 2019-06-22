@@ -47,7 +47,7 @@ class LocalDatabase {
   Future<void> _applyMigration(Database db, int version) async {
     if(version == 1){
       await db.execute("CREATE TABLE outfit (outfit_id INTEGER PRIMARY KEY, poster_user_id TEXT, image_url_1 TEXT, image_url_2 TEXT, image_url_3 TEXT, title TEXT, description TEXT, style TEXT, outfit_created_at DATETIME, likes_count INTEGER, dislikes_count INTEGER, is_saved TINYINT, comments_count INTEGER, user_impression INTEGER DEFAULT 0)");
-      await db.execute("CREATE TABLE user (user_id STRING PRIMARY KEY, name TEXT, username TEXT, bio TEXT, profile_pic_url TEXT, date_of_birth DATETIME, gender_is_male TINYINT, is_subscribed  TINYINT, boosts INTEGER, subscription_end_date DATETIME, user_created_at DATETIME, is_current_user TINYINT DEFAULT 0, last_seen_notification_at DATETIME, number_of_followers INTEGER, number_of_following INTEGER, number_of_outfits INTEGER, number_of_likes INTEGER, number_of_new_notifications INTEGER, is_following TINYINT DEFAULT 0)");
+      await db.execute("CREATE TABLE user (user_id STRING PRIMARY KEY, name TEXT, username TEXT, bio TEXT, profile_pic_url TEXT, date_of_birth DATETIME, gender_is_male TINYINT, is_subscribed  TINYINT, boosts INTEGER, subscription_end_date DATETIME, user_created_at DATETIME, is_current_user TINYINT DEFAULT 0, number_of_followers INTEGER, number_of_following INTEGER, number_of_outfits INTEGER, number_of_likes INTEGER, number_of_new_notifications INTEGER, is_following TINYINT DEFAULT 0)");
       await db.execute("CREATE TABLE outfit_search (search_outfit_id INTERGER, search_outfit_mode STRING, UNIQUE(search_outfit_id, search_outfit_mode) ON CONFLICT REPLACE)");
       await db.execute("CREATE TABLE user_search (search_user_id STRING, search_user_mode STRING, UNIQUE(search_user_id, search_user_mode) ON CONFLICT REPLACE)");
       await db.execute("CREATE TABLE comment (comment_id INTEGER PRIMARY KEY, commenter_user_id TEXT, comment_body TEXT, comment_likes_count INTEGER, comment_is_liked TINYINT DEFAULT 0, comment_created_at DATETIME)");
@@ -56,9 +56,6 @@ class LocalDatabase {
     }
     if(version == 2){
       await db.execute("ALTER TABLE user ADD COLUMN has_new_feed_outfits TINYINT DEFAULT 0");
-    }
-    if(version == 3){
-      await db.execute("ALTER TABLE user ADD COLUMN has_new_followers TINYINT DEFAULT 0");
     }
     if(version == 4) {
       await db.execute("ALTER TABLE notification ADD COLUMN notification_is_seen TINYINT DEFAULT 0");

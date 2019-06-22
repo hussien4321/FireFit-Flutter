@@ -243,13 +243,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
-                StreamBuilder<bool>(
-                  stream: _userBloc.currentUser.map((user)=>user.hasNewFollowers),
-                  initialData: false,
-                  builder: (context, hasFollowersSnap) {
-                    return NotificationIcon(child: Text('$count', style: Theme.of(context).textTheme.title), showBubble: isFollowersTab && hasFollowersSnap.data == true);
-                  }
-                ),
+                Text('$count', style: Theme.of(context).textTheme.title),
                 Text(name, style: Theme.of(context).textTheme.subhead),
               ],
             ),

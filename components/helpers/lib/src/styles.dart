@@ -60,7 +60,7 @@ class Style {
   }
 
   
-  static Style    fromStyleString(String style) {
+  static Style fromStyleString(String style) {
     switch (style.toLowerCase()) {
       case 'casualwear':
         return Style(ClothesStyles.CASUAL);

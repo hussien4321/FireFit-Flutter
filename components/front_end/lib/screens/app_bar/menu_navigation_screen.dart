@@ -113,20 +113,11 @@ class _MenuNavigationScreenState extends State<MenuNavigationScreen> {
             children: <Widget>[
               Container(
                 padding: EdgeInsets.symmetric(vertical: 8),
-                child: StreamBuilder<bool>(
-                  stream: _userBloc.currentUser.map((user) => user.hasNewFollowers),
-                  initialData: false,
-                  builder: (context, hasFollowers) {
-                    return NotificationIcon(
-                      child: ProfilePicWithShadow(
-                        url: user.profilePicUrl,
-                        userId: user.userId,
-                        size: 64,
-                        margin: EdgeInsets.all(8.0),
-                      ),
-                      showBubble: hasFollowers.data == true,
-                    );
-                  }
+                child: ProfilePicWithShadow(
+                  url: user.profilePicUrl,
+                  userId: user.userId,
+                  size: 64,
+                  margin: EdgeInsets.all(8.0),
                 ),
               ),
               Column(

@@ -7,6 +7,7 @@ import 'package:front_end/screens.dart';
 import 'package:blocs/blocs.dart';
 import 'package:front_end/providers.dart';
 import 'dart:async';
+import 'package:front_end/services.dart';
 import 'package:flutter/services.dart';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
@@ -19,6 +20,8 @@ class UploadOutfitScreen extends StatefulWidget {
 
 class _UploadOutfitScreenState extends State<UploadOutfitScreen> with LoadingAndErrorDialogs, SnackbarMessages {
   List<Asset> images = List<Asset>();
+
+  Preferences preferences = Preferences();
 
   UploadOutfit uploadOutfit;
   TextEditingController titleTextEdit;
@@ -39,15 +42,20 @@ class _UploadOutfitScreenState extends State<UploadOutfitScreen> with LoadingAnd
     uploadOutfit = UploadOutfit();
     titleTextEdit = TextEditingController(text: uploadOutfit.title);
     descriptionTextEdit = TextEditingController(text: uploadOutfit.description);
-
     _initTempGallery();
-    
+    _initPreferences();
   }
 
   _initTempGallery() async{ 
     Directory extDir = await getApplicationDocumentsDirectory();
     dirPath = '${extDir.path}/Pictures/temp';
     await Directory(dirPath).create(recursive: true);
+  }
+  _initPreferences() async {
+    String styleString = await preferences.getPreference(Preferences.CURRENT_CLOTHES_STYLE); 
+    setState(() {
+      uploadOutfit.style = styleString;
+    });
   }
 
   @override
@@ -194,6 +202,7 @@ class _UploadOutfitScreenState extends State<UploadOutfitScreen> with LoadingAnd
       builder: (context) => StyleSelectorScreen()
     ));
     if(!mounted || styleName == null) return;
+    preferences.updatePreference(Preferences.CURRENT_CLOTHES_STYLE, styleName); 
     setState(() {
       uploadOutfit.style = styleName;    
     });

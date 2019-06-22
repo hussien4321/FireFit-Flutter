@@ -60,9 +60,6 @@ class CachedUserRepository {
   }
   
   Future<void> clearUsers(SearchModes searchMode) async {
-    if(searchMode ==SearchModes.FOLLOWERS){
-      await markUserHasSeenFollowers();
-    }
     await _clearUserSearches(searchMode);
     await _clearUsers(searchMode);
   }
@@ -78,7 +75,7 @@ class CachedUserRepository {
 
   Future<void> markNotificationsSeen(MarkNotificationsSeen markSeen) async {
     if(markSeen.isMarkingAll){
-      await streamDatabase.executeAndTrigger(['user'],"UPDATE user SET number_of_new_notifications=0, has_new_followers=0, has_new_feed_outfits=0 WHERE user_id=?", [ markSeen.userId]);
+      await streamDatabase.executeAndTrigger(['user'],"UPDATE user SET number_of_new_notifications=0, has_new_feed_outfits=0 WHERE user_id=?", [ markSeen.userId]);
       return streamDatabase.executeAndTrigger(['notification'], "UPDATE notification SET notification_is_seen=1 WHERE notification_id>0");
     }else{
       await streamDatabase.executeAndTrigger(['user'],"UPDATE user SET number_of_new_notifications=number_of_new_notifications-1 WHERE user_id=?", [ markSeen.userId]);
@@ -91,18 +88,11 @@ class CachedUserRepository {
     String searchModeString = searchModeToString(SearchModes.MINE);
     return streamDatabase.executeAndTrigger(['user'], "UPDATE user SET number_of_new_notifications=number_of_new_notifications+? WHERE user_id=(SELECT search_user_id FROM user_search WHERE search_user_mode=? LIMIT 1)", [newNotificationsCount, searchModeString]);
   }
-  Future<void> updateUserHasNewFollower() async {
-    String searchModeString = searchModeToString(SearchModes.MINE);
-    return streamDatabase.executeAndTrigger(['user'], "UPDATE user SET has_new_followers=1 WHERE user_id=(SELECT search_user_id FROM user_search WHERE search_user_mode=? LIMIT 1)", [searchModeString]);
-  }
   Future<void> updateUserHasNewFeed() async {
     String searchModeString = searchModeToString(SearchModes.MINE);
     return streamDatabase.executeAndTrigger(['user'], "UPDATE user SET has_new_feed_outfits=1 WHERE user_id=(SELECT search_user_id FROM user_search WHERE search_user_mode=? LIMIT 1)", [searchModeString]);
   }
-  Future<void> markUserHasSeenFollowers() async {
-    String searchModeString = searchModeToString(SearchModes.MINE);
-    return streamDatabase.executeAndTrigger(['user'], "UPDATE user SET has_new_followers=0 WHERE user_id=(SELECT search_user_id FROM user_search WHERE search_user_mode=? LIMIT 1)", [searchModeString]);
-  }
+  
 
   Future<void> followUser(FollowUser followUser) async {
     User user = followUser.followed;
@@ -112,8 +102,21 @@ class CachedUserRepository {
     return streamDatabase.executeAndTrigger(['user'], "UPDATE user SET number_of_following=number_of_following+? WHERE user_id=?", [numberOfFollowsChange, followUser.followerUserId]);
   }
 
-  Future<void> clearNewFeed() {
+  Future<void> clearNewFeed() async {
     String searchModeString =searchModeToString(SearchModes.MINE);
-    return streamDatabase.executeAndTrigger(['user'], "UPDATE user SET has_new_feed_outfits=0 WHERE user_id=(SELECT search_user_id FROM user_search WHERE search_user_mode=? LIMIT 1)", [searchModeString]);
+    String notificationType='new-outfit';
+    await streamDatabase.executeAndTrigger(['user'], "UPDATE user SET has_new_feed_outfits=0 WHERE user_id=(SELECT search_user_id FROM user_search WHERE search_user_mode=? LIMIT 1)", [searchModeString]);
+    return _markNotificationTypeAsSeen(notificationType);
+  }
+
+  Future<void> _markNotificationTypeAsSeen(String notificationType){
+    return streamDatabase.query('notification', columns: ["COUNT(*) AS 'count'"], where: 'notification_is_seen=0 AND notification_type=?', whereArgs: [notificationType]).then(
+      (res) {
+        int count = res[0]['count'];
+        print('removing $count with type $notificationType');
+        incrementUserNewNotifications(-count);
+        return streamDatabase.executeAndTrigger(['notification'], "UPDATE notification SET notification_is_seen=1 WHERE notification_type=?", [notificationType]);
+      }
+    );
   }
 }

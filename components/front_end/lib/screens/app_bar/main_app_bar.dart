@@ -173,7 +173,7 @@ class _MainAppBarState extends State<MainAppBar> {
 
   Widget _buildMenuButton() {
     return StreamBuilder<bool>(
-      stream: _userBloc.currentUser.map((user) => user.hasNewFeedOutfits || user.hasNewFollowers),
+      stream: _userBloc.currentUser.map((user) => user.hasNewFeedOutfits),
       initialData: false,
       builder: (context, hasFeedSnap) {
         return IconButton(

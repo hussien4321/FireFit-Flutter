@@ -232,9 +232,6 @@ class CachedOutfitRepository {
   }
 
   Future<void> updateLiveNotification(OutfitNotification notification) async { 
-    if(notification.type == NotificationType.NEW_FOLLOW){
-      await userCache.updateUserHasNewFollower();
-    }
     if(notification.type == NotificationType.NEW_OUTFIT){
       await userCache.updateUserHasNewFeed();
     }
