@@ -45,7 +45,13 @@ class _LogInScreenState extends State<LogInScreen> with LoadingAndErrorDialogs {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          widget.isRegistering ? 'Create account' : 'Log In'
+          widget.isRegistering ? 'Create account' : 'Sign in',
+          style: TextStyle(
+            inherit: true,
+            fontWeight: FontWeight.w300,
+            fontStyle: FontStyle.italic,
+            letterSpacing: 1.2,
+          ),
         ),
         centerTitle: true,
         actions: <Widget>[

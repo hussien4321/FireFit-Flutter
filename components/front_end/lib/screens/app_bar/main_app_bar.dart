@@ -60,10 +60,15 @@ class _MainAppBarState extends State<MainAppBar> {
   @override
   Widget build(BuildContext context) {
     _initBlocs();
-    return _buildNotificationsScaffold(
-      body: _buildMenuScaffold(
-        body: currentPages[currentIndex]
-      )
+    return Scaffold(
+      resizeToAvoidBottomPadding: false,
+      body: SafeArea(
+        child: _buildNotificationsScaffold(
+          body: _buildMenuScaffold(
+            body: currentPages[currentIndex]
+          )
+        ),
+      ),
     );
   }
 
@@ -146,14 +151,17 @@ class _MainAppBarState extends State<MainAppBar> {
     return Stack(
       children: <Widget>[
         Scaffold(
+          resizeToAvoidBottomInset: false,
+
           backgroundColor: Colors.white,
           appBar: AppBar(
             leading: _buildMenuButton(),
             title: Text(
               pages[currentIndex],
-              style: TextStyle(
-                fontWeight: FontWeight.normal,
-                letterSpacing: 1.5
+              style:TextStyle(
+                fontWeight: FontWeight.w300,
+                fontStyle: FontStyle.italic,
+                letterSpacing: 1.2,
               ),
             ),
             centerTitle: true,
@@ -224,46 +232,15 @@ class _MainAppBarState extends State<MainAppBar> {
   }
 
   Widget _buildShading(){
-    return SafeArea(
-      child: StreamBuilder<bool>(
-        stream: _isSliderOpenController,
-        initialData: false,
-        builder: (ctx, snap) {
-          return Container(
-            color: snap.data ? Colors.black.withOpacity(0.5) : null
-          );
-        }
-      ),
+    return StreamBuilder<bool>(
+      stream: _isSliderOpenController,
+      initialData: false,
+      builder: (ctx, snap) {
+        return Container(
+          color: snap.data ? Colors.black.withOpacity(0.5) : null
+        );
+      }
     );
   }
 
-}
-
-class MessageNotification extends StatelessWidget {
-  final VoidCallback onReplay;
-
-  const MessageNotification({Key key, this.onReplay}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 4),
-      child: SafeArea(
-        child: ListTile(
-          leading: SizedBox.fromSize(
-              size: const Size(40, 40),
-              child: ClipOval(child: Image.asset('assets/avatar.png'))),
-          title: Text('Lily MacDonald'),
-          subtitle: Text('Do you want to see a movie?'),
-          trailing: IconButton(
-              icon: Icon(Icons.reply),
-              onPressed: () {
-                ///TODO i'm not sure it should be use this widget' BuildContext to create a Dialog
-                ///maybe i will give the answer in the future
-                if (onReplay != null) onReplay();
-              }),
-        ),
-      ),
-    );
-  }
 }

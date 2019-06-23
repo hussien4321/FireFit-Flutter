@@ -9,8 +9,9 @@ class OutfitsGrid extends StatelessWidget {
   final bool isLoading;
   final List<Outfit> outfits;
   final bool hideTitle;
+  final bool hasFixedHeight;
 
-  OutfitsGrid({this.outfits, this.isLoading, this.hideTitle = false});
+  OutfitsGrid({this.outfits, this.isLoading, this.hideTitle = false, this.hasFixedHeight = false});
 
   @override
   Widget build(BuildContext context) {
@@ -23,9 +24,12 @@ class OutfitsGrid extends StatelessWidget {
   }
 
   Widget _buildNoOutfitsMessage() {
-    return CustomBanner(
-      icon: FontAwesomeIcons.boxOpen,
-      text: 'No outfits found'
+    return Container(
+      height: hasFixedHeight ? 200: null,
+      child: CustomBanner(
+        icon: FontAwesomeIcons.boxOpen,
+        text: 'No outfits found'
+      ),
     );
   }
 

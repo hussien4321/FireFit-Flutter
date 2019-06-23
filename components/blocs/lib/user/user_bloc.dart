@@ -50,6 +50,8 @@ class UserBloc {
 
   final _loadingController = PublishSubject<bool>();
   Observable<bool> get isLoading => _loadingController.stream;
+  final _isLoadingFollowsController = PublishSubject<bool>();
+  Observable<bool> get isLoadingFollows => _isLoadingFollowsController.stream;
   final _errorController = PublishSubject<String>();
   Observable<String> get hasError => _errorController.stream;
   final _successController = PublishSubject<bool>();
@@ -232,7 +234,7 @@ class UserBloc {
   }
 
   _loadFollowers(String userId) async {
-    _loadingController.add(true);
+    _isLoadingFollowsController.add(true);
     await repository.loadFollowers(
       LoadUser(
         userId: userId,
@@ -240,10 +242,10 @@ class UserBloc {
         searchMode: SearchModes.FOLLOWERS
       )
     );
-    _loadingController.add(false);
+    _isLoadingFollowsController.add(false);
   }
   _loadFollowing(String userId) async {
-    _loadingController.add(true);
+    _isLoadingFollowsController.add(true);
     await repository.loadFollowing(
       LoadUser(
         userId: userId,
@@ -251,7 +253,7 @@ class UserBloc {
         searchMode: SearchModes.FOLLOWING
       ),
     );
-    _loadingController.add(false);
+    _isLoadingFollowsController.add(false);
   }
 
   void dispose() {
@@ -272,6 +274,7 @@ class UserBloc {
     _deleteUserController.close();
     _registerController.close();
     _errorController.close();
+    _isLoadingFollowsController.close();
     _subscriptions.forEach((subscription) => subscription.cancel());
   }
 }

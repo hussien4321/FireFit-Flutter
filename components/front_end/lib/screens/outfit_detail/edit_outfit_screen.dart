@@ -53,7 +53,15 @@ class _EditOutfitScreenState extends State<EditOutfitScreen> with LoadingAndErro
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
-        title: Text('Edit Outfit'),
+        title: Text(
+          'Edit Outfit',
+          style: TextStyle(
+            inherit: true,
+            fontWeight: FontWeight.w300,
+            fontStyle: FontStyle.italic,
+            letterSpacing: 1.2,
+          ),
+        ),
         centerTitle: true,
         actions: <Widget>[
           _saveOutfitButton()

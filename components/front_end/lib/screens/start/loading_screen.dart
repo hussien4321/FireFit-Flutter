@@ -29,7 +29,14 @@ class _LoadingScreenState extends State<LoadingScreen> {
           children: <Widget>[
             Text(
               'MIRA MIRA',
-              style: Theme.of(context).textTheme.display1,
+              style:TextStyle(
+                fontWeight: FontWeight.w200,
+                fontSize: 48.0,
+                fontStyle: FontStyle.italic,
+                letterSpacing: 1.5,
+                color: Colors.black,
+              ),
+              textAlign: TextAlign.center,
             ),
             Expanded(child: Container(),),
             CircularProgressIndicator(),

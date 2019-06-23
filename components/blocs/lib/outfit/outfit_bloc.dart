@@ -164,7 +164,6 @@ class OutfitBloc{
 
   _loadOutfit(LoadOutfit loadOutfit) async {
     loadOutfit.searchModes = SearchModes.SELECTED_SINGLE;
-    
     _loadingController.add(true);
     final success = await repository.loadOutfit(loadOutfit);
     _loadingController.add(false);

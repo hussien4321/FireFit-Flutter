@@ -22,7 +22,7 @@ class _MenuNavigationScreenState extends State<MenuNavigationScreen> {
   UserBloc _userBloc;
 
   List<String> pages = [
-      "INPSPIRATION",
+      "INSPIRATION",
       "FASHION CIRCLE",
       "WARDROBE",
       "PROFILE",
@@ -32,67 +32,69 @@ class _MenuNavigationScreenState extends State<MenuNavigationScreen> {
   Widget build(BuildContext context) {
     _initBlocs();
     return Scaffold(
+      resizeToAvoidBottomPadding: false,
       backgroundColor: Colors.grey[300],
       body: StreamBuilder<User>(
         stream:_userBloc.currentUser,
         builder: (ctx, snap) {
-          return SafeArea(
-            child: Container(
-              color: Colors.white,
-              child: Column(
-                children: <Widget>[
-                  _profileOverview(snap.data),
-                  _menuOption(
-                    title: 'INSPIRATION',
-                    iconData: Icons.search,
-                    selected: widget.index == 0,
-                    onPressed: () => widget.onPageSelected(0)
-                  ),
-                  StreamBuilder<bool>(
-                    stream: _userBloc.currentUser.map((user) => user.hasNewFeedOutfits),
-                    initialData: false,
-                    builder: (context, hasFeedSnap) {
-                      return _menuOption(
-                        title: 'FASHION CIRCLE',
-                        iconData: Icons.people,
-                        selected: widget.index == 1,
-                        onPressed: () => widget.onPageSelected(1),
-                        showNotificationBubble: hasFeedSnap.data == true
-                      );
-                    }
-                  ),
-                  _menuOption(
-                    title: 'WARDROBE',
-                    iconData: FontAwesomeIcons.tshirt,
-                    selected: widget.index == 2,
-                    onPressed: () => widget.onPageSelected(2)
-                  ),
-                  _menuOption(
-                    title: 'SETTINGS',
-                    iconData: Icons.settings,
-                    onPressed: () {
-                      Navigator.push(context, MaterialPageRoute(
-                        builder: (ctx) => SettingsScreen()
-                      ));
-                    }
-                  ),
-                  Expanded(
-                    child: Align(
-                      alignment: Alignment.bottomCenter,
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: <Widget>[
-                          _logOutButton(),
-                          Text(
+          return Container(
+            color: Colors.white,
+            child: Column(
+              children: <Widget>[
+                _profileOverview(snap.data),
+                _menuOption(
+                  title: 'INSPIRATION',
+                  iconData: Icons.search,
+                  selected: widget.index == 0,
+                  onPressed: () => widget.onPageSelected(0)
+                ),
+                StreamBuilder<bool>(
+                  stream: _userBloc.currentUser.map((user) => user.hasNewFeedOutfits),
+                  initialData: false,
+                  builder: (context, hasFeedSnap) {
+                    return _menuOption(
+                      title: 'FASHION CIRCLE',
+                      iconData: Icons.people,
+                      selected: widget.index == 1,
+                      onPressed: () => widget.onPageSelected(1),
+                      showNotificationBubble: hasFeedSnap.data == true
+                    );
+                  }
+                ),
+                _menuOption(
+                  title: 'WARDROBE',
+                  iconData: FontAwesomeIcons.tshirt,
+                  selected: widget.index == 2,
+                  onPressed: () => widget.onPageSelected(2)
+                ),
+                _menuOption(
+                  title: 'SETTINGS',
+                  iconData: Icons.settings,
+                  onPressed: () {
+                    Navigator.push(context, MaterialPageRoute(
+                      builder: (ctx) => SettingsScreen()
+                    ));
+                  }
+                ),
+                Expanded(
+                  child: Align(
+                    alignment: Alignment.bottomCenter,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        _logOutButton(),
+                        Padding(
+                          padding: const EdgeInsets.only(top: 8.0),
+                          child: Text(
                             'Version: 1.0.0',
                             style: Theme.of(context).textTheme.subtitle,
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
-                  )
-                ],
-              ),
+                  ),
+                )
+              ],
             ),
           );
         }
@@ -182,7 +184,7 @@ class _MenuNavigationScreenState extends State<MenuNavigationScreen> {
                 child: Text(
                   title,
                   style:TextStyle(
-                    fontWeight: FontWeight.w500,
+                    fontWeight: FontWeight.w300,
                     fontSize: 22.0,
                     fontStyle: FontStyle.italic,
                     letterSpacing: 1.5,
@@ -214,7 +216,7 @@ class _MenuNavigationScreenState extends State<MenuNavigationScreen> {
           style:TextStyle(
             fontWeight: FontWeight.w500,
             fontSize: 22.0,
-            color: Colors.red
+            color: Colors.redAccent[700],
           ),
           textAlign: TextAlign.center,
         ),
@@ -228,7 +230,7 @@ class _MenuNavigationScreenState extends State<MenuNavigationScreen> {
       context: context,
       builder: (secondContext) {
         return YesNoDialog(
-          title: 'Confirmation',
+          title: 'Sign out',
           description: 'Are you sure you want to sign out?',
           yesText: 'Yes',
           noText: 'No',

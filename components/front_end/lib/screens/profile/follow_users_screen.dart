@@ -32,22 +32,40 @@ class _FollowUsersScreenState extends State<FollowUsersScreen> {
       appBar: AppBar(
         centerTitle: true,
         title: Text(
-          widget.isFollowers ? 'Followers' : 'Following'
+          widget.isFollowers ? 'Followers' : 'Following',
+          style: TextStyle(
+            inherit: true,
+            fontWeight: FontWeight.w300,
+            fontStyle: FontStyle.italic,
+            letterSpacing: 1.2,
+          ),
         ),
         backgroundColor: Colors.white,
         elevation: 1.0,
       ),
       body: Container(
-        child: StreamBuilder<List<User>>(
-          stream: widget.isFollowers? _userBloc.followers : _userBloc.following,
-          initialData: [],
-          builder: (ctx, snap){
-            List<User> users = snap.data;
-            return ListView.builder(
-              itemCount: users.length,
-              itemBuilder: (ctx, i) => _followUserTab(users[i]),
-            );
-          },
+        child: StreamBuilder<bool>(
+          stream: _userBloc.isLoadingFollows,
+          initialData: true,
+          builder: (ctx, loadingSnap) => StreamBuilder<List<User>>(
+            stream: widget.isFollowers? _userBloc.followers : _userBloc.following,
+            initialData: [],
+            builder: (ctx, snap){
+              if(loadingSnap.data){
+                return Padding(
+                  padding: EdgeInsets.all(16.0),
+                  child: Center(
+                    child: CircularProgressIndicator(),
+                  ),
+                );
+              }
+              List<User> users = snap.data;
+              return ListView.builder(
+                itemCount: users.length,
+                itemBuilder: (ctx, i) => _followUserTab(users[i]),
+              );
+            },
+          ),
         ) 
       ),
     );

@@ -362,7 +362,8 @@ class FirebaseUserRepository implements UserRepository {
       return true;
     })
     .catchError((err) {
-      print(err);
+      print('failed on func $functionName');
+      print(err.message);
       return false;
     });
 

@@ -8,7 +8,15 @@ class StyleSelectorScreen  extends StatelessWidget {
   Widget build(BuildContext ctx) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Select Style!'),
+        title: Text(
+          'Select Style!',
+          style: TextStyle(
+            inherit: true,
+            fontWeight: FontWeight.w300,
+            fontStyle: FontStyle.italic,
+            letterSpacing: 1.2,
+          ),
+        ),
         centerTitle: true,
         backgroundColor: Colors.transparent,
         elevation: 0.0,

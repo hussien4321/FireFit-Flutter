@@ -45,7 +45,16 @@ class _CommentsScreenState extends State<CommentsScreen> {
     return Scaffold(
       appBar: AppBar(
         elevation: 1.0,
-        title: Text('Comments'),
+        title: Text(
+          'Comments',
+          style: TextStyle(
+            inherit: true,
+            fontWeight: FontWeight.w300,
+            fontStyle: FontStyle.italic,
+            letterSpacing: 1.2,
+          ),
+        ),
+        centerTitle: true,
         backgroundColor: Colors.white,
       ),
       body: Container(

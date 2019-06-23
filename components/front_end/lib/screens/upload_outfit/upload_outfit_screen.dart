@@ -72,7 +72,15 @@ class _UploadOutfitScreenState extends State<UploadOutfitScreen> with LoadingAnd
       key: scaffoldKey,
       appBar: AppBar(
         backgroundColor: Colors.white,
-        title: Text('New Outfit'),
+        title: Text(
+          'New Outfit',
+          style: TextStyle(
+            inherit: true,
+            fontWeight: FontWeight.w300,
+            fontStyle: FontStyle.italic,
+            letterSpacing: 1.2,
+          ),
+        ),
         centerTitle: true,
         actions: <Widget>[
           IconButton(

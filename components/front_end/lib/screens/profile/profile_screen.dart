@@ -81,7 +81,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
           onPressed: Navigator.of(context).pop,
         ),
         title: Text(
-          "${user.name}'s Profile"
+          isCurrentUser ? "My Profile" :
+          "${user.name}'s Profile",
+          style: TextStyle(
+            inherit: true,
+            fontWeight: FontWeight.w300,
+            fontStyle: FontStyle.italic,
+            letterSpacing: 1.2,
+          ),
         ),
         centerTitle: true,
         actions: <Widget>[
@@ -412,11 +419,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
       builder: (ctx, loadingSnap) => StreamBuilder<List<Outfit>>(
         stream: _outfitBloc.selectedOutfits,
         initialData: [],
-        builder: (ctx, outfitsSnap) => OutfitsGrid(
-          isLoading: loadingSnap.data,
-          outfits: outfitsSnap.data,
-          hideTitle: true,
-        ),
+        builder: (ctx, outfitsSnap) {
+          return OutfitsGrid(
+            isLoading: loadingSnap.data,
+            outfits: outfitsSnap.data,
+            hideTitle: true,
+            hasFixedHeight: true,
+          );
+        }
       )
     );
   }

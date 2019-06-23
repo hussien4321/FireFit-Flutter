@@ -27,11 +27,21 @@ class _SettingsScreenState extends State<SettingsScreen> with LoadingAndErrorDia
     _initBlocs();
     return Scaffold(
       appBar: AppBar(
-        title: Text('Settings'),
+        title: Text(
+          'SETTINGS',
+          style: TextStyle(
+            inherit: true,
+            fontWeight: FontWeight.w300,
+            fontStyle: FontStyle.italic,
+            letterSpacing: 1.2,
+          ),
+        ),
         centerTitle: true,
+        backgroundColor: Colors.white,
+        elevation: 2,
       ),
       body: Container(
-        padding: EdgeInsets.only(left: 8, right: 8, top: 8),
+        padding: EdgeInsets.only(left: 8, right: 8, top: 16),
         child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -80,7 +90,7 @@ class _SettingsScreenState extends State<SettingsScreen> with LoadingAndErrorDia
       ),
       child: Text(
         title,
-        style: Theme.of(context).textTheme.headline,
+        style: Theme.of(context).textTheme.subtitle.apply(fontSizeDelta: 10, color: Colors.grey),
       ),
     );
   }
@@ -90,7 +100,7 @@ class _SettingsScreenState extends State<SettingsScreen> with LoadingAndErrorDia
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: <Widget>[
         Text(
-          'Delete account?',
+          'Delete account',
           style: Theme.of(context).textTheme.subhead,
         ),
         RaisedButton(

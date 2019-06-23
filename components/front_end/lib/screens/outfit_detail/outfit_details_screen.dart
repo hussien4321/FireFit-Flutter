@@ -54,24 +54,19 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
     return StreamBuilder<bool>(
       stream: _outfitBloc.isLoading,
       initialData: false,
-      builder: (ctx, isLoadingSnap){
-        if(isLoadingSnap.data){
-          return _scaffold(
-            body: _outfitLoadingPlaceholder()
-          );
-        }else{
-          return StreamBuilder<Outfit>(
-            stream: _outfitBloc.selectedOutfit,
-            builder: (ctx, snap) { 
-              if(!snap.hasData){    
-                return _scaffold(body: _outfitLoadingPlaceholder());
-              }
-              outfit = snap.data;
-              return _scaffold(body: _buildMainBody());
-            },
-          );
+      builder: (ctx, isLoadingSnap) => StreamBuilder<Outfit>(
+        stream: _outfitBloc.selectedOutfit,
+        builder: (ctx, outfitSnap) {
+          if(isLoadingSnap.data || !outfitSnap.hasData && outfitSnap.data == null){
+            return _scaffold(
+              body: _outfitLoadingPlaceholder()
+            );
+          }else{
+            outfit = outfitSnap.data;
+            return _scaffold(body: _buildMainBody());
+          }
         }
-      }
+      ),
     );
   }
 
@@ -79,12 +74,11 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
     if(_outfitBloc==null){
       _outfitBloc = OutfitBlocProvider.of(context);
       userId = await UserBlocProvider.of(context).existingAuthId.first;
-      LoadOutfit loadOutfit = LoadOutfit(
+      _outfitBloc.selectOutfit.add(LoadOutfit(
         outfitId: widget.outfitId,
         userId: userId,
         loadFromCloud: widget.loadOutfit
-      );
-      _outfitBloc.selectOutfit.add(loadOutfit);
+      ));
     }
   }
 
@@ -97,14 +91,25 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
           icon: Icon(Icons.close),
           onPressed: Navigator.of(context).pop,
         ),
-        title: Text("${outfit?.poster?.name}'s Outfit"),
+        title: Text(
+          outfit==null ? "Loading...":
+          isCurrentUser ? "My Outfit" : 
+          "${outfit?.poster?.name}'s Outfit",
+          style: TextStyle(
+            inherit: true,
+            fontWeight: FontWeight.w300,
+            fontStyle: FontStyle.italic,
+            letterSpacing: 1.2,
+          ),
+
+        ),
         centerTitle: true,
         elevation: 1.0,
-        actions: <Widget>[
+        actions:outfit==null? <Widget>[] : <Widget>[
           _loadOutfitOptions()
         ],
       ),
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: outfit == null ? null : FloatingActionButton(
         onPressed: _loadCommentsPage,
         backgroundColor: Colors.green,
         child: Icon(

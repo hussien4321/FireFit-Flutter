@@ -27,7 +27,11 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         automaticallyImplyLeading: false,
         title: Text(
           'Notifications',
-          style: Theme.of(context).textTheme.title,
+          style: Theme.of(context).textTheme.title.copyWith(
+            fontWeight: FontWeight.w300,
+            fontStyle: FontStyle.italic,
+            letterSpacing: 1.2,
+          ),
         ),
         actions: <Widget>[
           IconButton(
