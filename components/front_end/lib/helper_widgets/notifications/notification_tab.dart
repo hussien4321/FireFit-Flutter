@@ -5,6 +5,7 @@ import 'package:middleware/middleware.dart';
 import 'package:front_end/helper_widgets.dart';
 import 'package:blocs/blocs.dart';
 import 'package:front_end/providers.dart';
+import 'package:front_end/screens.dart';
 
 class NotificationTab extends StatefulWidget {
 
@@ -151,17 +152,26 @@ class _NotificationTabState extends State<NotificationTab> {
   }
 
   _openNotification() {
-    if(!widget.notification.isSeen){
+    if(!widget.notification.isSeen) {
       MarkNotificationsSeen markSeen = MarkNotificationsSeen(
         userId: userId,
         notificationId: widget.notification.notificationId,
       );
       _notificationBloc.markNotificationsSeen.add(markSeen);
     }
-    if(widget.notification.type == NotificationType.OUTFIT_LIKE || widget.notification.type == NotificationType.NEW_COMMENT || widget.notification.type == NotificationType.COMMENT_LIKE || widget.notification.type == NotificationType.NEW_OUTFIT){
+    if(widget.notification.type == NotificationType.OUTFIT_LIKE || widget.notification.type == NotificationType.NEW_OUTFIT){
       CustomNavigator.goToOutfitDetailsScreen(context, false, 
-        outfitId: refOutfit.outfitId
+        outfitId: refOutfit.outfitId,
+        loadOutfit: true
       );
+    }
+    if(widget.notification.type == NotificationType.NEW_COMMENT || widget.notification.type == NotificationType.COMMENT_LIKE){
+      Navigator.push(context, MaterialPageRoute(
+        builder: (ctx) => CommentsScreen(
+          outfitId: refOutfit.outfitId,
+          loadOutfit: true,
+        )
+      ));
     }
     if(widget.notification.type == NotificationType.NEW_FOLLOW){
       CustomNavigator.goToProfileScreen(context, false,

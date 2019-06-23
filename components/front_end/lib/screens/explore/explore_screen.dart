@@ -313,7 +313,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
               color: Colors.greenAccent[700],
               icon: Icons.comment,
               disabled: allDisabled,
-              onPressed: () => _composeComment(currentOutfit.outfitId),
+              onPressed: () => _composeComment(currentOutfit),
             ),
             CustomFab(
               color: Colors.blueAccent,
@@ -336,10 +336,13 @@ class _ExploreScreenState extends State<ExploreScreen> {
     );
   }
 
-  _composeComment(int outfitId){
-    CustomNavigator.goToOutfitDetailsScreen(context, false, 
-      outfitId: outfitId,
-    );
+  _composeComment(Outfit outfit){
+    Navigator.push(context, MaterialPageRoute(
+      builder: (ctx) => CommentsScreen(
+        focusComment: true,
+        outfitId: outfit.outfitId,
+      )
+    ));
   }
 
   _openCurrentProfile(String userId) {

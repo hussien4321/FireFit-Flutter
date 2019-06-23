@@ -1,5 +1,5 @@
 enum SearchModes {
-  EXPLORE, MINE, SAVED, SELECTED, FEED, NOTIFICATIONS, FOLLOWERS, FOLLOWING, TEMP
+  EXPLORE, MINE, SAVED, SELECTED, SELECTED_SINGLE, FEED, NOTIFICATIONS, FOLLOWERS, FOLLOWING, TEMP
 }
 
 String searchModeToString(SearchModes searchMode){
@@ -14,6 +14,8 @@ String searchModeToString(SearchModes searchMode){
       return 'saved';
     case SearchModes.SELECTED:
       return 'selected';
+    case SearchModes.SELECTED_SINGLE:
+      return 'selected-single';
     case SearchModes.NOTIFICATIONS:
       return 'notifications';
     case SearchModes.FOLLOWERS:

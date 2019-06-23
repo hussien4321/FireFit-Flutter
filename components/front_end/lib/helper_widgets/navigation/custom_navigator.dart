@@ -23,11 +23,12 @@ class CustomNavigator {
     );
   } 
 
-  static goToOutfitDetailsScreen(BuildContext context, bool removePrevious, {int outfitId, bool openComments}) {
+  static goToOutfitDetailsScreen(BuildContext context, bool removePrevious, {int outfitId, bool loadOutfit = false}) {
     Navigator.pushAndRemoveUntil(context, 
       MaterialPageRoute(
         builder: (ctx) => OutfitDetailsScreen(
           outfitId: outfitId,
+          loadOutfit: loadOutfit,
         ),
         settings: RouteSettings(
           name: '/outfit'

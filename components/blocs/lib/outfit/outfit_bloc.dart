@@ -29,10 +29,10 @@ class OutfitBloc{
   final _loadSavedOutfitsController = PublishSubject<LoadOutfits>();
   Sink<LoadOutfits> get loadSavedOutfits => _loadSavedOutfitsController;
 
-  final _selectedOutfitController = BehaviorSubject<Stream<Outfit>>();
-  Stream<Outfit> get selectedOutfit => _selectedOutfitController.value;
-  final _selectOutfitController = PublishSubject<int>();
-  Sink<int> get selectOutfit => _selectOutfitController; 
+  final _selectedOutfitController = BehaviorSubject<Outfit>(seedValue: null);
+  Stream<Outfit> get selectedOutfit => _selectedOutfitController;
+  final _selectOutfitController = PublishSubject<LoadOutfit>();
+  Sink<LoadOutfit> get selectOutfit => _selectOutfitController; 
   
   final _uploadOutfitsController = PublishSubject<UploadOutfit>();
   Sink<UploadOutfit> get uploadOutfit => _uploadOutfitsController;
@@ -60,6 +60,7 @@ class OutfitBloc{
     _myOutfitsController.addStream(repository.getOutfits(SearchModes.MINE));
     _savedOutfitsController.addStream(repository.getOutfits(SearchModes.SAVED));
     _selectedOutfitsController.addStream(repository.getOutfits(SearchModes.SELECTED));
+    _selectedOutfitController.addStream(repository.getOutfit(SearchModes.SELECTED_SINGLE));
     _feedOutfitsController.addStream(repository.getOutfits(SearchModes.FEED));
 
     _subscriptions = <StreamSubscription<dynamic>>[
@@ -74,7 +75,7 @@ class OutfitBloc{
       _saveOutfitController.listen(_saveOutfit),
       _likeOutfitController.listen((outfitImpression) => _triggerImpression(outfitImpression, 1)),
       _dislikeOutfitController.listen((outfitImpression) => _triggerImpression(outfitImpression, -1)),
-      _selectOutfitController.listen(_getOutfitStream),
+      _selectOutfitController.listen(_loadOutfit),
     ];
   }
 
@@ -99,9 +100,9 @@ class OutfitBloc{
     await _loadOutfits(loadOutfits);
   }
 
-  _loadOutfits(LoadOutfits LoadOutfits) async {
+  _loadOutfits(LoadOutfits loadOutfits) async {
     _loadingController.add(true);
-    final success = await repository.loadOutfits(LoadOutfits);
+    final success = await repository.loadOutfits(loadOutfits);
     _loadingController.add(false);
     _successController.add(success);
     if(!success){
@@ -161,10 +162,16 @@ class OutfitBloc{
     }
   }
 
-  _getOutfitStream(int outfitId) async {
+  _loadOutfit(LoadOutfit loadOutfit) async {
+    loadOutfit.searchModes = SearchModes.SELECTED_SINGLE;
+    
     _loadingController.add(true);
-    _selectedOutfitController.add(repository.getOutfit(outfitId));
+    final success = await repository.loadOutfit(loadOutfit);
     _loadingController.add(false);
+    _successController.add(success);
+    if(!success){
+      _errorController.add("Failed to load outfits");
+    }
   }
 
   void dispose() {

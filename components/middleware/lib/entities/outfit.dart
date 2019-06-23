@@ -30,6 +30,8 @@ class Outfit {
     this.isSaved
   });
 
+  bool get hasCompleteData => commentsCount != null;
+
   int get likesOverallCount => likesCount - dislikesCount;
 
   bool get hasAdditionalInfo => hasMultipleImages || hasDescription;
@@ -53,7 +55,7 @@ class Outfit {
     style = map['style'];
     likesCount = map['likes_count'] == null ? 0 : map['likes_count'];
     dislikesCount = map['dislikes_count'] == null ? 0 : map['dislikes_count'];
-    commentsCount = map['comments_count'] == null ? 0 : map['comments_count'];
+    commentsCount = map['comments_count'];
     userImpression = map['user_impression'] == null ? 0 : map['user_impression'];
     isSaved = map['is_saved'] == 1;
     poster = User.fromMap(map);

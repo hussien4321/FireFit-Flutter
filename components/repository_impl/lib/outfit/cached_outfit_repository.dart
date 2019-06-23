@@ -13,7 +13,7 @@ class CachedOutfitRepository {
   CachedOutfitRepository({@required this.streamDatabase, @required this.userCache});
 
   Future<int> addOutfit(Outfit outfit, SearchModes searchMode) async {
-    _addOutfitSearch(outfit.outfitId, searchMode);
+    addOutfitSearch(outfit.outfitId, searchMode);
     await userCache.addUser(outfit.poster, searchMode);
     if(searchMode ==SearchModes.SAVED){
       await _addOutfitSave(outfit.save);
@@ -30,7 +30,7 @@ class CachedOutfitRepository {
     );
   }
 
-  Future<int> _addOutfitSearch(int outfitId, SearchModes searchMode) async {
+  Future<int> addOutfitSearch(int outfitId, SearchModes searchMode) async {
     SearchOutfit searchOutfit =SearchOutfit(
       outfitId: outfitId,
       searchMode: searchModeToString(searchMode),
@@ -138,8 +138,9 @@ class CachedOutfitRepository {
     await userCache.clearUsers(SearchModes.TEMP);
   }
 
-  Stream<Outfit> getOutfit(int outfitId){
-    return streamDatabase.createRawQuery(['outfit'], "SELECT * FROM outfit, user WHERE user_id = poster_user_id AND outfit_id=? LIMIT 1", [outfitId]).mapToOneOrDefault((data) {
+  Stream<Outfit> getOutfit(SearchModes searchMode){
+    String searchModeString = searchModeToString(searchMode);
+    return streamDatabase.createRawQuery(['outfit', 'outfit_search'], "SELECT * FROM outfit, user WHERE user_id = poster_user_id AND (SELECT COUNT(*) FROM outfit_search WHERE search_outfit_id=outfit_id AND search_outfit_mode=?)=1 LIMIT 1", [searchModeString]).mapToOneOrDefault((data) {
       return Outfit.fromMap(data);
     }, null).asBroadcastStream();
   }

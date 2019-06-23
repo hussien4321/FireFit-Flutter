@@ -13,7 +13,7 @@ import 'package:overlay_support/overlay_support.dart';
 
 class MainAppBar extends StatefulWidget {
 
-  FirebaseMessaging messaging;
+  final FirebaseMessaging messaging;
 
   MainAppBar({Key key,
     @required this.messaging,

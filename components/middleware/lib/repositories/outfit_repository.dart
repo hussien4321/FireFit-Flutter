@@ -4,9 +4,10 @@ import 'package:middleware/middleware.dart';
 abstract class OutfitRepository{
 
   Stream<List<Outfit>> getOutfits(SearchModes searchMode);
-  Stream<Outfit> getOutfit(int outfitId);
+  Stream<Outfit> getOutfit(SearchModes searchMode);
   Future<bool> loadOutfits(LoadOutfits loadOutfits);
   Future<bool> loadMoreOutfits(LoadOutfits loadOutfits);
+  Future<bool> loadOutfit(LoadOutfit loadOutfit);
   Future<bool> uploadOutfit(UploadOutfit uploadOutfit); 
   Future<bool> editOutfit(EditOutfit editOutfit); 
   Future<bool> saveOutfit(OutfitSave saveData);

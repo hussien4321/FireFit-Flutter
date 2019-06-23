@@ -24,8 +24,7 @@ class FirebaseOutfitRepository implements OutfitRepository {
 
   Stream<List<Outfit>> getOutfits(SearchModes searchMode) => cache.getOutfits(searchMode);
 
-  Stream<Outfit> getOutfit(int outfitId) => cache.getOutfit(outfitId);
-
+  Stream<Outfit> getOutfit(SearchModes searchMode) => cache.getOutfit(searchMode);
 
   Future<bool> loadOutfits(LoadOutfits loadOutfits) async {
     await cache.clearOutfits(loadOutfits.searchMode);
@@ -40,6 +39,21 @@ class FirebaseOutfitRepository implements OutfitRepository {
       return true;
     })
     .catchError((err) => false);
+  }
+  Future<bool> loadOutfit(LoadOutfit loadOutfit) async {
+    await cache.clearOutfits(loadOutfit.searchModes);
+    if(loadOutfit.loadFromCloud){
+      return cloudFunctions.getHttpsCallable(functionName: 'getOutfit').call(loadOutfit.toJson())
+      .then((res) async {
+        List<Outfit> outfits = _resToOutfitList(res);
+        outfits.forEach((outfit) => cache.addOutfit(outfit, loadOutfit.searchModes));
+        return true;
+      })
+      .catchError((err) => false);
+    }else{
+      cache.addOutfitSearch(loadOutfit.outfitId, loadOutfit.searchModes);
+      return true;
+    }
   }
 
   List<Outfit> _resToOutfitList(HttpsCallableResult res){

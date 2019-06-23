@@ -14,9 +14,11 @@ enum OutfitOption { EDIT, REPORT, DELETE }
 class OutfitDetailsScreen extends StatefulWidget {
 
   final int outfitId;
+  final bool loadOutfit;
 
   OutfitDetailsScreen({
     this.outfitId,
+    this.loadOutfit = false,
   });
 
   @override
@@ -76,8 +78,13 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
   _initBlocs() async {
     if(_outfitBloc==null){
       _outfitBloc = OutfitBlocProvider.of(context);
-      _outfitBloc.selectOutfit.add(widget.outfitId);
       userId = await UserBlocProvider.of(context).existingAuthId.first;
+      LoadOutfit loadOutfit = LoadOutfit(
+        outfitId: widget.outfitId,
+        userId: userId,
+        loadFromCloud: widget.loadOutfit
+      );
+      _outfitBloc.selectOutfit.add(loadOutfit);
     }
   }
 
@@ -603,7 +610,7 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
   _loadCommentsPage() {
     Navigator.push(context, MaterialPageRoute(
       builder: (ctx) => CommentsScreen(
-        outfit: outfit,
+        outfitId: outfit.outfitId,
       )
     ));
   }
