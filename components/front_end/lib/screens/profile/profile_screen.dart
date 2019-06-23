@@ -86,7 +86,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ],
                 ),
               ),
-              isCurrentUser ? Container() : _buildInteractButtons(user),
+              isCurrentUser ? Container() : _buildInteractButton(user),
             ],
           ),
         ),
@@ -347,7 +347,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       )
     );
   }
-  Widget _buildInteractButtons(User user){
+  Widget _buildInteractButton(User user){
     return Container(
       decoration: BoxDecoration(
         border: BorderDirectional(

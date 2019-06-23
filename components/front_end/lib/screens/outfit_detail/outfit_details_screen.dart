@@ -9,6 +9,9 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter_swiper/flutter_swiper.dart';
 import 'package:front_end/screens.dart';
 
+
+enum OutfitOption { EDIT, REPORT, DELETE }
+
 class OutfitDetailsScreen extends StatefulWidget {
 
   final int outfitId;
@@ -90,29 +93,96 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
         ),
         title: Text("Outfit details"),
         centerTitle: true,
-        elevation: 0.0,
+        elevation: 1.0,
         actions: <Widget>[
-          (outfit?.poster?.userId == userId) ? IconButton(
-            icon: Icon(Icons.delete),
-            onPressed: (){
-              _outfitBloc.deleteOutfit.add(outfit);
-              Navigator.pop(context);
-            },
-          ) : Container(),
-          IconButton(
-            icon: Icon(FontAwesomeIcons.comment),
-            onPressed: () {
-              Navigator.push(context, MaterialPageRoute(
-                builder: (ctx) => CommentsScreen(
-                  outfit: outfit
-                )
-              ));
-            },
-          )
+          _loadOutfitOptions()
         ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _loadCommentsPage,
+        child: Icon(
+          Icons.comment,
+          color: Colors.white,
+        ),
       ),
       body: body,
     );
+  }
+
+  Widget _loadOutfitOptions(){
+    List<OutfitOption> availableOptions = OutfitOption.values.where((option) => _canShowOption(option)).toList();
+    return availableOptions.isEmpty ? Container() : PopupMenuButton<OutfitOption>(
+      onSelected: (option) => _optionAction(option),
+      itemBuilder: (BuildContext context) {
+        return availableOptions.map((OutfitOption option) {
+          return PopupMenuItem<OutfitOption>(
+            value: option,
+            child: Text(_optionToString(option)),
+          );
+        }).toList();
+      },
+    );
+  }
+
+  String _optionToString(OutfitOption option){
+    switch (option) {
+      case OutfitOption.EDIT:
+        return 'Edit';
+      case OutfitOption.REPORT:
+        return 'Report';
+      case OutfitOption.DELETE:
+        return 'Delete';
+      default:
+        return null;
+    }
+  }
+
+  bool _canShowOption(OutfitOption option){
+    switch (option) {
+      case OutfitOption.EDIT:
+        return outfit?.poster?.userId == userId;
+      case OutfitOption.REPORT:
+        return true;
+      case OutfitOption.DELETE:
+        return outfit?.poster?.userId == userId;
+      default:
+        return null;
+    }
+  }
+
+  _optionAction(OutfitOption option){
+    switch (option) {
+      case OutfitOption.EDIT:
+        break;
+      case OutfitOption.REPORT:
+        break;
+      case OutfitOption.DELETE:
+        _confirmDelete();
+        break;
+      default:
+        return null;
+    }
+  }
+
+  _confirmDelete(){
+    return showDialog(
+      context: context,
+      builder: (secondContext) {
+        return YesNoDialog(
+          title: 'Delete Outfit',
+          description: 'Are you sure you want to delete this outfit?',
+          yesText: 'Yes',
+          noText: 'No',
+          onYes: () {
+            _outfitBloc.deleteOutfit.add(outfit);
+            Navigator.pop(context);
+          },
+          onDone: () {
+            Navigator.pop(context);
+          },
+        );
+      }
+    ) ?? false;
   }
 
   Widget _outfitLoadingPlaceholder(){
@@ -142,7 +212,7 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
                       Material(
                         color: Colors.white,
                         child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 0.0),
+                          padding: const EdgeInsets.only(bottom: 64.0),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             mainAxisSize: MainAxisSize.min,
@@ -164,8 +234,6 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
       ),
     );
   }
-
-
 
   Widget _buildOutfitImage() {
     return Container(
@@ -485,5 +553,47 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
         ],
       ),
     );
+  }
+
+  Widget _buildCommentButton(){
+    return Container(
+      decoration: BoxDecoration(
+        border: BorderDirectional(
+          start: BorderSide(
+            color: Colors.grey.withOpacity(0.5),
+            width: 0.5
+          )
+        ),
+        color: Colors.grey,
+      ),
+      width: double.infinity,
+      child: FlatButton(
+        padding: EdgeInsets.symmetric(vertical: 16.0),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Padding(
+              padding: const EdgeInsets.only(right: 8.0),
+              child: Text(
+                'Add/View comments',
+                style: TextStyle(color: Colors.white, fontSize: 20),
+              ),
+            ),
+            Icon(
+              Icons.add_comment,
+              color: Colors.white,
+            ),
+          ],
+        ),
+        onPressed: () => _loadCommentsPage()
+      ),
+    );
+  }
+  _loadCommentsPage() {
+    Navigator.push(context, MaterialPageRoute(
+      builder: (ctx) => CommentsScreen(
+        outfit: outfit,
+      )
+    ));
   }
 }

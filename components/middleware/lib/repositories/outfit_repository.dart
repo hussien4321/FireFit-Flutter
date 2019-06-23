@@ -17,4 +17,5 @@ abstract class OutfitRepository{
   Future<bool> loadComments(LoadComments loadComments);
   Future<bool> addComment(AddComment comment);
   Future<bool> likeComment(CommentLike commentlike);
+  Future<bool> deleteComment(DeleteComment deleteComment);
 }

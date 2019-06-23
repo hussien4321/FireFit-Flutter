@@ -59,6 +59,15 @@ class CachedOutfitRepository {
     );
   }
 
+  Future<int> deleteComment(DeleteComment deleteComment) async {
+    _decrementCommentsCount(deleteComment.outfitId);
+    return streamDatabase.delete(
+      'comment',
+      where: 'comment_id = ?',
+      whereArgs: [deleteComment.comment.commentId],
+    );
+  }
+
   Future<int> saveOutfit(OutfitSave saveData) async {
     Outfit outfit = saveData.outfit;
     outfit.isSaved =!outfit.isSaved;
@@ -156,8 +165,11 @@ class CachedOutfitRepository {
     return streamDatabase.executeAndTrigger(['outfit'], "UPDATE outfit SET likes_count=likes_count+1 WHERE outfit_id=?", [outfit.outfitId]);
   }
   
-  Future<void> _incrementCommentsCount(Outfit outfit) async {
-    return streamDatabase.executeAndTrigger(['outfit'], "UPDATE outfit SET comments_count=comments_count+1 WHERE outfit_id=?", [outfit.outfitId]);
+  Future<void> _incrementCommentsCount(int outfitId) async {
+    return streamDatabase.executeAndTrigger(['outfit'], "UPDATE outfit SET comments_count=comments_count+1 WHERE outfit_id=?", [outfitId]);
+  }
+  Future<void> _decrementCommentsCount(int outfitId) async {
+    return streamDatabase.executeAndTrigger(['outfit'], "UPDATE outfit SET comments_count=comments_count-1 WHERE outfit_id=?", [outfitId]);
   }
   
   Future<void> _incrementCommentLikesCount(Comment comment) async {
@@ -184,7 +196,7 @@ class CachedOutfitRepository {
   }
   Future<int> updateComment(AddComment addComment, int tempCommentId, int actualCommentId) async { 
     await streamDatabase.rawDelete([], 'DELETE FROM comment WHERE comment_id=$tempCommentId');
-    _incrementCommentsCount(addComment.outfit);
+    _incrementCommentsCount(addComment.outfit.outfitId);
     return addNewComment(addComment, actualCommentId);
   }
   Future<int> addComment(Comment comment) async { 

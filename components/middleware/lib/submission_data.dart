@@ -11,6 +11,7 @@ export 'submission_data/outfit_save.dart';
 export 'submission_data/add_comment.dart';
 export 'submission_data/load_comments.dart';
 export 'submission_data/comment_like.dart';
+export 'submission_data/delete_comment.dart';
 
 export 'submission_data/load_user.dart';
 

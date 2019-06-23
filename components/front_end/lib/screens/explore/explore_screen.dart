@@ -338,7 +338,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
 
   _composeComment(int outfitId){
     CustomNavigator.goToOutfitDetailsScreen(context, false, 
-      outfitId: outfitId
+      outfitId: outfitId,
     );
   }
 

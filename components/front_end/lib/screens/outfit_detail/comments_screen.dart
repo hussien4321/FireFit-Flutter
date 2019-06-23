@@ -5,14 +5,17 @@ import 'package:helpers/helpers.dart';
 import 'package:front_end/providers.dart';
 import 'package:blocs/blocs.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class CommentsScreen extends StatefulWidget {
 
   final Outfit outfit;
+  final int outfitId;
   final bool focusComment;
   
   CommentsScreen({
     this.outfit,
+    this.outfitId,
     this.focusComment = false,
   });
 
@@ -107,6 +110,7 @@ class _CommentsScreenState extends State<CommentsScreen> {
                         canSendComment = text.isNotEmpty;                      
                       });
                     },
+                    onSubmitted: (s) => _sendComment(),
                     textCapitalization: TextCapitalization.sentences,
                     decoration: InputDecoration(
                       border: InputBorder.none,
@@ -181,12 +185,28 @@ class _CommentsScreenState extends State<CommentsScreen> {
               ],
             ),
           ),
+          Container(
+            margin: EdgeInsets.only(right: 8.0),
+            width: 35.0,
+            height: 60.0,
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: CachedNetworkImageProvider(widget.outfit.images.first),
+                fit: BoxFit.cover
+              ),
+              border: Border.all(
+                width: 0.5
+              ),
+              color: Colors.grey
+            ),
+          )
         ],
       ),
     );
   }
   
   Widget _buildCommentField(Comment comment) {
+    bool isCurrentUser = userId == comment.commenter.userId;
     return Container(
       padding: EdgeInsets.only(bottom: 4.0, left: 8.0, right: 8.0),
       child: Column(
@@ -236,12 +256,24 @@ class _CommentsScreenState extends State<CommentsScreen> {
               ) : 
               Padding(
                 padding: const EdgeInsets.only(top: 16.0),
-                child: IconButton(
-                  icon: Icon(
-                    comment.isLiked ? FontAwesomeIcons.solidHeart :  FontAwesomeIcons.heart,
-                    color: Colors.redAccent,
-                  ),
-                  onPressed: () => _likeComment(comment),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    isCurrentUser ? IconButton(
+                      icon: Icon(
+                        Icons.delete,
+                        color: Colors.black,
+                      ),
+                      onPressed: () => _confirmDelete(comment),
+                    ) : Container(),
+                    IconButton(
+                      icon: Icon(
+                        comment.isLiked ? FontAwesomeIcons.solidHeart :  FontAwesomeIcons.heart,
+                        color: Colors.redAccent,
+                      ),
+                      onPressed: () => _likeComment(comment),
+                    ),
+                  ],
                 ),
               ),
             ],
@@ -250,7 +282,6 @@ class _CommentsScreenState extends State<CommentsScreen> {
             padding: EdgeInsets.only(left: 48),
             width: double.infinity,
             child: Row(
-              // mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: <Widget>[
                 Text(
                   DateFormatter.dateToRecentFormat(comment.uploadDate),
@@ -275,6 +306,31 @@ class _CommentsScreenState extends State<CommentsScreen> {
         ],
       ),
     );
+  }
+
+
+  _confirmDelete(Comment comment){
+    DeleteComment deleteComment = DeleteComment(
+      comment: comment,
+      outfitId: widget.outfit.outfitId,
+    );
+    return showDialog(
+      context: context,
+      builder: (secondContext) {
+        return YesNoDialog(
+          title: 'Delete Comment',
+          description: 'Are you sure you want to delete this comment?',
+          yesText: 'Yes',
+          noText: 'No',
+          onYes: () {
+            _commentBloc.deleteComment.add(deleteComment);
+          },
+          onDone: () {
+            Navigator.pop(context);
+          },
+        );
+      }
+    ) ?? false;
   }
 
   _likeComment(Comment comment) {

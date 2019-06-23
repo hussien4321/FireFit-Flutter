@@ -19,6 +19,9 @@ class CommentBloc {
   final _likeCommentController = PublishSubject<CommentLike>();
   Sink<CommentLike> get likeComment => _likeCommentController; 
   
+  final _deleteCommentController = PublishSubject<DeleteComment>();
+  Sink<DeleteComment> get deleteComment => _deleteCommentController; 
+  
   final _loadingController = PublishSubject<bool>();
   Observable<bool> get isLoading => _loadingController.stream;
 
@@ -34,6 +37,7 @@ class CommentBloc {
       _loadCommentsController.listen(_loadComments),
       _likeCommentController.listen(_likeComment),
       _addCommentController.listen(_addComment),
+      _deleteCommentController.listen(_deleteComment),
     ];
   }
 
@@ -63,11 +67,14 @@ class CommentBloc {
     }
   }
 
+  _deleteComment(DeleteComment comment) => repository.deleteComment(comment);
+  
   void dispose() {
     _addCommentController.close();
     _loadCommentsController.close();
     _commentsController.close();
     _likeCommentController.close();
+    _deleteCommentController.close();
     _loadingController.close();
     _successController.close();
     _errorController.close();

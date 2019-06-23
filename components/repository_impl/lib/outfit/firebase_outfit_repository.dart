@@ -204,5 +204,18 @@ class FirebaseOutfitRepository implements OutfitRepository {
     comments.forEach((comment) => cache.addComment(comment));
   }
 
+  Future<bool> deleteComment(DeleteComment deleteComment) async {
+    cache.deleteComment(deleteComment);
+    return cloudFunctions.getHttpsCallable(functionName: 'deleteComment').call(deleteComment.toJson())
+    .then((res) async {
+      bool status = res.data['res'];
+      return status;
+    })
+    .catchError((err) {
+      print(err);
+      return false;
+    });
+  }
+
 
 }
