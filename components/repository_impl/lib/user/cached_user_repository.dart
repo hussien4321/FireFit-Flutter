@@ -92,6 +92,11 @@ class CachedUserRepository {
     String searchModeString = searchModeToString(SearchModes.MINE);
     return streamDatabase.executeAndTrigger(['user'], "UPDATE user SET has_new_feed_outfits=1 WHERE user_id=(SELECT search_user_id FROM user_search WHERE search_user_mode=? LIMIT 1)", [searchModeString]);
   }
+
+  Future<void> updateUserBiometrics(EditUser editUser) {
+    String searchModeString = searchModeToString(SearchModes.MINE);
+    return streamDatabase.executeAndTrigger(['user'], "UPDATE user SET name=?, bio=? WHERE user_id=(SELECT search_user_id FROM user_search WHERE search_user_mode=? LIMIT 1)", [editUser.name, editUser.bio, searchModeString]);
+  }
   
 
   Future<void> followUser(FollowUser followUser) async {

@@ -5,7 +5,6 @@ import 'package:helpers/helpers.dart';
 import 'package:front_end/providers.dart';
 import 'package:blocs/blocs.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter_swiper/flutter_swiper.dart';
 import 'package:front_end/screens.dart';
 
@@ -52,7 +51,7 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
     _initBlocs();
     return StreamBuilder<bool>(
       stream: _outfitBloc.isLoading,
-      initialData: true,
+      initialData: false,
       builder: (ctx, isLoadingSnap){
         if(isLoadingSnap.data){
           return _scaffold(
@@ -91,7 +90,7 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
           icon: Icon(Icons.close),
           onPressed: Navigator.of(context).pop,
         ),
-        title: Text("Outfit details"),
+        title: Text("${outfit?.poster?.name}'s Outfit"),
         centerTitle: true,
         elevation: 1.0,
         actions: <Widget>[
@@ -100,6 +99,7 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _loadCommentsPage,
+        backgroundColor: Colors.green,
         child: Icon(
           Icons.comment,
           color: Colors.white,
@@ -140,19 +140,22 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
   bool _canShowOption(OutfitOption option){
     switch (option) {
       case OutfitOption.EDIT:
-        return outfit?.poster?.userId == userId;
+        return isCurrentUser;
       case OutfitOption.REPORT:
-        return true;
+        return !isCurrentUser;
       case OutfitOption.DELETE:
-        return outfit?.poster?.userId == userId;
+        return isCurrentUser;
       default:
         return null;
     }
   }
 
+  bool get isCurrentUser => outfit?.poster?.userId == userId;
+
   _optionAction(OutfitOption option){
     switch (option) {
       case OutfitOption.EDIT:
+        _editOutfit();
         break;
       case OutfitOption.REPORT:
         break;
@@ -162,6 +165,14 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
       default:
         return null;
     }
+  }
+
+  _editOutfit() {
+    Navigator.push(context, MaterialPageRoute(
+      builder: (ctx) => EditOutfitScreen(
+        outfit: outfit,
+      )
+    ));
   }
 
   _confirmDelete(){

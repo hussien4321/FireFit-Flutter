@@ -30,7 +30,7 @@ void main({
                   '/home' : (ctx) => MainAppBar(
                     messaging: messaging
                   ),
-                  '/login': (ctx) => LogInScreen(),
+                  '/login': (ctx) => IntroScreen(),
                   '/onboard': (ctx) => OnboardScreen(),
                 },
                 theme: ThemeData(

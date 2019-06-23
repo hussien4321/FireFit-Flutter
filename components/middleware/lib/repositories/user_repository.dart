@@ -9,6 +9,7 @@ abstract class UserRepository {
   Future<bool> register(LogInForm logInForm);
   Future<bool> logIn(LogInForm logInForm);
   Future<bool> createAccount(OnboardUser onboardUser);
+  Future<bool> editUser(EditUser editUser);
 
   Future<void> registerNotificationToken(String userId);
   Future<bool> loadNotifications(LoadNotifications loadNotifications);
@@ -25,6 +26,7 @@ abstract class UserRepository {
   Future<bool> checkUsernameExists(String username);
 
   Future<void> logOut();
+  Future<bool> deleteUser(String userId);
 
   Future<bool> loadUserDetails(LoadUser loadUser, SearchModes searchMode);
   Stream<User> getUser(SearchModes searchMode);

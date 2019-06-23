@@ -79,9 +79,15 @@ class _MenuNavigationScreenState extends State<MenuNavigationScreen> {
                   Expanded(
                     child: Align(
                       alignment: Alignment.bottomCenter,
-                      child: Text(
-                        'Version: 1.0.0',
-                        style: Theme.of(context).textTheme.subtitle,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          _logOutButton(),
+                          Text(
+                            'Version: 1.0.0',
+                            style: Theme.of(context).textTheme.subtitle,
+                          ),
+                        ],
                       ),
                     ),
                   )
@@ -196,5 +202,45 @@ class _MenuNavigationScreenState extends State<MenuNavigationScreen> {
     CustomNavigator.goToProfileScreen(context, true,
       userId: userId,
     );
+  }
+
+  Widget _logOutButton() {
+    return Container(
+      width: double.infinity,
+      child: FlatButton(
+        padding: EdgeInsets.symmetric(vertical: 8),
+        child: Text(
+          'Sign out',
+          style:TextStyle(
+            fontWeight: FontWeight.w500,
+            fontSize: 22.0,
+            color: Colors.red
+          ),
+          textAlign: TextAlign.center,
+        ),
+        onPressed: _confirmLogOut,
+      ),
+    );
+  }
+
+  _confirmLogOut() {
+    return showDialog(
+      context: context,
+      builder: (secondContext) {
+        return YesNoDialog(
+          title: 'Confirmation',
+          description: 'Are you sure you want to sign out?',
+          yesText: 'Yes',
+          noText: 'No',
+          onYes: () {
+            _userBloc.logOut.add(null);
+            Navigator.pop(context);
+          },
+          onDone: () {
+            Navigator.pop(context);
+          },
+        );
+      }
+    ) ?? false;
   }
 }

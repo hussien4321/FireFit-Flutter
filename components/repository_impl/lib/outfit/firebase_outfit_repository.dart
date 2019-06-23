@@ -68,7 +68,7 @@ class FirebaseOutfitRepository implements OutfitRepository {
     List<String> imageFiles = [];
     for(int i = 0; i < imagePaths.length; i++){
       final String uuid = Uuid().generateV4();
-      imageFiles.add('temp/outfit:$outfitId:${uploadOutfit.posterUserId}:${i+1}:${uuid.toString()}${extension(imagePaths[i])}');
+      imageFiles.add('temp/outfit:$outfitId:${uploadOutfit.posterUserId}:${i+1}:${imagePaths.length}:${uuid.toString()}${extension(imagePaths[i])}');
     }
     return imageFiles;
   }
@@ -103,6 +103,21 @@ class FirebaseOutfitRepository implements OutfitRepository {
     })
     .catchError((err) => false);
   }
+
+  Future<bool> editOutfit(EditOutfit editOutfit) async {
+    cache.editOutfit(editOutfit);
+    return cloudFunctions.getHttpsCallable(functionName: 'editOutfit').call(editOutfit.toJson())
+    .then((res) async {
+      bool status = res.data['res'];
+      return status;
+    })
+    .catchError((err) {
+      print(err.message);
+      return false;
+    });
+  }
+
+
   
   Future<bool> deleteOutfit(Outfit outfit) async {
     cache.deleteOutfit(outfit);

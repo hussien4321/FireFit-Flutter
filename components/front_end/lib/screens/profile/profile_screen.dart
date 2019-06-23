@@ -3,9 +3,10 @@ import 'package:middleware/middleware.dart';
 import 'package:blocs/blocs.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:front_end/helper_widgets.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:front_end/providers.dart';
 import 'package:front_end/screens.dart';
+
+enum UserOption { EDIT, REPORT }
 
 class ProfileScreen extends StatefulWidget {
   final String userId;
@@ -69,32 +70,105 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Widget _profileScaffold(User user){
     return Scaffold(
-      body: SafeArea(
-        child: _closeButtonStack(
-          child: Column(
-            children: <Widget>[
-              Expanded(
-                child: ListView(
-                  children: <Widget>[
-                    _biometricInfo(user),
-                    _spaceSeparator(),
-                    _overallStatistics(user),
-                    _spaceSeparator(),
-                    _buildOutfitDescription(user),
-                    _spaceSeparator(),
-                    _outfitsOverview(user),
-                  ],
-                ),
-              ),
-              isCurrentUser ? Container() : _buildInteractButton(user),
-            ],
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 2.0,
+        leading: IconButton(
+          icon: Icon(
+            Icons.close,
+            color: Colors.black,
           ),
+          onPressed: Navigator.of(context).pop,
         ),
+        title: Text(
+          "${user.name}'s Profile"
+        ),
+        centerTitle: true,
+        actions: <Widget>[
+          _loadUserOptions(user),
+        ],
+      ),
+      body: Column(
+        children: <Widget>[
+          Expanded(
+            child: ListView(
+              children: <Widget>[
+                _biometricInfo(user),
+                _spaceSeparator(),
+                _overallStatistics(user),
+                _spaceSeparator(),
+                _buildOutfitDescription(user),
+                _spaceSeparator(),
+                _outfitsOverview(user),
+              ],
+            ),
+          ),
+          isCurrentUser ? Container() : _buildInteractButton(user),
+        ],
       ),
     );
   }
 
   bool get isCurrentUser => currentUserId == widget.userId;
+  
+  Widget _loadUserOptions(User user){
+    List<UserOption> availableOptions = UserOption.values.where((option) => _canShowOption(option)).toList();
+    return availableOptions.isEmpty ? Container() : PopupMenuButton<UserOption>(
+      onSelected: (option) => _optionAction(option, user),
+      itemBuilder: (BuildContext context) {
+        return availableOptions.map((UserOption option) {
+          return PopupMenuItem<UserOption>(
+            value: option,
+            child: Text(_optionToString(option)),
+          );
+        }).toList();
+      },
+    );
+  }
+
+  String _optionToString(UserOption option){
+    switch (option) {
+      case UserOption.EDIT:
+        return 'Edit';
+      case UserOption.REPORT:
+        return 'Report';
+      default:
+        return null;
+    }
+  }
+
+  bool _canShowOption(UserOption option){
+    switch (option) {
+      case UserOption.EDIT:
+        return isCurrentUser;
+      case UserOption.REPORT:
+        return !isCurrentUser;
+      default:
+        return null;
+    }
+  }
+
+  _optionAction(UserOption option, User user){
+    switch (option) {
+      case UserOption.EDIT:
+        _editUser(user);
+        break;
+      case UserOption.REPORT:
+        break;
+      default:
+        return null;
+    }
+  }
+
+
+  _editUser(User user) {
+    Navigator.push(context, MaterialPageRoute(
+      builder: (ctx) => EditUserScreen(
+        user: user,
+      )
+    ));
+  }
+
 
   Widget _spaceSeparator(){
     return Padding(
@@ -122,7 +196,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
   Widget _biometricInfo(User user) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+      padding: const EdgeInsets.only(left: 8.0, right: 8, top: 8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisSize: MainAxisSize.min,
@@ -271,8 +345,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _buildOutfitDescription(User user) {
-    String bio = "Hi there, my name is hussien! I enjoy trying new clothes and discovering new types of fashion! Looking forward to seeing all the cool outfits people come up with on this app :D";
-    if(bio == null){
+    if(user.bio == null){
       return Center(
         child: Text(
           "No bio has been added",
@@ -291,7 +364,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         children: <Widget>[
           _sectionHeader("User Bio"),
           Text(
-            bio,
+            user.bio,
             style: Theme.of(context).textTheme.caption,
           ),
         ],

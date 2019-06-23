@@ -39,6 +39,10 @@ class UserBloc {
   Sink<LogInForm> get logIn => _logInController;
   final _logOutController = PublishSubject<void>();
   Sink<void> get logOut => _logOutController;
+  final _editUserController = PublishSubject<EditUser>();
+  Sink<EditUser> get editUser => _editUserController;
+  final _deleteUserController = PublishSubject<void>();
+  Sink<void> get deleteUser => _deleteUserController;
 
   
   final _onboardController = PublishSubject<OnboardUser>();
@@ -74,6 +78,8 @@ class UserBloc {
       _logInController.listen(_logInUser),
       _registerController.listen(_registerUser),
       _logOutController.listen(_logOutUser),
+      _deleteUserController.listen(_deleteUser),
+      _editUserController.listen(_editUser),
       _onboardController.listen(_onboardUser),
       _checkUsernameController.stream.listen((t) => _isUsernameTakenController.add(null)),
       _checkUsernameController.stream.debounce(Duration(milliseconds: 500)).listen(_refreshUsernameCheck),
@@ -142,6 +148,28 @@ class UserBloc {
   _logOutUser([_]) async {
       _existingAuthController.add(null);
       await repository.logOut();
+  }
+
+  _deleteUser([_]) async {
+    _loadingController.add(true);
+    bool success = await repository.deleteUser(_currentUserId);
+    _loadingController.add(false);
+    if(success){
+      _existingAuthController.add(null);
+      _successController.add(true);
+    }else{
+      _errorController.add('Failed to delete account');
+    }
+  }
+
+  _editUser(EditUser editUser) async {
+    _loadingController.add(true);
+    bool success = await repository.editUser(editUser);
+    _loadingController.add(false);
+    _successController.add(success);
+    if(!success){
+      _errorController.add('Failed to edit user');
+    }
   }
 
 
@@ -240,6 +268,8 @@ class UserBloc {
     _loadingController.close();
     _logInController.close();
     _logOutController.close();
+    _editUserController.close();
+    _deleteUserController.close();
     _registerController.close();
     _errorController.close();
     _subscriptions.forEach((subscription) => subscription.cancel());

@@ -31,7 +31,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         ),
         actions: <Widget>[
           IconButton(
-            icon: Icon(Icons.clear_all),
+            icon: Icon(Icons.playlist_add_check),
             onPressed: _clearNotifications,
           )
         ],

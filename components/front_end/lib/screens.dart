@@ -14,8 +14,10 @@ export 'screens/notification/new_notifications_overlay_screen.dart';
 export 'screens/onboarding/onboard_screen.dart';
 
 export 'screens/outfit_detail/comments_screen.dart';
+export 'screens/outfit_detail/edit_outfit_screen.dart';
 export 'screens/outfit_detail/outfit_details_screen.dart';
 
+export 'screens/profile/edit_user_screen.dart';
 export 'screens/profile/profile_screen.dart';
 export 'screens/profile/follow_users_screen.dart';
 

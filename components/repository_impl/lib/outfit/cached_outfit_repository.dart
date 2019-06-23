@@ -78,6 +78,10 @@ class CachedOutfitRepository {
     );
   }
 
+  Future<void> editOutfit(EditOutfit editOutfit) {
+    return streamDatabase.executeAndTrigger(['outfit'], "UPDATE outfit SET style=?, title=?, description=? WHERE outfit_id=?", [editOutfit.style, editOutfit.title, editOutfit.description, editOutfit.outfitId]);
+  }
+
   Future<int> impressOutfit(OutfitImpression outfitImpression) async {
     Outfit outfit = outfitImpression.outfit;
     int impressionValue = outfitImpression.impressionValue;

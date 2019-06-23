@@ -36,6 +36,8 @@ class OutfitBloc{
   
   final _uploadOutfitsController = PublishSubject<UploadOutfit>();
   Sink<UploadOutfit> get uploadOutfit => _uploadOutfitsController;
+  final _editOutfitController = PublishSubject<EditOutfit>();
+  Sink<EditOutfit> get editOutfit => _editOutfitController;
   final _deleteOutfitController = PublishSubject<Outfit>();
   Sink<Outfit> get deleteOutfit => _deleteOutfitController;
 
@@ -67,6 +69,7 @@ class OutfitBloc{
       _loadFeedOutfitsController.listen(_loadFeedOutfits),
       _loadSavedOutfitsController.listen(_loadSavedOutfits),
       _uploadOutfitsController.listen(_uploadOutfit),
+      _editOutfitController.listen(_editOutfit),
       _deleteOutfitController.listen(_deleteOutfit),
       _saveOutfitController.listen(_saveOutfit),
       _likeOutfitController.listen((outfitImpression) => _triggerImpression(outfitImpression, 1)),
@@ -109,6 +112,15 @@ class OutfitBloc{
   _uploadOutfit(UploadOutfit uploadOutfit) async {
     _loadingController.add(true);
     final success = await repository.uploadOutfit(uploadOutfit);
+    _loadingController.add(false);
+    _successController.add(success);
+    if(!success){
+      _errorController.add("Failed to create new outfit");
+    }
+  }
+  _editOutfit(EditOutfit editOutfit) async {
+    _loadingController.add(true);
+    final success = await repository.editOutfit(editOutfit);
     _loadingController.add(false);
     _successController.add(success);
     if(!success){
@@ -167,6 +179,7 @@ class OutfitBloc{
     _loadUserOutfitsController.close();
     _loadSavedOutfitsController.close();
     _uploadOutfitsController.close();
+    _editOutfitController.close();
     _selectedOutfitController.close();
     _selectOutfitController.close();
     _saveOutfitController.close();

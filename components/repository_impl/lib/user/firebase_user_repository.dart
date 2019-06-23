@@ -171,6 +171,63 @@ class FirebaseUserRepository implements UserRepository {
     });
   }
 
+  Future<bool> editUser(EditUser editUser) {
+    return cloudFunctions.getHttpsCallable(functionName: 'editUser').call(editUser.toJson())
+    .then((res) async {
+      bool success = res.data['res'];
+      if(!success){
+        return false;
+      }
+      if(editUser.hasNewProfilePic){
+        String fileName = _generateFileName(editUser.profilePicUrl, editUser.userId);
+        await imageUploader.uploadImage(editUser.profilePicUrl, fileName);
+        return _checkImageUpdated(editUser.userId, editUser.initialProfilePicUrl);
+      }else{
+        userCache.updateUserBiometrics(editUser);
+        return true;
+      }
+    })
+    .catchError((err) => false);
+  }
+
+
+  Future<bool> _checkImageUpdated(String userId, String currentProfilePic) async {
+    LoadUser loadUser = LoadUser(
+      userId: userId,
+      currentUserId: userId,
+      searchMode: SearchModes.MINE,
+    );
+    for(int i = 0; i < AppConfig.NUMBER_OF_POLL_ATTEMPTS; i++){
+      print('polling for profile pic attempt: $i time=${DateTime.now()}');
+      bool success = await _getUserNewProfilePic(loadUser, currentProfilePic);
+      if(success){
+        return true;
+      }
+      await Future.delayed(Duration(milliseconds: AppConfig.DURATION_PER_POLL_ATTEMPT));
+    }
+    return false;
+  }
+
+  Future<bool> _getUserNewProfilePic(LoadUser loadUser, String currentProfilePicUrl) async {
+    return cloudFunctions.getHttpsCallable(functionName: 'getUser').call(loadUser.toJson())
+    .then((res) async {
+      List<User> userList = _resToUserList(res);
+      if(userList.isEmpty){
+        return false;
+      }
+      User user = userList.first;
+      if(user.profilePicUrl != currentProfilePicUrl){
+        await userCache.addUser(user, loadUser.searchMode);
+        return true;
+      }else{
+        return false;
+      }
+    })
+    .catchError((err) {
+      return false;
+    });
+  }
+
   Future<bool> hasEmailVerified() async {
     (await auth.currentUser()).reload();
     final user = await auth.currentUser();
@@ -217,6 +274,22 @@ class FirebaseUserRepository implements UserRepository {
     messaging.deleteInstanceID();
     userCache.clearEverything();
     auth.signOut();
+  }
+
+  Future<bool> deleteUser(String userId) async {
+    return cloudFunctions.getHttpsCallable(functionName: 'deleteUser').call({
+      'user_id' : userId,
+    }).then((res) {
+      bool success = res.data['res'] == true;
+      if(success){
+        messaging.deleteInstanceID();
+        userCache.clearEverything();
+        auth.signOut();
+      }
+      return success;
+    }).catchError((err){
+      return false;
+    });
   }
 
   Stream<User> getUser(SearchModes searchMode) => userCache.getUser(searchMode);

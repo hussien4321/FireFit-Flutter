@@ -220,6 +220,9 @@ class _UploadOutfitScreenState extends State<UploadOutfitScreen> with LoadingAnd
       child: TextField(
         controller: titleTextEdit,
         onChanged: (newTitle) {
+          if(newTitle.isEmpty){
+            newTitle=null;
+          }
           setState((){
             uploadOutfit.title = newTitle;
           });
@@ -246,6 +249,9 @@ class _UploadOutfitScreenState extends State<UploadOutfitScreen> with LoadingAnd
       child: TextField(
         controller: descriptionTextEdit,
         onChanged: (newDesc) {
+          if(newDesc.isEmpty){
+            newDesc=null;
+          }
           setState((){
             uploadOutfit.description = newDesc;
           });
