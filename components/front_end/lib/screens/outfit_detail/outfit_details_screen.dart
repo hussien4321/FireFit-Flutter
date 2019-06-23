@@ -5,9 +5,8 @@ import 'package:helpers/helpers.dart';
 import 'package:front_end/providers.dart';
 import 'package:blocs/blocs.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flutter_swiper/flutter_swiper.dart';
 import 'package:front_end/screens.dart';
-
+import 'package:front_end/helper_widgets.dart';
 
 enum OutfitOption { EDIT, REPORT, DELETE }
 
@@ -101,7 +100,6 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
             fontStyle: FontStyle.italic,
             letterSpacing: 1.2,
           ),
-
         ),
         centerTitle: true,
         elevation: 1.0,
@@ -259,7 +257,12 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
   }
 
   Widget _buildOutfitImage() {
+    List<int> imageIndexes = [];
+    for(int i = 0; i < outfit.images.length; i ++){
+      imageIndexes.add(i);
+    }
     return Container(
+      padding: EdgeInsets.only(top: 16),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
@@ -272,38 +275,34 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
       ), 
       child: SizedBox(
         height: 300.0,
-        child: Hero(
-          tag: outfit.images.first,  
-          child: Container(
-            child: Swiper(
-              itemCount: outfit.images.length,
-              viewportFraction: 0.8,
-              scale: 0.9,
-              itemBuilder: (context, i) => _loadImage(outfit.images[i]),
-              loop: false,
-              pagination: SwiperPagination(
-                margin: EdgeInsets.only(top: 20.0),
-                alignment: Alignment.bottomCenter,
-                builder: DotSwiperPaginationBuilder(
-                  color: Colors.grey,
-                  activeColor: Colors.blueAccent,
-                  size: 8,
-                  activeSize: 12.0,
-                )
-              )
-            ),
+        child: Container(
+          child: CarouselSliderWithIndicator(
+            height: 300,
+            viewportFraction: 0.7,
+            enableInfiniteScroll: false,
+            items: imageIndexes.map((index) => _loadImage(index)).toList(),
           ),
         ),
       ),
     );
   }
 
-  Widget _loadImage(String url){
+  Widget _loadImage(int index){
     return Container(
-      padding: const EdgeInsets.only(bottom: 20.0),
-      child: CachedNetworkImage(
-        imageUrl: url,
-        fit: BoxFit.contain,
+      decoration: BoxDecoration(
+        color: Colors.grey.withOpacity(0.5),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black45,
+            blurRadius: 3,
+            offset: Offset(1.5, 1.5)
+          )
+        ]
+      ),
+      child: ImageGalleryPreview(
+        imageUrls: outfit.images,
+        currentIndex: index, 
+        title: 'Outfit Image',
       ),
     );
   }

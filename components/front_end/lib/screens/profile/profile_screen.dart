@@ -216,6 +216,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _profilePic(User user){
+    String heroTag = widget.heroTag == null ? 'null' : widget.heroTag;
     return Center(
       child: Hero(
         tag: widget.heroTag == null ? 'null' : widget.heroTag,
@@ -223,21 +224,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
             margin: EdgeInsets.all(8.0),
             width: profilePicSize,
             height: profilePicSize,
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                image: CachedNetworkImageProvider(user.profilePicUrl),
-                fit: BoxFit.cover,
-              ),
-              shape: BoxShape.circle,
-              color: Colors.grey,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black12,
-                  offset: Offset(0, 0),
-                  blurRadius: 0,
-                  spreadRadius: 3
-                )
-              ]
+            child: ImagePreview(
+              title: 'Profile Picture',
+              imageUrl: user.profilePicUrl,
+              heroTag: heroTag,
             ),
           ),
       ), 

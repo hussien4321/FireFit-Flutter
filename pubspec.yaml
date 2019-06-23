@@ -19,6 +19,8 @@ dependencies:
     path: components/front_end/
   repository_impl:
     path: components/repository_impl/
+dependency_overrides:
+  path_provider: ^1.1.0
 
 dev_dependencies:
   flutter_test:

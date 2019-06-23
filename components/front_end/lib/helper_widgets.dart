@@ -3,9 +3,13 @@ export 'helper_widgets/notification_icon.dart';
 export 'helper_widgets/mirror_frame.dart';
 export 'helper_widgets/profile_pic_with_shadow.dart';
 
+export 'helper_widgets/animated/carousel_slider_with_indicator.dart';
 export 'helper_widgets/animated/fade_in_and_slide_page_transformer.dart';
 
 export 'helper_widgets/functions/route_converters.dart';
+
+export 'helper_widgets/image/image_gallery_viewer.dart';
+export 'helper_widgets/image/image_viewer.dart';
 
 export 'helper_widgets/input/custom_fab.dart';
 export 'helper_widgets/input/dropdown_buttons.dart';
