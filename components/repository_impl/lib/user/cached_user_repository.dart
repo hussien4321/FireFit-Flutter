@@ -118,7 +118,6 @@ class CachedUserRepository {
     return streamDatabase.query('notification', columns: ["COUNT(*) AS 'count'"], where: 'notification_is_seen=0 AND notification_type=?', whereArgs: [notificationType]).then(
       (res) {
         int count = res[0]['count'];
-        print('removing $count with type $notificationType');
         incrementUserNewNotifications(-count);
         return streamDatabase.executeAndTrigger(['notification'], "UPDATE notification SET notification_is_seen=1 WHERE notification_type=?", [notificationType]);
       }

@@ -168,7 +168,7 @@ class _OnboardScreenState extends State<OnboardScreen> with SnackbarMessages, Lo
           title: 'Log out',
           description: 'Are you sure you want to go back to the log in page?',
           yesText: 'Yes',
-          noText: 'No',
+          noText: 'Cancel',
           onYes: () {
             userBloc.logOut.add(null);
           },

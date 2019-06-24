@@ -10,6 +10,7 @@ import 'package:middleware/middleware.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:overlay_support/overlay_support.dart';
+import 'package:front_end/services.dart';
 
 class MainAppBar extends StatefulWidget {
 
@@ -27,6 +28,8 @@ class _MainAppBarState extends State<MainAppBar> {
   final GlobalKey<InnerDrawerState> _dmDrawerKey = GlobalKey<InnerDrawerState>();
   final GlobalKey<InnerDrawerState> _menuDrawerKey = GlobalKey<InnerDrawerState>();
 
+  Preferences _preferences =Preferences();
+
   UserBloc _userBloc;
   NotificationBloc _notificationBloc;
   List<StreamSubscription<dynamic>> _subscriptions;
@@ -43,18 +46,29 @@ class _MainAppBarState extends State<MainAppBar> {
     FeedScreen(),
     WardrobeScreen(),
   ];
-
-  List<String> pages = [
-      "INPSPIRATION",
-      "FASHION CIRCLE",
-      "WARDROBE",
-  ];
+  List<String> pages = AppConfig.MAIN_PAGES;
 
   @override
   void dispose() {
     super.dispose();
     _subscriptions?.forEach((subscription) => subscription.cancel());
     _isSliderOpenController.close();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _loadDefaultPageIndex();
+  }
+
+  _loadDefaultPageIndex() async {
+    int newIndex = pages.indexOf(await _preferences.getPreference(Preferences.DEFAULT_START_PAGE));
+    if(newIndex == -1){
+      newIndex = currentPages.length-1;
+    }
+    setState(() {
+     currentIndex = newIndex; 
+    });
   }
 
   @override

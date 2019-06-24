@@ -2,15 +2,19 @@ import 'package:path_provider/path_provider.dart';
 import 'dart:async';
 import 'dart:io';
 import 'dart:convert';
+import 'package:helpers/helpers.dart';
 
 class Preferences {
 
   static final String _VERSION = '_VERSION';
   static final String CURRENT_CLOTHES_STYLE = 'CURRENT_CLOTHES_STYLE';
+  static final String DEFAULT_START_PAGE = 'DEFAULT_START_PAGE';
+  
 
   final Map<String, dynamic> _initialPreferences = {
-    _VERSION: 1,
+    _VERSION: 2,
     CURRENT_CLOTHES_STYLE : 'casualwear',
+    DEFAULT_START_PAGE: AppConfig.MAIN_PAGES.first,
   };
 
   Map<String, dynamic> _currentPreferences = {};

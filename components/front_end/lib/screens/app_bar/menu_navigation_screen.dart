@@ -233,7 +233,7 @@ class _MenuNavigationScreenState extends State<MenuNavigationScreen> {
           title: 'Sign out',
           description: 'Are you sure you want to sign out?',
           yesText: 'Yes',
-          noText: 'No',
+          noText: 'Cancel',
           onYes: () {
             _userBloc.logOut.add(null);
             Navigator.pop(context);

@@ -75,7 +75,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           title: 'Mark as seen',
           description: 'Are you sure you want to mark all notifications as seen?',
           yesText: 'Yes',
-          noText: 'No',
+          noText: 'Cancel',
           onYes: () {
             _notificationBloc.markNotificationsSeen.add(markSeen);
             Navigator.pop(context);

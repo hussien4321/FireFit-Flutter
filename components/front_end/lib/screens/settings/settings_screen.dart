@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:blocs/blocs.dart';
 import 'package:front_end/providers.dart';
 import 'package:front_end/helper_widgets.dart';
+import 'package:helpers/helpers.dart';
+import 'package:front_end/services.dart';
 import 'dart:async';
 
 class SettingsScreen extends StatefulWidget {
@@ -15,11 +17,27 @@ class _SettingsScreenState extends State<SettingsScreen> with LoadingAndErrorDia
   List<StreamSubscription<dynamic>> _subscriptions;
   
   bool isOverlayShowing = false;
+  
+  Preferences preferences = Preferences();
+  String currentDefaultPage;
 
   @override
   void dispose() {
     _subscriptions?.forEach((subscription) => subscription.cancel());
     super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _loadPreferencesData();
+  }
+
+  _loadPreferencesData() async {
+    String defaultPage = await preferences.getPreference(Preferences.DEFAULT_START_PAGE);
+    setState(() {
+     currentDefaultPage = defaultPage; 
+    });
   }
 
   @override
@@ -41,12 +59,14 @@ class _SettingsScreenState extends State<SettingsScreen> with LoadingAndErrorDia
         elevation: 2,
       ),
       body: Container(
-        padding: EdgeInsets.only(left: 8, right: 8, top: 16),
+        padding: EdgeInsets.only(left: 8, right: 8),
         child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              _sectionHeader('Account'),
+              _sectionHeader('MENU'),
+              _defaultStartPage(),
+              _sectionHeader('ACCOUNT'),
               _deleteAccount(),
             ],
           ),
@@ -80,6 +100,7 @@ class _SettingsScreenState extends State<SettingsScreen> with LoadingAndErrorDia
   Widget _sectionHeader(String title){
     return Container(
       width: double.infinity,
+      margin: EdgeInsets.only(bottom: 8, top: 16),
       decoration: BoxDecoration(
         border: BorderDirectional(
           bottom: BorderSide(
@@ -90,8 +111,44 @@ class _SettingsScreenState extends State<SettingsScreen> with LoadingAndErrorDia
       ),
       child: Text(
         title,
-        style: Theme.of(context).textTheme.subtitle.apply(fontSizeDelta: 10, color: Colors.grey),
+        style: Theme.of(context).textTheme.title.copyWith(
+          inherit: true,
+          fontWeight: FontWeight.w600,
+          fontStyle: FontStyle.italic,
+          letterSpacing: 1.2,
+        ),
       ),
+    );
+  }
+
+  Widget _defaultStartPage() {
+    List<String> pages = AppConfig.MAIN_PAGES;
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: <Widget>[
+        Text(
+          'Default start page'
+        ),
+        DropdownButton(
+          value: currentDefaultPage,
+          items: pages.map((page) => DropdownMenuItem(
+            child: Text(
+              page,
+              style: TextStyle(
+                inherit: true,
+                color: page ==currentDefaultPage ? Colors.blue: Colors.grey
+              ),
+            ),
+            value: page,
+          )).toList(),
+          onChanged: (newPage) {
+            preferences.updatePreference(Preferences.DEFAULT_START_PAGE, newPage);
+            setState(() {
+             currentDefaultPage = newPage; 
+            });
+          },
+        ),
+      ],
     );
   }
 
@@ -99,17 +156,14 @@ class _SettingsScreenState extends State<SettingsScreen> with LoadingAndErrorDia
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: <Widget>[
-        Text(
-          'Delete account',
-          style: Theme.of(context).textTheme.subhead,
-        ),
-        RaisedButton(
-          child: Text(
-            'Delete',
-            style: Theme.of(context).textTheme.button.apply(color: Colors.white),
+        Expanded(
+          child: FlatButton(
+            child: Text(
+              'DELETE ACCOUNT',
+              style: Theme.of(context).textTheme.button.apply(color: Colors.red),
+            ),
+            onPressed: _confirmDelete,
           ),
-          color: Colors.red,
-          onPressed: _confirmDelete,
         )
       ],
     );
@@ -120,10 +174,10 @@ class _SettingsScreenState extends State<SettingsScreen> with LoadingAndErrorDia
       context: context,
       builder: (secondContext) {
         return YesNoDialog(
-          title: 'Delete Outfit',
-          description: 'Are you sure you want to delete this outfit?\n(NOTE: This action is PERMANENT and cannot be undone!)',
+          title: 'Delete Account',
+          description: 'Are you sure you want to delete this account?\n(NOTE: This action is PERMANENT and cannot be undone!)',
           yesText: 'Yes',
-          noText: 'No',
+          noText: 'Cancel',
           onYes: () {
             _userBloc.deleteUser.add(null);
           },

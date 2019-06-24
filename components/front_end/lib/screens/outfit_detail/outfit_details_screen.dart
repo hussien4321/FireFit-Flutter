@@ -193,7 +193,7 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
           title: 'Delete Outfit',
           description: 'Are you sure you want to delete this outfit?',
           yesText: 'Yes',
-          noText: 'No',
+          noText: 'Cancel',
           onYes: () {
             _outfitBloc.deleteOutfit.add(outfit);
             Navigator.pop(context);

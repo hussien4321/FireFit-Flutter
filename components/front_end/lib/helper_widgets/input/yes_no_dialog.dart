@@ -36,37 +36,26 @@ class YesNoDialog extends StatelessWidget {
             Container(
               padding: EdgeInsets.only(left: 5.0, right:5.0, bottom: 5.0, top: 10.0),
               child : Row(
+                mainAxisAlignment: MainAxisAlignment.end,
                 children: <Widget>[
-                  Expanded(
-                    child: RaisedButton(
-                      color: Theme.of(context).errorColor,
-                      elevation: 2.0,
-                      child: Text(
-                        noText,
-                        style: Theme.of(context).textTheme.button.apply(color: Colors.white), 
-                      ),
-                      onPressed: () {
-                        if(onNo != null){
-                          onNo();
-                        }
-                        onDone();
+                  _customFlatButton(context,
+                    color: Theme.of(context).errorColor,
+                    text: noText,
+                    onTap: () {
+                      if(onNo != null){
+                        onNo();
                       }
-                    ),
+                      onDone();
+                    }
                   ),
-                  Padding( padding: EdgeInsets.all(5.0)),
-                  Expanded(
-                    child: RaisedButton(
-                      color: Colors.blue,
-                      elevation: 2.0,
-                      child: Text(
-                        yesText,
-                        style: Theme.of(context).textTheme.button.apply(color: Colors.white), 
-                      ),
-                      onPressed: () {
-                        onYes();
-                        onDone();
-                      }
-                    ),
+                  Padding( padding: EdgeInsets.all(8.0)),
+                  _customFlatButton(context,
+                    color: Colors.blue,
+                    text: yesText,
+                    onTap: () {
+                      onYes();
+                      onDone();
+                    }
                   ),
                 ],
               ),
@@ -75,6 +64,20 @@ class YesNoDialog extends StatelessWidget {
         ),
       ),
       actions: null,
+    );
+  }
+
+  Widget _customFlatButton(BuildContext context, {String text, Color color, VoidCallback onTap}){
+    return InkWell(
+      borderRadius: BorderRadius.circular(4),
+      child: Padding(
+        padding: EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+        child: Text(
+          text,
+          style: Theme.of(context).textTheme.button.apply(color: color), 
+        ),
+      ),
+      onTap: onTap
     );
   }
 }

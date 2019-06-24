@@ -7,10 +7,10 @@ import 'package:front_end/screens.dart';
 class WardrobeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-      length: 2,
-      child: Scaffold(
-        body: Container(
+    return Scaffold(
+      body:DefaultTabController(
+        length: 2,
+        child: Container(
           child: Column(
             children: <Widget>[
               Container(

@@ -374,7 +374,7 @@ class _CommentsScreenState extends State<CommentsScreen> {
           title: 'Delete Comment',
           description: 'Are you sure you want to delete this comment?',
           yesText: 'Yes',
-          noText: 'No',
+          noText: 'Cancel',
           onYes: () {
             _commentBloc.deleteComment.add(deleteComment);
           },
