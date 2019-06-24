@@ -21,6 +21,8 @@ class _ExploreScreenState extends State<ExploreScreen> {
 
   int adCounter = 50;
   int currentIndex=0;
+  int pageNumber = 1;
+  int get previousIndex => currentIndex - 1;
   int get nextIndex => currentIndex + 1;
 
   bool isPaginationDropdownInFocus = false;
@@ -36,6 +38,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
 
   restartSearch(){
     currentIndex=0;
+    pageNumber=1;
     _outfitBloc.exploreOutfits.add(explore);
   }
 
@@ -83,10 +86,13 @@ class _ExploreScreenState extends State<ExploreScreen> {
                     children: <Widget>[
                       _buildOutfitViewAndOptions(
                         outfitView: OutfitFadingCard(
+                          previousOutfit: outfitAtIndex(outfits, previousIndex),
                           currentOutfit: outfitAtIndex(outfits, currentIndex),
                           nextOutfit: outfitAtIndex(outfits, nextIndex),
                           thickness: 10,
-                          onNextPicShown: () => _incrementIndexes(outfits),
+                          onPageSwitch: (isForward) => setState(() => pageNumber+=isForward?1:-1),
+                          onNextPicShown: () => _incrementIndexes(1),
+                          onPrevPicShown: () => _incrementIndexes(-1),
                           backgroundColor: imageOverlayColor,
                           isLoading: loadingSnap.data,
                           enabled: !isAnyDropdownInFocus,
@@ -170,7 +176,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
   }
 
   Outfit outfitAtIndex(List<Outfit> allOutfits, int index) {
-    if(allOutfits == null || allOutfits.length <= index){
+    if(allOutfits == null || allOutfits.length <= index || index < 0){
       return null;
     }
     return allOutfits[index];
@@ -194,7 +200,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
   Widget _buildPaginationDropdown() {
     return DropdownButtons(
       child: Text(
-        '${currentIndex+1}',
+        '$pageNumber',
         style: Theme.of(context).textTheme.subtitle.apply(color: Colors.white),
       ),
       onFocusChanged: (isInFocus) {
@@ -264,9 +270,14 @@ class _ExploreScreenState extends State<ExploreScreen> {
   }
 
 
-  _incrementIndexes(List<Outfit> outfits){
+  _incrementIndexes(int diff){
     setState(() {
-      currentIndex++;
+      currentIndex+=diff;
+    });
+    _incrementAdCounter();
+  }
+  _incrementAdCounter(){
+    setState(() {
       adCounter--;
     });
     if(adCounter==0){

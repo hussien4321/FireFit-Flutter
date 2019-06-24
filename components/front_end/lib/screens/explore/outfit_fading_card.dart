@@ -4,23 +4,30 @@ import 'dart:ui';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:front_end/helper_widgets.dart';
 import 'package:flutter/gestures.dart';
+import 'dart:math';
 
 class OutfitFadingCard extends StatefulWidget {
+  final Outfit previousOutfit;
   final Outfit currentOutfit;
   final Outfit nextOutfit;
   final double thickness;
   final VoidCallback onNextPicShown;
+  final VoidCallback onPrevPicShown;
   final Color backgroundColor;
   final bool isLoading;
   final bool enabled;
+  final ValueChanged<bool> onPageSwitch;
 
   OutfitFadingCard({
+    this.previousOutfit,
     this.currentOutfit,
     this.nextOutfit,
     this.thickness = 6,
     this.onNextPicShown,
+    this.onPrevPicShown,
     this.backgroundColor,
     this.isLoading,
+    this.onPageSwitch,
     this.enabled = true,
   });
 
@@ -34,7 +41,14 @@ class _OutfitFadingCardState extends State<OutfitFadingCard> with SingleTickerPr
 
   double thickness;
   AnimationController blurringTransitionController;
+
+  Offset dragStartPos;
+  double percentageOfBlur = 0;
+  bool isDraggingForward = true;
+  bool hasSwitchedOutfits = false;
+  bool hasPassedDragThreshold = false;
   
+
   final double maxBlurSigma = 10.0;
   @override
   void initState() {
@@ -47,16 +61,29 @@ class _OutfitFadingCardState extends State<OutfitFadingCard> with SingleTickerPr
     ..addStatusListener((status) {
       if(status == AnimationStatus.completed){
         blurringTransitionController.reverse();
-        currentOutfitId = (currentOutfitId == widget.currentOutfit?.outfitId) ? widget.nextOutfit?.outfitId : widget.currentOutfit?.outfitId;
+        _switchOutfits();
+        hasSwitchedOutfits = true;
       }
       if(status ==AnimationStatus.dismissed){
-        widget.onNextPicShown();
+        if(hasSwitchedOutfits){
+          if(isDraggingForward){
+            widget.onNextPicShown();
+          }else{
+            widget.onPrevPicShown();
+          }
+          hasSwitchedOutfits=false;
+          isDraggingForward=true;
+        }
       }
     });
     super.initState();
   }
 
-  bool get haveOutfit => _currentOutfit != null;
+  _switchOutfits() {
+    setState(() {
+      currentOutfitId = (currentOutfitId == widget.currentOutfit?.outfitId) ? (isDraggingForward ? widget.nextOutfit?.outfitId :  widget.previousOutfit?.outfitId) : widget.currentOutfit?.outfitId;
+    });
+  }
 
   @override
   void dispose() {
@@ -77,25 +104,97 @@ class _OutfitFadingCardState extends State<OutfitFadingCard> with SingleTickerPr
   @override
   Widget build(BuildContext context) {
     return SizedBox.expand(
-      child: Column(
-        children: <Widget>[
-          Expanded(
-            child: _buildOutfitSplash(),
-          ),
-          _buildOutfitInfo(),
-        ],
+      child: _buildTouchDetector(
+        child: Column(
+          children: <Widget>[
+            Expanded(
+              child: _buildOutfitSplash(),
+            ),
+            _buildOutfitInfo(),
+          ],
+        ),
       ),
     );
   }
 
+  Widget _buildTouchDetector({Widget child}) {
+    return GestureDetector(
+      onHorizontalDragStart: _onDragStart,
+      onHorizontalDragUpdate: _onDragUpdate,
+      onHorizontalDragEnd: _onDragEnd,
+      child: child,
+    );
+  }
+
+  _onDragStart(DragStartDetails details) {
+    dragStartPos = details.globalPosition;
+  }
+
+  _onDragUpdate(DragUpdateDetails details) {
+    Offset overallDelta = details.globalPosition - dragStartPos;
+    percentageOfBlur = overallDelta.dx / (screenWidth/2);
+    
+    hasPassedDragThreshold = (overallDelta.dx/dragThreshold).abs() > 1;
+    
+    isDraggingForward = percentageOfBlur >= 0;
+
+    _zeroDragIfNoMoreItems();
+
+    percentageOfBlur=percentageOfBlur.abs();
+
+    percentageOfBlur*=2;
+    percentageOfBlur=min(percentageOfBlur, 1.99);
+
+    bool latestHasSwitchedOutfits = percentageOfBlur>1;
+    if(percentageOfBlur>1){
+      percentageOfBlur = 2-percentageOfBlur;
+    }
+    if(latestHasSwitchedOutfits!=hasSwitchedOutfits){
+      _switchOutfits();
+      bool isSwipingForward1 = latestHasSwitchedOutfits && isDraggingForward;
+      bool isSwipingForward2 = !latestHasSwitchedOutfits && !isDraggingForward;
+      widget.onPageSwitch(isSwipingForward1 || isSwipingForward2);
+    }
+    hasSwitchedOutfits=latestHasSwitchedOutfits;
+    setState(() {
+     blurringTransitionController.value =percentageOfBlur;
+    });
+  }
+
+  
+  _zeroDragIfNoMoreItems(){
+    bool hasNoMoreBackDrag = !isDraggingForward && !hasPrevious;
+    bool hasNoMoreForwardDrag = isDraggingForward && !hasCurrent;
+    if(hasNoMoreBackDrag || hasNoMoreForwardDrag){
+      percentageOfBlur=0;
+      hasPassedDragThreshold = false;
+    }
+  }
+
+  _onDragEnd(DragEndDetails details) {
+    percentageOfBlur = 0;
+    if(hasPassedDragThreshold && !hasSwitchedOutfits){
+      blurringTransitionController.forward();
+    }else{
+      blurringTransitionController.reverse();
+    }
+  }
+
+  bool get hasPrevious => widget.previousOutfit != null;
+  bool get hasCurrent => widget.currentOutfit != null;
+  bool get hasOutfit => _currentOutfit != null;
+
+  double get screenWidth => context.size.width;
+  double get dragThreshold => screenWidth/5;
+
   Widget _buildOutfitSplash() {
     return GestureDetector(
-      onVerticalDragUpdate: widget.enabled ? (s) => _switchToNextImage() : null,
-      onTap: widget.enabled && haveOutfit ? _openDetailedOutfit : null,
+      onTap: widget.enabled && hasOutfit? _openDetailedOutfit : null,
       child: Hero(
         tag: widget.currentOutfit?.images?.first == null? 'NULL' : widget.currentOutfit?.images?.first,
         child: Stack(
           children: <Widget>[
+            _buildPicture(widget.previousOutfit),
             _buildPicture(widget.currentOutfit),
             _buildPicture(widget.nextOutfit),
             SizedBox.expand(
@@ -229,16 +328,8 @@ class _OutfitFadingCardState extends State<OutfitFadingCard> with SingleTickerPr
 
 
 
-  _switchToNextImage() {
-    if(haveOutfit){
-      if(!blurringTransitionController.isAnimating){
-        blurringTransitionController.forward();
-      }
-    }
-  }
-
   _openDetailedOutfit(){
-    if(haveOutfit){
+    if(hasOutfit){
       CustomNavigator.goToOutfitDetailsScreen(context, false, 
         outfitId: widget.currentOutfit.outfitId
       );
@@ -246,7 +337,7 @@ class _OutfitFadingCardState extends State<OutfitFadingCard> with SingleTickerPr
   }
 
   Widget _buildOutfitInfo() {
-    if(!haveOutfit) {
+    if(!hasOutfit) {
       return Container();
     }
     return Padding(
@@ -293,7 +384,7 @@ class _OutfitFadingCardState extends State<OutfitFadingCard> with SingleTickerPr
     );
   }
 
-  Outfit get _currentOutfit => currentOutfitId == widget.currentOutfit?.outfitId ? widget.currentOutfit : widget.nextOutfit;
+  Outfit get _currentOutfit => currentOutfitId == widget.currentOutfit?.outfitId ? widget.currentOutfit : (isDraggingForward ? widget.nextOutfit : widget.previousOutfit);
 
   double get _blurValue => Tween<double>(
     begin: 0.0,
@@ -301,5 +392,5 @@ class _OutfitFadingCardState extends State<OutfitFadingCard> with SingleTickerPr
   ).lerp(blurringTransitionController.value);
 
   double get _infoOpacityValue => (1-blurringTransitionController.value*1.5).clamp(0.0,1.0);
-  double get _infoSlideValue => (blurringTransitionController.status == AnimationStatus.forward ? 1 : -1) * blurringTransitionController.value * 60 ;
+  double get _infoSlideValue => (isDraggingForward ? (hasSwitchedOutfits ? -1 : 1) : (hasSwitchedOutfits ? 1 : -1)) * blurringTransitionController.value * 60 ;
 }
