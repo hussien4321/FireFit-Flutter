@@ -5,10 +5,12 @@ class CustomBanner extends StatelessWidget {
   
   final IconData icon;
   final String text;
-  
+  final Color color;
+
   CustomBanner({
     @required this.text,
     @required this.icon,
+    this.color,
   });
 
   @override
@@ -16,6 +18,7 @@ class CustomBanner extends StatelessWidget {
     return Scaffold(
       body: Center(
         child: Container(
+          color: color,
           padding: EdgeInsets.symmetric(horizontal: 32.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceAround,

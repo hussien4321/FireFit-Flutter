@@ -16,23 +16,33 @@ class FeedOutfits extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Colors.grey[300],
+      color: Colors.white,
       width: double.infinity,
       child: outfits.isEmpty && !isLoading ? _buildNoOutfitsMessage() : _buildScrollableGrid(context)
     );
   }
 
   Widget _buildNoOutfitsMessage() {
-    return CustomBanner(
-      icon: FontAwesomeIcons.meh,
-      text: "None of your followers have uploaded any outfits, go to the inspiration page to find new users to follow!",
+    return Container(
+      height: 300,
+      child: CustomBanner(
+        icon: FontAwesomeIcons.meh,
+        text: "None of your followers have uploaded any outfits, go to the inspiration page to find new users to follow!",
+        color: Colors.white,
+      ),
     );
   }
 
   Widget _buildScrollableGrid(BuildContext ctx) {
-    return ListView.builder(
-      itemCount: outfits.length,
-      itemBuilder: (ctx, i) => _buildOutfitCard(i, outfits[i], ctx, i==0),
+    List<int> indexes = [];
+    for (var i = 0; i < outfits.length; i++) {
+      indexes.add(i);
+    }
+    return Container(
+      color: Colors.grey[300],
+        child: Column(
+        children: indexes.map((i) => _buildOutfitCard(i, outfits[i], ctx, i==0)).toList(),
+      ),
     );
   }
 

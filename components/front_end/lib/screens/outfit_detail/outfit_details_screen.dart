@@ -4,9 +4,9 @@ import 'package:middleware/middleware.dart';
 import 'package:helpers/helpers.dart';
 import 'package:front_end/providers.dart';
 import 'package:blocs/blocs.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:front_end/screens.dart';
-import 'package:front_end/helper_widgets.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
+import 'dart:async';
 
 enum OutfitOption { EDIT, REPORT, DELETE }
 
@@ -30,22 +30,25 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
   OutfitBloc _outfitBloc;
   Outfit outfit;
 
+  List<StreamSubscription<dynamic>> _subscriptions;
+
   String userId;
 
   bool canSendComment = false;
   TextEditingController commentTextController = new TextEditingController();
-  
+  RefreshController _refreshController;
+
   @override
   void initState() {
     super.initState();
-    // SystemChrome.setEnabledSystemUIOverlays([]);
+    _refreshController = RefreshController(initialRefresh:false);
   }
 
   @override
   void dispose() {
     super.dispose();
-    // SystemChrome.setEnabledSystemUIOverlays(SystemUiOverlay.values);
- }  
+    _subscriptions?.forEach((subscription) => subscription.cancel());
+ }
 
   @override
   Widget build(BuildContext context) {
@@ -78,7 +81,18 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
         userId: userId,
         loadFromCloud: widget.loadOutfit
       ));
+      _subscriptions = <StreamSubscription<dynamic>>[
+        _loadingListener(),
+      ];
     }
+  }
+
+  StreamSubscription _loadingListener(){
+    return _outfitBloc.isLoading.listen((loadingStatus) {
+      if(!loadingStatus){
+        _refreshController.refreshCompleted();
+      }
+    });
   }
 
   Widget _scaffold({Widget body}){
@@ -218,42 +232,57 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
       height: double.infinity,
       color: Colors.white,
       child: Column(
-        children: <Widget>[
-          Expanded(
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  _buildOutfitImage(),
-                  _buildImpressionsSummary(),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Expanded(
+              child: SmartRefresher(
+                enablePullDown: true,
+                enablePullUp: false,
+                header: WaterDropHeader(),
+                controller: _refreshController,
+                onRefresh: _onForceRefresh,
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
                     children: <Widget>[
-                      _buildInteractButtons(),
-                      Material(
-                        color: Colors.white,
-                        child: Padding(
-                          padding: const EdgeInsets.only(bottom: 64.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisSize: MainAxisSize.min,
-                            children: <Widget>[
-                              _buildTitleAndDate(),
-                              _buildPosterInfo(),
-                              _buildOutfitDescription(),
-                            ],
-                          ),
-                        ),
-                      )
+                      _buildOutfitImage(),
+                      _buildImpressionsSummary(),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          _buildInteractButtons(),
+                          Material(
+                            color: Colors.white,
+                            child: Padding(
+                              padding: const EdgeInsets.only(bottom: 64.0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
+                                children: <Widget>[
+                                  _buildTitleAndDate(),
+                                  _buildPosterInfo(),
+                                  _buildOutfitDescription(),
+                                ],
+                              ),
+                            ),
+                          )
+                        ],
+                      ),
                     ],
                   ),
-                ],
+                ),
               ),
             ),
-          ),
-        ],
+          ],
       ),
     );
+  }
+
+  _onForceRefresh() {
+    _outfitBloc.selectOutfit.add(LoadOutfit(
+      outfitId: outfit.outfitId,
+      userId: userId,
+      loadFromCloud: true,
+    ));
   }
 
   Widget _buildOutfitImage() {

@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:middleware/middleware.dart';
 import 'package:blocs/blocs.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:front_end/helper_widgets.dart';
 import 'package:front_end/providers.dart';
 import 'package:front_end/screens.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
+import 'dart:async';
 
 enum UserOption { EDIT, REPORT }
 
@@ -22,6 +23,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   
   UserBloc _userBloc;
   OutfitBloc _outfitBloc;
+  List<StreamSubscription<dynamic>> _subscriptions;
+  RefreshController _refreshController;
 
   FollowUser followUser =FollowUser();
   
@@ -29,6 +32,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   final double splashSize = 200;
   final double profilePicSize = 100; 
+
+  @override
+  void initState() {
+    super.initState();
+    _refreshController = RefreshController(initialRefresh:false);
+  }
+ 
+  @override
+  void dispose() {
+    super.dispose();
+    _subscriptions?.forEach((subscription) => subscription.cancel());
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -65,7 +80,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
         )
       );
       followUser.followerUserId = currentUserId;
+      _subscriptions = <StreamSubscription<dynamic>>[
+        _loadingListener(),
+      ];
     }
+  }
+
+  StreamSubscription _loadingListener(){
+    return _outfitBloc.isLoading.listen((loadingStatus) {
+      if(!loadingStatus){
+        _refreshController.refreshCompleted();
+      }
+    });
   }
 
   Widget _profileScaffold(User user){
@@ -114,6 +140,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ],
       ),
     );
+  }
+  Widget _refresher({Widget child}){
+    return SmartRefresher(
+      enablePullDown: true,
+      enablePullUp: false,
+      header: WaterDropMaterialHeader(),
+      controller: _refreshController,
+      onRefresh: _forceRefresh,
+      child: child
+    );
+  }
+  _forceRefresh() {
+    _userBloc.forceSelectUser.add(widget.userId);
   }
 
   bool get isCurrentUser => currentUserId == widget.userId;

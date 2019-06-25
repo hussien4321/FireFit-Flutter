@@ -16,6 +16,8 @@ class UserBloc {
   Stream<User> get selectedUser => _selectedUserController;
   final _selectUserController = PublishSubject<String>();
   Sink<String> get selectUser => _selectUserController; 
+  final _forceSelectUserController = PublishSubject<String>();
+  Sink<String> get forceSelectUser => _forceSelectUserController; 
 
 
   final _followersController = BehaviorSubject<List<User>>();
@@ -88,6 +90,7 @@ class UserBloc {
       _refreshVerificationEmailController.stream.listen(_refreshVerifiedCheck),
       _resendEmailController.stream.listen(repository.resendVerificationEmail),
       _selectUserController.distinct().listen(_loadSelectedUser),
+      _forceSelectUserController.listen(_loadSelectedUser),
       _loadCurrentUserController.listen(_loadCurrentUser),
       _followUserController.listen(_followUser),
       _loadFollowersController.listen(_loadFollowers),
@@ -267,6 +270,7 @@ class UserBloc {
     _selectedUserController.close();
     _followUserController.close();
     _selectUserController.close();
+    _forceSelectUserController.close();
     _loadingController.close();
     _logInController.close();
     _logOutController.close();
