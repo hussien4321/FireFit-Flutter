@@ -48,7 +48,7 @@ class OutfitsGrid extends StatelessWidget {
           GridView.builder(
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 3,
-              childAspectRatio: 0.5,
+              childAspectRatio: 1/2,
               crossAxisSpacing: 4,
               mainAxisSpacing: 4
             ),
@@ -72,15 +72,19 @@ class OutfitsGrid extends StatelessWidget {
         border: Border.all(
           color: Colors.black45,
           width: 0.5
-        )
+        ),
+        borderRadius: BorderRadius.circular(8),
       ),
-      child: GestureDetector(
-        onTap: () => _openDetailedOutfit(outfit, ctx),
-        child: Hero(
-          tag: outfit.images.first,  
-          child: CachedNetworkImage(
-            imageUrl: outfit.images[0],
-            fit: BoxFit.fitHeight,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(8),
+        child: GestureDetector(
+          onTap: () => _openDetailedOutfit(outfit, ctx),
+          child: Hero(
+            tag: outfit.images.first,  
+            child: CachedNetworkImage(
+              imageUrl: outfit.images[0],
+              fit: BoxFit.fitHeight,
+            ),
           ),
         ),
       ),

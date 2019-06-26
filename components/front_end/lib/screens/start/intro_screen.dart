@@ -92,7 +92,7 @@ class _IntroScreenState extends State<IntroScreen> {
       child: Column(
         children: <Widget>[
           Text(
-            'MIRA MIRA',
+            'FIREFIT',
             style: Theme.of(context).textTheme.display1.apply(color: Colors.white),
           ),
           Expanded(child: Container(),),

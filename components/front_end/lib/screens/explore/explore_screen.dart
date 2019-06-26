@@ -6,6 +6,9 @@ import 'package:front_end/providers.dart';
 import 'package:front_end/helper_widgets.dart';
 import 'package:flutter/gestures.dart';
 import 'package:front_end/screens.dart';
+import 'package:carousel_slider/carousel_slider.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 
 class ExploreScreen extends StatefulWidget {
   @override
@@ -20,10 +23,6 @@ class _ExploreScreenState extends State<ExploreScreen> {
   String userId;
 
   int adCounter = 50;
-  int currentIndex=0;
-  int pageNumber = 1;
-  int get previousIndex => currentIndex - 1;
-  int get nextIndex => currentIndex + 1;
 
   bool isPaginationDropdownInFocus = false;
   bool isFilterDropdownInFocus = false;
@@ -34,12 +33,6 @@ class _ExploreScreenState extends State<ExploreScreen> {
   @override
   void initState() {
     super.initState();
-  }
-
-  restartSearch(){
-    currentIndex=0;
-    pageNumber=1;
-    _outfitBloc.exploreOutfits.add(explore);
   }
 
   @override
@@ -54,7 +47,13 @@ class _ExploreScreenState extends State<ExploreScreen> {
           borderRadius: BorderRadius.vertical(top: Radius.circular(10.0))
         ),
         padding: EdgeInsets.only(top: 16.0),
-        child: _buildOutfitLiveStream()
+        child: Column(
+          children: <Widget>[
+            _searchDetailsBar(),
+            Expanded(child: _outfitsCarousel()),
+            _fireButton(),
+          ],
+        )
       ),
     );
   }
@@ -65,300 +64,204 @@ class _ExploreScreenState extends State<ExploreScreen> {
       _outfitBloc = OutfitBlocProvider.of(context);
       userId = await UserBlocProvider.of(context).existingAuthId.first;
       explore.userId = userId;
-      restartSearch();
+      _outfitBloc.exploreOutfits.add(explore);
     }
   }
-  Widget _buildOutfitLiveStream() {
-    return StreamBuilder<bool>(
-      stream: _outfitBloc.isLoading,
-      initialData: true,
-      builder: (ctx, loadingSnap) {
-        return StreamBuilder<List<Outfit>>(
-          stream: _outfitBloc.exploredOutfits,
-          initialData: [],
-          builder: (ctx, snap) {
-            List<Outfit> outfits = snap.data;
-            return Column(
+
+  Widget _searchDetailsBar(){
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 8),
+      child: Row(
+        children: <Widget>[
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                _extraInfoBar(loadingSnap.data),
-                Expanded(
-                  child: Stack(
-                    children: <Widget>[
-                      _buildOutfitViewAndOptions(
-                        outfitView: OutfitFadingCard(
-                          previousOutfit: outfitAtIndex(outfits, previousIndex),
-                          currentOutfit: outfitAtIndex(outfits, currentIndex),
-                          nextOutfit: outfitAtIndex(outfits, nextIndex),
-                          thickness: 10,
-                          onPageSwitch: (isForward) => setState(() => pageNumber+=isForward?1:-1),
-                          onNextPicShown: () => _incrementIndexes(1),
-                          onPrevPicShown: () => _incrementIndexes(-1),
-                          backgroundColor: imageOverlayColor,
-                          isLoading: loadingSnap.data,
-                          enabled: !isAnyDropdownInFocus,
-                        ),
-                        options: _buildActionBar(outfitAtIndex(outfits, currentIndex)),
-                      ),
-                      _searchManipulatorButtons(),
-                    ],
+                Text(
+                  'Freshest Fits',
+                  style: Theme.of(context).textTheme.display1.copyWith(
+                    color: Colors.black,
+                    fontWeight: FontWeight.bold
+                  ),
+                ),
+                Text(
+                  'Most recently uploaded outfits!',
+                  style: Theme.of(context).textTheme.caption.copyWith(
+                    fontStyle: FontStyle.italic
                   ),
                 ),
               ],
+            )
+          ),
+          IconButton(
+            onPressed: (){},
+            icon: Icon(Icons.tune),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _outfitsCarousel() {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 8),
+      child: StreamBuilder<bool>(
+        stream: _outfitBloc.isLoading,
+        initialData: true,
+        builder: (ctx, isLoadingSnap) => StreamBuilder<List<Outfit>>(
+          stream: _outfitBloc.exploredOutfits,
+          initialData: [],
+          builder: (ctx, outfitsSnap) {
+            return CarouselSlider(
+              height: double.infinity,
+              enlargeCenterPage: true,
+              items: outfitsSnap.data.map((outfit) => _buildOutfitCard(outfit)).toList(),
+              enableInfiniteScroll: false,
+              viewportFraction: 0.8,
             );
-          }
-        );
-      }
-    );
-  }
-  Widget _extraInfoBar(bool isLoading) {
-    return Container(
-      padding: EdgeInsets.only(left: 20.0, right: 20.0, bottom: 2.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: <Widget>[
-          isLoading ? _loadingBanner() : Container(),
-          _adCounter(),
-        ],
-      ),
-    );
-  }
-  Widget _loadingBanner() {
-    return Text(
-      'Loading new outfits...',
-      style: TextStyle(
-        color: Colors.grey,
-        fontSize: 12.0
+          }, 
+        ),
       ),
     );
   }
 
-
-  Widget _adCounter() {
-    return Text(
-      'Next ad in: $adCounter',
-      style: TextStyle(
-        color: Colors.grey,
-        fontStyle: FontStyle.italic,
-        fontSize: 12.0
-      ),
-    );
-  }
-  Widget _buildOutfitViewAndOptions({
-    Widget outfitView,
-    Widget options,
-  }){
+  Widget _buildOutfitCard(Outfit outfit) {
     return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(30.0)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.4),
-            blurRadius: 2,
-            offset: Offset(0, -1)
-          )
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(30.0)),
-        child: Container(
-          color: imageOverlayColor,
-          child: Column(
-            children: <Widget>[
-              Expanded(
-                child: outfitView
+      padding: EdgeInsets.symmetric(horizontal: 4),
+      child: Align(
+        alignment: Alignment.center,
+        child: AspectRatio(
+          aspectRatio: 2/3,
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(16.0),
+            child: GestureDetector(
+              onTap: () => _openOutfit(outfit),
+              child: Stack(
+                children: <Widget>[
+                  _outfitImage(outfit),
+                  _outfitBasicInfo(outfit)
+                ],
               ),
-              options,
-            ],
+            ),
           ),
         ),
       ),
     );
   }
 
-  Outfit outfitAtIndex(List<Outfit> allOutfits, int index) {
-    if(allOutfits == null || allOutfits.length <= index || index < 0){
-      return null;
-    }
-    return allOutfits[index];
-  }
-
-  Widget _searchManipulatorButtons(){
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 8.0),
-      child: Row(
-        mainAxisSize: MainAxisSize.max,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: <Widget>[
-          _buildPaginationDropdown(),
-          _buildFilterDropdown(),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildPaginationDropdown() {
-    return DropdownButtons(
-      child: Text(
-        '$pageNumber',
-        style: Theme.of(context).textTheme.subtitle.apply(color: Colors.white),
-      ),
-      onFocusChanged: (isInFocus) {
-        setState(() {
-          isPaginationDropdownInFocus = isInFocus;
-        });
-      },
-      enabled: !isFilterDropdownInFocus,
-      options: <DropdownOption>[
-        DropdownOption(
-          child: Icon(
-            Icons.repeat_one,
-            color: Colors.white,
-          ),
-          tag: "Refresh & Restart",
-          onPressed: restartSearch
-        ),
-        DropdownOption(
-          child: Icon(
-            Icons.search,
-            color: Colors.white,
-          ),
-          tag: "Go To Page",
-          onPressed: restartSearch
-        ),
-      ],
-      alignStart: true,
-    );
-  }
-  Widget _buildFilterDropdown() {
-    return DropdownButtons(
-      child: Icon(
-        Icons.tune,
-        color: Colors.white,
-      ),
-      onFocusChanged: (isInFocus) {
-        setState(() {
-          isFilterDropdownInFocus = isInFocus;
-        });
-      },
-      enabled: !isPaginationDropdownInFocus,
-      options: <DropdownOption>[
-        DropdownOption(
-          child: Icon(
-            Icons.category,
-            color: Colors.white,
-          ),
-          tag: "Select Cateogry"
-        ),
-        DropdownOption(
-          child: Icon(
-            Icons.show_chart,
-            color: Colors.white,
-          ),
-          tag: "Sort By Top"
-        ),
-        DropdownOption(
-          child: Icon(
-            Icons.delete,
-            color: Colors.white,
-          ),
-          tag: "Undo Filters"
-        ),
-      ],
-      alignStart: false,
-    );
-  }
-
-
-  _incrementIndexes(int diff){
-    setState(() {
-      currentIndex+=diff;
-    });
-    _incrementAdCounter();
-  }
-  _incrementAdCounter(){
-    setState(() {
-      adCounter--;
-    });
-    if(adCounter==0){
-      _displayAd();
-      adCounter = 50;
-    }
-  }
-  _displayAd() => print('ad displayed');
-
-  Widget _buildActionBar(Outfit currentOutfit) {
-    OutfitImpression outfitImpression =OutfitImpression(
-      outfit: currentOutfit,
-      userId: userId,
-    );
-    OutfitSave saveData = OutfitSave(
-      outfit: currentOutfit,
-      userId: userId,
-    );
-    final allDisabled = currentOutfit == null;
-    return Material(
-      color: imageOverlayColor,
-      child: Container(
-        padding: EdgeInsets.only(bottom: 16.0, left: 16.0, right: 16.0, top: 8.0),
-        child: Row(
-          mainAxisSize: MainAxisSize.max,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: <Widget>[
-            CustomFab(
-              color: Colors.deepPurple,
-              icon: Icons.person,
-              disabled: allDisabled,
-              selected: currentOutfit?.poster?.userId == userId,
-              onPressed: () => _openCurrentProfile(currentOutfit.poster.userId),
-            ),
-            CustomFab(
-              color: Colors.pinkAccent,
-              icon: Icons.thumb_down,
-              largeIcon: true,
-              disabled: allDisabled || currentOutfit?.userImpression == 1,
-              selected: currentOutfit?.userImpression == -1,
-              onPressed: () => _outfitBloc.dislikeOutfit.add(outfitImpression),
-            ),
-            CustomFab(
-              color: Colors.greenAccent[700],
-              icon: Icons.comment,
-              disabled: allDisabled,
-              onPressed: () => _composeComment(currentOutfit),
-            ),
-            CustomFab(
-              color: Colors.blueAccent,
-              icon: Icons.thumb_up,
-              largeIcon: true,
-              disabled: allDisabled || currentOutfit?.userImpression == -1,
-              selected: currentOutfit?.userImpression == 1,
-              onPressed: () => _outfitBloc.likeOutfit.add(outfitImpression),
-            ),
-            CustomFab(
-              color: Colors.amberAccent,
-              icon: Icons.star,
-              disabled: allDisabled,
-              selected: currentOutfit?.isSaved == true,
-              onPressed: () => _outfitBloc.saveOutfit.add(saveData),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  _composeComment(Outfit outfit){
+  _openOutfit(Outfit outfit) {
     Navigator.push(context, MaterialPageRoute(
-      builder: (ctx) => CommentsScreen(
-        focusComment: true,
+      builder: (ctx) => OutfitDetailsScreen(
         outfitId: outfit.outfitId,
       )
     ));
   }
 
-  _openCurrentProfile(String userId) {
-    CustomNavigator.goToProfileScreen(context, false,
-      userId: userId
+  Widget _outfitImage(Outfit outfit){
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.grey,
+        image: DecorationImage(
+          fit: BoxFit.cover,
+          image: CachedNetworkImageProvider(outfit.images.first)
+        ),
+      ),
     );
   }
+  Widget _outfitBasicInfo(Outfit outfit){
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            Colors.transparent,
+            Colors.black26
+          ],
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+        ),
+      ),
+      child: Align(
+        alignment: Alignment.bottomCenter,
+        child: Container(
+          padding: const EdgeInsets.all(8.0),
+          decoration: BoxDecoration(
+          ),
+          width: double.infinity,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: <Widget>[
+              Expanded(
+                child: Text(
+                  outfit.title,
+                  style: Theme.of(context).textTheme.display1.copyWith(
+                    color: Colors.white
+                  ),
+                  textAlign: TextAlign.start,
+                  softWrap: true,
+                  overflow: TextOverflow.fade,
+                ),
+              ),
+              outfit.hasMultipleImages ? Icon(
+                Icons.photo_library,
+                color: Colors.white,
+              ) : Container(),
+            ],
+          ),
+        ),
+      ),
+    );
+  } 
+
+  Widget _fireButton() {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          RawMaterialButton(
+            fillColor: Colors.lightBlue,
+            elevation: 0,
+            shape: CircleBorder(),
+            onPressed: (){},
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Image.asset(
+                'assets/flame.png',
+                width: 32,
+                height: 32,
+              ),
+            )
+          )
+        ],
+      ),
+    );
+  }
+
+  Widget _ratingSelector() {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          FlutterRatingBar(
+            initialRating: 5,
+            itemCount: 5,
+            allowHalfRating: true,
+            itemSize: 32,
+            fullRatingWidget: Image.asset(
+              'assets/flame.png',
+              width: 32,
+              height: 32,
+            ),
+            noRatingWidget: Container(
+              width: 32,
+              height: 32,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
 }

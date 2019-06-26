@@ -28,7 +28,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
         child: Column(
           children: <Widget>[
             Text(
-              'MIRA MIRA',
+              'FIREFIT',
               style:TextStyle(
                 fontWeight: FontWeight.w200,
                 fontSize: 48.0,

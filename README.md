@@ -1,4 +1,4 @@
-# mira_mira
+# firefit
 
 A new Flutter project.
 

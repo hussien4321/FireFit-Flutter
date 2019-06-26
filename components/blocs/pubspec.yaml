@@ -1,5 +1,5 @@
 name: blocs
-description: The Business Logic Components for mira mira
+description: The Business Logic Components for firefit
 
 environment:
   sdk: '>=2.0.0-dev.28.0 <3.0.0'
