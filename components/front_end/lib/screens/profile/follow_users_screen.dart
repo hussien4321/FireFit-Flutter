@@ -24,6 +24,33 @@ class _FollowUsersScreenState extends State<FollowUsersScreen> {
   
   UserBloc _userBloc;
   String currentUserId;
+
+  User lastUser;
+
+  ScrollController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = ScrollController();
+    _controller.addListener(_scrollListener);
+  }
+  _scrollListener() {
+    if (_controller.offset >= (_controller.position.maxScrollExtent - 100) && !_controller.position.outOfRange) {
+      (widget.isFollowers ? _userBloc.loadFollowers : _userBloc.loadFollowing).add(
+        LoadUsers(
+          userId: widget.selectedUserId,
+          startAfterUser: lastUser,
+        )
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _controller.dispose();
+  }
   
   @override
   Widget build(BuildContext context) {
@@ -47,25 +74,22 @@ class _FollowUsersScreenState extends State<FollowUsersScreen> {
         child: StreamBuilder<bool>(
           stream: _userBloc.isLoadingFollows,
           initialData: true,
-          builder: (ctx, loadingSnap) => StreamBuilder<List<User>>(
-            stream: widget.isFollowers? _userBloc.followers : _userBloc.following,
-            initialData: [],
-            builder: (ctx, snap){
-              if(loadingSnap.data){
-                return Padding(
-                  padding: EdgeInsets.all(16.0),
-                  child: Center(
-                    child: CircularProgressIndicator(),
-                  ),
+          builder: (ctx, loadingSnap) {
+            return StreamBuilder<List<User>>(
+              stream: widget.isFollowers? _userBloc.followers : _userBloc.following,
+              initialData: [],
+              builder: (ctx, snap){
+                List<User> users = snap.data;
+                if(users.length > 0){
+                  lastUser = users.last;
+                }
+                return ListView(
+                  controller: _controller,
+                  children: users.map((user) => _followUserTab(user)).toList()..add(_userLoadTab(loadingSnap.data, users.isEmpty)),
                 );
-              }
-              List<User> users = snap.data;
-              return ListView.builder(
-                itemCount: users.length,
-                itemBuilder: (ctx, i) => _followUserTab(users[i]),
-              );
-            },
-          ),
+              },
+            );
+          }
         ) 
       ),
     );
@@ -74,13 +98,37 @@ class _FollowUsersScreenState extends State<FollowUsersScreen> {
   _initBlocs() async {
     if(_userBloc == null){
       _userBloc = UserBlocProvider.of(context);
+      LoadUsers loadUsers =LoadUsers(
+        userId: widget.selectedUserId,
+      );
       if(widget.isFollowers){
-        _userBloc.loadFollowers.add(widget.selectedUserId);
+        _userBloc.loadFollowers.add(loadUsers);
       }else{
-        _userBloc.loadFollowing.add(widget.selectedUserId);
+        _userBloc.loadFollowing.add(loadUsers);
       }
       currentUserId =await _userBloc.existingAuthId.first;
     }
+  }
+
+  Widget _userLoadTab(bool isLoading, bool isEmptyList){
+    String followName = widget.isFollowers ? 'followers' : 'following';
+    return !isLoading ? Container() : Container(
+      padding: EdgeInsets.all(8),
+      width: double.infinity,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          Padding(
+            padding: const EdgeInsets.only(right: 8.0),
+            child: CircularProgressIndicator(),
+          ),
+          Text(
+            'Loading ${isEmptyList?'':'more '}$followName',
+            style: Theme.of(context).textTheme.caption,
+          ),
+        ],
+      )
+    );
   }
 
   Widget _followUserTab(User user){

@@ -7,6 +7,8 @@ import 'package:blocs/blocs.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:front_end/screens.dart';
 import 'package:front_end/helper_widgets.dart';
+import 'dart:ui';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 enum OutfitOption { EDIT, REPORT, DELETE }
 
@@ -57,12 +59,12 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
         stream: _outfitBloc.selectedOutfit,
         builder: (ctx, outfitSnap) {
           if(isLoadingSnap.data || !outfitSnap.hasData && outfitSnap.data == null){
-            return _scaffold(
+            return _overlayScaffold(
               body: _outfitLoadingPlaceholder()
             );
           }else{
             outfit = outfitSnap.data;
-            return _scaffold(body: _buildMainBody());
+            return _overlayScaffold(body: _buildMainBody());
           }
         }
       ),
@@ -80,42 +82,41 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
       ));
     }
   }
-
-  Widget _scaffold({Widget body}){
+  Widget _overlayScaffold({Widget body}){
     return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        leading: IconButton(
-          icon: Icon(Icons.close),
-          onPressed: Navigator.of(context).pop,
-        ),
-        title: Text(
-          outfit==null ? "Loading...":
-          isCurrentUser ? "My Outfit" : 
-          "${outfit?.poster?.name}'s Outfit",
-          style: TextStyle(
-            inherit: true,
-            fontWeight: FontWeight.w300,
-            fontStyle: FontStyle.italic,
-            letterSpacing: 1.2,
+      body: Container(
+        color: Colors.white,
+        child: SafeArea(
+          child: Stack(
+            children: <Widget>[
+              body,
+              _appBarButtons(),
+            ],
           ),
         ),
-        centerTitle: true,
-        elevation: 1.0,
-        actions:outfit==null? <Widget>[] : <Widget>[
-          _loadOutfitOptions()
-        ],
       ),
-      floatingActionButton: outfit == null ? null : FloatingActionButton(
-        onPressed: _loadCommentsPage,
-        backgroundColor: Colors.green,
-        child: Icon(
-          Icons.comment,
-          color: Colors.white,
+    );
+  }
+
+  Widget _appBarButtons() {
+    return Positioned(
+      top: 0,
+      right: 0,
+      left: 0,
+      child: Container(
+        padding: EdgeInsets.all(4),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: <Widget>[
+            IconButton(
+              padding: EdgeInsets.all(0),
+              onPressed: Navigator.of(context).pop,
+              icon: Icon(Icons.close),
+            ),
+            outfit == null ? Container() : _loadOutfitOptions()
+          ],
         ),
       ),
-      body: body,
     );
   }
 
@@ -216,7 +217,6 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
     return Container(
       width: double.infinity,
       height: double.infinity,
-      color: Colors.white,
       child: Column(
         children: <Widget>[
           Expanded(
@@ -224,34 +224,78 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
-                  _buildOutfitImage(),
-                  _buildImpressionsSummary(),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      _buildInteractButtons(),
-                      Material(
-                        color: Colors.white,
-                        child: Padding(
-                          padding: const EdgeInsets.only(bottom: 64.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisSize: MainAxisSize.min,
-                            children: <Widget>[
-                              _buildTitleAndDate(),
-                              _buildPosterInfo(),
-                              _buildOutfitDescription(),
-                            ],
+                  Container(
+                    decoration: BoxDecoration(
+                      image: DecorationImage(
+                        image: CachedNetworkImageProvider(
+                          outfit.images.first
+                        ),
+                        
+                        fit: BoxFit.cover,
+                      ),
+                       boxShadow: []
+                    ),
+                    child: Stack(
+                      children: <Widget>[
+                        Positioned(
+                          top: 0,
+                          bottom: 0,
+                          left: 0,
+                          right: 0,
+                          child: BackdropFilter(
+                            filter: ImageFilter.blur(sigmaX: 7, sigmaY: 7),
+                            child: Container(
+                              color: Colors.white.withOpacity(0.5),
+                            ),
                           ),
                         ),
-                      )
-                    ],
+                        Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: <Widget>[
+                            _outfitTitle(),    
+                            _buildOutfitImage(),
+                            _buildRatingsSummary(),
+                            _styleSummary(),
+                            Padding(padding: EdgeInsets.only(bottom: 8),),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    color: Colors.white,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: <Widget>[
+                            _buildPosterInfo(),
+                            _buildOutfitDescription(),
+                            _actionButtons(),
+                            _commentsPreview(),
+                          ],
+                        )
+                      ],
+                    ),
                   ),
                 ],
               ),
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _outfitTitle() {
+    return Padding(
+      padding: EdgeInsets.only(left: 64, right: 64, top: 12),
+      child: Text(
+        outfit.title,
+        style: Theme.of(context).textTheme.headline.apply(fontWeightDelta: 2),
+        textAlign: TextAlign.center,
       ),
     );
   }
@@ -263,16 +307,6 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
     }
     return Container(
       padding: EdgeInsets.only(top: 16),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            Colors.white,
-            Colors.grey[300]
-          ],
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-        ),
-      ), 
       child: SizedBox(
         height: 300.0,
         child: Container(
@@ -293,8 +327,8 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
         color: Colors.grey.withOpacity(0.5),
         boxShadow: [
           BoxShadow(
-            color: Colors.black45,
-            blurRadius: 3,
+            color: Colors.black87,
+            blurRadius: 5,
             offset: Offset(1.5, 1.5)
           )
         ]
@@ -309,237 +343,125 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
 
 
 
-  Widget _buildImpressionsSummary(){
+  Widget _buildRatingsSummary(){
     return Container(
-      color: Colors.grey[300],
       width: double.infinity,
-      padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 32.0),
+      margin: EdgeInsets.symmetric(vertical: 8.0, horizontal: 8.0),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          _buildCommentsSummary(),
-          _buildLikesSummary(),
-        ],
-      ),
-    );
-  }
-  Widget _buildLikesSummary() {
-    return Container(
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          Padding(
-            padding: const EdgeInsets.only(right: 8.0),
-            child: Icon(Icons.thumbs_up_down),
-          ),
-          RichText(
-            text: TextSpan(
-              children: [
-                TextSpan(
-                  text: '${outfit.likesOverallCount}',
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                TextSpan(
-                  text: ' LIKES',
-                  style: TextStyle(
-                    letterSpacing: 1.5,
-                    color: Colors.black,
-                    fontStyle: FontStyle.italic,
-                  ),
-                ),
-              ]
+          // Text(
+          //   'Rating:',
+          //   style: Theme.of(context).textTheme.display1.copyWith(
+          //     color: Colors.red[900],
+          //     fontSize: 28,
+          //     fontWeight: FontWeight.bold,
+          //     fontStyle: FontStyle.italic
+          //   ),
+          // ),
+          Container(
+            padding: EdgeInsets.all(4),
+            child: RatingBar(
+              value: outfit?.averageRating?.round(),
+              size: 28,
             ),
-          ),
-        ],
-      )
-    );
-  }
-
-  Widget _buildCommentsSummary(){
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: <Widget>[
-        Padding(
-          padding: const EdgeInsets.only(right: 8.0),
-          child: Icon(Icons.comment),
-        ),
-        RichText(
-          text: TextSpan(
-            children: [
-              TextSpan(
-                text: '${outfit.commentsCount} ',
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontWeight: FontWeight.bold,
-                  ),
-              ),
-              TextSpan(
-                text: 'COMMENT${outfit.commentsCount==1?'':'S'}',
-                  style: TextStyle(
-                    color: Colors.black,
-                    letterSpacing: 1.5
-                  ),
-              ),
-            ]
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildInteractButtons() {
-    OutfitImpression outfitImpression =OutfitImpression(
-      outfit: outfit,
-      userId: userId,
-    );
-    OutfitSave saveData = OutfitSave(
-      outfit: outfit,
-      userId: userId,
-    );
-    return Container(
-      color: Colors.green,
-      child: Material(
-        child: Row(
-          children: <Widget>[
-            _buildInteractButton('Dislike', Colors.pinkAccent[700], 
-              selected: outfit.userImpression == -1,
-              onPressed: () => _outfitBloc.dislikeOutfit.add(outfitImpression)
-            ),
-            _buildInteractButton('Save', Colors.amberAccent[700], 
-              selected: outfit.isSaved,
-              onPressed: () => _outfitBloc.saveOutfit.add(saveData)
-            ),
-            _buildInteractButton('Like', Colors.blueAccent[700],
-              selected: outfit.userImpression == 1,
-              onPressed: () => _outfitBloc.likeOutfit.add(outfitImpression)
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildInteractButton(String name, Color color, {bool selected, VoidCallback onPressed}) {
-    Color background = Colors.white;
-    return Expanded(
-      child: Container(
-        decoration: BoxDecoration(
-          border: BorderDirectional(
-            bottom: BorderSide(
-              color: selected ? background : color
-            )
-          ),
-          color: selected ? color : null
-        ),
-        height: 50.0,
-        padding: EdgeInsets.all(0.0),
-        child: InkWell(
-          child: Center(
-            child: Text(
-              '$name${selected?'d':''}',
-              style: Theme.of(context).textTheme.subhead.apply(
-                color: selected? background: color, 
-                fontWeightDelta: 2
-              ),
-            )
-          ),
-          onTap: onPressed,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTitleAndDate() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-      child: Row(
-        children: <Widget>[
-          Expanded(
-            child: Text(
-              outfit.title,
-              style: Theme.of(context).textTheme.headline.apply(fontWeightDelta: 2),
-            ),
-          ),
-          _drawMiniClothesStyle(Style.fromStyleString(outfit.style)),
-        ],
-      ),
-    );
-  }
-
-  Widget _drawMiniClothesStyle(Style style){
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10.0),
-        color: style.backgroundColor
-      ),
-      padding: EdgeInsets.all(4.0),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4.0),
-            child: Text(
-              style.name,
-              style: Theme.of(context).textTheme.caption.apply(
-                color: style.textColor
-              ),
-            ),
-          ),
-          Image.asset(
-            style.asset,
-            width: 30.0,
-            height: 30.0,
           )
         ],
       ),
     );
   }
 
-  Widget _buildPosterInfo() {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16.0, left: 16.0, right: 16.0),
-      child: Row(
-        children: <Widget>[
-          ProfilePicWithShadow(
-            userId: outfit.poster.userId,
-            url: outfit.poster.profilePicUrl,
-            size: 50.0,
+  Widget _styleSummary() {
+    return RichText(
+      text: TextSpan(
+        children: [
+          TextSpan(
+            text: outfit.style
           ),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+          TextSpan(
+            text: ' - '
+          ),
+          TextSpan(
+            text: DateFormatter.dateToSimpleFormat(outfit.createdAt)
+          )
+        ],
+        style: Theme.of(context).textTheme.subtitle.copyWith(
+          fontStyle: FontStyle.italic,
+          color: Colors.black45
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPosterInfo() {
+    String hero = 'Outfit-details-poster-${outfit.poster.profilePicUrl}';
+    return Container(
+      margin: EdgeInsets.only(bottom: 16),
+      child: Material(
+        elevation: 3,
+        color: Colors.grey[200],
+        child: InkWell(
+          onTap: () => _navigateToProfileScreen(hero),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: <Widget>[
-                Text(
-                  outfit.poster.name,
-                  style: Theme.of(context).textTheme.title,
+                ProfilePicWithShadow(
+                  hasOnClick: false,
+                  userId: outfit.poster.userId,
+                  url: outfit.poster.profilePicUrl,
+                  size: 50.0,
                 ),
-                Text(
-                  '@'+outfit.poster.username,
-                  style: Theme.of(context).textTheme.caption,
+                Expanded(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.max,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Text(
+                        'Posted by:',
+                        style: Theme.of(context).textTheme.caption,
+                      ),
+                      Text(
+                        outfit.poster.name,
+                        style: Theme.of(context).textTheme.title,
+                      ),
+                    ],
+                  ),
                 ),
+                Container(
+                  padding: EdgeInsets.all(8),
+                  child: Text(
+                    'View Profile',
+                    style: Theme.of(context).textTheme.button.apply(color: Colors.black),
+                  ),
+                )
               ],
             ),
           ),
-          Text(
-            DateFormatter.dateToRecentFormat(outfit.createdAt),
-            style: Theme.of(context).textTheme.caption,
-          ),
-        ],
+        ),
       ),
+    );
+  }
+
+  _navigateToProfileScreen(String hero) {
+    CustomNavigator.goToProfileScreen(context, true,
+      userId: outfit.poster.userId,
+      heroTag: hero,
     );
   }
   
   Widget _buildOutfitDescription() {
     if(outfit.description == null){
       return Center(
-        child: Text(
-          "No description has been added",
-          style: TextStyle(
-            color: Colors.grey,
-            fontStyle: FontStyle.italic
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 16.0),
+          child: Text(
+            "No description has been added",
+            style: TextStyle(
+              color: Colors.grey,
+              fontStyle: FontStyle.italic
+            ),
           ),
         ),
       );
@@ -577,44 +499,140 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
     );
   }
 
-  Widget _buildCommentButton(){
-    return Container(
-      decoration: BoxDecoration(
-        border: BorderDirectional(
-          start: BorderSide(
-            color: Colors.grey.withOpacity(0.5),
-            width: 0.5
-          )
-        ),
-        color: Colors.grey,
-      ),
-      width: double.infinity,
-      child: FlatButton(
-        padding: EdgeInsets.symmetric(vertical: 16.0),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.only(right: 8.0),
-              child: Text(
-                'Add/View comments',
-                style: TextStyle(color: Colors.white, fontSize: 20),
-              ),
+  Widget _actionButtons(){
+    OutfitSave saveData = OutfitSave(
+      outfit: outfit,
+      userId: userId,
+    );
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        mainAxisSize: MainAxisSize.max,
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: <Widget>[
+          _actionButton(
+            icon: Icons.add_comment,
+            text: 'Commment',
+            onPressed: () => _loadCommentsPage(
+              focusComment: true,
             ),
-            Icon(
-              Icons.add_comment,
-              color: Colors.white,
-            ),
-          ],
-        ),
-        onPressed: () => _loadCommentsPage()
+          ),
+          _actionButton(
+            icon: FontAwesomeIcons.fireAlt,
+            selectedIcon: FontAwesomeIcons.fire,
+            text: 'Rate',
+            selected: outfit.hasRating,
+            onPressed: () => _rateOutfit(),
+          ),
+          _actionButton(
+            icon: Icons.star_border,
+            text: 'Save',
+            selected: outfit.isSaved,
+            selectedIcon: Icons.star,
+            onPressed: () => _outfitBloc.saveOutfit.add(saveData)
+          ),
+        ],
       ),
     );
   }
-  _loadCommentsPage() {
+
+  _rateOutfit() {
+    return showDialog(
+      context: context,
+      builder: (ctx) {
+        return RatingDialog(
+          initialValue: outfit.userRating,
+          isUpdate: outfit.hasRating,
+          onSubmit: (newRating) {
+            OutfitRating outfitRating = OutfitRating(
+              outfit: outfit,
+              ratingValue: newRating,
+              userId: userId,
+            );
+            _outfitBloc.rateOutfit.add(outfitRating);
+          }
+        );
+      }
+    );
+  }
+
+  Widget _actionButton({IconData icon, String text, bool selected = false, IconData selectedIcon, VoidCallback onPressed, bool isEnd = false}){
+    return Expanded(
+      child: Material(
+        color: Colors.white,
+        child: InkWell(
+          onTap: onPressed,
+          child: Container(
+            padding: EdgeInsets.symmetric(vertical: 8),
+            decoration: isEnd ? null :BoxDecoration(
+              border: BorderDirectional(
+                end: BorderSide(
+                  color: Colors.grey[300],
+                  width: 0.5
+                ),
+              ),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 2.0),
+                  child: Material(
+                    elevation: selected ? 0 : 1,
+                    shape: CircleBorder(
+                      side: BorderSide(
+                        color: Colors.black,
+                        width: 0.5
+                      )                    
+                    ),
+                    color: selected? Colors.black : Colors.white,
+                    child: Container(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Icon(
+                        selected ? selectedIcon : icon,
+                        color: selected ? Colors.white : Colors.black
+                      )
+                    ),
+                  ),
+                ),
+                Text(
+                  '$text${selected? 'd':''}', 
+                  style: Theme.of(context).textTheme.caption
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _commentsPreview(){
+    return Padding(
+      padding: EdgeInsets.only(left: 8, bottom: 8),
+      child: Material(
+        color: Colors.white,
+        child: InkWell(
+          onTap: () => _loadCommentsPage(),
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+            child: Text(
+              'View all ${outfit.commentsCount} comment${outfit.commentsCount==1?'':'s'}',
+              style: Theme.of(context).textTheme.subtitle.copyWith(
+                color: Colors.black
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  _loadCommentsPage({bool focusComment = false}) {
     Navigator.push(context, MaterialPageRoute(
       builder: (ctx) => CommentsScreen(
         outfitId: outfit.outfitId,
+        focusComment: focusComment,
       )
     ));
   }

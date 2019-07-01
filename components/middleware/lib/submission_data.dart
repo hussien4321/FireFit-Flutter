@@ -11,11 +11,12 @@ export 'submission_data/notification/mark_notifications_seen.dart';
 export 'submission_data/outfit/edit_outfit.dart';
 export 'submission_data/outfit/load_outfit.dart';
 export 'submission_data/outfit/load_outfits.dart';
-export 'submission_data/outfit/outfit_impression.dart';
+export 'submission_data/outfit/outfit_rating.dart';
 export 'submission_data/outfit/outfit_save.dart';
 export 'submission_data/outfit/upload_outfit.dart';
 
 export 'submission_data/user/edit_user.dart';
 export 'submission_data/user/follow_user.dart';
 export 'submission_data/user/load_user.dart';
+export 'submission_data/user/load_users.dart';
 export 'submission_data/user/onboard_user.dart';

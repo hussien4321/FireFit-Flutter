@@ -7,14 +7,14 @@ class Outfit {
   String title;
   String description;
   String style;
-  int likesCount;
-  int dislikesCount;
+  double averageRating;
+  int ratingsCount;
   int commentsCount;
   User poster;
   DateTime createdAt;
-  int userImpression;
+  int userRating;
   bool isSaved;
-  SearchOutfit searchOutfit;
+  SearchOutfit searchOutfit ;
   Save save;
 
   Outfit({
@@ -23,7 +23,8 @@ class Outfit {
     this.title, 
     this.description, 
     this.style,
-    this.likesCount,
+    this.averageRating,
+    this.ratingsCount,
     this.commentsCount,
     this.poster,
     this.createdAt,
@@ -32,12 +33,11 @@ class Outfit {
 
   bool get hasCompleteData => commentsCount != null;
 
-  int get likesOverallCount => likesCount - dislikesCount;
-
-  bool get hasAdditionalInfo => hasMultipleImages || hasDescription;
-  
+  bool get hasAdditionalInfo => hasMultipleImages || hasDescription;  
   bool get hasMultipleImages => images.length > 1;
   bool get hasDescription => description != null && description.length > 0;
+
+  bool get hasRating => userRating != null;
 
   Outfit.fromMap(Map<String, dynamic> map){
     outfitId = map['outfit_id'];
@@ -53,10 +53,10 @@ class Outfit {
     }
     images = _images;
     style = map['style'];
-    likesCount = map['likes_count'] == null ? 0 : map['likes_count'];
-    dislikesCount = map['dislikes_count'] == null ? 0 : map['dislikes_count'];
+    averageRating = map['average_rating'] == null ? null : double.parse(map['average_rating'].toString());
+    ratingsCount = map['ratings_count'];
     commentsCount = map['comments_count'];
-    userImpression = map['user_impression'] == null ? 0 : map['user_impression'];
+    userRating = map['user_rating'];
     isSaved = map['is_saved'] == 1;
     poster = User.fromMap(map);
     searchOutfit = SearchOutfit.fromMap(map);
@@ -72,10 +72,10 @@ class Outfit {
     'title' : title, 
     'description' : description, 
     'style' : style,
-    'user_impression' : userImpression,
+    'average_rating':averageRating,
+    'ratings_count' :ratingsCount,
+    'user_rating' : userRating,
     'outfit_created_at' : createdAt.toIso8601String(), 
-    'likes_count':likesCount,
-    'dislikes_count':dislikesCount,
     'comments_count':commentsCount,
     'is_saved': isSaved ? 1 : 0, 
   };

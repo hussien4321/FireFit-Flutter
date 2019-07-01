@@ -22,10 +22,10 @@ class UserBloc {
   Stream<List<User>> get followers => _followersController;
   final _followingController = BehaviorSubject<List<User>>();
   Stream<List<User>> get following => _followingController;
-  final _loadFollowersController = PublishSubject<String>();
-  Sink<String> get loadFollowers => _loadFollowersController; 
-  final _loadFollowingController = PublishSubject<String>();
-  Sink<String> get loadFollowing => _loadFollowingController; 
+  final _loadFollowersController = PublishSubject<LoadUsers>();
+  Sink<LoadUsers> get loadFollowers => _loadFollowersController; 
+  final _loadFollowingController = PublishSubject<LoadUsers>();
+  Sink<LoadUsers> get loadFollowing => _loadFollowingController; 
 
   final _existingAuthController = BehaviorSubject<String>(seedValue: null);
   Stream<String> get existingAuthId => _existingAuthController.stream; 
@@ -233,26 +233,18 @@ class UserBloc {
     }
   }
 
-  _loadFollowers(String userId) async {
+  _loadFollowers(LoadUsers loadUsers) async {
+    loadUsers.searchMode = SearchModes.FOLLOWERS;
+    loadUsers.currentUserId = _currentUserId;
     _isLoadingFollowsController.add(true);
-    await repository.loadFollowers(
-      LoadUser(
-        userId: userId,
-        currentUserId: _currentUserId,
-        searchMode: SearchModes.FOLLOWERS
-      )
-    );
+    loadUsers.startAfterUser == null ? await repository.loadFollowers(loadUsers) : await repository.loadMoreFollowers(loadUsers);
     _isLoadingFollowsController.add(false);
   }
-  _loadFollowing(String userId) async {
+  _loadFollowing(LoadUsers loadUsers) async {
+    loadUsers.searchMode = SearchModes.FOLLOWING;
+    loadUsers.currentUserId = _currentUserId;
     _isLoadingFollowsController.add(true);
-    await repository.loadFollowing(
-      LoadUser(
-        userId: userId,
-        currentUserId: _currentUserId,
-        searchMode: SearchModes.FOLLOWING
-      ),
-    );
+    loadUsers.startAfterUser == null ? await repository.loadFollowing(loadUsers) : await repository.loadMoreFollowing(loadUsers);
     _isLoadingFollowsController.add(false);
   }
 

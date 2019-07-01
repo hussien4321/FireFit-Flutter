@@ -24,7 +24,7 @@ class Save {
     'save_id' : saveId, 
     'save_outfit_id' : outfitId,
     'save_user_id' : userId,
-    'save_created_at' : createdAt.toIso8601String(),
+    'save_created_at' : createdAt?.toIso8601String(),
   };
 
 }

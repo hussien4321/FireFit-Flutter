@@ -28,13 +28,10 @@ class _LoadingScreenState extends State<LoadingScreen> {
         child: Column(
           children: <Widget>[
             Text(
-              'FIREFIT',
-              style:TextStyle(
-                fontWeight: FontWeight.w200,
-                fontSize: 48.0,
-                fontStyle: FontStyle.italic,
-                letterSpacing: 1.5,
+              'FireFit',
+              style: Theme.of(context).textTheme.display1.copyWith(
                 color: Colors.black,
+                fontWeight: FontWeight.bold
               ),
               textAlign: TextAlign.center,
             ),

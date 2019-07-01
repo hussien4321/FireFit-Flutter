@@ -305,6 +305,10 @@ class FirebaseUserRepository implements UserRepository {
     }else{
       outfitCache.clearNotifications();
     }
+    return loadMoreNotifications(loadNotifications);
+  }
+  
+  Future<bool> loadMoreNotifications(LoadNotifications loadNotifications) async {
     return cloudFunctions.getHttpsCallable(functionName: 'getNotifications').call(loadNotifications.toJson())
     .then((res) async {
       List<OutfitNotification> notifications = List<OutfitNotification>.from(res.data['res'].map((data){
@@ -350,15 +354,22 @@ class FirebaseUserRepository implements UserRepository {
     });
   }
   
-  Future<bool> loadFollowing(LoadUser loadUser) => _loadFollowUsers(loadUser, functionName: 'getFollowing');
-  Future<bool> loadFollowers(LoadUser loadUser) => _loadFollowUsers(loadUser, functionName: 'getFollowers');
+  Future<bool> loadFollowing(LoadUsers loadUsers) => _loadFollowUsers(loadUsers, functionName: 'getFollowing');
+  Future<bool> loadFollowers(LoadUsers loadUsers) => _loadFollowUsers(loadUsers, functionName: 'getFollowers');
   
-  Future<bool> _loadFollowUsers(LoadUser loadUser, {String functionName}){
-    userCache.clearUsers(loadUser.searchMode);
-    return cloudFunctions.getHttpsCallable(functionName: functionName).call(loadUser.toJson())
+  Future<bool> _loadFollowUsers(LoadUsers loadUsers, {String functionName}){
+    userCache.clearUsers(loadUsers.searchMode);
+    return _loadMoreFollowUsers(loadUsers, functionName:functionName);
+  }
+
+  Future<bool> loadMoreFollowing(LoadUsers loadUsers) => _loadMoreFollowUsers(loadUsers, functionName: 'getFollowing');
+  Future<bool> loadMoreFollowers(LoadUsers loadUsers) => _loadMoreFollowUsers(loadUsers, functionName: 'getFollowers');
+  
+  Future<bool> _loadMoreFollowUsers(LoadUsers loadUsers, {String functionName}){  
+    return cloudFunctions.getHttpsCallable(functionName: functionName).call(loadUsers.toJson())
     .then((res) async {
       List<User> users = _resToUserList(res);
-      users.forEach((user) => userCache.addUser(user, loadUser.searchMode));
+      users.forEach((user) => userCache.addUser(user, loadUsers.searchMode));
       return true;
     })
     .catchError((err) {

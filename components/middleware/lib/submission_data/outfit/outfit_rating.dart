@@ -1,21 +1,21 @@
 import 'package:middleware/middleware.dart';
 
-class OutfitImpression {
+class OutfitRating {
 
   String userId;
   Outfit outfit;
-  int impressionValue;
+  int ratingValue;
 
-  OutfitImpression({
+  OutfitRating({
     this.userId,
     this.outfit,
-    this.impressionValue,
+    this.ratingValue,
   });
 
   Map<String, dynamic> toJson() => {
-    'impression_user_id': userId,
+    'rating_user_id': userId,
     'poster_user_id': outfit.poster.userId,
     'outfit_id' : outfit.outfitId,
-    'impression_value' :impressionValue,
+    'rating_value' :ratingValue,
   };
 }

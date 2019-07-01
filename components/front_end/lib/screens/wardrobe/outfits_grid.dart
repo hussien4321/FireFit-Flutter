@@ -4,48 +4,63 @@ import 'package:middleware/middleware.dart';
 import 'package:front_end/helper_widgets.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
-class OutfitsGrid extends StatelessWidget {
+class OutfitsGrid extends StatefulWidget {
 
   final bool isLoading;
   final List<Outfit> outfits;
-  final bool hideTitle;
   final bool hasFixedHeight;
+  final VoidCallback onReachEnd;
 
-  OutfitsGrid({this.outfits, this.isLoading, this.hideTitle = false, this.hasFixedHeight = false});
+  OutfitsGrid({this.outfits, this.isLoading, this.onReachEnd, this.hasFixedHeight = false});
+
+  @override
+  _OutfitsGridState createState() => _OutfitsGridState();
+}
+
+class _OutfitsGridState extends State<OutfitsGrid> {
+
+  ScrollController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = ScrollController();
+    _controller.addListener(_scrollListener);
+  }
+  _scrollListener() {
+    if (_controller.offset >= (_controller.position.maxScrollExtent-100) && !_controller.position.outOfRange) {
+      if(widget.onReachEnd != null){
+        widget.onReachEnd();
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _controller.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(vertical: 8,horizontal: 4.0),
+      padding: EdgeInsets.symmetric(horizontal: 4.0),
       width: double.infinity,
-      child: outfits.isEmpty && !isLoading ? _buildNoOutfitsMessage() : _buildScrollableGrid(context)
+      child: _buildScrollableGrid(context)
       
-    );
-  }
-
-  Widget _buildNoOutfitsMessage() {
-    return Container(
-      height: hasFixedHeight ? 200: null,
-      child: CustomBanner(
-        icon: FontAwesomeIcons.boxOpen,
-        text: 'No outfits found'
-      ),
     );
   }
 
   Widget _buildScrollableGrid(BuildContext ctx) {
     return SingleChildScrollView(
+      controller: _controller,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: <Widget>[
-          hideTitle ? Container():  Container(
-            padding: EdgeInsets.only(bottom: 8.0),
-            child: Text(
-              '${outfits.length} OUTFIT${outfits.length==1?'':'S'}',
-              style: Theme.of(ctx).textTheme.subhead,
-            ),
+          Padding(
+            padding: EdgeInsets.only(bottom: 4),
           ),
-          GridView.builder(
+          widget.outfits.isEmpty ? Container() : GridView.builder(
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 3,
               childAspectRatio: 1/2,
@@ -54,12 +69,12 @@ class OutfitsGrid extends StatelessWidget {
             ),
             physics: ScrollPhysics(),
             shrinkWrap: true,
-            itemCount: outfits.length,
-            itemBuilder: (ctx, i) => _buildSimpleOutfitView(outfits[i], ctx),
+            itemCount: widget.outfits.length,
+            itemBuilder: (ctx, i) => _buildSimpleOutfitView(widget.outfits[i%widget.outfits.length], ctx),
           ),
           Container(
-            padding: EdgeInsets.all(4.0),
-            child: isLoading ? CircularProgressIndicator() : Container()
+            padding: EdgeInsets.all(12.0),
+            child: widget.isLoading ? _loadingMoreNotice() : _endOfListNotice(),
           )
         ],
       ),
@@ -97,4 +112,36 @@ class OutfitsGrid extends StatelessWidget {
     );
   }
 
+  Widget _loadingMoreNotice(){
+    return Container(
+      width: double.infinity,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          Padding(
+            padding: const EdgeInsets.only(right: 16.0),
+            child: CircularProgressIndicator(
+              
+            ),
+          ),
+          Text(
+            'Loading ${widget.outfits.isEmpty?'':'more '}fits...',
+            style: Theme.of(context).textTheme.subtitle.copyWith(
+              color: Colors.black54
+            ),
+          )
+        ],
+      ),
+    );
+  }
+  Widget _endOfListNotice() {
+    return Center(
+      child: Text(
+        'No ${widget.outfits.isEmpty ? '' : 'more '}outfits to display',
+        style: Theme.of(context).textTheme.subtitle.copyWith(
+          color: Colors.black54
+        ),
+      ),
+    );
+  }
 }

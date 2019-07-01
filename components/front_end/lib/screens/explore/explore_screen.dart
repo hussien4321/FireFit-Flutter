@@ -9,13 +9,15 @@ import 'package:front_end/screens.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'dart:async';
 
 class ExploreScreen extends StatefulWidget {
   @override
   _ExploreScreenState createState() => _ExploreScreenState();
 }
 
-class _ExploreScreenState extends State<ExploreScreen> {
+class _ExploreScreenState extends State<ExploreScreen> with SingleTickerProviderStateMixin{
   
   final Color imageOverlayColor = Colors.white;
 
@@ -29,6 +31,8 @@ class _ExploreScreenState extends State<ExploreScreen> {
   bool get isAnyDropdownInFocus => isPaginationDropdownInFocus || isFilterDropdownInFocus;
 
   OutfitBloc _outfitBloc;
+  
+  int index = 0;
 
   @override
   void initState() {
@@ -50,8 +54,19 @@ class _ExploreScreenState extends State<ExploreScreen> {
         child: Column(
           children: <Widget>[
             _searchDetailsBar(),
-            Expanded(child: _outfitsCarousel()),
-            _fireButton(),
+            Expanded(
+              child: StreamBuilder<bool>(
+                stream: _outfitBloc.isLoading,
+                initialData: true,
+                builder: (ctx, isLoadingSnap) => StreamBuilder<List<Outfit>>(
+                  stream: _outfitBloc.exploredOutfits,
+                  initialData: [],
+                  builder: (ctx, outfitsSnap) {
+                    return _outfitsCarousel(outfitsSnap.data, isLoadingSnap.data);
+                  }
+                )
+              )
+            ),
           ],
         )
       ),
@@ -94,7 +109,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
             )
           ),
           IconButton(
-            onPressed: (){},
+            onPressed: _openFilters,
             icon: Icon(Icons.tune),
           ),
         ],
@@ -102,30 +117,73 @@ class _ExploreScreenState extends State<ExploreScreen> {
     );
   }
 
-  Widget _outfitsCarousel() {
-    return Padding(
-      padding: EdgeInsets.symmetric(vertical: 8),
-      child: StreamBuilder<bool>(
-        stream: _outfitBloc.isLoading,
-        initialData: true,
-        builder: (ctx, isLoadingSnap) => StreamBuilder<List<Outfit>>(
-          stream: _outfitBloc.exploredOutfits,
-          initialData: [],
-          builder: (ctx, outfitsSnap) {
-            return CarouselSlider(
+  _openFilters(){
+    return showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text('Still in progress'),
+        content: Text('Filters coming soon!'),
+        actions: <Widget>[
+          FlatButton(
+            child: Text(
+              'Close',
+              style: TextStyle(
+                inherit: true,
+                color: Colors.deepOrange,
+              ),
+            ),
+            onPressed: Navigator.of(ctx).pop,
+          )
+        ],
+      )
+    );
+  }
+
+  Widget _outfitsCarousel(List<Outfit> outfits, bool isLoading) {
+    return Column(
+      children: <Widget>[
+        Expanded(
+          child: Padding(
+            padding: EdgeInsets.symmetric(vertical: 8),
+            child: CarouselSlider(
               height: double.infinity,
               enlargeCenterPage: true,
-              items: outfitsSnap.data.map((outfit) => _buildOutfitCard(outfit)).toList(),
+              onPageChanged: (i) {
+                setState(() => index = i);
+                if(i+1>=outfits.length){
+                  _outfitBloc.exploreOutfits.add(LoadOutfits(
+                    userId: userId,
+                    startAfterOutfit: outfits.last
+                  ));
+                }
+              },
+              items: outfits.map((outfit) => _buildOutfitCard(outfit, index)).toList()..add(_endCard(isLoading)),
               enableInfiniteScroll: false,
               viewportFraction: 0.8,
-            );
-          }, 
+            ),
+          )
+        ),
+        _fireButton(outfits, index),
+      ],
+    );
+                     
+  }
+
+  Widget _buildOutfitCard(Outfit outfit, int index) {
+    return _card(
+      child: GestureDetector(
+        onTap: () => _openOutfit(outfit),
+        child: Stack(
+          children: <Widget>[
+            _outfitImage(outfit),
+            _outfitBasicInfo(outfit),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildOutfitCard(Outfit outfit) {
+  Widget _card({Widget child}) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 4),
       child: Align(
@@ -134,18 +192,10 @@ class _ExploreScreenState extends State<ExploreScreen> {
           aspectRatio: 2/3,
           child: ClipRRect(
             borderRadius: BorderRadius.circular(16.0),
-            child: GestureDetector(
-              onTap: () => _openOutfit(outfit),
-              child: Stack(
-                children: <Widget>[
-                  _outfitImage(outfit),
-                  _outfitBasicInfo(outfit)
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
+            child: child
+          )
+        )
+      )
     );
   }
 
@@ -158,12 +208,15 @@ class _ExploreScreenState extends State<ExploreScreen> {
   }
 
   Widget _outfitImage(Outfit outfit){
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.grey,
-        image: DecorationImage(
-          fit: BoxFit.cover,
-          image: CachedNetworkImageProvider(outfit.images.first)
+    return Hero(
+      tag: outfit.images.first,
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.grey,
+          image: DecorationImage(
+            fit: BoxFit.cover,
+            image: CachedNetworkImageProvider(outfit.images.first)
+          ),
         ),
       ),
     );
@@ -213,17 +266,68 @@ class _ExploreScreenState extends State<ExploreScreen> {
     );
   } 
 
-  Widget _fireButton() {
+  Widget _endCard(bool isLoading) {
+    return _card(
+      child: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              Colors.grey[300],
+              Colors.black54
+            ],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              isLoading? 
+              Theme(
+                data: ThemeData(
+                  accentColor: Colors.white
+                ),
+                child: CircularProgressIndicator()
+              ) : Icon(
+                FontAwesomeIcons.boxOpen,
+                color: Colors.white,
+                size: 48,
+              ),
+              Text(isLoading ? 'Loading Fits' : 'No more items',
+                style: Theme.of(context).textTheme.display1.copyWith(
+                  color: Colors.white
+                ),
+                textAlign: TextAlign.center,
+              ),
+              Text(isLoading ? 'Please wait while we find you more fire fits!' : 'Try a different search filter or refresh the page to see new fits!',
+                style: Theme.of(context).textTheme.subtitle.copyWith(
+                  color: Colors.white
+                ),
+                textAlign: TextAlign.center,
+              )
+            ],
+          ),
+        ),
+      )
+    );
+  }
+
+  Widget _fireButton(List<Outfit> outfits, int index) {
+    Outfit currentOutfit = outfits.length <= index ? null : outfits[index];
+    bool hasOutfit =currentOutfit != null;
+    bool hasRating =currentOutfit?.hasRating == true;
     return Padding(
       padding: const EdgeInsets.only(bottom: 8.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
           RawMaterialButton(
-            fillColor: Colors.lightBlue,
-            elevation: 0,
+            fillColor: !hasOutfit ? Colors.grey : hasRating ? Colors.red[900] : Colors.lightBlue,
+            elevation: hasRating ? 0 : 2,
             shape: CircleBorder(),
-            onPressed: (){},
+            onPressed: currentOutfit == null ? null : () => _giveRating(currentOutfit),
             child: Padding(
               padding: const EdgeInsets.all(8.0),
               child: Image.asset(
@@ -238,30 +342,24 @@ class _ExploreScreenState extends State<ExploreScreen> {
     );
   }
 
-  Widget _ratingSelector() {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8.0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          FlutterRatingBar(
-            initialRating: 5,
-            itemCount: 5,
-            allowHalfRating: true,
-            itemSize: 32,
-            fullRatingWidget: Image.asset(
-              'assets/flame.png',
-              width: 32,
-              height: 32,
-            ),
-            noRatingWidget: Container(
-              width: 32,
-              height: 32,
-            ),
-          ),
-        ],
-      ),
+  _giveRating(Outfit currentOutfit) {
+    return showDialog(
+      context: context,
+      builder: (ctx) {
+        return RatingDialog(
+          initialValue: currentOutfit.userRating,
+          isUpdate: currentOutfit.hasRating,
+          onSubmit: (newRating) {
+            OutfitRating outfitRating = OutfitRating(
+              outfit: currentOutfit,
+              ratingValue: newRating,
+              userId: userId,
+            );
+            _outfitBloc.rateOutfit.add(outfitRating);
+          }
+        );
+      }
     );
   }
-
 }
+

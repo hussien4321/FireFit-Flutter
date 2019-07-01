@@ -15,10 +15,13 @@ class CachedOutfitRepository {
   Future<int> addOutfit(Outfit outfit, SearchModes searchMode) async {
     addOutfitSearch(outfit.outfitId, searchMode);
     await userCache.addUser(outfit.poster, searchMode);
-    if(searchMode ==SearchModes.SAVED){
+    if(searchMode==SearchModes.SAVED){
       await _addOutfitSave(outfit.save);
     }
+    return _addOutfit(outfit, searchMode);
+  }
 
+  Future<int> _addOutfit(Outfit outfit, SearchModes searchMode){
     ConflictAlgorithm conflictAlgorithm = ConflictAlgorithm.replace;
     if(searchMode ==SearchModes.NOTIFICATIONS){
       conflictAlgorithm =ConflictAlgorithm.ignore;
@@ -44,17 +47,26 @@ class CachedOutfitRepository {
 
 
   Future<int> _addOutfitSave(Save save) async {
-    return streamDatabase.insert(
-      'save',
-      save.toJson(),
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
+    if(save.saveId!=null){
+      return streamDatabase.insert(
+        'save',
+        save.toJson(),
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+    }
   }
 
   Future<int> deleteOutfit(Outfit outfitToDelete) async {
     return streamDatabase.delete(
       'outfit',
       where: 'outfit_id = ?',
+      whereArgs: [outfitToDelete.outfitId],
+    );
+  }
+  Future<int> deleteSave(Outfit outfitToDelete) async {
+    return streamDatabase.delete(
+      'save',
+      where: 'save_outfit_id = ?',
       whereArgs: [outfitToDelete.outfitId],
     );
   }
@@ -68,35 +80,44 @@ class CachedOutfitRepository {
     );
   }
 
-  Future<int> saveOutfit(OutfitSave saveData) async {
+  Future<void> saveOutfit(OutfitSave saveData) async {
     Outfit outfit = saveData.outfit;
     outfit.isSaved =!outfit.isSaved;
-    return streamDatabase.insert(
-      'outfit',
-      outfit.toJson(),
-      conflictAlgorithm: ConflictAlgorithm.replace,
+    await addOutfit(outfit, SearchModes.SAVED);
+    if(!outfit.isSaved){
+      return _clearOutfitSearchesForOutfit(SearchModes.SAVED, outfit);
+    }
+  }
+
+  Future<int> addSave(OutfitSave saveData, int saveId) {
+    Save save =Save(
+      userId: saveData.userId,
+      outfitId: saveData.outfit.outfitId,
+      createdAt: DateTime.now(),
+      saveId: saveId
     );
+    saveData.outfit.save = save;
+    return addOutfit(saveData.outfit, SearchModes.SAVED);
   }
 
   Future<void> editOutfit(EditOutfit editOutfit) {
     return streamDatabase.executeAndTrigger(['outfit'], "UPDATE outfit SET style=?, title=?, description=? WHERE outfit_id=?", [editOutfit.style, editOutfit.title, editOutfit.description, editOutfit.outfitId]);
   }
 
-  Future<int> impressOutfit(OutfitImpression outfitImpression) async {
-    Outfit outfit = outfitImpression.outfit;
-    int impressionValue = outfitImpression.impressionValue;
-    if(outfit.userImpression == 1){
-      outfit.likesCount--;
-    }else if(outfit.userImpression == -1){
-      outfit.dislikesCount--;
+  Future<int> rateOutfit(OutfitRating outfitRating) async {
+    Outfit outfit = outfitRating.outfit;
+    int ratingValue = outfitRating.ratingValue;
+    double average = outfit.averageRating == null ? 0 : outfit.averageRating;
+    double total = outfit.ratingsCount.toDouble();
+    if(outfit.hasRating){
+      average = ((average * total) - outfit.userRating) / (total - 1);
+      total--;
+      userCache.incrementFlamesCount(outfit.poster.userId, outfit.userRating, decrement: true);
     }
-    if(impressionValue == 1){
-      outfit.likesCount++;
-    }
-    else if(impressionValue == -1){
-      outfit.dislikesCount++;
-    }
-    outfit.userImpression = impressionValue;
+    outfit.averageRating = ((average*total.toDouble()) + ratingValue) / (total + 1);
+    outfit.userRating = ratingValue;
+    outfit.ratingsCount =(total+1).toInt();
+    userCache.incrementFlamesCount(outfit.poster.userId, ratingValue);
     return streamDatabase.insert(
       'outfit',
       outfit.toJson(),
@@ -133,6 +154,11 @@ class CachedOutfitRepository {
     await streamDatabase.execute("DELETE FROM outfit_search WHERE search_outfit_mode=?", [searchModeString]);
   }
 
+  Future<void> _clearOutfitSearchesForOutfit(SearchModes searchMode, Outfit outfit) async {
+    String searchModeString = searchModeToString(searchMode);
+    await streamDatabase.execute("DELETE FROM outfit_search WHERE search_outfit_mode=? AND search_outfit_id=?", [searchModeString, outfit.outfitId]);
+  }
+
   Future<void> clearComments() async {
     await streamDatabase.executeAndTrigger(['comment'], "DELETE FROM comment");
     await userCache.clearUsers(SearchModes.TEMP);
@@ -156,7 +182,7 @@ class CachedOutfitRepository {
         queryStream = streamDatabase.createRawQuery(['outfit'], 'SELECT * FROM outfit LEFT JOIN user ON user_id=poster_user_id LEFT JOIN outfit_search ON outfit_id=search_outfit_id WHERE search_outfit_mode=? ORDER BY outfit_created_at desc', [searchModeString]);
         break;
       case SearchModes.SAVED:
-        queryStream = streamDatabase.createRawQuery(['outfit'], 'SELECT * FROM outfit LEFT JOIN user ON poster_user_id=user_id LEFT JOIN outfit_search ON outfit_id=search_outfit_id LEFT JOIN save ON outfit_id=save_outfit_id WHERE is_saved=1 AND search_outfit_mode=? ORDER BY save_created_at desc', [searchModeString]);
+        queryStream = streamDatabase.createRawQuery(['outfit', 'save'], 'SELECT * FROM outfit LEFT JOIN user ON poster_user_id=user_id LEFT JOIN outfit_search ON outfit_id=search_outfit_id LEFT JOIN save ON outfit_id=save_outfit_id WHERE is_saved=1 AND search_outfit_mode=? ORDER BY save_created_at desc', [searchModeString]);
         break;
       default:
         break;

@@ -17,6 +17,30 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   
   String userId;
 
+  OutfitNotification lastNotification;
+  ScrollController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = ScrollController();
+    _controller.addListener(_scrollListener);
+  }
+  _scrollListener() {
+    if (_controller.offset >= (_controller.position.maxScrollExtent - 100) && !_controller.position.outOfRange) {
+      _notificationBloc.loadStaticNotifications.add(LoadNotifications(
+        userId: userId,
+        startAfterNotification: lastNotification,
+      ));
+    }
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _controller.dispose();
+  }
+  
   @override
   Widget build(BuildContext context) {
     _initBlocs();
@@ -42,16 +66,24 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         elevation: 0.0,
       ),
       body: Container(
-        child: StreamBuilder<List<OutfitNotification>>(
-          stream: _notificationBloc.notifications,
-          initialData: [],
-          builder: (ctx, snap) {
-            return ListView(
-              children: _buildNotifications(snap.data)..add(
-                _buildMoreNotificationsButton()
-              )
-            );
-          },
+        child: StreamBuilder<bool>(
+          stream: _notificationBloc.isLoading,
+          initialData: false,
+          builder: (ctx, isLoadingSnap) => StreamBuilder<List<OutfitNotification>>(
+            stream: _notificationBloc.notifications,
+            initialData: [],
+            builder: (ctx, snap) {
+              if(!isLoadingSnap.data && snap.data.length>0){
+                lastNotification = snap.data.last;
+              }
+              return ListView(
+                controller: _controller,
+                children: _buildNotifications(snap.data)..add(
+                  _buildEndTag(isLoadingSnap.data, snap.data.isEmpty)
+                )
+              );
+            },
+          ),
         ),
       ),
     );
@@ -96,14 +128,38 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     return previews;
   }
   
-  Widget _buildMoreNotificationsButton() {
+  Widget _buildEndTag(bool isLoading, bool isEmpty) {
     return Container(
       width: double.infinity,
-      child: FlatButton(
-        padding: EdgeInsets.symmetric(vertical: 16.0),
-          child: Text('Load previous'),
-          onPressed: () {},
+      padding: EdgeInsets.symmetric(vertical: 16.0),
+      child: isLoading? _loadingTag() : _noNotificationsTag(isEmpty)
+    );
+  }
+
+  Widget _loadingTag() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[
+        Padding(
+          padding: EdgeInsets.only(right: 16),
+          child: CircularProgressIndicator(),
         ),
+        Text(
+          'Loading previous',
+          style: Theme.of(context).textTheme.subtitle.copyWith(
+            color: Colors.black54
+          ),
+        ),
+      ],
+    );
+  }
+  Widget _noNotificationsTag(bool isEmpty) {
+    return Text(
+      'No ${isEmpty?'':'more '}notifications',
+      style: Theme.of(context).textTheme.subtitle.copyWith(
+        color: Colors.black54
+      ),
+      textAlign: TextAlign.center,
     );
   }
 }

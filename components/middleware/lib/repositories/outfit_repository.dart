@@ -11,7 +11,7 @@ abstract class OutfitRepository{
   Future<bool> uploadOutfit(UploadOutfit uploadOutfit); 
   Future<bool> editOutfit(EditOutfit editOutfit); 
   Future<bool> saveOutfit(OutfitSave saveData);
-  Future<bool> impressOutfit(OutfitImpression outfitImpression);
+  Future<bool> rateOutfit(OutfitRating outfitRating);
   Future<bool> deleteOutfit(Outfit outfitToDelete);
 
 

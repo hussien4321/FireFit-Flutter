@@ -159,7 +159,7 @@ class _NotificationTabState extends State<NotificationTab> {
       );
       _notificationBloc.markNotificationsSeen.add(markSeen);
     }
-    if(widget.notification.type == NotificationType.OUTFIT_LIKE || widget.notification.type == NotificationType.NEW_OUTFIT){
+    if(widget.notification.type == NotificationType.OUTFIT_RATING || widget.notification.type == NotificationType.NEW_OUTFIT){
       CustomNavigator.goToOutfitDetailsScreen(context, false, 
         outfitId: refOutfit.outfitId,
         loadOutfit: true

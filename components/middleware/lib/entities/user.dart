@@ -14,8 +14,9 @@ class User {
   DateTime subscriptionEndDate;
   bool hasNewFeedOutfits;
   DateTime createdAt;
-  int numberOfFollowers, numberOfFollowing, numberOfOutfits, numberOfLikes, numberOfNewNotifications;
+  int numberOfFollowers, numberOfFollowing, numberOfOutfits, numberOfFlames, numberOfNewNotifications;
   bool isFollowing;
+  DateTime followCreatedAt;
   SearchUser searchUser;
 
   User({
@@ -51,9 +52,10 @@ class User {
     numberOfFollowers = map['number_of_followers'];
     numberOfFollowing = map['number_of_following'];
     numberOfOutfits = map['number_of_outfits'];
-    numberOfLikes = map['number_of_likes'];
+    numberOfFlames = map['number_of_flames'] == null ? 0 : map['number_of_flames'];
     numberOfNewNotifications = map['number_of_new_notifications'];
     isFollowing = map['is_following'] == 1;
+    followCreatedAt = map['follow_created_at'] == null ? null : DateTime.parse(map['follow_created_at']);
     searchUser = SearchUser.fromMap(map);
   } 
 
@@ -73,8 +75,9 @@ class User {
     'number_of_followers' : numberOfFollowers,
     'number_of_following' : numberOfFollowing,
     'number_of_outfits' : numberOfOutfits,
-    'number_of_likes' : numberOfLikes,
+    'number_of_flames' : numberOfFlames,
     'number_of_new_notifications' : numberOfNewNotifications,
+    'follow_created_at' : followCreatedAt?.toIso8601String(),
     'is_following' : isFollowing ? 1 : 0,
   };
 

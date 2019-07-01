@@ -14,7 +14,6 @@ class _FeedScreenState extends State<FeedScreen> {
 
   OutfitBloc _outfitBloc;
   String userId;
-  LoadOutfits searchParams = LoadOutfits(); 
 
   bool isMyOutfits = true;
   
@@ -37,6 +36,12 @@ class _FeedScreenState extends State<FeedScreen> {
             return FeedOutfits(
               isLoading: isLoadingSnap.data,
               outfits: outfitsSnap.data,
+              onReachEnd: (lastOutfit) {
+                _outfitBloc.loadFeedOutfits.add(LoadOutfits(
+                  userId: userId,
+                  startAfterOutfit: lastOutfit,
+                ));
+              }
             );
           },
         );
@@ -48,8 +53,9 @@ class _FeedScreenState extends State<FeedScreen> {
     if(_outfitBloc==null){
       _outfitBloc = OutfitBlocProvider.of(context);
       userId = await UserBlocProvider.of(context).existingAuthId.first;
-      searchParams.userId = userId;
-      _outfitBloc.loadFeedOutfits.add(searchParams);
+      _outfitBloc.loadFeedOutfits.add(LoadOutfits(
+        userId: userId
+      ));
     }
   }
 }

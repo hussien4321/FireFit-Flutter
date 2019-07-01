@@ -99,12 +99,16 @@ class _MainAppBarState extends State<MainAppBar> {
       _userBloc.loadCurrentUser.add(null);
       userId = await _userBloc.existingAuthId.first;
       _notificationBloc.registerNotificationToken.add(userId);
-      _notificationBloc.loadStaticNotifications.add(userId);
+      _notificationBloc.loadStaticNotifications.add(LoadNotifications(
+        userId: userId
+      ));
     }
   }
 
   _loadNewNotifications() {
-    _notificationBloc.loadLiveNotifications.add(userId);
+    _notificationBloc.loadLiveNotifications.add(LoadNotifications(
+      userId: userId
+    ));
     showSimpleNotification(
       Text(
         'New notification!',

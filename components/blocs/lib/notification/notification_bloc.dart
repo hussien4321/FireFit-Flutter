@@ -10,10 +10,10 @@ class NotificationBloc {
 
   final _registerNotificationTokenController = PublishSubject<String>();
   Sink<String> get registerNotificationToken => _registerNotificationTokenController;
-  final _loadStaticNotificationsController = PublishSubject<String>();
-  Sink<String> get loadStaticNotifications => _loadStaticNotificationsController;
-  final _loadLiveNotificationsController = PublishSubject<String>();
-  Sink<String> get loadLiveNotifications => _loadLiveNotificationsController;
+  final _loadStaticNotificationsController = PublishSubject<LoadNotifications>();
+  Sink<LoadNotifications> get loadStaticNotifications => _loadStaticNotificationsController;
+  final _loadLiveNotificationsController = PublishSubject<LoadNotifications>();
+  Sink<LoadNotifications> get loadLiveNotifications => _loadLiveNotificationsController;
   final _notificationsController = BehaviorSubject<List<OutfitNotification>>(seedValue: []);
   Stream<List<OutfitNotification>> get notifications => _notificationsController.stream; 
 
@@ -31,7 +31,7 @@ class NotificationBloc {
   NotificationBloc(this.repository) {
     _subscriptions = <StreamSubscription<dynamic>>[
       _registerNotificationTokenController.listen(_registerNotificationToken),
-      _loadStaticNotificationsController.listen(_loadStaticNotifications),
+      _loadStaticNotificationsController.distinct().listen(_loadStaticNotifications),
       _loadLiveNotificationsController.listen(_loadLiveNotifications),
       _markNotificationsSeenController.listen(_markNotificationsSeen)
     ];
@@ -42,20 +42,24 @@ class NotificationBloc {
     repository.registerNotificationToken(userId);
   }
 
-  _loadStaticNotifications(String userId) async {
-    _loadNotifications(userId, false);
+  _loadStaticNotifications(LoadNotifications loadNotifications) async {
+    _loadNotifications(LoadNotifications(
+      userId: loadNotifications.userId,
+      startAfterNotification: loadNotifications.startAfterNotification,
+      isLive: false
+    ));
   }
-  _loadLiveNotifications(String userId) async {
-    _loadNotifications(userId, true);
+  _loadLiveNotifications(LoadNotifications loadNotifications) async {
+    _loadNotifications(LoadNotifications(
+      userId: loadNotifications.userId,
+      startAfterNotification: loadNotifications.startAfterNotification,
+      isLive: true
+    ));
   }
 
-  _loadNotifications(String userId, bool isLive) async {
-    LoadNotifications loadNotifications = LoadNotifications(
-      userId: userId,
-      isLive: isLive
-    );
+  _loadNotifications(LoadNotifications loadNotifications) async {
     _loadingController.add(true);
-    bool success = await repository.loadNotifications(loadNotifications);
+    bool success = loadNotifications.startAfterNotification == null ? await repository.loadNotifications(loadNotifications) : await repository.loadMoreNotifications(loadNotifications);
     _loadingController.add(false);
     if(!success){
       _errorController.add('Failed to load notifications');

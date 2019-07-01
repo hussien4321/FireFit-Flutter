@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:middleware/middleware.dart';
 import 'package:front_end/helper_widgets.dart';
 import 'package:helpers/helpers.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class OutfitStats extends StatelessWidget {
 
@@ -42,11 +43,11 @@ class OutfitStats extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
                 Text(
-                  '${outfit.likesOverallCount} ',
+                  '${outfit.averageRating.round()} ',
                   style: Theme.of(context).textTheme.subtitle,
                 ),
                 Icon(
-                  Icons.thumbs_up_down,
+                  FontAwesomeIcons.fire,
                   size: 16,
                   color: Colors.black,
                 ),

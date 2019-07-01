@@ -23,12 +23,38 @@ class _ProfileScreenState extends State<ProfileScreen> {
   UserBloc _userBloc;
   OutfitBloc _outfitBloc;
 
+  ScrollController _controller;
+
   FollowUser followUser =FollowUser();
   
   String currentUserId;
 
   final double splashSize = 200;
   final double profilePicSize = 100; 
+  Outfit lastOutfit;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = ScrollController();
+    _controller.addListener(_scrollListener);
+  }
+  _scrollListener() {
+    if (_controller.offset >= (_controller.position.maxScrollExtent-100) && !_controller.position.outOfRange) {
+      _outfitBloc.loadUserOutfits.add(
+        LoadOutfits(
+          userId: widget.userId,
+          startAfterOutfit: lastOutfit,
+        )
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _controller.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -38,15 +64,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
         stream: _userBloc.isLoading,
         initialData: false,
         builder: (ctx, loadingSnap){
-          return StreamBuilder<User>(
-            stream: _userBloc.selectedUser,
-            builder: (ctx, snap) {
-              if(loadingSnap.data || !snap.hasData){
-                return Center(child: CircularProgressIndicator(),);
-              }
-              followUser.followed = snap.data;
-              return _profileScaffold(snap.data);
-            },
+          return StreamBuilder<bool>(
+            stream: _outfitBloc.isLoading,
+            initialData: false,
+            builder: (ctx, loadingOutfitsSnap) => StreamBuilder<User>(
+              stream: _userBloc.selectedUser,
+              builder: (ctx, snap) {
+                if(loadingSnap.data || !snap.hasData){
+                  return Center(child: CircularProgressIndicator(),);
+                }
+                followUser.followed = snap.data;
+                return _profileScaffold(snap.data, loadingOutfitsSnap.data);
+              },
+            ),
           );
         }
       ),
@@ -56,9 +86,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
   _initBlocs() async {
     if(_userBloc == null){
       _userBloc = UserBlocProvider.of(context);
+      _outfitBloc = OutfitBlocProvider.of(context);
       _userBloc.selectUser.add(widget.userId);
       currentUserId = await _userBloc.existingAuthId.first;
-      _outfitBloc = OutfitBlocProvider.of(context);
       _outfitBloc.loadUserOutfits.add(
         LoadOutfits(
           userId: widget.userId
@@ -68,7 +98,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
-  Widget _profileScaffold(User user){
+  Widget _profileScaffold(User user, bool isLoadingOutfits){
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
@@ -99,6 +129,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         children: <Widget>[
           Expanded(
             child: ListView(
+              controller: _controller,
               children: <Widget>[
                 _biometricInfo(user),
                 _spaceSeparator(),
@@ -106,7 +137,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 _spaceSeparator(),
                 _buildOutfitDescription(user),
                 _spaceSeparator(),
-                _outfitsOverview(user),
+                _outfitsOverview(user, isLoadingOutfits),
               ],
             ),
           ),
@@ -289,8 +320,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
           name: 'Outfit${user.numberOfOutfits==1?'':'s'}'
         ),
         _buildStatisticTab(
-          count: user.numberOfLikes, 
-          name: 'Like${user.numberOfLikes==1?'':'s'}', 
+          count: user.numberOfFlames, 
+          name: 'Flame${user.numberOfFlames==1?'':'s'}', 
           isEnd: true
         ),
       ],
@@ -388,7 +419,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _outfitsOverview(User user){
+  Widget _outfitsOverview(User user, bool isLoadingOutfits){
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 16.0),
       child: Column(
@@ -396,28 +427,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           _sectionHeader("Outfits"),
-          _outfitsGrid(),
+          _outfitsGrid(isLoadingOutfits),
         ],
       ),
     );
   }
 
-  Widget _outfitsGrid() {
-    return StreamBuilder<bool>(
-      stream: _outfitBloc.isLoading,
-      initialData: false,
-      builder: (ctx, loadingSnap) => StreamBuilder<List<Outfit>>(
-        stream: _outfitBloc.selectedOutfits,
-        initialData: [],
-        builder: (ctx, outfitsSnap) {
-          return OutfitsGrid(
-            isLoading: loadingSnap.data,
-            outfits: outfitsSnap.data,
-            hideTitle: true,
-            hasFixedHeight: true,
-          );
+  Widget _outfitsGrid(bool isLoading) {
+    return StreamBuilder<List<Outfit>>(
+      stream: _outfitBloc.selectedOutfits,
+      initialData: [],
+      builder: (ctx, outfitsSnap) {
+        if(outfitsSnap.data != null && outfitsSnap.data.isNotEmpty){
+          lastOutfit=outfitsSnap.data.last;
         }
-      )
+        return OutfitsGrid(
+          isLoading: isLoading,
+          outfits: outfitsSnap.data,
+          hasFixedHeight: true,
+        );
+      }
     );
   }
   Widget _buildInteractButton(User user){
@@ -454,5 +483,56 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
     );
   }
+}
 
+class _ProfileOutfitsGrid extends StatefulWidget {
+  String userId;
+
+  @override
+  __ProfileOutfitsGridState createState() => __ProfileOutfitsGridState();
+}
+
+class __ProfileOutfitsGridState extends State<_ProfileOutfitsGrid> {
+  OutfitBloc _outfitBloc;
+
+  @override
+  void initState() {
+    super.initState();
+  }
+  
+  @override
+  Widget build(BuildContext context) {
+    _initBlocs();
+    return StreamBuilder<bool>(
+      stream: _outfitBloc.isLoading,
+      initialData: false,
+      builder: (ctx, loadingSnap) => StreamBuilder<List<Outfit>>(
+        stream: _outfitBloc.selectedOutfits,
+        initialData: [],
+        builder: (ctx, outfitsSnap) {
+          return OutfitsGrid(
+            isLoading: loadingSnap.data,
+            outfits: outfitsSnap.data,
+            hasFixedHeight: true,
+            onReachEnd: () {
+              _outfitBloc.loadUserOutfits.add(
+                LoadOutfits(
+                  userId: widget.userId,
+                  startAfterOutfit: outfitsSnap.data.last
+                )
+              );
+            },
+          );
+        }
+      )
+    );
+  }
+  _initBlocs() {
+    if(_outfitBloc==null){
+      _outfitBloc=  OutfitBlocProvider.of(context);
+      _outfitBloc.loadUserOutfits.add(LoadOutfits(
+        userId: widget.userId,
+      ));
+    }
+  }
 }

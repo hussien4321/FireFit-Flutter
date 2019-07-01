@@ -4,6 +4,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:front_end/providers.dart';
 import 'package:meta/meta.dart';
 import 'dart:async';
+import 'package:middleware/middleware.dart';
 
 class NewNotificationsOverlayScreen extends StatefulWidget {
   
@@ -61,7 +62,9 @@ class _NewNotificationsOverlayScreenState extends State<NewNotificationsOverlayS
 
   _loadNewNotifications() async {
     String userId = await _userBloc.existingAuthId.first;
-    _notificationBloc.loadLiveNotifications.add(userId);
+    _notificationBloc.loadLiveNotifications.add(LoadNotifications(
+      userId: userId
+    ));
     _startNotificationAnimation();
   }
 

@@ -31,7 +31,8 @@ class FirebaseOutfitRepository implements OutfitRepository {
     return loadMoreOutfits(loadOutfits);
   }
   
-  Future<bool> loadMoreOutfits(LoadOutfits loadOutfits) {
+  Future<bool> loadMoreOutfits(LoadOutfits loadOutfits) async {
+    await Future.delayed(Duration(seconds: 2));
     return cloudFunctions.getHttpsCallable(functionName: 'getOutfits').call(loadOutfits.toJson())
     .then((res) async {
       List<Outfit> outfits = _resToOutfitList(res);
@@ -40,6 +41,7 @@ class FirebaseOutfitRepository implements OutfitRepository {
     })
     .catchError((err) => false);
   }
+
   Future<bool> loadOutfit(LoadOutfit loadOutfit) async {
     await cache.clearOutfits(loadOutfit.searchModes);
     if(loadOutfit.loadFromCloud){
@@ -153,24 +155,27 @@ class FirebaseOutfitRepository implements OutfitRepository {
     cache.saveOutfit(saveData);
     return cloudFunctions.getHttpsCallable(functionName: 'saveOutfit').call(saveData.toJson())
     .then((res) async {
-      bool status = res.data['res'];
-      return status;
+      if(saveData.outfit.isSaved){
+        cache.addSave(saveData, res.data['ref']);;
+      }else{
+        cache.deleteSave(saveData.outfit);
+      }
+      return true;
     })
     .catchError((err) {
-      print(err);
       return false;
     });
   }
 
-  Future<bool> impressOutfit(OutfitImpression outfitImpression) async {
-    cache.impressOutfit(outfitImpression);
-    return cloudFunctions.getHttpsCallable(functionName: 'impressOutfit').call(outfitImpression.toJson())
+  Future<bool> rateOutfit(OutfitRating outfitRating) async {
+    cache.rateOutfit(outfitRating);
+    return cloudFunctions.getHttpsCallable(functionName: 'rateOutfit').call(outfitRating.toJson())
     .then((res) async {
       bool status = res.data['res'];
       return status;
     })
     .catchError((err) {
-      print(err);
+      print(err.message);
       return false;
     });
   }

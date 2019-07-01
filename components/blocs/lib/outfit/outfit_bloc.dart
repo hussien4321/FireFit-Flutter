@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:rxdart/rxdart.dart';
-import 'package:middleware/middleware.dart'
-;
+import 'package:middleware/middleware.dart';
+
 class OutfitBloc{
 
   final OutfitRepository repository;
@@ -43,10 +43,8 @@ class OutfitBloc{
 
   final _saveOutfitController = PublishSubject<OutfitSave>();
   Sink<OutfitSave> get saveOutfit => _saveOutfitController;
-  final _likeOutfitController = PublishSubject<OutfitImpression>();
-  Sink<OutfitImpression> get likeOutfit => _likeOutfitController;
-  final _dislikeOutfitController = PublishSubject<OutfitImpression>();
-  Sink<OutfitImpression> get dislikeOutfit => _dislikeOutfitController;
+  final _rateOutfitController = PublishSubject<OutfitRating>();
+  Sink<OutfitRating> get rateOutfit => _rateOutfitController;
 
   final _loadingController = PublishSubject<bool>();
   Observable<bool> get isLoading => _loadingController.stream;
@@ -64,17 +62,16 @@ class OutfitBloc{
     _feedOutfitsController.addStream(repository.getOutfits(SearchModes.FEED));
 
     _subscriptions = <StreamSubscription<dynamic>>[
-      _exploreOutfitsController.listen(_exploreOutfits),
-      _loadMyOutfitsController.listen(_loadMyOutfits),
+      _exploreOutfitsController.distinct().listen(_exploreOutfits),
+      _loadMyOutfitsController.distinct().listen(_loadMyOutfits),
       _loadUserOutfitsController.distinct().listen(_loadUserOutfits),
-      _loadFeedOutfitsController.listen(_loadFeedOutfits),
-      _loadSavedOutfitsController.listen(_loadSavedOutfits),
+      _loadFeedOutfitsController.distinct().listen(_loadFeedOutfits),
+      _loadSavedOutfitsController.distinct().listen(_loadSavedOutfits),
       _uploadOutfitsController.listen(_uploadOutfit),
       _editOutfitController.listen(_editOutfit),
       _deleteOutfitController.listen(_deleteOutfit),
       _saveOutfitController.listen(_saveOutfit),
-      _likeOutfitController.listen((outfitImpression) => _triggerImpression(outfitImpression, 1)),
-      _dislikeOutfitController.listen((outfitImpression) => _triggerImpression(outfitImpression, -1)),
+      _rateOutfitController.listen(_rateOutfit),
       _selectOutfitController.listen(_loadOutfit),
     ];
   }
@@ -102,7 +99,7 @@ class OutfitBloc{
 
   _loadOutfits(LoadOutfits loadOutfits) async {
     _loadingController.add(true);
-    final success = await repository.loadOutfits(loadOutfits);
+    final success = loadOutfits.startAfterOutfit==null ? await repository.loadOutfits(loadOutfits) : await repository.loadMoreOutfits(loadOutfits);
     _loadingController.add(false);
     _successController.add(success);
     if(!success){
@@ -139,17 +136,9 @@ class OutfitBloc{
     }
   }
 
-  _triggerImpression(OutfitImpression outfitImpression, int impressionValue){
-    if(outfitImpression.outfit.userImpression == impressionValue){
-      _impressOutfit(outfitImpression, 0);
-    }else{
-      _impressOutfit(outfitImpression, impressionValue);
-    }
-  }
 
-  _impressOutfit(OutfitImpression outfitImpression, int impressionValue) async {
-    outfitImpression.impressionValue = impressionValue;
-    final success = await repository.impressOutfit(outfitImpression);
+  _rateOutfit(OutfitRating outfitRating) async {
+    final success = await repository.rateOutfit(outfitRating);
     if(!success){
       _errorController.add("Failed to react to outfit");
     }
@@ -189,8 +178,7 @@ class OutfitBloc{
     _selectedOutfitController.close();
     _selectOutfitController.close();
     _saveOutfitController.close();
-    _likeOutfitController.close();
-    _dislikeOutfitController.close();
+    _rateOutfitController.close();
     _loadingController.close();
     _successController.close();
     _errorController.close();

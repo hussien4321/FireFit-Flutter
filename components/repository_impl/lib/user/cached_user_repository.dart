@@ -83,7 +83,9 @@ class CachedUserRepository {
     }
   }
 
-  
+  incrementFlamesCount(String userId, int userRating, {bool decrement = false}) => streamDatabase.executeAndTrigger(['user'],"UPDATE user SET number_of_flames=number_of_flames${decrement?'-':'+'}? WHERE user_id=?", [ userRating, userId]);
+
+
   Future<void> incrementUserNewNotifications(int newNotificationsCount) async {
     String searchModeString = searchModeToString(SearchModes.MINE);
     return streamDatabase.executeAndTrigger(['user'], "UPDATE user SET number_of_new_notifications=number_of_new_notifications+? WHERE user_id=(SELECT search_user_id FROM user_search WHERE search_user_mode=? LIMIT 1)", [newNotificationsCount, searchModeString]);

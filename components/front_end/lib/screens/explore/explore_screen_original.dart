@@ -288,7 +288,7 @@ class _ExploreScreenOriginalState extends State<ExploreScreenOriginal> {
   _displayAd() => print('ad displayed');
 
   Widget _buildActionBar(Outfit currentOutfit) {
-    OutfitImpression outfitImpression =OutfitImpression(
+    OutfitRating outfitRating =OutfitRating(
       outfit: currentOutfit,
       userId: userId,
     );
@@ -316,9 +316,9 @@ class _ExploreScreenOriginalState extends State<ExploreScreenOriginal> {
               color: Colors.pinkAccent,
               icon: Icons.thumb_down,
               largeIcon: true,
-              disabled: allDisabled || currentOutfit?.userImpression == 1,
-              selected: currentOutfit?.userImpression == -1,
-              onPressed: () => _outfitBloc.dislikeOutfit.add(outfitImpression),
+              disabled: allDisabled || currentOutfit?.userRating == 1,
+              selected: currentOutfit?.userRating == -1,
+              // onPressed: () => _outfitBloc.dislikeOutfit.add(outfitRating),
             ),
             CustomFab(
               color: Colors.greenAccent[700],
@@ -330,9 +330,9 @@ class _ExploreScreenOriginalState extends State<ExploreScreenOriginal> {
               color: Colors.blueAccent,
               icon: Icons.thumb_up,
               largeIcon: true,
-              disabled: allDisabled || currentOutfit?.userImpression == -1,
-              selected: currentOutfit?.userImpression == 1,
-              onPressed: () => _outfitBloc.likeOutfit.add(outfitImpression),
+              disabled: allDisabled || currentOutfit?.userRating == -1,
+              selected: currentOutfit?.userRating == 1,
+            // onPressed: () => _outfitBloc.likeOutfit.add(outfitRating),
             ),
             CustomFab(
               color: Colors.amberAccent,

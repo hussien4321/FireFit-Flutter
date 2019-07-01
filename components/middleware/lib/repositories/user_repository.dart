@@ -13,13 +13,16 @@ abstract class UserRepository {
 
   Future<void> registerNotificationToken(String userId);
   Future<bool> loadNotifications(LoadNotifications loadNotifications);
+  Future<bool> loadMoreNotifications(LoadNotifications loadNotifications);
   Future<bool> markNotificationsSeen(MarkNotificationsSeen markSeen);
   Stream<List<OutfitNotification>> getNotifications();
   
   Future<bool> followUser(FollowUser followUser);
-  Future<bool> loadFollowers(LoadUser userId);
-  Future<bool> loadFollowing(LoadUser userId);
-
+  Future<bool> loadFollowers(LoadUsers loadUsers);
+  Future<bool> loadFollowing(LoadUsers loadUsers);
+  Future<bool> loadMoreFollowing(LoadUsers loadUsers);
+  Future<bool> loadMoreFollowers(LoadUsers loadUsers);
+  
   Future<bool> hasEmailVerified();
   Future<void> resendVerificationEmail([_]);
   Future<String> getVerificationEmail();

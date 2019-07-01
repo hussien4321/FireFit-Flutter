@@ -1,3 +1,5 @@
+import 'package:middleware/entities.dart';
+
 enum SearchModes {
   EXPLORE, MINE, SAVED, SELECTED, SELECTED_SINGLE, FEED, NOTIFICATIONS, FOLLOWERS, FOLLOWING, TEMP
 }
@@ -33,13 +35,13 @@ class LoadOutfits {
 
   SearchModes searchMode;
   String userId;
-  String startAfterUserId;
+  Outfit startAfterOutfit;
   String category;
   bool sortByTop;
   
   LoadOutfits({
     this.userId,
-    this.startAfterUserId,
+    this.startAfterOutfit,
     this.category,
     this.sortByTop = false,
   });
@@ -47,7 +49,7 @@ class LoadOutfits {
   bool operator ==(o) {
     return o is LoadOutfits &&
     o.userId == userId &&
-    o.startAfterUserId == startAfterUserId &&
+    o.startAfterOutfit == startAfterOutfit &&
     o.category == category&&
     o.sortByTop == sortByTop;
   }
@@ -55,7 +57,8 @@ class LoadOutfits {
   Map<String, dynamic> toJson() => {
     'search_mode': searchModeToString(searchMode),
     'user_id': userId,
-    'start_after_user_id': startAfterUserId,
+    'start_after_outfit': startAfterOutfit?.toJson(),
+    'start_after_save':startAfterOutfit?.save?.toJson(),
     'category': category,
     'sort_by_top': sortByTop,
   };
