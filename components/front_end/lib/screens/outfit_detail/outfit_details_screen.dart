@@ -64,7 +64,9 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
             );
           }else{
             outfit = outfitSnap.data;
-            return _overlayScaffold(body: _buildMainBody());
+            return _overlayScaffold(
+              body: _buildMainBody()
+            );
           }
         }
       ),

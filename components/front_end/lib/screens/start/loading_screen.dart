@@ -27,21 +27,24 @@ class _LoadingScreenState extends State<LoadingScreen> {
       body: SafeArea(
         child: Column(
           children: <Widget>[
-            Text(
-              'FireFit',
-              style: Theme.of(context).textTheme.display1.copyWith(
-                color: Colors.black,
-                fontWeight: FontWeight.bold
+            AppTitle(
+              color: Colors.deepOrange[800],
+            ),
+            Expanded(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: CircularProgressIndicator(),
+                  ),
+                  Text(
+                    'Setting up...',
+                    style: Theme.of(context).textTheme.caption,
+                  ),
+                ],
               ),
-              textAlign: TextAlign.center,
             ),
-            Expanded(child: Container(),),
-            CircularProgressIndicator(),
-            Text(
-              'Setting up...',
-              style: Theme.of(context).textTheme.caption,
-            ),
-            Expanded(child: Container(),),
           ],
         ),
       ),

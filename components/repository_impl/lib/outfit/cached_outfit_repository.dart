@@ -107,7 +107,7 @@ class CachedOutfitRepository {
   Future<int> rateOutfit(OutfitRating outfitRating) async {
     Outfit outfit = outfitRating.outfit;
     int ratingValue = outfitRating.ratingValue;
-    double average = outfit.averageRating == null ? 0 : outfit.averageRating;
+    double average = outfit.averageRating;
     double total = outfit.ratingsCount.toDouble();
     if(outfit.hasRating){
       average = ((average * total) - outfit.userRating) / (total - 1);

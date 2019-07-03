@@ -30,6 +30,7 @@ class _FeedOutfitsState extends State<FeedOutfits> {
     _controller.addListener(_scrollListener);
   }
   _scrollListener() {
+    print('_controller.offset:${_controller.offset}');
     if (_controller.offset >= (_controller.position.maxScrollExtent - 150) && !_controller.position.outOfRange) {
       if(widget.onReachEnd!=null && widget.outfits.isNotEmpty){
         widget.onReachEnd(widget.outfits.last);

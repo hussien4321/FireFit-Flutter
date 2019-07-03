@@ -3,6 +3,7 @@ import 'package:front_end/screens.dart';
 import 'package:middleware/middleware.dart';
 import 'package:blocs/blocs.dart';
 import 'package:front_end/providers.dart';
+import 'package:front_end/helper_widgets.dart';
 
 class FeedScreen extends StatefulWidget {
   @override
@@ -25,27 +26,30 @@ class _FeedScreenState extends State<FeedScreen> {
   @override
   Widget build(BuildContext context) {
     _initBlocs();
-    return StreamBuilder<bool>(
-      stream: _outfitBloc.isLoading,
-      initialData: false,
-      builder: (ctx, isLoadingSnap) {
-        return StreamBuilder<List<Outfit>>(
-          stream: _outfitBloc.feedOutfits,
-          initialData: [],
-          builder: (ctx, outfitsSnap) {
-            return FeedOutfits(
-              isLoading: isLoadingSnap.data,
-              outfits: outfitsSnap.data,
-              onReachEnd: (lastOutfit) {
-                _outfitBloc.loadFeedOutfits.add(LoadOutfits(
-                  userId: userId,
-                  startAfterOutfit: lastOutfit,
-                ));
-              }
-            );
-          },
-        );
-      },
+    return Container(
+      color: Colors.grey[300],
+      child: StreamBuilder<bool>(
+        stream: _outfitBloc.isLoading,
+        initialData: false,
+        builder: (ctx, isLoadingSnap) {
+          return StreamBuilder<List<Outfit>>(
+            stream: _outfitBloc.feedOutfits,
+            initialData: [],
+            builder: (ctx, outfitsSnap) {
+              return FeedOutfits(
+                isLoading: isLoadingSnap.data,
+                outfits: outfitsSnap.data,
+                onReachEnd: (lastOutfit) {
+                  _outfitBloc.loadFeedOutfits.add(LoadOutfits(
+                    userId: userId,
+                    startAfterOutfit: lastOutfit,
+                  ));
+                }
+              );
+            },
+          );
+        },
+      ),
     );
   }
   

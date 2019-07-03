@@ -21,7 +21,6 @@ class _ExploreScreenState extends State<ExploreScreen> with SingleTickerProvider
   
   final Color imageOverlayColor = Colors.white;
 
-  LoadOutfits explore = LoadOutfits();
   String userId;
 
   int adCounter = 50;
@@ -51,23 +50,32 @@ class _ExploreScreenState extends State<ExploreScreen> with SingleTickerProvider
           borderRadius: BorderRadius.vertical(top: Radius.circular(10.0))
         ),
         padding: EdgeInsets.only(top: 16.0),
-        child: Column(
-          children: <Widget>[
-            _searchDetailsBar(),
-            Expanded(
-              child: StreamBuilder<bool>(
-                stream: _outfitBloc.isLoading,
-                initialData: true,
-                builder: (ctx, isLoadingSnap) => StreamBuilder<List<Outfit>>(
-                  stream: _outfitBloc.exploredOutfits,
-                  initialData: [],
-                  builder: (ctx, outfitsSnap) {
-                    return _outfitsCarousel(outfitsSnap.data, isLoadingSnap.data);
-                  }
+        child: PullToRefreshOverlay(
+          matchSize: true,
+          onRefresh: () {
+            _outfitBloc.exploreOutfits.add(LoadOutfits(
+              userId: userId,
+              forceLoad: true,
+            ));
+          },
+          child: Column(
+            children: <Widget>[
+              _searchDetailsBar(),
+              Expanded(
+                child: StreamBuilder<bool>(
+                  stream: _outfitBloc.isLoading,
+                  initialData: true,
+                  builder: (ctx, isLoadingSnap) => StreamBuilder<List<Outfit>>(
+                    stream: _outfitBloc.exploredOutfits,
+                    initialData: [],
+                    builder: (ctx, outfitsSnap) {
+                      return _outfitsCarousel(outfitsSnap.data, isLoadingSnap.data);
+                    }
+                  )
                 )
-              )
-            ),
-          ],
+              ),
+            ],
+          )
         )
       ),
     );
@@ -78,8 +86,9 @@ class _ExploreScreenState extends State<ExploreScreen> with SingleTickerProvider
     if(_outfitBloc==null){
       _outfitBloc = OutfitBlocProvider.of(context);
       userId = await UserBlocProvider.of(context).existingAuthId.first;
-      explore.userId = userId;
-      _outfitBloc.exploreOutfits.add(explore);
+      _outfitBloc.exploreOutfits.add(LoadOutfits(
+        userId: userId,
+      ));
     }
   }
 

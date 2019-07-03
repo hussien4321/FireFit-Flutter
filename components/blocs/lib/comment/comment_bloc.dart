@@ -34,7 +34,7 @@ class CommentBloc {
   CommentBloc(this.repository) {
     _commentsController.addStream(repository.getComments());
     _subscriptions = <StreamSubscription<dynamic>>[
-      _loadCommentsController.listen(_loadComments),
+      _loadCommentsController.distinct().listen(_loadComments),
       _likeCommentController.listen(_likeComment),
       _addCommentController.listen(_addComment),
       _deleteCommentController.listen(_deleteComment),
@@ -44,7 +44,7 @@ class CommentBloc {
 
   _loadComments(LoadComments loadComments) async {
     _loadingController.add(true);
-    final success = await repository.loadComments(loadComments);
+    final success = loadComments.startAfterComment == null ? await repository.loadComments(loadComments) : await repository.loadMoreComments(loadComments);
     _loadingController.add(false);
     _successController.add(success);
     if(!success){

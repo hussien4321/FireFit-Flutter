@@ -21,9 +21,9 @@ class _LogInScreenState extends State<LogInScreen> with LoadingAndErrorDialogs {
   
   final GlobalKey<FormState> _formKey = new GlobalKey<FormState>();
 
-  TextEditingController emailController = TextEditingController(text: 'hussien.elmi@outlook.com');
-  TextEditingController passwordController = TextEditingController(text: 'password2');
-  TextEditingController confirmationController = TextEditingController(text: 'password2');
+  TextEditingController emailController = TextEditingController();
+  TextEditingController passwordController = TextEditingController();
+  TextEditingController confirmationController = TextEditingController();
 
   FocusNode passwordFocus = FocusNode();
   FocusNode confirmationFocus = FocusNode();
@@ -32,6 +32,18 @@ class _LogInScreenState extends State<LogInScreen> with LoadingAndErrorDialogs {
   List<StreamSubscription<dynamic>> _subscriptions;
 
   bool isOverlayShowing = false;
+
+  bool _giveDefaultLogIn = true;
+
+  @override
+  void initState() {
+    super.initState();
+    if(_giveDefaultLogIn){
+      emailController.text ='hussien.elmi@outlook.com';
+      passwordController.text = 'password2';
+      confirmationController.text ='password2';
+    }
+  }
 
   @override
   dispose(){
@@ -44,6 +56,8 @@ class _LogInScreenState extends State<LogInScreen> with LoadingAndErrorDialogs {
     _initBlocs();
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 2,
         title: Text(
           widget.isRegistering ? 'Create account' : 'Sign in',
           style: TextStyle(

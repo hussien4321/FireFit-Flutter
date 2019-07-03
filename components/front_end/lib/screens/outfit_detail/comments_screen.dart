@@ -34,9 +34,30 @@ class _CommentsScreenState extends State<CommentsScreen> {
   TextEditingController commentTextController = new TextEditingController();
 
 
+  Comment lastComment;
+
+  ScrollController _controller;
+
   @override
   void initState() {
     super.initState();
+    _controller = ScrollController();
+    _controller.addListener(_scrollListener);
+  }
+  _scrollListener() {
+    if (_controller.offset >= (_controller.position.maxScrollExtent - 100) && !_controller.position.outOfRange) {
+      _commentBloc.loadComments.add(LoadComments(
+        userId: userId,
+        outfitId: widget.outfitId,
+        startAfterComment: lastComment,
+      ));
+    }
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _controller.dispose();
   }
 
   @override
@@ -58,28 +79,32 @@ class _CommentsScreenState extends State<CommentsScreen> {
         backgroundColor: Colors.white,
       ),
       body: Container(
-        child: SingleChildScrollView(
-          child: StreamBuilder<bool>(
-            stream: _outfitBloc.isLoading,
-            initialData: true,
-            builder: (context, loadingSnap) => StreamBuilder<Outfit>(
-              stream: _outfitBloc.selectedOutfit,
-              builder: (context, outfitSnap) {
-                if(loadingSnap.data || !outfitSnap.hasData || outfitSnap.data == null){
-                  return _loadingPlaceholder();
-                }
-                Outfit outfit = outfitSnap.data;
-                return Column(
-                  children: [
-                    _commentInput(outfit),
-                    _buildOutfitText(outfit),
-                    _buildCommentsCount(outfit),
-                    Divider(color: Colors.grey.withOpacity(0.5)),
-                    StreamBuilder<List<Comment>>(
-                      stream: _commentBloc.comments,
-                      initialData: [],
-                      builder: (ctx, snap) {
-                        return Column(
+        child: StreamBuilder<bool>(
+          stream: _outfitBloc.isLoading,
+          initialData: true,
+          builder: (context, loadingSnap) => StreamBuilder<Outfit>(
+            stream: _outfitBloc.selectedOutfit,
+            builder: (context, outfitSnap) {
+              if(loadingSnap.data || !outfitSnap.hasData || outfitSnap.data == null){
+                return _loadingPlaceholder();
+              }
+              Outfit outfit = outfitSnap.data;
+              return Column(
+                children: [
+                  _commentInput(outfit),
+                  _buildOutfitText(outfit),
+                  _buildCommentsCount(outfit),
+                  Divider(color: Colors.grey.withOpacity(0.5)),
+                  StreamBuilder<List<Comment>>(
+                    stream: _commentBloc.comments,
+                    initialData: [],
+                    builder: (ctx, snap) {
+                      if(snap.data.length>0){
+                        lastComment = snap.data.last;
+                      } 
+                      return Expanded(
+                        child: ListView(
+                          controller: _controller,
                           children: snap.data.map((comment) => _buildCommentField(comment)).toList()..add(
                             StreamBuilder<bool>(
                               stream: _commentBloc.isLoading,
@@ -87,13 +112,13 @@ class _CommentsScreenState extends State<CommentsScreen> {
                               builder: (ctx, loadingSnap) => loadingSnap.data ? _loadingPlaceholder() : Container(),
                             )
                           )
-                        );
-                      },
-                    )
-                  ]
-                );
-              }
-            ),
+                        ),
+                      );
+                    },
+                  )
+                ]
+              );
+            }
           ),
         ),
       ),

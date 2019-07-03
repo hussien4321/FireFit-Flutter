@@ -18,6 +18,7 @@ export 'helper_widgets/input/rating_dialog.dart';
 export 'helper_widgets/input/select_images.dart';
 export 'helper_widgets/input/yes_no_dialog.dart';
 
+export 'helper_widgets/notices/app_title.dart';
 export 'helper_widgets/notices/custom_banner.dart';
 export 'helper_widgets/notices/under_construction_notice.dart';
 
@@ -29,6 +30,8 @@ export 'helper_widgets/outfit/demographic_sticker.dart';
 export 'helper_widgets/outfit/outfit_stats.dart';
 export 'helper_widgets/outfit/style_banner.dart';
 export 'helper_widgets/outfit/style_sticker.dart';
+
+export 'helper_widgets/overlays/pull_to_refresh_overlay.dart';
 
 export 'helper_widgets/state/loading_and_error_dialogs.dart';
 export 'helper_widgets/state/snackbar_messages.dart';

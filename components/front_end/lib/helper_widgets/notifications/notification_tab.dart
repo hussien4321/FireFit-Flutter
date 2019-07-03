@@ -53,7 +53,7 @@ class _NotificationTabState extends State<NotificationTab> {
                 height: 50.0,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  image: DecorationImage(
+                  image: refUser == null ? null : DecorationImage(
                     image: CachedNetworkImageProvider(refUser.profilePicUrl),
                     fit: BoxFit.cover
                   ),

@@ -91,16 +91,17 @@ class _IntroScreenState extends State<IntroScreen> {
     return SafeArea(
       child: Column(
         children: <Widget>[
-          Text(
-            'FIREFIT',
-            style: Theme.of(context).textTheme.display1.apply(color: Colors.white),
+          AppTitle(
+            color: Colors.orange[300],
           ),
-          Expanded(child: Container(),),
-          Text(
-            '"Discover, share & upgrade your fashion style"',
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontStyle: FontStyle.italic, ),
+          Expanded(
+            child: Center(
+              child: Text(
+                '"Discover, share & upgrade your fashion style"',
+                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontStyle: FontStyle.italic, ),
+              ),
+            ),
           ),
-          Expanded(child: Container(),),
           Container(
             width: double.infinity,
             child: RaisedButton(

@@ -17,6 +17,7 @@ abstract class OutfitRepository{
 
   Stream<List<Comment>> getComments();
   Future<bool> loadComments(LoadComments loadComments);
+  Future<bool> loadMoreComments(LoadComments loadComments);
   Future<bool> addComment(AddComment comment);
   Future<bool> likeComment(CommentLike commentlike);
   Future<bool> deleteComment(DeleteComment deleteComment);

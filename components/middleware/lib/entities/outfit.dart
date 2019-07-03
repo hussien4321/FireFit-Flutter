@@ -53,7 +53,7 @@ class Outfit {
     }
     images = _images;
     style = map['style'];
-    averageRating = map['average_rating'] == null ? null : double.parse(map['average_rating'].toString());
+    averageRating = map['average_rating'] == null ? 0 : double.parse(map['average_rating'].toString());
     ratingsCount = map['ratings_count'];
     commentsCount = map['comments_count'];
     userRating = map['user_rating'];

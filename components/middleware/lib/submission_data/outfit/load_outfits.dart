@@ -38,18 +38,21 @@ class LoadOutfits {
   Outfit startAfterOutfit;
   String category;
   bool sortByTop;
+  bool forceLoad;
   
   LoadOutfits({
     this.userId,
     this.startAfterOutfit,
     this.category,
     this.sortByTop = false,
+    this.forceLoad = false,
   });
 
   bool operator ==(o) {
     return o is LoadOutfits &&
     o.userId == userId &&
     o.startAfterOutfit == startAfterOutfit &&
+    !o.forceLoad &&
     o.category == category&&
     o.sortByTop == sortByTop;
   }
