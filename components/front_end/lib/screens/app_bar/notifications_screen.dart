@@ -76,11 +76,19 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
               if(!isLoadingSnap.data && snap.data.length>0){
                 lastNotification = snap.data.last;
               }
-              return ListView(
-                controller: _controller,
-                children: _buildNotifications(snap.data)..add(
-                  _buildEndTag(isLoadingSnap.data, snap.data.isEmpty)
-                )
+              return PullToRefreshOverlay(
+                matchSize: false,
+                onRefresh: () async {
+                  _notificationBloc.loadStaticNotifications.add(LoadNotifications(
+                    userId: userId
+                  ));
+                },
+                child: ListView(
+                  controller: _controller,
+                  children: _buildNotifications(snap.data)..add(
+                    _buildEndTag(isLoadingSnap.data, snap.data.isEmpty)
+                  )
+                ),
               );
             },
           ),

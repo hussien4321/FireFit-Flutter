@@ -52,7 +52,7 @@ class _ExploreScreenState extends State<ExploreScreen> with SingleTickerProvider
         padding: EdgeInsets.only(top: 16.0),
         child: PullToRefreshOverlay(
           matchSize: true,
-          onRefresh: () {
+          onRefresh: () async {
             _outfitBloc.exploreOutfits.add(LoadOutfits(
               userId: userId,
               forceLoad: true,

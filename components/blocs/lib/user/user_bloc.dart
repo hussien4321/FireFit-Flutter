@@ -56,6 +56,8 @@ class UserBloc {
   Observable<String> get hasError => _errorController.stream;
   final _successController = PublishSubject<bool>();
   Observable<bool> get isSuccessful => _successController.stream;
+  final _successMessageController = PublishSubject<String>();
+  Observable<String> get successMessage => _successMessageController.stream;
 
   final _resendEmailController = PublishSubject<void>();
   Sink<void> get resendVerificationEmail => _resendEmailController;
@@ -87,7 +89,7 @@ class UserBloc {
       _checkUsernameController.stream.debounce(Duration(milliseconds: 500)).listen(_refreshUsernameCheck),
       _refreshVerificationEmailController.stream.listen(_refreshVerifiedCheck),
       _resendEmailController.stream.listen(repository.resendVerificationEmail),
-      _selectUserController.distinct().listen(_loadSelectedUser),
+      _selectUserController.listen(_loadSelectedUser),
       _loadCurrentUserController.listen(_loadCurrentUser),
       _followUserController.listen(_followUser),
       _loadFollowersController.listen(_loadFollowers),
@@ -150,6 +152,7 @@ class UserBloc {
   _logOutUser([_]) async {
       _existingAuthController.add(null);
       await repository.logOut();
+      _successMessageController.add("Sign out successful!");
   }
 
   _deleteUser([_]) async {
@@ -227,8 +230,11 @@ class UserBloc {
   }
 
   _followUser(FollowUser followUser) async {
+    bool isFollowing = followUser.followed.isFollowing;
     bool success = await repository.followUser(followUser);
-    if(!success){
+    if(success){
+      _successMessageController.add(isFollowing ?  "User unfollowed!" : "Now following user!");
+    }else{
       _errorController.add("Failed to complete task");
     }
   }
@@ -267,6 +273,7 @@ class UserBloc {
     _registerController.close();
     _errorController.close();
     _isLoadingFollowsController.close();
+    _successMessageController.close();
     _subscriptions.forEach((subscription) => subscription.cancel());
   }
 }

@@ -222,9 +222,16 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
       child: Column(
         children: <Widget>[
           Expanded(
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
+            child: PullToRefreshOverlay(
+              matchSize: false,
+              onRefresh: () async {
+                _outfitBloc.selectOutfit.add(LoadOutfit(
+                outfitId: widget.outfitId,
+                userId: userId,
+                loadFromCloud: true,
+                ));
+              },
+              child: ListView(
                 children: <Widget>[
                   Container(
                     decoration: BoxDecoration(
@@ -232,7 +239,6 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
                         image: CachedNetworkImageProvider(
                           outfit.images.first
                         ),
-                        
                         fit: BoxFit.cover,
                       ),
                        boxShadow: []

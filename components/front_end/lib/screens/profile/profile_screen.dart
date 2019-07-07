@@ -128,17 +128,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
       body: Column(
         children: <Widget>[
           Expanded(
-            child: ListView(
-              controller: _controller,
-              children: <Widget>[
-                _biometricInfo(user),
-                _spaceSeparator(),
-                _overallStatistics(user),
-                _spaceSeparator(),
-                _buildOutfitDescription(user),
-                _spaceSeparator(),
-                _outfitsOverview(user, isLoadingOutfits),
-              ],
+            child: PullToRefreshOverlay(
+              matchSize: false,
+              onRefresh: () async {
+                _userBloc.selectUser.add(widget.userId);
+                _outfitBloc.loadUserOutfits.add(
+                  LoadOutfits(
+                    userId: widget.userId,
+                    forceLoad: true,
+                  )
+                );
+              },
+              child: ListView(
+                controller: _controller,
+                children: <Widget>[
+                  _biometricInfo(user),
+                  _spaceSeparator(),
+                  _overallStatistics(user),
+                  _spaceSeparator(),
+                  _buildOutfitDescription(user),
+                  _spaceSeparator(),
+                  _outfitsOverview(user, isLoadingOutfits),
+                ],
+              ),
             ),
           ),
           isCurrentUser ? Container() : _buildInteractButton(user),

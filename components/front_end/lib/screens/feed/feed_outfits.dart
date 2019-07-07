@@ -10,9 +10,10 @@ class FeedOutfits extends StatefulWidget {
   final bool isLoading;
   final List<Outfit> outfits;
   final bool hideTitle;
+  final RefreshCallback onRefresh;
   final ValueChanged<Outfit> onReachEnd;
 
-  FeedOutfits({this.outfits, this.isLoading, this.hideTitle = false, this.onReachEnd});
+  FeedOutfits({this.outfits, this.isLoading, this.hideTitle = false, this.onRefresh, this.onReachEnd});
 
   @override
   _FeedOutfitsState createState() => _FeedOutfitsState();
@@ -30,7 +31,6 @@ class _FeedOutfitsState extends State<FeedOutfits> {
     _controller.addListener(_scrollListener);
   }
   _scrollListener() {
-    print('_controller.offset:${_controller.offset}');
     if (_controller.offset >= (_controller.position.maxScrollExtent - 150) && !_controller.position.outOfRange) {
       if(widget.onReachEnd!=null && widget.outfits.isNotEmpty){
         widget.onReachEnd(widget.outfits.last);
@@ -54,10 +54,14 @@ class _FeedOutfitsState extends State<FeedOutfits> {
   }
 
   Widget _buildScrollableGrid(BuildContext ctx) {
-    return ListView.builder(
-      controller: _controller,
-      itemCount: widget.outfits.length+1,
-      itemBuilder: (ctx, i) => i==widget.outfits.length ? _endOfListNotice(ctx) : _buildOutfitCard(i, widget.outfits[i], ctx, i==0),
+    return PullToRefreshOverlay(
+      matchSize: false,
+      onRefresh: widget.onRefresh, 
+      child: ListView.builder(
+        controller: _controller,
+        itemCount: widget.outfits.length+1,
+        itemBuilder: (ctx,i) => i==widget.outfits.length ? _endOfListNotice(ctx) : _buildOutfitCard(i, widget.outfits[i], ctx, i==0),
+      ),
     );
   }
 
@@ -116,19 +120,22 @@ class _FeedOutfitsState extends State<FeedOutfits> {
       margin: EdgeInsets.only(top: isFirst ? 32 : 0 , bottom: 32.0, left: 32, right: 32),
       child: GestureDetector(
         onTap: () => _openDetailedOutfit(outfit, ctx),
-        child: Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(8),
-            color: Colors.white,
-          ),
-          padding: EdgeInsets.symmetric(horizontal: 16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: <Widget>[
-              _postBasicData(index, outfit, ctx),
-              _outfitFullImageCard(outfit, ctx),
-              _outfitStats(outfit, ctx),
-            ],
+        child: Card(
+          elevation: 5,
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(8),
+              color: Colors.white,
+            ),
+            padding: EdgeInsets.symmetric(horizontal: 16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: <Widget>[
+                _postBasicData(index, outfit, ctx),
+                _outfitFullImageCard(outfit, ctx),
+                _outfitStats(outfit, ctx),
+              ],
+            ),
           ),
         ),
       ),

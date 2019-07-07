@@ -94,7 +94,12 @@ class _CommentsScreenState extends State<CommentsScreen> {
                   _commentInput(outfit),
                   _buildOutfitText(outfit),
                   _buildCommentsCount(outfit),
-                  Divider(color: Colors.grey.withOpacity(0.5)),
+                  Container(
+                    margin: EdgeInsets.only(top: 4),
+                    width: double.infinity,
+                    height: 0.5,
+                    color: Colors.grey.withOpacity(0.5)
+                  ),
                   StreamBuilder<List<Comment>>(
                     stream: _commentBloc.comments,
                     initialData: [],
@@ -103,15 +108,25 @@ class _CommentsScreenState extends State<CommentsScreen> {
                         lastComment = snap.data.last;
                       } 
                       return Expanded(
-                        child: ListView(
-                          controller: _controller,
-                          children: snap.data.map((comment) => _buildCommentField(comment)).toList()..add(
-                            StreamBuilder<bool>(
-                              stream: _commentBloc.isLoading,
-                              initialData: false,
-                              builder: (ctx, loadingSnap) => loadingSnap.data ? _loadingPlaceholder() : Container(),
+                        child: PullToRefreshOverlay(
+                          matchSize: false,
+                          onRefresh: () async {
+                            _commentBloc.loadComments.add(LoadComments(
+                              userId: userId,
+                              outfitId: widget.outfitId,
+                            ));
+                          },
+                          child: ListView(
+                            padding: EdgeInsets.all(0),
+                            controller: _controller,
+                            children: snap.data.map((comment) => _buildCommentField(comment)).toList()..add(
+                              StreamBuilder<bool>(
+                                stream: _commentBloc.isLoading,
+                                initialData: false,
+                                builder: (ctx, loadingSnap) => loadingSnap.data ? _loadingPlaceholder() : Container(),
+                              )
                             )
-                          )
+                          ),
                         ),
                       );
                     },

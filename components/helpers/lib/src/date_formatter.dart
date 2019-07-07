@@ -23,7 +23,7 @@ class DateFormatter {
       return 'Today';
     }
     String dateString = "";
-    dateString += "${_monthToString(current.month)} ${current.day}${_daySuffix(current)}";
+    dateString += "${_monthToString(dateTime.month)} ${dateTime.day}${_daySuffix(dateTime)}";
     if(!_isSameYear(current, dateTime)){
       dateString += ' ${dateTime.year}';
     }

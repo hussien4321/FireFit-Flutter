@@ -39,6 +39,12 @@ class _FeedScreenState extends State<FeedScreen> {
               return FeedOutfits(
                 isLoading: isLoadingSnap.data,
                 outfits: outfitsSnap.data,
+                onRefresh: () {
+                  _outfitBloc.loadFeedOutfits.add(LoadOutfits(
+                    userId: userId,
+                    forceLoad: true,
+                  ));
+                },
                 onReachEnd: (lastOutfit) {
                   _outfitBloc.loadFeedOutfits.add(LoadOutfits(
                     userId: userId,

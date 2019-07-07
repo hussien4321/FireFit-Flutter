@@ -50,6 +50,8 @@ class OutfitBloc{
   Observable<bool> get isLoading => _loadingController.stream;
   final _successController = PublishSubject<bool>();
   Observable<bool> get isSuccessful => _successController.stream;
+  final _successMessageController = PublishSubject<String>();
+  Observable<String> get successMessage => _successMessageController.stream;
   final _errorController = PublishSubject<String>();
   Observable<String> get hasError => _errorController.stream;
   
@@ -112,7 +114,9 @@ class OutfitBloc{
     final success = await repository.uploadOutfit(uploadOutfit);
     _loadingController.add(false);
     _successController.add(success);
-    if(!success){
+    if(success){
+      _successMessageController.add("Outfit uploaded!");
+    }else{
       _errorController.add("Failed to create new outfit");
     }
   }
@@ -121,7 +125,9 @@ class OutfitBloc{
     final success = await repository.editOutfit(editOutfit);
     _loadingController.add(false);
     _successController.add(success);
-    if(!success){
+    if(success){
+      _successMessageController.add("Edit successful!");
+    }else{
       _errorController.add("Failed to create new outfit");
     }
   }
@@ -131,7 +137,9 @@ class OutfitBloc{
     final success = await repository.deleteOutfit(outfit);
     _loadingController.add(false);
     _successController.add(success);
-    if(!success){
+    if(success){
+      _successMessageController.add("Delete successful!");
+    }else{
       _errorController.add("Failed to delete outfit");
     }
   }
@@ -139,15 +147,22 @@ class OutfitBloc{
 
   _rateOutfit(OutfitRating outfitRating) async {
     final success = await repository.rateOutfit(outfitRating);
-    if(!success){
+    if(success){
+      _successMessageController.add("Rating submitted!");
+    }else{
       _errorController.add("Failed to react to outfit");
     }
   }
 
   _saveOutfit(OutfitSave saveData) async {
+    bool isSaved = saveData.outfit.isSaved;
     final success = await repository.saveOutfit(saveData);
-    if(!success){
-      _errorController.add("Failed to react to outfit");
+    if(success){
+      if(!isSaved) {
+        _successMessageController.add("Outfit saved!");
+      }
+    }else{
+      _errorController.add("Failed to save to outfit");
     }
   }
 
@@ -181,6 +196,7 @@ class OutfitBloc{
     _rateOutfitController.close();
     _loadingController.close();
     _successController.close();
+    _successMessageController.close();
     _errorController.close();
     _subscriptions.forEach((subscription) => subscription.cancel());
   }

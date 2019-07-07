@@ -2,6 +2,8 @@ import 'package:multi_image_picker/multi_image_picker.dart';
 import 'dart:async';
 import 'package:flutter/services.dart';
 import 'dart:io';
+import 'dart:math';
+import 'dart:ui';
 
 class SelectImages {
 
@@ -61,7 +63,9 @@ class SelectImages {
   static Future<String> _saveImage(String dirPath, Asset result, List<Asset> selectedAssets) async {
     if(!selectedAssets.any((Asset image) => result.identifier==image.identifier)){
       selectedAssets.add(result);
-      ByteData imageData = await result.requestOriginal(quality: 50);
+      Offset coords = _getNewCoords(result, 800);
+      ByteData imageData = await result.requestThumbnail(coords.dx.toInt(),coords.dy.toInt());
+      print('size: ${imageData.lengthInBytes}');
       if(imageData != null){
         String filename = '$dirPath/$timestamp.jpg';
         File filePath = File(filename);
@@ -70,5 +74,16 @@ class SelectImages {
       }
     }
     return null;
+  }
+
+  static Offset _getNewCoords(Asset result, int newSize){
+    int height = result.originalHeight;
+    int width = result.originalWidth;
+    int maxSide = max(height, width);
+    print('originalHeight:${result.originalHeight}, originalWidth:${result.originalWidth}');
+    double newHeight =newSize*(height/maxSide);
+    double newWidth =newSize*(width/maxSide);
+    print('newHeight:${newHeight}, newWidth:${newWidth}');
+    return Offset(newWidth, newHeight);
   }
 }

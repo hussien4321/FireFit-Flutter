@@ -2,16 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:middleware/middleware.dart';
 import 'package:front_end/helper_widgets.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class OutfitsGrid extends StatefulWidget {
 
   final bool isLoading;
   final List<Outfit> outfits;
   final bool hasFixedHeight;
+  final RefreshCallback onRefresh;
   final VoidCallback onReachEnd;
 
-  OutfitsGrid({this.outfits, this.isLoading, this.onReachEnd, this.hasFixedHeight = false});
+  OutfitsGrid({this.outfits, this.isLoading, this.onReachEnd, this.onRefresh, this.hasFixedHeight = false});
 
   @override
   _OutfitsGridState createState() => _OutfitsGridState();
@@ -47,37 +47,47 @@ class _OutfitsGridState extends State<OutfitsGrid> {
       padding: EdgeInsets.symmetric(horizontal: 4.0),
       width: double.infinity,
       child: _buildScrollableGrid(context)
-      
     );
   }
 
   Widget _buildScrollableGrid(BuildContext ctx) {
-    return SingleChildScrollView(
+    bool hasRefresh = widget.onRefresh != null;
+    Widget content = ListView(
+      shrinkWrap: true,
       controller: _controller,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: <Widget>[
-          Padding(
-            padding: EdgeInsets.only(bottom: 4),
-          ),
-          widget.outfits.isEmpty ? Container() : GridView.builder(
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 3,
-              childAspectRatio: 1/2,
-              crossAxisSpacing: 4,
-              mainAxisSpacing: 4
-            ),
-            physics: ScrollPhysics(),
-            shrinkWrap: true,
-            itemCount: widget.outfits.length,
-            itemBuilder: (ctx, i) => _buildSimpleOutfitView(widget.outfits[i%widget.outfits.length], ctx),
-          ),
-          Container(
-            padding: EdgeInsets.all(12.0),
-            child: widget.isLoading ? _loadingMoreNotice() : _endOfListNotice(),
-          )
-        ],
+      children: <Widget>[
+        Padding(
+          padding: EdgeInsets.only(bottom: 4),
+        ),
+        widget.outfits.isEmpty ? Container() : _displayGrid(hasRefresh), 
+        Container(
+          padding: EdgeInsets.all(12.0),
+          child: widget.isLoading ? _loadingMoreNotice() : _endOfListNotice(),
+        )
+      ],
+    );
+    if(hasRefresh){
+      return PullToRefreshOverlay(
+        matchSize: false,
+        onRefresh: widget.onRefresh,
+        child: content
+      );
+    }
+    return content;
+  }
+
+  _displayGrid(bool hasRefresh) {
+    return GridView.builder(
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 3,
+        childAspectRatio: 1/2,
+        crossAxisSpacing: 4,
+        mainAxisSpacing: 4
       ),
+      physics: NeverScrollableScrollPhysics(),
+      shrinkWrap: true,
+      itemCount: widget.outfits.length,
+      itemBuilder: (ctx, i) => _buildSimpleOutfitView(widget.outfits[i%widget.outfits.length], ctx),
     );
   }
 
@@ -120,9 +130,7 @@ class _OutfitsGridState extends State<OutfitsGrid> {
         children: <Widget>[
           Padding(
             padding: const EdgeInsets.only(right: 16.0),
-            child: CircularProgressIndicator(
-              
-            ),
+            child: CircularProgressIndicator(),
           ),
           Text(
             'Loading ${widget.outfits.isEmpty?'':'more '}fits...',
@@ -134,6 +142,7 @@ class _OutfitsGridState extends State<OutfitsGrid> {
       ),
     );
   }
+
   Widget _endOfListNotice() {
     return Center(
       child: Text(

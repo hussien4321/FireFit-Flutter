@@ -31,7 +31,10 @@ class _MainAppBarState extends State<MainAppBar> {
   Preferences _preferences =Preferences();
 
   UserBloc _userBloc;
+  OutfitBloc _outfitBloc;
   NotificationBloc _notificationBloc;
+  CommentBloc _commentBloc;
+
   List<StreamSubscription<dynamic>> _subscriptions;
 
   BehaviorSubject<bool> _isSliderOpenController =BehaviorSubject<bool>(seedValue: false);
@@ -89,13 +92,15 @@ class _MainAppBarState extends State<MainAppBar> {
   _initBlocs() async {
     if(_userBloc == null){
       _userBloc = UserBlocProvider.of(context);
+      _outfitBloc =OutfitBlocProvider.of(context);
       _notificationBloc = NotificationBlocProvider.of(context);
+      _commentBloc =CommentBlocProvider.of(context);
       widget.messaging.configure(
         onMessage: (res) => _loadNewNotifications(),
       );
       _subscriptions = <StreamSubscription<dynamic>>[
-        _logInStatusListener()
-      ];
+        _logInStatusListener(),
+      ]..addAll(_successToastListeners());
       _userBloc.loadCurrentUser.add(null);
       userId = await _userBloc.existingAuthId.first;
       _notificationBloc.registerNotificationToken.add(userId);
@@ -125,6 +130,14 @@ class _MainAppBarState extends State<MainAppBar> {
       }
     });
   }
+
+  List<StreamSubscription> _successToastListeners() => [
+      _userBloc.successMessage.listen((message) => toast(message)),
+      _outfitBloc.successMessage.listen((message) => toast(message)),
+      _notificationBloc.successMessage.listen((message) => toast(message)),
+      _commentBloc.successMessage.listen((message) => toast(message)),
+    ];
+  
 
   Widget _buildNotificationsScaffold({Widget body}) {
     return InnerDrawer(

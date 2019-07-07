@@ -7,6 +7,7 @@ import 'package:front_end/screens.dart';
 import 'package:front_end/localization.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:overlay_support/overlay_support.dart';
+import 'package:overlay_support/src/theme.dart';
 
 void main({
   @required OutfitRepository outfitRepository,
@@ -23,6 +24,11 @@ void main({
           child: NotificationBlocProvider(
             bloc: NotificationBloc(userRepository),
             child: OverlaySupport(
+              toastTheme: ToastThemeData(
+                alignment: Alignment(0, 0.75),
+                background: Colors.deepOrange[800].withOpacity(0.8),
+                textColor: Colors.white
+              ),
               child: MaterialApp(
                 title: BlocLocalizations().appTitle,
                 debugShowCheckedModeBanner: false,

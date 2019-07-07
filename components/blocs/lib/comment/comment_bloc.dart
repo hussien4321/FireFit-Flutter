@@ -27,6 +27,8 @@ class CommentBloc {
 
   final _successController = PublishSubject<bool>();
   Observable<bool> get isSuccessful => _successController.stream;
+  final _successMessageController = PublishSubject<String>();
+  Observable<String> get successMessage => _successMessageController.stream;
 
   final _errorController = PublishSubject<String>();
   Observable<String> get hasError => _errorController.stream;
@@ -62,13 +64,20 @@ class CommentBloc {
 
   _addComment(AddComment comment) async {
     final success = await repository.addComment(comment);
-    if(!success){
+    if(success){
+      _successMessageController.add("Comment added!");
+    } else {
       _errorController.add("Failed to comment on outfit");
     }
   }
 
-  _deleteComment(DeleteComment comment) => repository.deleteComment(comment);
-  
+  _deleteComment(DeleteComment comment) async {
+    bool success = await repository.deleteComment(comment);
+    if(success){
+      _successMessageController.add("Delete successful!");
+    }
+  }
+
   void dispose() {
     _addCommentController.close();
     _loadCommentsController.close();
@@ -78,6 +87,7 @@ class CommentBloc {
     _loadingController.close();
     _successController.close();
     _errorController.close();
+    _successMessageController.close();
     _subscriptions.forEach((subscription) => subscription.cancel());
   }
 }

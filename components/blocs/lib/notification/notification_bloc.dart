@@ -26,12 +26,14 @@ class NotificationBloc {
   Observable<String> get hasError => _errorController.stream;
   final _successController = PublishSubject<bool>();
   Observable<bool> get isSuccessful => _successController.stream;
+  final _successMessageController = PublishSubject<String>();
+  Observable<String> get successMessage => _successMessageController.stream;
 
 
   NotificationBloc(this.repository) {
     _subscriptions = <StreamSubscription<dynamic>>[
       _registerNotificationTokenController.listen(_registerNotificationToken),
-      _loadStaticNotificationsController.distinct().listen(_loadStaticNotifications),
+      _loadStaticNotificationsController.listen(_loadStaticNotifications),
       _loadLiveNotificationsController.listen(_loadLiveNotifications),
       _markNotificationsSeenController.listen(_markNotificationsSeen)
     ];
@@ -66,8 +68,11 @@ class NotificationBloc {
     };
   }
 
-  _markNotificationsSeen(MarkNotificationsSeen markSeen){
-    repository.markNotificationsSeen(markSeen);
+  _markNotificationsSeen(MarkNotificationsSeen markSeen) async {
+    bool success = await repository.markNotificationsSeen(markSeen);
+    if(success && markSeen.isMarkingAll){
+      _successMessageController.add("Done!");
+    }
   }
 
   void dispose() {
@@ -79,6 +84,7 @@ class NotificationBloc {
     _loadingController.close();
     _errorController.close();
     _successController.close();
+    _successMessageController.close();
     _subscriptions.forEach((subscription) => subscription.cancel());
   }
 }

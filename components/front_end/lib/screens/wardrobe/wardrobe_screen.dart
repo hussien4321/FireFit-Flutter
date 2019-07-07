@@ -84,6 +84,12 @@ class _CustomOutfitsGridState extends State<CustomOutfitsGrid> {
             return OutfitsGrid(
               isLoading: isLoadingSnap.data,
               outfits: outfitsSnap.data,
+              onRefresh: () async {
+                (isMyOutfits ? _outfitBloc.loadMyOutfits : _outfitBloc.loadSavedOutfits).add(LoadOutfits(
+                  userId: userId,
+                  forceLoad: true,
+                ));
+              },
               onReachEnd: () => (isMyOutfits ? _outfitBloc.loadMyOutfits : _outfitBloc.loadSavedOutfits).add(
                 LoadOutfits(
                   userId: userId,
