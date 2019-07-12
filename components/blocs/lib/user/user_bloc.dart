@@ -16,6 +16,8 @@ class UserBloc {
   Stream<User> get selectedUser => _selectedUserController;
   final _selectUserController = PublishSubject<String>();
   Sink<String> get selectUser => _selectUserController; 
+  final _searchUserController = PublishSubject<String>();
+  Sink<String> get searchUser => _searchUserController; 
 
 
   final _followersController = BehaviorSubject<List<User>>();
@@ -47,6 +49,9 @@ class UserBloc {
   
   final _onboardController = PublishSubject<OnboardUser>();
   Sink<OnboardUser> get onboard => _onboardController;
+  
+  final _isBackgroundLoadingController = PublishSubject<bool>();
+  Observable<bool> get isBackgroundLoading => _isBackgroundLoadingController.stream;
 
   final _loadingController = PublishSubject<bool>();
   Observable<bool> get isLoading => _loadingController.stream;
@@ -63,8 +68,8 @@ class UserBloc {
   Sink<void> get resendVerificationEmail => _resendEmailController;
   final _refreshVerificationEmailController = PublishSubject<void>();
   Sink<void> get refreshVerificationEmail => _refreshVerificationEmailController;
-  final _isEmailVerifiedController = PublishSubject<bool>();
-  Observable<bool> get isEmailVerified => _isEmailVerifiedController;
+  final _isEmailVerifiedController = BehaviorSubject<bool>();
+  BehaviorSubject<bool> get isEmailVerified => _isEmailVerifiedController;
   final _verificationEmailController = BehaviorSubject<String>();
   Observable<String> get verificationEmail => _verificationEmailController;
 
@@ -90,6 +95,7 @@ class UserBloc {
       _refreshVerificationEmailController.stream.listen(_refreshVerifiedCheck),
       _resendEmailController.stream.listen(repository.resendVerificationEmail),
       _selectUserController.listen(_loadSelectedUser),
+      _searchUserController.listen(_loadSearchUser),
       _loadCurrentUserController.listen(_loadCurrentUser),
       _followUserController.listen(_followUser),
       _loadFollowersController.listen(_loadFollowers),
@@ -168,11 +174,13 @@ class UserBloc {
   }
 
   _editUser(EditUser editUser) async {
-    _loadingController.add(true);
+    _successController.add(true);
+    _isBackgroundLoadingController.add(true);
     bool success = await repository.editUser(editUser);
-    _loadingController.add(false);
-    _successController.add(success);
-    if(!success){
+    _isBackgroundLoadingController.add(false);
+    if(success){
+      _successMessageController.add("Profile edited!");
+    }else{
       _errorController.add('Failed to edit user');
     }
   }
@@ -206,6 +214,18 @@ class UserBloc {
   String get _currentUserId => _existingAuthController.value;
 
   _loadSelectedUser(String userId) async {
+    _loadingController.add(true);
+    await repository.loadUserDetails(
+      LoadUser(
+        userId: userId,
+        currentUserId: _currentUserId
+      ),
+      SearchModes.SELECTED
+    );
+    _loadingController.add(false);
+  }
+
+  _loadSearchUser(String userId) async {
     _loadingController.add(true);
     await repository.loadUserDetails(
       LoadUser(
@@ -265,6 +285,7 @@ class UserBloc {
     _selectedUserController.close();
     _followUserController.close();
     _selectUserController.close();
+    _searchUserController.close();
     _loadingController.close();
     _logInController.close();
     _logOutController.close();
@@ -272,6 +293,7 @@ class UserBloc {
     _deleteUserController.close();
     _registerController.close();
     _errorController.close();
+    _isBackgroundLoadingController.close();
     _isLoadingFollowsController.close();
     _successMessageController.close();
     _subscriptions.forEach((subscription) => subscription.cancel());

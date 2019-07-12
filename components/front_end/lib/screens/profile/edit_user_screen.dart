@@ -51,6 +51,10 @@ class _EditUserScreenState extends State<EditUserScreen> with LoadingAndErrorDia
   _initTempGallery() async{ 
     Directory extDir = await getApplicationDocumentsDirectory();
     dirPath = '${extDir.path}/Pictures/temp';
+    final dir = Directory(dirPath);
+    if(dir.existsSync()){
+      dir.deleteSync(recursive: true);
+    }
     await Directory(dirPath).create(recursive: true);
   }
 
@@ -58,7 +62,6 @@ class _EditUserScreenState extends State<EditUserScreen> with LoadingAndErrorDia
   @override
   dispose(){
     _subscriptions?.forEach((subscription) => subscription.cancel());
-    Directory(dirPath).deleteSync(recursive: true);
     super.dispose();
   }
 
@@ -68,7 +71,15 @@ class _EditUserScreenState extends State<EditUserScreen> with LoadingAndErrorDia
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
-        title: Text('Edit Profile'),
+        title: Text(
+          'Edit Profile',
+          style: TextStyle(
+            inherit: true,
+            fontWeight: FontWeight.w300,
+            fontStyle: FontStyle.italic,
+            letterSpacing: 1.2,
+          ),
+        ),
         centerTitle: true,
         actions: <Widget>[
           _saveOutfitButton()

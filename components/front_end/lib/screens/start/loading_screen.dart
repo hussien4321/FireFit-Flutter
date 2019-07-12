@@ -53,6 +53,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
 
   _initBlocs(BuildContext context){
     if(_userBloc == null){
+      AnalyticsEvents(context).logCustomScreen('loading');
       _userBloc = UserBlocProvider.of(context);
       _subscriptions = <StreamSubscription<dynamic>>[
         _navigationListener(),

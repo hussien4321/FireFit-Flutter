@@ -4,6 +4,7 @@ import 'package:middleware/middleware.dart';
 import 'package:blocs/blocs.dart';
 import 'package:front_end/providers.dart';
 import 'package:front_end/helper_widgets.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:front_end/screens.dart';
 
 class MenuNavigationScreen extends StatefulWidget {
@@ -35,66 +36,61 @@ class _MenuNavigationScreenState extends State<MenuNavigationScreen> {
             child: Column(
               children: <Widget>[
                 _profileOverview(snap.data),
-                _menuOption(
-                  title: 'INSPIRATION',
-                  iconData: Icons.search,
-                  selected: widget.index == 0,
-                  onPressed: () => widget.onPageSelected(0)
-                ),
-                StreamBuilder<bool>(
-                  stream: _userBloc.currentUser.map((user) => user.hasNewFeedOutfits),
-                  initialData: false,
-                  builder: (context, hasFeedSnap) {
-                    return _menuOption(
-                      title: 'FASHION CIRCLE',
-                      iconData: Icons.people,
-                      selected: widget.index == 1,
-                      onPressed: () => widget.onPageSelected(1),
-                      showNotificationBubble: hasFeedSnap.data == true
-                    );
-                  }
-                ),
-                _menuOption(
-                  title: 'WARDROBE',
-                  iconData: FontAwesomeIcons.tshirt,
-                  selected: widget.index == 2,
-                  onPressed: () => widget.onPageSelected(2)
-                ),
-                _menuOption(
-                  title: 'LOOKBOOKS',
-                  iconData: FontAwesomeIcons.addressBook,
-                  selected: widget.index == 3,
-                  onPressed: () => widget.onPageSelected(3)
-                ),
-                _menuOption(
-                  title: 'FIREFIT+',
-                  iconData: FontAwesomeIcons.fireAlt,
-                  color: Color.fromRGBO(255, 203, 20, 1.0),
-                  onPressed: () => widget.onPageSelected(2)
-                ),
-                _menuOption(
-                  title: 'SETTINGS',
-                  iconData: Icons.settings,
-                  onPressed: () => CustomNavigator.goToSettingsScreen(context)
-                ),
                 Expanded(
-                  child: Align(
-                    alignment: Alignment.bottomCenter,
+                  child: SingleChildScrollView(
                     child: Column(
-                      mainAxisSize: MainAxisSize.min,
                       children: <Widget>[
-                        _logOutButton(),
-                        Padding(
-                          padding: const EdgeInsets.only(top: 8.0),
-                          child: Text(
-                            'Version: 1.0.0',
-                            style: Theme.of(context).textTheme.subtitle,
-                          ),
+                        _menuOption(
+                          title: 'INSPIRATION',
+                          iconData: FontAwesomeIcons.globeAmericas,
+                          selected: widget.index == 0,
+                          onPressed: () => widget.onPageSelected(0)
+                        ),
+                        _menuOption(
+                          title: 'FIND USERS',
+                          iconData: FontAwesomeIcons.search,
+                          onPressed: () => CustomNavigator.goToFindUsersScreen(context)
+                        ),
+                        StreamBuilder<bool>(
+                          stream: _userBloc.currentUser.map((user) => user.hasNewFeedOutfits),
+                          initialData: false,
+                          builder: (context, hasFeedSnap) {
+                            return _menuOption(
+                              title: 'FASHION CIRCLE',
+                              iconData: Icons.people,
+                              selected: widget.index == 1,
+                              onPressed: () => widget.onPageSelected(1),
+                              showNotificationBubble: hasFeedSnap.data == true
+                            );
+                          }
+                        ),
+                        _menuOption(
+                          title: 'WARDROBE',
+                          iconData: FontAwesomeIcons.tshirt,
+                          selected: widget.index == 2,
+                          onPressed: () => widget.onPageSelected(2)
+                        ),
+                        _menuOption(
+                          title: 'LOOKBOOKS',
+                          iconData: FontAwesomeIcons.addressBook,
+                          selected: widget.index == 3,
+                          onPressed: () => widget.onPageSelected(3)
+                        ),
+                        _menuOption(
+                          title: 'FIREFIT+',
+                          iconData: FontAwesomeIcons.fireAlt,
+                          color: Color.fromRGBO(255, 203, 20, 1.0),
+                          onPressed: () => CustomNavigator.goToSubscriptionDetailsScreen(context)
+                        ),
+                        _menuOption(
+                          title: 'SETTINGS',
+                          iconData: Icons.settings,
+                          onPressed: () => CustomNavigator.goToSettingsScreen(context)
                         ),
                       ],
                     ),
                   ),
-                )
+                ),
               ],
             ),
           );
@@ -206,45 +202,5 @@ class _MenuNavigationScreenState extends State<MenuNavigationScreen> {
     CustomNavigator.goToProfileScreen(context, true,
       userId: userId,
     );
-  }
-
-  Widget _logOutButton() {
-    return Container(
-      width: double.infinity,
-      child: FlatButton(
-        padding: EdgeInsets.symmetric(vertical: 8),
-        child: Text(
-          'Sign out',
-          style:TextStyle(
-            fontWeight: FontWeight.w500,
-            fontSize: 22.0,
-            color: Colors.redAccent[700],
-          ),
-          textAlign: TextAlign.center,
-        ),
-        onPressed: _confirmLogOut,
-      ),
-    );
-  }
-
-  _confirmLogOut() {
-    return showDialog(
-      context: context,
-      builder: (secondContext) {
-        return YesNoDialog(
-          title: 'Sign out',
-          description: 'Are you sure you want to sign out?',
-          yesText: 'Yes',
-          noText: 'Cancel',
-          onYes: () {
-            _userBloc.logOut.add(null);
-            Navigator.pop(context);
-          },
-          onDone: () {
-            Navigator.pop(context);
-          },
-        );
-      }
-    ) ?? false;
   }
 }

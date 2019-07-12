@@ -10,6 +10,7 @@ import 'package:middleware/middleware.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:overlay_support/overlay_support.dart';
+import 'package:overlay_support/src/notification/overlay_notification.dart';
 import 'package:front_end/services.dart';
 
 class MainAppBar extends StatefulWidget {
@@ -37,6 +38,8 @@ class _MainAppBarState extends State<MainAppBar> {
 
   List<StreamSubscription<dynamic>> _subscriptions;
 
+  OverlaySupportEntry _entry; 
+
   BehaviorSubject<bool> _isSliderOpenController =BehaviorSubject<bool>(seedValue: false);
 
   String userId;
@@ -48,6 +51,7 @@ class _MainAppBarState extends State<MainAppBar> {
     ExploreScreen(),
     FeedScreen(),
     WardrobeScreen(),
+    LookbooksScreen(),
   ];
   List<String> pages = AppConfig.MAIN_PAGES;
 
@@ -101,8 +105,10 @@ class _MainAppBarState extends State<MainAppBar> {
       );
       _subscriptions = <StreamSubscription<dynamic>>[
         _logInStatusListener(),
-      ]..addAll(_successToastListeners());
+      ]..addAll(_successToastListeners())
+      ..addAll(_uploadImagesListeners());
       _userBloc.loadCurrentUser.add(null);
+      _userBloc.refreshVerificationEmail.add(null);
       userId = await _userBloc.existingAuthId.first;
       _notificationBloc.registerNotificationToken.add(userId);
       _notificationBloc.loadStaticNotifications.add(LoadNotifications(
@@ -117,13 +123,6 @@ class _MainAppBarState extends State<MainAppBar> {
     _notificationBloc.loadLiveNotifications.add(LoadNotifications(
       userId: userId
     ));
-    showSimpleNotification(
-      Text(
-        'New notification!',
-        style: Theme.of(context).textTheme.title.apply(color: Colors.white),
-      ),
-      background: Colors.grey,
-    );
   }
   
   StreamSubscription _logInStatusListener() { 
@@ -138,11 +137,28 @@ class _MainAppBarState extends State<MainAppBar> {
   }
 
   List<StreamSubscription> _successToastListeners() => [
-      _userBloc.successMessage.listen((message) => toast(message)),
-      _outfitBloc.successMessage.listen((message) => toast(message)),
-      _notificationBloc.successMessage.listen((message) => toast(message)),
-      _commentBloc.successMessage.listen((message) => toast(message)),
-    ];
+    _userBloc.successMessage.listen((message) => toast(message)),
+    _outfitBloc.successMessage.listen((message) => toast(message)),
+    _notificationBloc.successMessage.listen((message) => toast(message)),
+    _commentBloc.successMessage.listen((message) => toast(message)),
+  ];
+
+  List<StreamSubscription> _uploadImagesListeners() => [
+    _outfitBloc.isBackgroundLoading.listen((isLoading) {
+      if(isLoading){
+        _entry = _backgroundLoadingOverlay('Uploading Outfit');
+      }else{
+        _closeOverlay();
+      }
+    }),
+    _userBloc.isBackgroundLoading.listen((isLoading) {
+      if(isLoading){
+        _entry = _backgroundLoadingOverlay('Updating Profile');
+      }else{
+        _closeOverlay();
+      }
+    }),
+  ];
   
 
   Widget _buildNotificationsScaffold({Widget body}) {
@@ -170,8 +186,10 @@ class _MainAppBarState extends State<MainAppBar> {
       child: MenuNavigationScreen(
         index: currentIndex,
         onPageSelected: (newIndex) {
-          currentIndex = newIndex;
-          _logCurrentScreen();
+          if(currentIndex != newIndex){
+            currentIndex = newIndex;
+            _logCurrentScreen();
+          }
         },
       ),
       innerDrawerCallback: _updateMainScreenDimming,
@@ -192,7 +210,6 @@ class _MainAppBarState extends State<MainAppBar> {
       children: <Widget>[
         Scaffold(
           resizeToAvoidBottomInset: false,
-
           backgroundColor: Colors.white,
           appBar: AppBar(
             leading: _buildMenuButton(),
@@ -241,8 +258,50 @@ class _MainAppBarState extends State<MainAppBar> {
         tag: MMKeys.uploadButtonHero,
         child: Icon(Icons.add_a_photo),
       ),
-      onPressed: () => CustomNavigator.goToUploadOutfitScreen(context)
+      onPressed: () {
+        if(!_userBloc.isEmailVerified.value){
+          _requestEmailVerification();
+        } else {
+          CustomNavigator.goToUploadOutfitScreen(context);
+        }
+      }
     );
+  }
+
+  _backgroundLoadingOverlay(String message) {
+    return showSimpleNotification(
+      Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          Text(
+            '$message...',
+            style: Theme.of(context).textTheme.title.copyWith(
+              color: Colors.blue,
+              fontWeight: FontWeight.w300
+            ),
+          ),
+          Theme(
+            data: ThemeData(
+              accentColor: Colors.blue
+            ),
+            child: CircularProgressIndicator(),
+          )
+        ],
+      ),
+      background: Colors.white,
+      autoDismiss: false,
+    );
+  }
+  _closeOverlay() => _entry?.dismiss(animate: true);
+
+  _requestEmailVerification() async {
+    _userBloc.refreshVerificationEmail.add(null);
+    String email = await _userBloc.verificationEmail.first;
+    await VerificationDialog.launch(context,
+      actionName: 'upload an outfit',
+      emailAddress: email
+    );
+    _userBloc.refreshVerificationEmail.add(null);
   }
 
   Widget _buildNotificationsButton() {

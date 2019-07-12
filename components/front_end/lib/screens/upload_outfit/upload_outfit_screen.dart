@@ -49,8 +49,13 @@ class _UploadOutfitScreenState extends State<UploadOutfitScreen> with LoadingAnd
   _initTempGallery() async{ 
     Directory extDir = await getApplicationDocumentsDirectory();
     dirPath = '${extDir.path}/Pictures/temp';
+    final dir = Directory(dirPath);
+    if(dir.existsSync()){
+      dir.deleteSync(recursive: true);
+    }
     await Directory(dirPath).create(recursive: true);
   }
+
   _initPreferences() async {
     String styleString = await preferences.getPreference(Preferences.CURRENT_CLOTHES_STYLE); 
     setState(() {
@@ -61,7 +66,6 @@ class _UploadOutfitScreenState extends State<UploadOutfitScreen> with LoadingAnd
   @override
   dispose(){
     _subscriptions?.forEach((subscription) => subscription.cancel());
-    Directory(dirPath).deleteSync(recursive: true);
     super.dispose();
   }
 
@@ -107,7 +111,7 @@ class _UploadOutfitScreenState extends State<UploadOutfitScreen> with LoadingAnd
       String userId = await _userBloc.existingAuthId.first;
       uploadOutfit.posterUserId = userId;
       _subscriptions = <StreamSubscription<dynamic>>[
-        _loadingListener(),
+        // _loadingListener(),
         _successListener(),
         _errorListener(),
       ];

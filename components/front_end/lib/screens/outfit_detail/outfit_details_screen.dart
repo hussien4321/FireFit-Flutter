@@ -299,7 +299,11 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
       padding: EdgeInsets.only(left: 64, right: 64, top: 12),
       child: Text(
         outfit.title,
-        style: Theme.of(context).textTheme.headline.apply(fontWeightDelta: 2),
+        style: Theme.of(context).textTheme.headline.copyWith(
+            fontWeight: FontWeight.w300,
+            fontStyle: FontStyle.italic,
+            letterSpacing: 1.2,
+        ),
         textAlign: TextAlign.center,
       ),
     );

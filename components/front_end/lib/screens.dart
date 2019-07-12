@@ -9,6 +9,10 @@ export 'screens/explore/outfit_fading_card.dart';
 export 'screens/feed/feed_outfits.dart';
 export 'screens/feed/feed_screen.dart';
 
+export 'screens/find_users/find_users_screen.dart';
+
+export 'screens/lookbooks/lookbooks_screen.dart';
+
 export 'screens/notification/new_notifications_overlay_screen.dart';
 
 export 'screens/onboarding/onboard_screen.dart';
@@ -26,6 +30,8 @@ export 'screens/settings/settings_screen.dart';
 export 'screens/start/intro_screen.dart';
 export 'screens/start/loading_screen.dart';
 export 'screens/start/log_in_screen.dart';
+
+export 'screens/subscriptions/subscription_details_screen.dart';
 
 export 'screens/upload_outfit/upload_outfit_screen.dart';
 export 'screens/upload_outfit/style_selector_screen.dart';

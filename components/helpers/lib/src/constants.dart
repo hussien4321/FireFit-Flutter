@@ -9,9 +9,9 @@ class AppConfig {
     "LOOKBOOKS",
   ];
   static final List<String> MAIN_PAGES_PATHS = [
-    "/explore",
-    "/fashion_circle",
-    "/wardrobe",
-    "/lookbooks",
+    "inspiration",
+    "fashion_circle",
+    "wardrobe",
+    "lookbooks",
   ];
 }

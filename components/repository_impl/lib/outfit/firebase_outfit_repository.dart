@@ -114,6 +114,7 @@ class FirebaseOutfitRepository implements OutfitRepository {
       }
       Outfit newOutfit = outfits.first;
       await cache.addOutfit(newOutfit, SearchModes.MINE);
+      await cache.addOutfit(newOutfit, SearchModes.EXPLORE);
       await cache.incrementOutfitCount(loadOutfit.userId);
       return true;
     })

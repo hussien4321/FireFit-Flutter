@@ -123,7 +123,7 @@ class _UsernamePageState extends State<UsernamePage> with SnackbarMessages {
   _parseNewUsername(String newUsername) {
     String formattedUsername =_getFormattedUsername(newUsername);
     if(formattedUsername != newUsername){
-      toast('Username can only contain letters & numbers');
+      toast('Username can only contain letters, numbers & underscores');
       usernameController.text = formattedUsername;
       usernameFocus.unfocus();
     }

@@ -25,6 +25,7 @@ export 'helper_widgets/input/yes_no_dialog.dart';
 export 'helper_widgets/notices/app_title.dart';
 export 'helper_widgets/notices/custom_banner.dart';
 export 'helper_widgets/notices/under_construction_notice.dart';
+export 'helper_widgets/notices/verification_dialog.dart';
 
 export 'helper_widgets/navigation/custom_navigator.dart';
 

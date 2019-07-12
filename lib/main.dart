@@ -44,6 +44,7 @@ void main() async {
     messaging: messaging,
   );
   FirebaseAnalytics analytics = FirebaseAnalytics();
+  
 
   app.main(
     outfitRepository: outfitRepository,

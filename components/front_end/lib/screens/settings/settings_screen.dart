@@ -67,6 +67,7 @@ class _SettingsScreenState extends State<SettingsScreen> with LoadingAndErrorDia
               _sectionHeader('MENU'),
               _defaultStartPage(),
               _sectionHeader('ACCOUNT'),
+              _signOut(),
               _deleteAccount(),
             ],
           ),
@@ -152,6 +153,48 @@ class _SettingsScreenState extends State<SettingsScreen> with LoadingAndErrorDia
     );
   }
 
+  Widget _signOut() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: <Widget>[
+        Expanded(
+          child: FlatButton(
+            child: Text(
+              'Sign out',
+              style:TextStyle(
+                fontWeight: FontWeight.w500,
+                fontSize: 22.0,
+                color: Colors.redAccent[700],
+              ),
+              textAlign: TextAlign.center,
+            ),
+            onPressed: _confirmLogOut,
+          ),
+        )
+      ],
+    );
+  }
+  _confirmLogOut() {
+    return showDialog(
+      context: context,
+      builder: (secondContext) {
+        return YesNoDialog(
+          title: 'Sign out',
+          description: 'Are you sure you want to sign out?',
+          yesText: 'Yes',
+          noText: 'Cancel',
+          onYes: () {
+            _userBloc.logOut.add(null);
+            Navigator.pop(context);
+          },
+          onDone: () {
+            Navigator.pop(context);
+          },
+        );
+      }
+    ) ?? false;
+  }
+
   Widget _deleteAccount() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -159,7 +202,7 @@ class _SettingsScreenState extends State<SettingsScreen> with LoadingAndErrorDia
         Expanded(
           child: FlatButton(
             child: Text(
-              'DELETE ACCOUNT',
+              'Delete Account',
               style: Theme.of(context).textTheme.button.apply(color: Colors.red),
             ),
             onPressed: _confirmDelete,
@@ -187,9 +230,5 @@ class _SettingsScreenState extends State<SettingsScreen> with LoadingAndErrorDia
         );
       }
     ) ?? false;
-  }
-  _deleteUser(){
-    Navigator.pop(context);
-    _userBloc.deleteUser.add(null);
   }
 }

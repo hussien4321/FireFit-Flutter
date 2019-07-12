@@ -46,6 +46,9 @@ class OutfitBloc{
   final _rateOutfitController = PublishSubject<OutfitRating>();
   Sink<OutfitRating> get rateOutfit => _rateOutfitController;
 
+  final _isBackgroundLoadingController = PublishSubject<bool>();
+  Observable<bool> get isBackgroundLoading => _isBackgroundLoadingController.stream;
+
   final _loadingController = PublishSubject<bool>();
   Observable<bool> get isLoading => _loadingController.stream;
   final _successController = PublishSubject<bool>();
@@ -110,10 +113,10 @@ class OutfitBloc{
   }
 
   _uploadOutfit(UploadOutfit uploadOutfit) async {
-    _loadingController.add(true);
+    _successController.add(true);
+    _isBackgroundLoadingController.add(true);
     final success = await repository.uploadOutfit(uploadOutfit);
-    _loadingController.add(false);
-    _successController.add(success);
+    _isBackgroundLoadingController.add(false);
     if(success){
       _successMessageController.add("Outfit uploaded!");
     }else{
@@ -195,6 +198,7 @@ class OutfitBloc{
     _saveOutfitController.close();
     _rateOutfitController.close();
     _loadingController.close();
+    _isBackgroundLoadingController.close();
     _successController.close();
     _successMessageController.close();
     _errorController.close();

@@ -3,6 +3,7 @@ import 'package:front_end/screens.dart';
 import 'package:middleware/middleware.dart';
 import 'dart:async';
 import 'package:front_end/helper_widgets.dart';
+import 'package:page_transition/page_transition.dart';
 
 class CustomNavigator {
 
@@ -116,4 +117,50 @@ class CustomNavigator {
       )
     ));
   }
+
+  static Future<T> goToSubscriptionDetailsScreen<T extends Object>(BuildContext context) {
+    return Navigator.push(context, MaterialPageRoute(
+      builder: (context) => SubscriptionDetailsScreen(),
+      settings: RouteSettings(
+        name: '/subscription'
+      )
+    ));
+  }
+
+  static Future<T> goToFindUsersScreen<T extends Object>(BuildContext context) {
+    return Navigator.push(context, MaterialPageRoute(
+      builder: (context) => FindUsersScreen(),
+      settings: RouteSettings(
+        name: '/find-users'
+      )
+    ));
+  }
+}
+
+class SlideRightRoute extends PageRouteBuilder {
+  
+  final Widget page;
+  final RouteSettings settings;
+
+  SlideRightRoute({this.page, this.settings}) : super(
+    settings: settings,
+    pageBuilder: (
+      BuildContext context,
+      Animation<double> animation,
+      Animation<double> secondaryAnimation,
+    ) => page,
+    transitionsBuilder: (
+      BuildContext context,
+      Animation<double> animation,
+      Animation<double> secondaryAnimation,
+      Widget child
+    ) => SlideTransition(
+      position: Tween<Offset>(
+        begin: const Offset(-1, 0),
+        end: Offset.zero,
+      ).animate(animation),
+      child: child,
+    ),
+  );
+
 }

@@ -4,6 +4,7 @@ import 'package:middleware/middleware.dart';
 import 'package:front_end/helper_widgets.dart';
 import 'package:helpers/helpers.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:flutter/gestures.dart';
 
 class FeedOutfits extends StatefulWidget {
 
@@ -88,6 +89,14 @@ class _FeedOutfitsState extends State<FeedOutfits> {
             style: Theme.of(ctx).textTheme.caption.copyWith(
               color: Colors.black54
             ),
+          ),
+          TextSpan(
+            text: "\n\nTap to Refresh",
+            style: Theme.of(context).textTheme.subtitle.copyWith(
+              decoration: TextDecoration.underline,
+              color: Colors.blue,
+            ),
+            recognizer: TapGestureRecognizer()..onTap = () => widget.onRefresh(),
           )
         ]
       ),

@@ -11,10 +11,12 @@ class CustomTextField extends StatelessWidget {
   final Widget prefix;
   final FocusNode focusNode;
   final Color textColor;
+  final bool autofocus;
 
   CustomTextField({
     this.controller,
     this.focusNode,
+    this.autofocus = false,
     this.onChanged,
     this.onSubmitted,
     this.textCapitalization,
@@ -57,6 +59,7 @@ class CustomTextField extends StatelessWidget {
             color: Colors.grey[350]
           ),
           child: TextField(
+            autofocus: autofocus,
             focusNode: focusNode,
             controller: controller,
             onChanged: onChanged,

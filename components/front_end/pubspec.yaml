@@ -40,6 +40,7 @@ dependencies:
   flutter_rating_bar: ^1.2.0
   pull_to_refresh: ^1.4.6
   firebase_analytics: ^3.0.3
+  page_transition: ^1.1.4
 dependency_overrides:
   path_provider: ^1.1.0
 
