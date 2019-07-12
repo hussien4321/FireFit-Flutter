@@ -6,6 +6,7 @@ class User {
   String name;
   String username;
   String bio;
+  String countryCode;
   String profilePicUrl;
   bool genderIsMale;
   DateTime dateOfBirth;
@@ -39,6 +40,7 @@ class User {
     name = map['name'];
     username = map['username'];
     bio = map['bio'];
+    countryCode = map['country_code'];
     profilePicUrl = map['profile_pic_url'];
     dateOfBirth = DateTime.parse(map['date_of_birth']);
     genderIsMale = map['gender_is_male'] != 0;
@@ -64,6 +66,7 @@ class User {
     'name' : name,
     'username': username,
     'bio': bio,
+    'country_code' : countryCode,
     'profile_pic_url' : profilePicUrl,
     'date_of_birth' : dateOfBirth?.toIso8601String(), 
     'gender_is_male' : genderIsMale ? 1 : 0, 

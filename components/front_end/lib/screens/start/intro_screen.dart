@@ -50,9 +50,17 @@ class _IntroScreenState extends State<IntroScreen> {
   }
   
   StreamSubscription _logInStatusListener(){
-    return _userBloc.accountStatus.listen((accountStatus) {
-      if(accountStatus!=null && accountStatus !=UserAccountStatus.LOGGED_OUT){
+    return _userBloc.accountStatus.listen((accountStatus) async {
+      if(accountStatus!=null && accountStatus !=UserAccountStatus.LOGGED_OUT) {
         print('got status = $accountStatus');
+        final events = AnalyticsEvents(context);
+        String userId = await _userBloc.existingAuthId.first;
+        events.setUserId(userId);
+        if(accountStatus == UserAccountStatus.LOGGED_IN){
+          events.logIn();
+        }else{
+          events.signUp();
+        }
         Navigator.pushReplacementNamed(context, RouteConverters.getFromAccountStatus(accountStatus));
       }
     });
@@ -91,9 +99,7 @@ class _IntroScreenState extends State<IntroScreen> {
     return SafeArea(
       child: Column(
         children: <Widget>[
-          AppTitle(
-            color: Colors.orange[300],
-          ),
+          AppTitle(),
           Expanded(
             child: Center(
               child: Text(
@@ -125,18 +131,12 @@ class _IntroScreenState extends State<IntroScreen> {
     );
   }
   _registerUser(BuildContext context) async {
-    await Navigator.push(context, MaterialPageRoute(
-      builder: (ctx) => LogInScreen(
-        isRegistering: true,
-      )
-    ));
+    await CustomNavigator.goToLogInScreen(context, isRegistering: true);
     _brightenStatusBar();
   }
 
   _logInUser(BuildContext context) async {
-    await Navigator.push(context, MaterialPageRoute(
-      builder: (ctx) => LogInScreen()
-    ));
+    await CustomNavigator.goToLogInScreen(context);
     _brightenStatusBar();
   }
 }

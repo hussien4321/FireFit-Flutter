@@ -27,7 +27,7 @@ class OnboardDetails extends StatelessWidget {
                 margin: EdgeInsets.all(10.0),
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: Theme.of(context).accentColor
+                  color: Colors.black
                 ),
                 child: Icon(
                   icon,

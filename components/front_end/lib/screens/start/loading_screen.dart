@@ -3,6 +3,7 @@ import 'package:front_end/providers.dart';
 import 'package:blocs/blocs.dart';
 import 'dart:async';
 import 'package:front_end/helper_widgets.dart';
+import 'package:middleware/middleware.dart';
 
 class LoadingScreen extends StatefulWidget {
   @override
@@ -24,12 +25,11 @@ class _LoadingScreenState extends State<LoadingScreen> {
   Widget build(BuildContext context) {
     _initBlocs(context);
     return Scaffold(
+      backgroundColor: Colors.white,
       body: SafeArea(
         child: Column(
           children: <Widget>[
-            AppTitle(
-              color: Colors.deepOrange[800],
-            ),
+            AppTitle(),
             Expanded(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -61,8 +61,15 @@ class _LoadingScreenState extends State<LoadingScreen> {
   }
 
   StreamSubscription _navigationListener(){
-    return _userBloc.accountStatus.listen((accountStatus) {
+    return _userBloc.accountStatus.listen((accountStatus) async {
       if(accountStatus!=null){
+        final events = AnalyticsEvents(context);
+        if(accountStatus == UserAccountStatus.LOGGED_OUT){
+          events.reset();
+        }else{
+          String userId = await _userBloc.existingAuthId.first;
+          events.setUserId(userId);
+        }
         Navigator.pushReplacementNamed(context, RouteConverters.getFromAccountStatus(accountStatus));
       }
     });

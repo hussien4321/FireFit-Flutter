@@ -1,3 +1,4 @@
+export 'providers/analytics/analytics_provider.dart';
 export 'providers/comment/comment_bloc_provider.dart';
 export 'providers/notifications/notification_bloc_provider.dart';
 export 'providers/outfit/outfit_bloc_provider.dart';

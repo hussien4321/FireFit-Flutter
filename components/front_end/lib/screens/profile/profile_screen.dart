@@ -73,6 +73,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 if(loadingSnap.data || !snap.hasData){
                   return Center(child: CircularProgressIndicator(),);
                 }
+                if(followUser.followed == null){
+                  AnalyticsEvents(context).profileViewed(snap.data);
+                }
                 followUser.followed = snap.data;
                 return _profileScaffold(snap.data, loadingOutfitsSnap.data);
               },
@@ -212,11 +215,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
 
   _editUser(User user) {
-    Navigator.push(context, MaterialPageRoute(
-      builder: (ctx) => EditUserScreen(
-        user: user,
-      )
-    ));
+    CustomNavigator.goToEditUserScreen(context, user:user);
   }
 
 
@@ -285,10 +284,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         Row(
           mainAxisSize: MainAxisSize.max,
           children: <Widget>[
-            Opacity(
-              opacity: 0.0,
-              child: DemographicSticker(user),
-            ),
+            CountrySticker(countryCode: user.countryCode),
             Expanded(
               child: Text(
                 user.name,

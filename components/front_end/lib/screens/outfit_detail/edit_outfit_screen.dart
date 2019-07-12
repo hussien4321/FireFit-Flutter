@@ -178,9 +178,7 @@ class _EditOutfitScreenState extends State<EditOutfitScreen> with LoadingAndErro
   }
 
   _selectNewStyle() async {
-    String styleName = await Navigator.push(context, MaterialPageRoute(
-      builder: (context) => StyleSelectorScreen()
-    ));
+    String styleName = await CustomNavigator.goToStyleSelectorScreen(context);
     if(!mounted || styleName == null) return;
     setState(() {
       editOutfitData.style = styleName;    

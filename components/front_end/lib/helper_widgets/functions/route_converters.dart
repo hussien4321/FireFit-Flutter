@@ -6,7 +6,7 @@ class RouteConverters {
   static String getFromAccountStatus(UserAccountStatus accountStatus) {
     switch (accountStatus) {
       case UserAccountStatus.LOGGED_OUT:
-        return '/login';
+        return '/intro';
       case UserAccountStatus.LOGGED_IN:
         return '/home';
       case UserAccountStatus.PENDING_ONBOARDING:
@@ -20,7 +20,7 @@ class RouteConverters {
     String name;
     switch (accountStatus) {
       case UserAccountStatus.LOGGED_OUT:
-        name = '/start';
+        name = '/intro';
         break;
       case UserAccountStatus.LOGGED_IN:
         name = '/home';

@@ -131,6 +131,7 @@ class _UploadOutfitScreenState extends State<UploadOutfitScreen> with LoadingAnd
   StreamSubscription _successListener(){
     return _outfitBloc.isSuccessful.listen((successStatus) {
       if(successStatus){
+        AnalyticsEvents(context).outfitUploaded();
         Navigator.pop(context);
       }
     });

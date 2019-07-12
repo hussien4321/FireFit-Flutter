@@ -21,13 +21,6 @@ class _MenuNavigationScreenState extends State<MenuNavigationScreen> {
 
   UserBloc _userBloc;
 
-  List<String> pages = [
-      "INSPIRATION",
-      "FASHION CIRCLE",
-      "WARDROBE",
-      "PROFILE",
-      "SETTINGS",
-  ];
   @override
   Widget build(BuildContext context) {
     _initBlocs();
@@ -68,13 +61,21 @@ class _MenuNavigationScreenState extends State<MenuNavigationScreen> {
                   onPressed: () => widget.onPageSelected(2)
                 ),
                 _menuOption(
+                  title: 'LOOKBOOKS',
+                  iconData: FontAwesomeIcons.addressBook,
+                  selected: widget.index == 3,
+                  onPressed: () => widget.onPageSelected(3)
+                ),
+                _menuOption(
+                  title: 'FIREFIT+',
+                  iconData: FontAwesomeIcons.fireAlt,
+                  color: Color.fromRGBO(255, 203, 20, 1.0),
+                  onPressed: () => widget.onPageSelected(2)
+                ),
+                _menuOption(
                   title: 'SETTINGS',
                   iconData: Icons.settings,
-                  onPressed: () {
-                    Navigator.push(context, MaterialPageRoute(
-                      builder: (ctx) => SettingsScreen()
-                    ));
-                  }
+                  onPressed: () => CustomNavigator.goToSettingsScreen(context)
                 ),
                 Expanded(
                   child: Align(
@@ -152,20 +153,21 @@ class _MenuNavigationScreenState extends State<MenuNavigationScreen> {
   Widget _menuOption({
     String title,
     IconData iconData,
+    Color color,
     bool selected = false,
     VoidCallback onPressed,
     bool showNotificationBubble = false,
   }){
     Color selectedColor = Colors.blue;
     Color unselectedColor = Colors.grey[700];
-    Color color =selected ? selectedColor :unselectedColor;
+    Color displayedColor = color != null ? color : (selected ? selectedColor :unselectedColor);
     Widget icon = SizedBox(
       width: 32.0,
       height: 32.0,
       child: NotificationIcon(
         iconData: iconData,
         showBubble: showNotificationBubble,
-        color: color,
+        color: displayedColor,
       )
     );
     return Material(
@@ -188,7 +190,7 @@ class _MenuNavigationScreenState extends State<MenuNavigationScreen> {
                     fontSize: 22.0,
                     fontStyle: FontStyle.italic,
                     letterSpacing: 1.5,
-                    color: color,
+                    color: displayedColor,
                   ),
                   textAlign: TextAlign.center,
                 ),

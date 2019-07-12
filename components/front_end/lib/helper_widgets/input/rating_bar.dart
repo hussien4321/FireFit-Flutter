@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class RatingBar extends StatefulWidget {
-  final int value;
+  final double value;
   final double size;
   final ValueChanged<int> onUpdateRating;
 
@@ -20,6 +20,9 @@ class _RatingBarState extends State<RatingBar> {
       mainAxisSize: MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
+        // Text(
+        //   ((widget?.value*2).floorToDouble() / 2).toString()
+        // ),
         GestureDetector(
           onVerticalDragStart: _onDragStart,
           onVerticalDragUpdate: _onDragUpdate,
@@ -46,20 +49,26 @@ class _RatingBarState extends State<RatingBar> {
 
   Widget _ratingIcon(int ratingThreshold){
     bool showRating = widget.value != null && ratingThreshold<= widget.value;
+    bool showHalfRating = widget.value != null && widget.value > (ratingThreshold-0.5) && widget.value < ratingThreshold;
     return SizedBox(
       width: widget.size,
       height: widget.size,
-      child: showRating ? _fireIcon() : _emptyIcon(),
+      child: showHalfRating ? _halfIcon() : showRating ? _fireIcon() : _emptyIcon(),
     );
   }
   Widget _fireIcon(){
     return Image.asset(
-      'assets/flame.png',
+      'assets/flame_full.png',
+    );
+  }
+  Widget _halfIcon(){
+    return Image.asset(
+      'assets/flame_half.png',
     );
   }
   Widget _emptyIcon(){
     return Image.asset(
-      'assets/empty-flame.png',
+      'assets/flame_empty.png',
     );
   }
   

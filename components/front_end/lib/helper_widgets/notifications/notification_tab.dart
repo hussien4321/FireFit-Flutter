@@ -166,12 +166,11 @@ class _NotificationTabState extends State<NotificationTab> {
       );
     }
     if(widget.notification.type == NotificationType.NEW_COMMENT || widget.notification.type == NotificationType.COMMENT_LIKE){
-      Navigator.push(context, MaterialPageRoute(
-        builder: (ctx) => CommentsScreen(
-          outfitId: refOutfit.outfitId,
-          loadOutfit: true,
-        )
-      ));
+      CustomNavigator.goToCommentsScreen(
+        context,
+        outfitId: refOutfit.outfitId,
+        loadOutfit: true,
+      );
     }
     if(widget.notification.type == NotificationType.NEW_FOLLOW){
       CustomNavigator.goToProfileScreen(context, false,

@@ -209,11 +209,7 @@ class _ExploreScreenState extends State<ExploreScreen> with SingleTickerProvider
   }
 
   _openOutfit(Outfit outfit) {
-    Navigator.push(context, MaterialPageRoute(
-      builder: (ctx) => OutfitDetailsScreen(
-        outfitId: outfit.outfitId,
-      )
-    ));
+    CustomNavigator.goToOutfitDetailsScreen(context, false, outfitId: outfit.outfitId);
   }
 
   Widget _outfitImage(Outfit outfit){
@@ -340,7 +336,7 @@ class _ExploreScreenState extends State<ExploreScreen> with SingleTickerProvider
             child: Padding(
               padding: const EdgeInsets.all(8.0),
               child: Image.asset(
-                'assets/flame.png',
+                'assets/flame_full.png',
                 width: 32,
                 height: 32,
               ),

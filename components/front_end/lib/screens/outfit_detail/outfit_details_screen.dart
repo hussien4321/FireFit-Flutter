@@ -63,6 +63,9 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
               body: _outfitLoadingPlaceholder()
             );
           }else{
+            if(outfit==null){
+              AnalyticsEvents(context).outfitViewed(outfitSnap.data);
+            }
             outfit = outfitSnap.data;
             return _overlayScaffold(
               body: _buildMainBody()
@@ -180,13 +183,7 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
     }
   }
 
-  _editOutfit() {
-    Navigator.push(context, MaterialPageRoute(
-      builder: (ctx) => EditOutfitScreen(
-        outfit: outfit,
-      )
-    ));
-  }
+  _editOutfit() => CustomNavigator.goToEditOutfitScreen(context, outfit: outfit);
 
   _confirmDelete(){
     return showDialog(
@@ -370,7 +367,7 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
           Container(
             padding: EdgeInsets.all(4),
             child: RatingBar(
-              value: outfit?.averageRating?.round(),
+              value: outfit?.averageRating,
               size: 28,
             ),
           )
@@ -637,11 +634,9 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
   }
 
   _loadCommentsPage({bool focusComment = false}) {
-    Navigator.push(context, MaterialPageRoute(
-      builder: (ctx) => CommentsScreen(
-        outfitId: outfit.outfitId,
-        focusComment: focusComment,
-      )
-    ));
+    CustomNavigator.goToCommentsScreen(context,
+      focusComment: focusComment,
+      outfitId: outfit.outfitId
+    );
   }
 }

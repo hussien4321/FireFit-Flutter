@@ -89,7 +89,11 @@ class FirebaseUserRepository implements UserRepository {
 
       return _checkImageUploaded(userId);
     })
-    .catchError((err) => false);
+    .catchError((err) {
+      print('failed creation!');
+      print(err.message);
+      return false;
+    });
   }
 
   _generateFileName(String imagePath, String userId){

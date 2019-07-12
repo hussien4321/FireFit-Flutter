@@ -91,6 +91,7 @@ class _MainAppBarState extends State<MainAppBar> {
 
   _initBlocs() async {
     if(_userBloc == null){
+      _logCurrentScreen();
       _userBloc = UserBlocProvider.of(context);
       _outfitBloc =OutfitBlocProvider.of(context);
       _notificationBloc = NotificationBlocProvider.of(context);
@@ -110,6 +111,8 @@ class _MainAppBarState extends State<MainAppBar> {
     }
   }
 
+  _logCurrentScreen() => AnalyticsEvents(context).logCustomScreen('/${AppConfig.MAIN_PAGES_PATHS[currentIndex]}');
+
   _loadNewNotifications() {
     _notificationBloc.loadLiveNotifications.add(LoadNotifications(
       userId: userId
@@ -123,9 +126,12 @@ class _MainAppBarState extends State<MainAppBar> {
     );
   }
   
-  StreamSubscription _logInStatusListener(){
+  StreamSubscription _logInStatusListener() { 
     return _userBloc.accountStatus.listen((accountStatus) {
       if(accountStatus!=null && accountStatus != UserAccountStatus.LOGGED_IN){
+        if(accountStatus ==UserAccountStatus.LOGGED_OUT){
+          AnalyticsEvents(context).logOut();
+        }
         Navigator.pushReplacementNamed(context, RouteConverters.getFromAccountStatus(accountStatus));
       }
     });
@@ -163,7 +169,10 @@ class _MainAppBarState extends State<MainAppBar> {
       animationType: InnerDrawerAnimation.linear,
       child: MenuNavigationScreen(
         index: currentIndex,
-        onPageSelected: (newIndex) => currentIndex = newIndex,
+        onPageSelected: (newIndex) {
+          currentIndex = newIndex;
+          _logCurrentScreen();
+        },
       ),
       innerDrawerCallback: _updateMainScreenDimming,
       scaffold: _buildScaffold(
@@ -232,11 +241,7 @@ class _MainAppBarState extends State<MainAppBar> {
         tag: MMKeys.uploadButtonHero,
         child: Icon(Icons.add_a_photo),
       ),
-      onPressed: () {
-        Navigator.push(context, MaterialPageRoute(
-          builder: (context) => UploadOutfitScreen()
-        ));
-      }
+      onPressed: () => CustomNavigator.goToUploadOutfitScreen(context)
     );
   }
 

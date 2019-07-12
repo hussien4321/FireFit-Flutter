@@ -11,6 +11,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:repository_impl/repository_impl.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:streamqflite/streamqflite.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 
 void main() async {
   
@@ -42,10 +43,12 @@ void main() async {
     imageUploader: imageUploader,
     messaging: messaging,
   );
+  FirebaseAnalytics analytics = FirebaseAnalytics();
 
   app.main(
     outfitRepository: outfitRepository,
     userRepository: userRepository,
-    messaging: messaging
+    messaging: messaging,
+    analytics: analytics
   );
 }

@@ -27,6 +27,7 @@ class EmailVerificationPage extends StatefulWidget {
 
 class _EmailVerificationPageState extends State<EmailVerificationPage> with SnackbarMessages, SingleTickerProviderStateMixin {
   
+  bool isEmailVerified = false;
 
   static final int DURATION = 10;
   AnimationController resendController;
@@ -96,8 +97,8 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> with Snac
                       style: Theme.of(context).textTheme.subhead,
                     ),
                     TextSpan(
-                      text: widget.onboardUser.isEmailVerified ? 'Verified' : 'Pending',
-                      style: Theme.of(context).textTheme.subhead.apply(color: widget.onboardUser.isEmailVerified ? Colors.blue : Colors.grey ),
+                      text: isEmailVerified ? 'Verified' : 'Pending',
+                      style: Theme.of(context).textTheme.subhead.apply(color: isEmailVerified ? Colors.blue : Colors.grey ),
                     ),
                   ],
                 ),
@@ -106,7 +107,7 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> with Snac
                 child: Text(
                   isRefreshing ? 'Refreshing' : 'Refresh',
                 ),
-                onPressed: widget.onboardUser.isEmailVerified || isRefreshing ? null : _refresh,
+                onPressed: isEmailVerified || isRefreshing ? null : _refresh,
               )
             ],
           ),
@@ -119,7 +120,7 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> with Snac
                     child: Text(
                       resendCoolingDown ? 'Email sent (wait ${resendAnimation.value}s to resend)' : 'Resend email'
                     ),
-                    onPressed: widget.onboardUser.isEmailVerified || resendCoolingDown ? null : _resend
+                    onPressed: isEmailVerified || resendCoolingDown ? null : _resend
                   )
                 ),
               ],
@@ -138,7 +139,7 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> with Snac
     displayNoticeSnackBar(context, 'Refreshing verification status');
     bool newVerificationStatus = await widget.currentEmailVerificationStatus.first;
     if(newVerificationStatus){
-      widget.onboardUser.isEmailVerified = true;
+      isEmailVerified = true;
       widget.onSave(widget.onboardUser);
     }
     setState(() {

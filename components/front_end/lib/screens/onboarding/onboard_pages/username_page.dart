@@ -4,6 +4,7 @@ import 'package:middleware/middleware.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:rxdart/rxdart.dart';
 import 'onboard_details.dart';
+import 'package:overlay_support/overlay_support.dart';
 
 class UsernamePage extends StatefulWidget {
 
@@ -49,69 +50,70 @@ class _UsernamePageState extends State<UsernamePage> with SnackbarMessages {
             widget.onboardUser.isUsernameTaken = isUsernameTakenSnapshot.data;
             widget.onSave(widget.onboardUser);
           }
-          return OnboardDetails(
-            icon: FontAwesomeIcons.user,
-            title: "What shall we call you?",
-            children: <Widget>[
-              Container(
-                child: Row(
-                  children: <Widget>[
-                    Expanded(
-                      child: TextField(
-                        autofocus: true,
-                        controller: displayNameController,
-                        onChanged: (newString) {
-                          widget.onboardUser.name = newString;
-                          widget.onSave(widget.onboardUser);
-                        },
-                        onSubmitted: (t) => FocusScope.of(context).requestFocus(usernameFocus),
-                        decoration: InputDecoration(
-                          border: InputBorder.none,
-                          labelText: 'Display name',
-                          labelStyle: Theme.of(context).textTheme.subtitle.apply(color: Colors.blue),
-                          hintText: 'Jennifer David',
+          return SingleChildScrollView(
+            child: OnboardDetails(
+              icon: FontAwesomeIcons.user,
+              title: "What shall we call you?",
+              children: <Widget>[
+                Container(
+                  child: Row(
+                    children: <Widget>[
+                      Expanded(
+                        child: CustomTextField(
+                          controller: displayNameController,
+                          onChanged: (newString) {
+                            widget.onboardUser.name = newString;
+                            widget.onSave(widget.onboardUser);
+                          },
+                          textColor: Colors.blue,
+                          onSubmitted: (t) => FocusScope.of(context).requestFocus(usernameFocus),
+                          title: 'Display Name',
+                          titleStyle: Theme.of(context).textTheme.subtitle,
+                          hintText: 'Dave Jefferson',
+                          textCapitalization: TextCapitalization.words,
+                          textInputAction: TextInputAction.next,
                         ),
-                        textCapitalization: TextCapitalization.words,
-                        textInputAction: TextInputAction.next,
-                        style: Theme.of(context).textTheme.title,
-                      )
-                    )
-                  ],
-                )
-              ),
-              Container(
-                child: Row(
-                  children: <Widget>[
-                    Expanded(
-                      child: TextField(
-                        focusNode: usernameFocus,
-                        controller: usernameController,
-                        onChanged: _parseNewUsername,
-                        decoration: InputDecoration(
-                          border: InputBorder.none,
-                          labelText: 'Username',
-                          labelStyle: Theme.of(context).textTheme.subtitle.apply(color: Colors.blue),
-                          prefix: Text('@')
-                        ),
-                        style: Theme.of(context).textTheme.title,
-                      )
-                    )
-                  ],
-                )
-              ),
-              Container(
-                padding: EdgeInsets.all(4.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: <Widget>[
-                    Text(
-                      usernameController.value.text.isEmpty ? '' : (widget.onboardUser.isUsernameTaken == null  ? 'Checking username...' : widget.onboardUser.isUsernameTaken ? 'Username exists' : 'Available!'),
-                      style: Theme.of(context).textTheme.caption.apply(color: widget.onboardUser.isUsernameTaken == null ? Theme.of(context).disabledColor : widget.onboardUser.isUsernameTaken ? Theme.of(context).errorColor : Colors.blue),
-                    )
-                  ],
+                      ),
+                    ],
+                  )
                 ),
-              )
-            ],
+                Container(
+                  child: Row(
+                    children: <Widget>[
+                      Expanded(
+                        child: CustomTextField(
+                          focusNode: usernameFocus,
+                          controller: usernameController,
+                          onChanged: _parseNewUsername,
+                          textCapitalization: TextCapitalization.none,
+                          textColor: widget.onboardUser.isUsernameTaken == null ? Colors.black : (widget.onboardUser.isUsernameTaken ? Colors.red : Colors.blue),
+                          title: 'Username',
+                          hintText: 'unique_name',
+                          titleStyle: Theme.of(context).textTheme.subtitle,
+                          textInputAction: TextInputAction.next,
+                          prefix: Text(
+                            ' @',
+                            style: Theme.of(context).textTheme.title.copyWith(fontSize: 32),
+                          ),
+                        ),
+                      ),
+                    ],
+                  )
+                ),
+                Container(
+                  padding: EdgeInsets.all(4.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: <Widget>[
+                      Text(
+                        usernameController.value.text.isEmpty ? '' : (widget.onboardUser.isUsernameTaken == null  ? 'Checking username...' : widget.onboardUser.isUsernameTaken ? 'Username exists' : 'Available!'),
+                        style: Theme.of(context).textTheme.caption.apply(color: widget.onboardUser.isUsernameTaken == null ? Theme.of(context).disabledColor : widget.onboardUser.isUsernameTaken ? Theme.of(context).errorColor : Colors.blue),
+                      )
+                    ],
+                  ),
+                )
+              ],
+            ),
           );
         }
       )
@@ -121,8 +123,9 @@ class _UsernamePageState extends State<UsernamePage> with SnackbarMessages {
   _parseNewUsername(String newUsername) {
     String formattedUsername =_getFormattedUsername(newUsername);
     if(formattedUsername != newUsername){
-      displayErrorSnackBar(context, 'Username can only contain letters & numbers');
+      toast('Username can only contain letters & numbers');
       usernameController.text = formattedUsername;
+      usernameFocus.unfocus();
     }
     widget.onboardUser.username = usernameController.text;
     widget.onboardUser.isUsernameTaken = null;
@@ -131,7 +134,7 @@ class _UsernamePageState extends State<UsernamePage> with SnackbarMessages {
   }
 
   String _getFormattedUsername(String text) {
-    text = text.replaceAll(RegExp("[^A-Za-z0-9]"), "");
+    text = text.replaceAll(RegExp("[^A-Za-z0-9_]"), "");
     return text;
   }
 }

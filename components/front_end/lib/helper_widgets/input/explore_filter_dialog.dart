@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:front_end/helper_widgets.dart';
 
 class ExploreFilterDialog extends StatefulWidget {
 
@@ -9,12 +8,6 @@ class ExploreFilterDialog extends StatefulWidget {
 }
 
 class _ExploreFilterDialogState extends State<ExploreFilterDialog> {
-
-
-  @override
-  void initState() {
-    super.initState();
-  }
 
   @override
   Widget build(BuildContext context) {

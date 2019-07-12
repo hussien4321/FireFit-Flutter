@@ -39,7 +39,7 @@ class _LogInScreenState extends State<LogInScreen> with LoadingAndErrorDialogs {
   void initState() {
     super.initState();
     if(_giveDefaultLogIn){
-      emailController.text ='hussien.elmi@outlook.com';
+      emailController.text ='xuri@mail-click.net';
       passwordController.text = 'password2';
       confirmationController.text ='password2';
     }

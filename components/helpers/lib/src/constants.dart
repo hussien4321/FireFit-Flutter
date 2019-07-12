@@ -6,5 +6,12 @@ class AppConfig {
     "INSPIRATION",
     "FASHION CIRCLE",
     "WARDROBE",
+    "LOOKBOOKS",
+  ];
+  static final List<String> MAIN_PAGES_PATHS = [
+    "/explore",
+    "/fashion_circle",
+    "/wardrobe",
+    "/lookbooks",
   ];
 }

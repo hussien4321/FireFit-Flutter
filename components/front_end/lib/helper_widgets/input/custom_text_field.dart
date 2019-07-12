@@ -7,15 +7,23 @@ class CustomTextField extends StatelessWidget {
   final TextCapitalization textCapitalization;
   final TextInputAction textInputAction;
   final String title, hintText;
+  final TextStyle titleStyle;
+  final Widget prefix;
+  final FocusNode focusNode;
+  final Color textColor;
 
   CustomTextField({
     this.controller,
+    this.focusNode,
     this.onChanged,
     this.onSubmitted,
     this.textCapitalization,
     this.textInputAction,
     this.title,
+    this.titleStyle,
+    this.textColor,
     this.hintText,
+    this.prefix,
   });
 
   @override
@@ -24,13 +32,14 @@ class CustomTextField extends StatelessWidget {
       children: <Widget>[
         Container(
           padding: EdgeInsets.symmetric(vertical: 8.0),
+          margin: EdgeInsets.only(left: 8.0),
           width: double.infinity,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: <Widget>[
               Text(
                 title,
-                style: Theme.of(context).textTheme.headline,
+                style: titleStyle!=null ? titleStyle : Theme.of(context).textTheme.headline,
               ),
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 8.0),
@@ -48,15 +57,18 @@ class CustomTextField extends StatelessWidget {
             color: Colors.grey[350]
           ),
           child: TextField(
+            focusNode: focusNode,
             controller: controller,
             onChanged: onChanged,
             onSubmitted: onSubmitted,
             textCapitalization: textCapitalization,
             textInputAction: textInputAction,
-            style: Theme.of(context).textTheme.display1.apply(color: Colors.black),
+            style: Theme.of(context).textTheme.display1.apply(color: textColor != null ? textColor : Colors.black),
             decoration: new InputDecoration.collapsed(
               hintText: hintText,
-              hintStyle: Theme.of(context).textTheme.headline.apply(color: Colors.black.withOpacity(0.5))
+              hintStyle: Theme.of(context).textTheme.headline.apply(color: Colors.black.withOpacity(0.5)),
+            ).copyWith(
+              prefixIcon: prefix
             ),
           ),
         ),

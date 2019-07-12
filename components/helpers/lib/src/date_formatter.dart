@@ -17,6 +17,13 @@ class DateFormatter {
     }
   }
 
+  static String dateToLongFormat(DateTime dateTime){
+    String dateString = "";
+    dateString += "${_monthToString(dateTime.month)} ${dateTime.day}${_daySuffix(dateTime)} ${dateTime.year}";
+    return dateString;
+  }
+
+
   static String dateToSimpleFormat(DateTime dateTime){
     DateTime current = DateTime.now();
     if(_isSameDay(current, dateTime)){

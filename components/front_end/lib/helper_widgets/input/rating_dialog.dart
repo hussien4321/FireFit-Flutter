@@ -65,7 +65,7 @@ class _RatingDialogState extends State<RatingDialog> {
          ),
          RatingBar(
           size: 36,
-          value: rating,
+          value: rating?.toDouble(),
           onUpdateRating: (newRating) => setState(() => rating=newRating),
            ),
        ],
@@ -84,7 +84,7 @@ class _RatingDialogState extends State<RatingDialog> {
     return Text(
       _rateText,
       style: Theme.of(context).textTheme.title.copyWith(
-        color: hasRating ? Colors.deepOrangeAccent : Colors.transparent,
+        color: rating != null ? Colors.deepOrangeAccent : Colors.transparent,
         fontWeight: FontWeight.bold
       ),
     );
@@ -101,7 +101,7 @@ class _RatingDialogState extends State<RatingDialog> {
       case 2:
         return "Not bad";
       case 1:
-        return "Needs fixing";
+        return "Needs fixing up";
       default:
         return "TEST";
     }

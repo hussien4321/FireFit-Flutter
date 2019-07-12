@@ -348,12 +348,10 @@ class _ExploreScreenOriginalState extends State<ExploreScreenOriginal> {
   }
 
   _composeComment(Outfit outfit){
-    Navigator.push(context, MaterialPageRoute(
-      builder: (ctx) => CommentsScreen(
-        focusComment: true,
-        outfitId: outfit.outfitId,
-      )
-    ));
+    CustomNavigator.goToCommentsScreen(context, 
+      focusComment: true, 
+      outfitId: outfit.outfitId
+    );
   }
 
   _openCurrentProfile(String userId) {
