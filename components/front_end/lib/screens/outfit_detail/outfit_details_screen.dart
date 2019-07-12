@@ -276,7 +276,11 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisSize: MainAxisSize.min,
                           children: <Widget>[
-                            _buildPosterInfo(),
+                            UserPreviewCard(
+                              outfit.poster,
+                              isPoster: true,
+                              removePrevious: true,
+                            ),
                             _buildOutfitDescription(),
                             _actionButtons(),
                             _commentsPreview(),
@@ -399,64 +403,6 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
           color: Colors.black45
         ),
       ),
-    );
-  }
-
-  Widget _buildPosterInfo() {
-    String hero = 'Outfit-details-poster-${outfit.poster.profilePicUrl}';
-    return Container(
-      margin: EdgeInsets.only(bottom: 16),
-      child: Material(
-        elevation: 3,
-        color: Colors.grey[200],
-        child: InkWell(
-          onTap: () => _navigateToProfileScreen(hero),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: <Widget>[
-                ProfilePicWithShadow(
-                  hasOnClick: false,
-                  userId: outfit.poster.userId,
-                  url: outfit.poster.profilePicUrl,
-                  size: 50.0,
-                ),
-                Expanded(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.max,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Text(
-                        'Posted by:',
-                        style: Theme.of(context).textTheme.caption,
-                      ),
-                      Text(
-                        outfit.poster.name,
-                        style: Theme.of(context).textTheme.title,
-                      ),
-                    ],
-                  ),
-                ),
-                Container(
-                  padding: EdgeInsets.all(8),
-                  child: Text(
-                    'View Profile',
-                    style: Theme.of(context).textTheme.button.apply(color: Colors.black),
-                  ),
-                )
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  _navigateToProfileScreen(String hero) {
-    CustomNavigator.goToProfileScreen(context, true,
-      userId: outfit.poster.userId,
-      heroTag: hero,
     );
   }
   

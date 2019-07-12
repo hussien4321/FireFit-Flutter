@@ -42,3 +42,5 @@ export 'helper_widgets/state/snackbar_messages.dart';
 
 export 'helper_widgets/user/country_sticker.dart';
 export 'helper_widgets/user/demographic_sticker.dart';
+export 'helper_widgets/user/user_preview_card.dart';
+

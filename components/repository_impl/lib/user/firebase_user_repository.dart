@@ -263,7 +263,7 @@ class FirebaseUserRepository implements UserRepository {
     .catchError((err) {
       return true;
     });
-  } 
+  }
 
   Future<void> registerNotificationToken(String userId) async {
     String notificationToken = await messaging.getToken();

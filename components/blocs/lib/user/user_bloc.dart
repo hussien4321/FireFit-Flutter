@@ -95,7 +95,7 @@ class UserBloc {
       _refreshVerificationEmailController.stream.listen(_refreshVerifiedCheck),
       _resendEmailController.stream.listen(repository.resendVerificationEmail),
       _selectUserController.listen(_loadSelectedUser),
-      _searchUserController.listen(_loadSearchUser),
+      _searchUserController.distinct().listen(_loadSearchUser),
       _loadCurrentUserController.listen(_loadCurrentUser),
       _followUserController.listen(_followUser),
       _loadFollowersController.listen(_loadFollowers),
@@ -225,11 +225,11 @@ class UserBloc {
     _loadingController.add(false);
   }
 
-  _loadSearchUser(String userId) async {
+  _loadSearchUser(String username) async {
     _loadingController.add(true);
     await repository.loadUserDetails(
       LoadUser(
-        userId: userId,
+        username: username,
         currentUserId: _currentUserId
       ),
       SearchModes.SELECTED

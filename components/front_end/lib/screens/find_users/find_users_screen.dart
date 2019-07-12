@@ -3,6 +3,7 @@ import 'package:front_end/helper_widgets.dart';
 import 'package:blocs/blocs.dart';
 import 'package:front_end/providers.dart';
 import 'package:overlay_support/overlay_support.dart';
+import 'package:middleware/middleware.dart';
 
 class FindUsersScreen extends StatefulWidget {
   @override
@@ -15,7 +16,7 @@ class _FindUsersScreenState extends State<FindUsersScreen> {
   TextEditingController usernameController = new TextEditingController();
   FocusNode usernameFocus = FocusNode();
 
-  bool isSearching = false;
+  bool hasSearched = false;
 
   @override
   Widget build(BuildContext context) {
@@ -46,21 +47,29 @@ class _FindUsersScreenState extends State<FindUsersScreen> {
 
   Widget _content() {
     return Container(
-      padding: EdgeInsets.only(left: 8, right: 8, top: 16),
-      child: Column(
-        children: <Widget>[
-          _introText(),
-          _usernameField(),
-          _searchButton(),
-          // _results(),
-        ],
+      padding: EdgeInsets.only(left: 8, right: 8),
+      child: StreamBuilder<bool>(
+        stream: _userBloc.isLoading,
+        initialData: false,
+        builder: (context, isLoadingSnap) {
+          return SingleChildScrollView(
+            child: Column(
+              children: <Widget>[
+                _introText(),
+                _usernameField(),
+                _searchButton(isLoadingSnap.data),
+                _searchResult(isLoadingSnap.data),
+              ],
+            ),
+          );
+        }
       ),
     );
   }
 
   Widget _introText() {
     return Padding(
-      padding: EdgeInsets.only(bottom: 8),
+      padding: EdgeInsets.only(top: 16, bottom: 8),
       child: Text(
         'To search for a user, type in their unique username below',
         style: Theme.of(context).textTheme.title,
@@ -94,30 +103,71 @@ class _FindUsersScreenState extends State<FindUsersScreen> {
       usernameController.text = formattedUsername;
       usernameFocus.unfocus();
     }
+    setState(() {});
   }
   String _getFormattedUsername(String text) {
     text = text.replaceAll(RegExp("[^A-Za-z0-9_]"), "");
     return text;
   }
 
-  Widget _searchButton() {
-    return RaisedButton(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8)
-      ),
-      color: Colors.black87,
-      child: Text(
-        'Search',
-        style: Theme.of(context).textTheme.subhead.copyWith(
-          inherit: true,
-          color: Colors.white
+  Widget _searchButton(bool isLoading) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8.0),
+      child: RaisedButton(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8)
         ),
+        color: Colors.black87,
+        child: Text(
+          isLoading ? 'Searching...' : 'Search',
+          style: Theme.of(context).textTheme.subhead.copyWith(
+            inherit: true,
+            color: Colors.white
+          ),
+        ),
+        onPressed: !isLoading && usernameController.text?.isNotEmpty == true ? _search : null,
       ),
-      onPressed: _search,
     );
   }
 
   _search() {
-    // _userBloc.selectUser
+    _userBloc.searchUser.add(usernameController.text);
+    usernameFocus.unfocus();
+    hasSearched = true;
+  }
+
+  Widget _searchResult(bool isLoading) {
+    return isLoading || !hasSearched ?
+      Container() :
+      StreamBuilder<User>(
+        stream: _userBloc.selectedUser,
+        initialData: null,
+        builder: (ctx, snap) {
+          return snap.data == null ? _notFoundMessage() : _foundUser(snap.data);
+        },
+      );
+  }
+
+  Widget _notFoundMessage() {
+    return Text(
+      'No user found 😢',
+      style: Theme.of(context).textTheme.subhead,
+    );
+  }
+
+  Widget _foundUser(User user) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Padding(
+          padding: const EdgeInsets.only(left: 4.0, bottom: 2),
+          child: Text(
+            'Found User!',
+            style: Theme.of(context).textTheme.subhead,
+          ),
+        ),
+        UserPreviewCard(user),
+      ],
+    );
   }
 }
