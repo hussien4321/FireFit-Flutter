@@ -10,10 +10,14 @@ class FollowUsersScreen extends StatefulWidget {
 
   final bool isFollowers;
   final String selectedUserId;
-  
+  final int pagesSinceOutfitScreen;
+  final int pagesSinceProfileScreen;
+
   FollowUsersScreen({
     @required this.isFollowers,
     @required this.selectedUserId,
+    this.pagesSinceOutfitScreen = 0,
+    this.pagesSinceProfileScreen = 0,
   });
 
   @override
@@ -188,6 +192,10 @@ class _FollowUsersScreenState extends State<FollowUsersScreen> {
 
 
   _openProfile(User user){
-    CustomNavigator.goToProfileScreen(context, true, userId: user.userId);
+    CustomNavigator.goToProfileScreen(context, 
+      userId: user.userId,
+      pagesSinceProfileScreen: widget.pagesSinceProfileScreen,
+      pagesSinceOutfitScreen: widget.pagesSinceOutfitScreen,
+    );
   }
 }

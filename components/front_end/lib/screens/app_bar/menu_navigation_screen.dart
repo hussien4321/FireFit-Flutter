@@ -199,7 +199,7 @@ class _MenuNavigationScreenState extends State<MenuNavigationScreen> {
   }
 
   _openUserProfile(String userId){
-    CustomNavigator.goToProfileScreen(context, true,
+    CustomNavigator.goToProfileScreen(context,
       userId: userId,
     );
   }

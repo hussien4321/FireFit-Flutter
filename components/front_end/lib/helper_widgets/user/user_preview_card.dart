@@ -6,12 +6,14 @@ class UserPreviewCard extends StatelessWidget {
 
   final User user;
   final bool isPoster;
-  final bool removePrevious;
-
-  UserPreviewCard(this.user, {this.isPoster = false, this.removePrevious = false});
+  final int pagesSinceOutfitScreen;
+  final int pagesSinceProfileScreen;
+  
+  UserPreviewCard(this.user, {this.isPoster = false, this.pagesSinceOutfitScreen = 0, this.pagesSinceProfileScreen = 0});
 
   @override
   Widget build(BuildContext context) {
+    // print('building card with pagesSinceOutfitScreen:$pagesSinceOutfitScreen pagesSinceProfileScreen:$pagesSinceProfileScreen');
     String hero = 'Outfit-details-poster-${user.profilePicUrl}';
     return Container(
       margin: EdgeInsets.only(bottom: 16),
@@ -67,9 +69,11 @@ class UserPreviewCard extends StatelessWidget {
   }
 
   _navigateToProfileScreen(BuildContext context, String hero) {
-    CustomNavigator.goToProfileScreen(context, removePrevious,
+    CustomNavigator.goToProfileScreen(context,
       userId: user.userId,
       heroTag: hero,
+      pagesSinceOutfitScreen: pagesSinceOutfitScreen,
+      pagesSinceProfileScreen: pagesSinceProfileScreen,
     );
   }
 

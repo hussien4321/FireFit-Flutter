@@ -12,11 +12,15 @@ class CommentsScreen extends StatefulWidget {
   final int outfitId;
   final bool loadOutfit;
   final bool focusComment;
+  final int pagesSinceOutfitScreen;
+  final int pagesSinceProfileScreen;
   
   CommentsScreen({
     this.outfitId,
     this.loadOutfit = false,
     this.focusComment = false,
+    this.pagesSinceOutfitScreen = 0,
+    this.pagesSinceProfileScreen = 0,
   });
 
   @override
@@ -224,6 +228,8 @@ class _CommentsScreenState extends State<CommentsScreen> {
                 heroTag: '${outfit.outfitId}-'+outfit.poster.profilePicUrl,
                 userId: outfit.poster.userId,
                 url: outfit.poster.profilePicUrl,
+                pagesSinceOutfitScreen: widget.pagesSinceOutfitScreen,
+                pagesSinceProfileScreen: widget.pagesSinceProfileScreen,
               ),
             ),
             Expanded(
@@ -276,8 +282,10 @@ class _CommentsScreenState extends State<CommentsScreen> {
   }
 
   _openOutfit() {
-    CustomNavigator.goToOutfitDetailsScreen(context, true, 
-      outfitId: widget.outfitId
+    CustomNavigator.goToOutfitDetailsScreen(context, 
+      outfitId: widget.outfitId,
+      pagesSinceOutfitScreen: widget.pagesSinceOutfitScreen,
+      pagesSinceProfileScreen: widget.pagesSinceProfileScreen,
     );
   }
   
@@ -305,6 +313,8 @@ class _CommentsScreenState extends State<CommentsScreen> {
                     heroTag: '${comment.commentId}-'+comment.commenter.profilePicUrl,
                     userId: comment.commenter.userId,
                     url: comment.commenter.profilePicUrl,
+                    pagesSinceOutfitScreen: widget.pagesSinceOutfitScreen,
+                    pagesSinceProfileScreen: widget.pagesSinceProfileScreen,
                   ),
                 ),
                 Expanded(

@@ -160,7 +160,7 @@ class _NotificationTabState extends State<NotificationTab> {
       _notificationBloc.markNotificationsSeen.add(markSeen);
     }
     if(widget.notification.type == NotificationType.OUTFIT_RATING || widget.notification.type == NotificationType.NEW_OUTFIT){
-      CustomNavigator.goToOutfitDetailsScreen(context, false, 
+      CustomNavigator.goToOutfitDetailsScreen(context, 
         outfitId: refOutfit.outfitId,
         loadOutfit: true
       );
@@ -173,7 +173,7 @@ class _NotificationTabState extends State<NotificationTab> {
       );
     }
     if(widget.notification.type == NotificationType.NEW_FOLLOW){
-      CustomNavigator.goToProfileScreen(context, false,
+      CustomNavigator.goToProfileScreen(context,
         userId: refUser.userId,
       );
     }

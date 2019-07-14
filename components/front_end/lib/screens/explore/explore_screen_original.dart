@@ -354,7 +354,7 @@ class _ExploreScreenOriginalState extends State<ExploreScreenOriginal> {
   }
 
   _openCurrentProfile(String userId) {
-    CustomNavigator.goToProfileScreen(context, false,
+    CustomNavigator.goToProfileScreen(context,
       userId: userId
     );
   }

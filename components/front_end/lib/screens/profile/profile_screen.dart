@@ -11,8 +11,15 @@ enum UserOption { EDIT, REPORT }
 class ProfileScreen extends StatefulWidget {
   final String userId;
   final String heroTag;
+  final int pagesSinceOutfitScreen;
+  final int pagesSinceProfileScreen;
 
-  ProfileScreen({this.userId, this.heroTag});
+  ProfileScreen({
+    this.userId, 
+    this.heroTag,
+    this.pagesSinceOutfitScreen = 0,
+    this.pagesSinceProfileScreen = 0,
+});
 
   @override
   _ProfileScreenState createState() => _ProfileScreenState();
@@ -105,7 +112,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return CustomScaffold(
       leading: IconButton(
         icon: Icon(
-          Icons.close,
+          Icons.arrow_back,
           color: Colors.black,
         ),
         onPressed: Navigator.of(context).pop,
@@ -351,20 +358,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   _showFollowing(String userId){
-    Navigator.of(context).push(MaterialPageRoute(
-      builder: (ctx) => FollowUsersScreen(
-        selectedUserId: userId,
-        isFollowers: false,
-      )
-    ));
+    CustomNavigator.goToFollowUsersScreen(context,
+      selectedUserId: userId,
+      isFollowers: false,
+      pagesSinceOutfitScreen: widget.pagesSinceOutfitScreen,
+      pagesSinceProfileScreen: widget.pagesSinceProfileScreen+1,
+    );
   }
   _showFollowers(String userId){
-    Navigator.of(context).push(MaterialPageRoute(
-      builder: (ctx) => FollowUsersScreen(
-        selectedUserId: userId,
-        isFollowers: true,
-      )
-    ));
+    CustomNavigator.goToFollowUsersScreen(context,
+      selectedUserId: userId,
+      isFollowers: true,
+      pagesSinceOutfitScreen: widget.pagesSinceOutfitScreen,
+      pagesSinceProfileScreen: widget.pagesSinceProfileScreen+1,
+    );
   }
 
   Widget _buildOutfitDescription(User user) {
@@ -441,6 +448,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
           isLoading: isLoading,
           outfits: outfitsSnap.data,
           hasFixedHeight: true,
+          pagesSinceProfileScreen: widget.pagesSinceProfileScreen+1,
+          pagesSinceOutfitScreen: widget.pagesSinceOutfitScreen,
         );
       }
     );

@@ -31,7 +31,7 @@ class OutfitMainCard extends StatelessWidget {
   
 
   _openOutfit(BuildContext context, Outfit outfit) {
-    CustomNavigator.goToOutfitDetailsScreen(context, false, outfitId: outfit.outfitId);
+    CustomNavigator.goToOutfitDetailsScreen(context, outfitId: outfit.outfitId);
   }
 
   Widget _outfitImage(Outfit outfit){

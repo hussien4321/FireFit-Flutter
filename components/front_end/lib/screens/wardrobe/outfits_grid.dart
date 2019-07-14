@@ -12,8 +12,14 @@ class OutfitsGrid extends StatefulWidget {
   final VoidCallback onReachEnd;
   final String emptyText;
   final OutfitOverlay customOverlay;
+  final int pagesSinceOutfitScreen;
+  final int pagesSinceProfileScreen;
 
-  OutfitsGrid({this.outfits, this.isLoading, this.onReachEnd, this.onRefresh, this.emptyText, this.customOverlay ,this.hasFixedHeight = false});
+  OutfitsGrid({this.outfits, this.isLoading, this.onReachEnd, this.onRefresh, this.emptyText, this.customOverlay ,
+    this.hasFixedHeight = false,
+    this.pagesSinceOutfitScreen = 0,
+    this.pagesSinceProfileScreen = 0,
+  });
 
   @override
   _OutfitsGridState createState() => _OutfitsGridState();
@@ -127,8 +133,10 @@ class _OutfitsGridState extends State<OutfitsGrid> {
   }
 
   _openDetailedOutfit(Outfit outfit, BuildContext ctx){
-    CustomNavigator.goToOutfitDetailsScreen(ctx, true, 
-      outfitId: outfit.outfitId
+    CustomNavigator.goToOutfitDetailsScreen(ctx, 
+      outfitId: outfit.outfitId,
+      pagesSinceOutfitScreen: widget.pagesSinceOutfitScreen,
+      pagesSinceProfileScreen: widget.pagesSinceProfileScreen,
     );
   }
 

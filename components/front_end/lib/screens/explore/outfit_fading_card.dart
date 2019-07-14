@@ -330,7 +330,7 @@ class _OutfitFadingCardState extends State<OutfitFadingCard> with SingleTickerPr
 
   _openDetailedOutfit(){
     if(hasOutfit){
-      CustomNavigator.goToOutfitDetailsScreen(context, false, 
+      CustomNavigator.goToOutfitDetailsScreen(context, 
         outfitId: widget.currentOutfit.outfitId
       );
     }

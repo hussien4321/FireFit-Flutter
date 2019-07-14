@@ -9,6 +9,8 @@ class ProfilePicWithShadow extends StatelessWidget {
   final EdgeInsets margin;
   final bool hasOnClick;
   final heroTag;
+  final int pagesSinceOutfitScreen;
+  final int pagesSinceProfileScreen;
   
   ProfilePicWithShadow({
     this.url, 
@@ -17,6 +19,8 @@ class ProfilePicWithShadow extends StatelessWidget {
     this.userId,
     this.hasOnClick = true,
     this.heroTag,
+    this.pagesSinceOutfitScreen = 0,
+    this.pagesSinceProfileScreen = 0,
   });
   
   @override
@@ -52,9 +56,11 @@ class ProfilePicWithShadow extends StatelessWidget {
   }
 
   _navigateToProfileScreen(BuildContext context, String hero) {
-    CustomNavigator.goToProfileScreen(context, true,
+    CustomNavigator.goToProfileScreen(context,
       userId: userId,
       heroTag: heroTag,
+      pagesSinceOutfitScreen: pagesSinceOutfitScreen,
+      pagesSinceProfileScreen: pagesSinceProfileScreen
     );
   }
 }

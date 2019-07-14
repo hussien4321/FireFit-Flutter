@@ -8,37 +8,79 @@ import 'package:page_transition/page_transition.dart';
 class CustomNavigator {
 
   //TODO: GET ROUTE STACK FROM OBSERVER TO DETERMINE IF IT NEEDS TO REWIND
+  //TODO: REMOVE ALL REFERENCES WHEN THAT IS IMPLEMENTED
+  //CURRENT PROBLEM, INSTEAD OF REMOVING ALL PREVIOUS ROUTES, WE SHOULD COUNT THE NUMBER OF PAGES SINCE LAST OUTFIT/PROFILE AND THEN ONLY GO BACK THAT MANY
 
-  static Future<T> goToProfileScreen<T extends Object>(BuildContext context, bool removePrevious, {String userId, String heroTag}) {
+  static Future<T> goToProfileScreen<T extends Object>(BuildContext context, {
+    String userId, 
+    String heroTag,
+    int pagesSinceOutfitScreen = 0, 
+    int pagesSinceProfileScreen = 0,
+  }) {
+    pagesSinceProfileScreen += pagesSinceProfileScreen>0 ? 1 : 0;
+    // print('goToProfileScreen pagesSinceProfileScreen:$pagesSinceProfileScreen pagesSinceOutfitScreen:$pagesSinceOutfitScreen');
+    int numberOfPagesToRemove = pagesSinceProfileScreen;
+    if(numberOfPagesToRemove>0){
+      pagesSinceOutfitScreen -= pagesSinceProfileScreen;
+      if(pagesSinceOutfitScreen < 0){
+        pagesSinceOutfitScreen = 0;
+      }
+      pagesSinceProfileScreen = 0;
+    }
+    // print('goToProfileScreen END pagesSinceProfileScreen:$pagesSinceProfileScreen pagesSinceOutfitScreen:$pagesSinceOutfitScreen');
     return Navigator.pushAndRemoveUntil(context, 
       MaterialPageRoute(
         builder: (ctx) => ProfileScreen(
-          userId: userId, 
+          userId: userId,
           heroTag: heroTag,
+          pagesSinceOutfitScreen: pagesSinceOutfitScreen,
+          pagesSinceProfileScreen: pagesSinceProfileScreen,
         ),
         settings: RouteSettings(
           name: '/profile'
         )
       ),
       (Route<dynamic> route) {
+        bool removePrevious = numberOfPagesToRemove>0;
+        numberOfPagesToRemove--;
         bool isFirst = route.isFirst;
         return !removePrevious || isFirst; 
       }
     );
   } 
 
-  static Future<T> goToOutfitDetailsScreen<T extends Object>(BuildContext context, bool removePrevious, {int outfitId, bool loadOutfit = false}) {
+  static Future<T> goToOutfitDetailsScreen<T extends Object>(BuildContext context, {
+    int outfitId, 
+    bool loadOutfit = false, 
+    int pagesSinceOutfitScreen = 0, 
+    int pagesSinceProfileScreen = 0, 
+  }) {
+    pagesSinceOutfitScreen += pagesSinceOutfitScreen>0 ? 1 : 0;
+    // print('goToOutfitDetailsScreen pagesSinceProfileScreen:$pagesSinceProfileScreen pagesSinceOutfitScreen:$pagesSinceOutfitScreen');
+    int numberOfPagesToRemove = pagesSinceOutfitScreen;
+    if(numberOfPagesToRemove>0){
+      pagesSinceProfileScreen -= pagesSinceOutfitScreen;
+      if(pagesSinceProfileScreen < 0){
+        pagesSinceProfileScreen= 0;
+      }
+      pagesSinceOutfitScreen= 0;
+    }
+    // print('goToOutfitDetailsScreen END pagesSinceProfileScreen:$pagesSinceProfileScreen pagesSinceOutfitScreen:$pagesSinceOutfitScreen');
     return Navigator.pushAndRemoveUntil(context, 
       MaterialPageRoute(
         builder: (ctx) => OutfitDetailsScreen(
           outfitId: outfitId,
           loadOutfit: loadOutfit,
+          pagesSinceOutfitScreen: pagesSinceOutfitScreen,
+          pagesSinceProfileScreen: pagesSinceProfileScreen,
         ),
         settings: RouteSettings(
           name: '/outfit'
         )
       ),
       (Route<dynamic> route) {
+        bool removePrevious = numberOfPagesToRemove>0;
+        numberOfPagesToRemove--;
         bool isFirst = route.isFirst;
         return !removePrevious || isFirst; 
       }
@@ -78,6 +120,27 @@ class CustomNavigator {
     ));
   }
 
+  static Future<T> goToFollowUsersScreen<T extends Object>(BuildContext context, {
+    bool isFollowers, 
+    String selectedUserId, 
+    int pagesSinceOutfitScreen = 0,
+    int pagesSinceProfileScreen = 0
+  }) {
+    pagesSinceOutfitScreen += pagesSinceOutfitScreen>0 ? 1 :0;
+    // print('goToFollowUsersScreen pagesSinceProfileScreen:$pagesSinceProfileScreen pagesSinceOutfitScreen:$pagesSinceOutfitScreen');
+    return Navigator.push(context, MaterialPageRoute(
+      builder: (context) => FollowUsersScreen(
+        selectedUserId: selectedUserId,
+        isFollowers: isFollowers,
+        pagesSinceOutfitScreen: pagesSinceOutfitScreen,
+        pagesSinceProfileScreen: pagesSinceProfileScreen,
+      ),
+      settings: RouteSettings(
+        name: '/follow-users'
+      )
+    ));
+  }
+  
   static Future<T> goToUploadOutfitScreen<T extends Object>(BuildContext context) {
     return Navigator.push(context, MaterialPageRoute(
       builder: (context) => UploadOutfitScreen(),
@@ -87,12 +150,19 @@ class CustomNavigator {
     ));
   }
 
-  static Future<T> goToCommentsScreen<T extends Object>(BuildContext context, {int outfitId, bool focusComment = false, bool loadOutfit = false}) {
+  static Future<T> goToCommentsScreen<T extends Object>(BuildContext context, {int outfitId, bool focusComment = false, bool loadOutfit = false, 
+    int pagesSinceOutfitScreen = 0, 
+    int pagesSinceProfileScreen = 0,
+  }) {
+    pagesSinceProfileScreen += pagesSinceProfileScreen>0 ? 1 :0;
+    // print('goToCommentsScreen pagesSinceProfileScreen:$pagesSinceProfileScreen pagesSinceOutfitScreen:$pagesSinceOutfitScreen');
     return Navigator.push(context, MaterialPageRoute(
       builder: (ctx) => CommentsScreen(
         focusComment: focusComment,
         outfitId: outfitId,
         loadOutfit: loadOutfit,
+        pagesSinceOutfitScreen: pagesSinceOutfitScreen,
+        pagesSinceProfileScreen: pagesSinceProfileScreen,
       ),
       settings: RouteSettings(
         name: '/comments'

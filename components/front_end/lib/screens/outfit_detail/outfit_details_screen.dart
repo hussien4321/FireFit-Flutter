@@ -16,10 +16,14 @@ class OutfitDetailsScreen extends StatefulWidget {
 
   final int outfitId;
   final bool loadOutfit;
+  final int pagesSinceOutfitScreen;
+  final int pagesSinceProfileScreen;
 
   OutfitDetailsScreen({
     this.outfitId,
     this.loadOutfit = false,
+    this.pagesSinceOutfitScreen = 0,
+    this.pagesSinceProfileScreen = 0,
   });
 
   @override
@@ -116,7 +120,7 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
             IconButton(
               padding: EdgeInsets.all(0),
               onPressed: Navigator.of(context).pop,
-              icon: Icon(Icons.close),
+              icon: Icon(Icons.arrow_back),
             ),
             outfit == null ? Container() : _loadOutfitOptions()
           ],
@@ -279,7 +283,8 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
                             UserPreviewCard(
                               outfit.poster,
                               isPoster: true,
-                              removePrevious: true,
+                              pagesSinceOutfitScreen: widget.pagesSinceOutfitScreen+1,
+                              pagesSinceProfileScreen: widget.pagesSinceProfileScreen,
                             ),
                             _buildOutfitDescription(),
                             _actionButtons(),
@@ -586,7 +591,9 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
   _loadCommentsPage({bool focusComment = false}) {
     CustomNavigator.goToCommentsScreen(context,
       focusComment: focusComment,
-      outfitId: outfit.outfitId
+      outfitId: outfit.outfitId,
+      pagesSinceOutfitScreen: widget.pagesSinceOutfitScreen+1,
+      pagesSinceProfileScreen: widget.pagesSinceProfileScreen,
     );
   }
 }

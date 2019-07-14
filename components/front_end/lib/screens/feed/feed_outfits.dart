@@ -152,7 +152,7 @@ class _FeedOutfitsState extends State<FeedOutfits> {
   }
 
   _openDetailedOutfit(Outfit outfit, BuildContext ctx){
-    CustomNavigator.goToOutfitDetailsScreen(ctx, true, 
+    CustomNavigator.goToOutfitDetailsScreen(ctx, 
       outfitId: outfit.outfitId
     );
   }
