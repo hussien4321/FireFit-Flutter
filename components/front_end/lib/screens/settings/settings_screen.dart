@@ -34,6 +34,7 @@ class _SettingsScreenState extends State<SettingsScreen> with LoadingAndErrorDia
   }
 
   _loadPreferencesData() async {
+    preferences.updatePreference(Preferences.DEFAULT_START_PAGE, AppConfig.MAIN_PAGES.first);
     String defaultPage = await preferences.getPreference(Preferences.DEFAULT_START_PAGE);
     setState(() {
      currentDefaultPage = defaultPage; 
@@ -43,21 +44,9 @@ class _SettingsScreenState extends State<SettingsScreen> with LoadingAndErrorDia
   @override
   Widget build(BuildContext context) {
     _initBlocs();
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'SETTINGS',
-          style: TextStyle(
-            inherit: true,
-            fontWeight: FontWeight.w300,
-            fontStyle: FontStyle.italic,
-            letterSpacing: 1.2,
-          ),
-        ),
-        centerTitle: true,
-        backgroundColor: Colors.white,
-        elevation: 2,
-      ),
+    return CustomScaffold(
+      title:'Settings',
+      allCaps: true,
       body: Container(
         padding: EdgeInsets.only(left: 8, right: 8),
         child: SingleChildScrollView(
@@ -132,16 +121,18 @@ class _SettingsScreenState extends State<SettingsScreen> with LoadingAndErrorDia
         ),
         DropdownButton(
           value: currentDefaultPage,
-          items: pages.map((page) => DropdownMenuItem(
-            child: Text(
-              page,
-              style: TextStyle(
-                inherit: true,
-                color: page ==currentDefaultPage ? Colors.blue: Colors.grey
+          items: pages.map((page) {
+            return DropdownMenuItem(
+              child: Text(
+                page,
+                style: TextStyle(
+                  inherit: true,
+                  color: page ==currentDefaultPage ? Colors.blue: Colors.grey
+                ),
               ),
-            ),
-            value: page,
-          )).toList(),
+              value: page,
+            );
+          }).toList(),
           onChanged: (newPage) {
             preferences.updatePreference(Preferences.DEFAULT_START_PAGE, newPage);
             setState(() {

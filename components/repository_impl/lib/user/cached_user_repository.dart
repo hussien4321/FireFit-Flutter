@@ -37,6 +37,7 @@ class CachedUserRepository {
   Stream<User> getUser(SearchModes searchMode){
     String searchModeString = searchModeToString(searchMode);
     return streamDatabase.createRawQuery(['user'], 'SELECT * FROM user, user_search WHERE user_id=search_user_id AND search_user_mode=? LIMIT 1',[searchModeString]).mapToOneOrDefault((data) {
+      // print('userId:${data['user_id']} number_of_lookbooks:${data['number_of_lookbooks']} number_of_lookbook_outfits:${data['number_of_lookbook_outfits']}');
       return User.fromMap(data);
     }, null).asBroadcastStream();
   }
@@ -52,6 +53,7 @@ class CachedUserRepository {
   Future<void> clearEverything() async {
     await streamDatabase.executeAndTrigger(["save"], "DELETE FROM save");
     await streamDatabase.executeAndTrigger(["comment"], "DELETE FROM comment");
+    await streamDatabase.executeAndTrigger(["lookbook"], "DELETE FROM lookbook");
     await streamDatabase.executeAndTrigger(["user_search"], "DELETE FROM user_search");
     await streamDatabase.executeAndTrigger(["outfit_search"], "DELETE FROM outfit_search");
     await streamDatabase.executeAndTrigger(["notification"], "DELETE FROM notification");
@@ -60,8 +62,10 @@ class CachedUserRepository {
   }
   
   Future<void> clearUsers(SearchModes searchMode) async {
-    await _clearUserSearches(searchMode);
-    await _clearUsers(searchMode);
+    if(searchModesToNOTClearEachTime.every((sm) => sm!=searchMode)){
+      await _clearUserSearches(searchMode);
+      await _clearUsers(searchMode);
+    }
   }
   Future<void> _clearUserSearches(SearchModes searchMode) async {
     String searchModeString = searchModeToString(searchMode);

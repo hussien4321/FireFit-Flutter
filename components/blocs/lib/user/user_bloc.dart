@@ -3,7 +3,8 @@ import 'package:rxdart/rxdart.dart';
 import 'package:middleware/middleware.dart';
 
 class UserBloc {
-  final UserRepository repository;
+  final UserRepository _repository;
+  final OutfitRepository _outfitRepository;
 
   List<StreamSubscription<dynamic>> _subscriptions;
 
@@ -82,7 +83,7 @@ class UserBloc {
   Sink<FollowUser> get followUser => _followUserController;
 
 
-  UserBloc(this.repository) {
+  UserBloc(this._repository, this._outfitRepository) {
     _subscriptions = <StreamSubscription<dynamic>>[
       _logInController.listen(_logInUser),
       _registerController.listen(_registerUser),
@@ -93,7 +94,7 @@ class UserBloc {
       _checkUsernameController.stream.listen((t) => _isUsernameTakenController.add(null)),
       _checkUsernameController.stream.debounce(Duration(milliseconds: 500)).listen(_refreshUsernameCheck),
       _refreshVerificationEmailController.stream.listen(_refreshVerifiedCheck),
-      _resendEmailController.stream.listen(repository.resendVerificationEmail),
+      _resendEmailController.stream.listen(_repository.resendVerificationEmail),
       _selectUserController.listen(_loadSelectedUser),
       _searchUserController.distinct().listen(_loadSearchUser),
       _loadCurrentUserController.listen(_loadCurrentUser),
@@ -101,11 +102,10 @@ class UserBloc {
       _loadFollowersController.listen(_loadFollowers),
       _loadFollowingController.listen(_loadFollowing),
     ];
-    _loadCurrentUser();
-    _selectedUserController.addStream(repository.getUser(SearchModes.SELECTED));
-    _currentUserController.addStream(repository.getUser(SearchModes.MINE));
-    _followersController.addStream(repository.getUsers(SearchModes.FOLLOWERS));
-    _followingController.addStream(repository.getUsers(SearchModes.FOLLOWING));
+    _selectedUserController.addStream(_repository.getUser(SearchModes.SELECTED));
+    _currentUserController.addStream(_repository.getUser(SearchModes.MINE));
+    _followersController.addStream(_repository.getUsers(SearchModes.FOLLOWERS));
+    _followingController.addStream(_repository.getUsers(SearchModes.FOLLOWING));
     _accountStatusController = Observable.combineLatest3<String, User, bool, UserAccountStatus>(existingAuthId, _currentUserController, _loadingController, _redirectPath).asBroadcastStream().debounce(Duration(milliseconds: 300));
     _resetCurrentUserStatus();
   }
@@ -126,26 +126,41 @@ class UserBloc {
   }
 
   _resetCurrentUserStatus() async {
-      String userId = await repository.existingAuthId();
+      String userId = await _repository.existingAuthId();
       _existingAuthController.add(userId);
       await _loadCurrentUser();
   }
 
   _logInUser(LogInForm logInForm) async {
     _loadingController.add(true);
-    bool success = await repository.logIn(logInForm);
+    bool success = await _repository.logIn(logInForm);
     _loadingController.add(false);
     if(success){
       await _resetCurrentUserStatus();
+      await _loadFirstTimeStreams();
       _successController.add(true);
     }else{
       _errorController.add('Failed to log in');
     }
   } 
 
+  _loadFirstTimeStreams() async {
+    await _outfitRepository.clearLookbooks();
+    _outfitRepository.loadLookbooks(LoadLookbooks(
+      userId: _currentUserId,
+    ));
+    searchModesToNOTClearEachTime.forEach((searchMode) async {
+      await _outfitRepository.clearOutfits(searchMode);
+      _outfitRepository.loadOutfits(LoadOutfits(
+        userId: _currentUserId,
+        searchMode: searchMode,
+      ));
+    });
+  }
+
   _registerUser(LogInForm logInForm) async {
     _loadingController.add(true);
-    bool success = await repository.register(logInForm);
+    bool success = await _repository.register(logInForm);
     _loadingController.add(false);
     if(success){
       await _resetCurrentUserStatus();
@@ -157,13 +172,13 @@ class UserBloc {
   
   _logOutUser([_]) async {
       _existingAuthController.add(null);
-      await repository.logOut();
+      await _repository.logOut();
       _successMessageController.add("Sign out successful!");
   }
 
   _deleteUser([_]) async {
     _loadingController.add(true);
-    bool success = await repository.deleteUser(_currentUserId);
+    bool success = await _repository.deleteUser(_currentUserId);
     _loadingController.add(false);
     if(success){
       _existingAuthController.add(null);
@@ -176,7 +191,7 @@ class UserBloc {
   _editUser(EditUser editUser) async {
     _successController.add(true);
     _isBackgroundLoadingController.add(true);
-    bool success = await repository.editUser(editUser);
+    bool success = await _repository.editUser(editUser);
     _isBackgroundLoadingController.add(false);
     if(success){
       _successMessageController.add("Profile edited!");
@@ -188,9 +203,10 @@ class UserBloc {
 
   _onboardUser(OnboardUser onboardUser) async {
     _loadingController.add(true);
-    bool success = await repository.createAccount(onboardUser);
+    bool success = await _repository.createAccount(onboardUser);
     _loadingController.add(false);
     if(success){
+      await _loadFirstTimeStreams();
       _successController.add(true);
     }else{
       _errorController.add('Failed to create, this might be because the username has now been taken.');
@@ -198,15 +214,15 @@ class UserBloc {
   } 
 
   _refreshVerifiedCheck([_]) async {
-    bool isEmailVerified = await repository.hasEmailVerified();
-    String email = await repository.getVerificationEmail();
+    bool isEmailVerified = await _repository.hasEmailVerified();
+    String email = await _repository.getVerificationEmail();
     _isEmailVerifiedController.add(isEmailVerified);
     _verificationEmailController.add(email);
   }
 
   _refreshUsernameCheck(String username) async {
     _loadingController.add(true);
-    bool usernameExists = await repository.checkUsernameExists(username);
+    bool usernameExists = await _repository.checkUsernameExists(username);
     _loadingController.add(false);
     _isUsernameTakenController.add(usernameExists);
   }
@@ -215,7 +231,7 @@ class UserBloc {
 
   _loadSelectedUser(String userId) async {
     _loadingController.add(true);
-    await repository.loadUserDetails(
+    await _repository.loadUserDetails(
       LoadUser(
         userId: userId,
         currentUserId: _currentUserId
@@ -227,7 +243,7 @@ class UserBloc {
 
   _loadSearchUser(String username) async {
     _loadingController.add(true);
-    await repository.loadUserDetails(
+    await _repository.loadUserDetails(
       LoadUser(
         username: username,
         currentUserId: _currentUserId
@@ -239,7 +255,7 @@ class UserBloc {
 
   _loadCurrentUser([_]) async {
     _loadingController.add(true);
-    await repository.loadUserDetails(
+    await _repository.loadUserDetails(
       LoadUser(
         userId: _currentUserId,
         currentUserId: _currentUserId
@@ -251,7 +267,7 @@ class UserBloc {
 
   _followUser(FollowUser followUser) async {
     bool isFollowing = followUser.followed.isFollowing;
-    bool success = await repository.followUser(followUser);
+    bool success = await _repository.followUser(followUser);
     if(success){
       _successMessageController.add(isFollowing ?  "User unfollowed!" : "Now following user!");
     }else{
@@ -263,14 +279,14 @@ class UserBloc {
     loadUsers.searchMode = SearchModes.FOLLOWERS;
     loadUsers.currentUserId = _currentUserId;
     _isLoadingFollowsController.add(true);
-    loadUsers.startAfterUser == null ? await repository.loadFollowers(loadUsers) : await repository.loadMoreFollowers(loadUsers);
+    loadUsers.startAfterUser == null ? await _repository.loadFollowers(loadUsers) : await _repository.loadMoreFollowers(loadUsers);
     _isLoadingFollowsController.add(false);
   }
   _loadFollowing(LoadUsers loadUsers) async {
     loadUsers.searchMode = SearchModes.FOLLOWING;
     loadUsers.currentUserId = _currentUserId;
     _isLoadingFollowsController.add(true);
-    loadUsers.startAfterUser == null ? await repository.loadFollowing(loadUsers) : await repository.loadMoreFollowing(loadUsers);
+    loadUsers.startAfterUser == null ? await _repository.loadFollowing(loadUsers) : await _repository.loadMoreFollowing(loadUsers);
     _isLoadingFollowsController.add(false);
   }
 

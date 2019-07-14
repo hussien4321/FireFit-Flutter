@@ -135,6 +135,17 @@ class CustomNavigator {
       )
     ));
   }
+
+  static Future<T> goToLookbookScreen<T extends Object>(BuildContext context, {Lookbook lookbook}) {
+    return Navigator.push(context, MaterialPageRoute(
+      builder: (context) => LookbookScreen(
+        lookbook: lookbook
+      ),
+      settings: RouteSettings(
+        name: '/lookbook'
+      )
+    ));
+  }
 }
 
 class SlideRightRoute extends PageRouteBuilder {

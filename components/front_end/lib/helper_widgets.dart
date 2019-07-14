@@ -22,6 +22,10 @@ export 'helper_widgets/input/rating_dialog.dart';
 export 'helper_widgets/input/select_images.dart';
 export 'helper_widgets/input/yes_no_dialog.dart';
 
+export 'helper_widgets/lookbook/add_to_lookbook_dialog.dart';
+export 'helper_widgets/lookbook/new_lookbook_dialog.dart';
+export 'helper_widgets/lookbook/lookbook_card.dart';
+
 export 'helper_widgets/notices/app_title.dart';
 export 'helper_widgets/notices/custom_banner.dart';
 export 'helper_widgets/notices/under_construction_notice.dart';
@@ -31,14 +35,20 @@ export 'helper_widgets/navigation/custom_navigator.dart';
 
 export 'helper_widgets/notifications/notification_tab.dart';
 
+export 'helper_widgets/outfit/outfit_main_card.dart';
 export 'helper_widgets/outfit/outfit_stats.dart';
 export 'helper_widgets/outfit/style_banner.dart';
 export 'helper_widgets/outfit/style_sticker.dart';
 
+export 'helper_widgets/overlays/custom_scaffold.dart';
 export 'helper_widgets/overlays/pull_to_refresh_overlay.dart';
 
 export 'helper_widgets/state/loading_and_error_dialogs.dart';
 export 'helper_widgets/state/snackbar_messages.dart';
+
+export 'helper_widgets/streams/lookbooks_stream.dart';
+export 'helper_widgets/streams/outfits_stream.dart';
+export 'helper_widgets/streams/user_stream.dart';
 
 export 'helper_widgets/user/country_sticker.dart';
 export 'helper_widgets/user/demographic_sticker.dart';

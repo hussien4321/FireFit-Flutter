@@ -12,50 +12,41 @@ class OutfitStats extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Style style = Style.fromStyleString(outfit.style);
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      mainAxisSize: MainAxisSize.min,
       children: <Widget>[
-        StyleSticker(
-          style: style,
+        Padding(
+          padding: const EdgeInsets.only(right: 8.0),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Text(
+                '${outfit.commentsCount} ',
+                style: Theme.of(context).textTheme.subtitle.apply(color: Colors.white),
+              ),
+              Icon(
+                Icons.comment,
+                size: 16,
+                color: Colors.white,
+              ),
+            ],
+          ),
         ),
         Row(
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.only(right: 8.0),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  Text(
-                    '${outfit.commentsCount} ',
-                    style: Theme.of(context).textTheme.subtitle,
-                  ),
-                  Icon(
-                    Icons.comment,
-                    size: 16,
-                    color: Colors.black,
-                  ),
-                ],
-              ),
+            Text(
+              '${outfit.averageRating.round()} ',
+              style: Theme.of(context).textTheme.subtitle.apply(color: Colors.white),
             ),
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                Text(
-                  '${outfit.averageRating.round()} ',
-                  style: Theme.of(context).textTheme.subtitle,
-                ),
-                Icon(
-                  FontAwesomeIcons.fire,
-                  size: 16,
-                  color: Colors.black,
-                ),
-              ]
+            Icon(
+              FontAwesomeIcons.fire,
+              size: 16,
+              color: Colors.white,
             ),
-           ],
+          ]
         ),
-      ]
+      ],
     );
   }
 }

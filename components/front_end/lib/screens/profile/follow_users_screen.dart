@@ -55,21 +55,8 @@ class _FollowUsersScreenState extends State<FollowUsersScreen> {
   @override
   Widget build(BuildContext context) {
     _initBlocs();
-    return Scaffold(
-      appBar: AppBar(
-        centerTitle: true,
-        title: Text(
-          widget.isFollowers ? 'Followers' : 'Following',
-          style: TextStyle(
-            inherit: true,
-            fontWeight: FontWeight.w300,
-            fontStyle: FontStyle.italic,
-            letterSpacing: 1.2,
-          ),
-        ),
-        backgroundColor: Colors.white,
-        elevation: 1.0,
-      ),
+    return CustomScaffold(
+      title: widget.isFollowers ? 'Followers' : 'Following',
       body: Container(
         child: StreamBuilder<bool>(
           stream: _userBloc.isLoadingFollows,

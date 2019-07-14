@@ -102,32 +102,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _profileScaffold(User user, bool isLoadingOutfits){
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 2.0,
-        leading: IconButton(
-          icon: Icon(
-            Icons.close,
-            color: Colors.black,
-          ),
-          onPressed: Navigator.of(context).pop,
+    return CustomScaffold(
+      leading: IconButton(
+        icon: Icon(
+          Icons.close,
+          color: Colors.black,
         ),
-        title: Text(
-          isCurrentUser ? "My Profile" :
-          "${user.name}'s Profile",
-          style: TextStyle(
-            inherit: true,
-            fontWeight: FontWeight.w300,
-            fontStyle: FontStyle.italic,
-            letterSpacing: 1.2,
-          ),
-        ),
-        centerTitle: true,
-        actions: <Widget>[
-          _loadUserOptions(user),
-        ],
+        onPressed: Navigator.of(context).pop,
       ),
+      title: isCurrentUser ? "My Profile" :
+        "${user.name}'s Profile",
+      actions: <Widget>[
+        _loadUserOptions(user),
+      ],
       body: Column(
         children: <Widget>[
           Expanded(
@@ -450,6 +437,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           lastOutfit=outfitsSnap.data.last;
         }
         return OutfitsGrid(
+          emptyText: 'This user has no outfits, follow them to get notified when they upload one!',
           isLoading: isLoading,
           outfits: outfitsSnap.data,
           hasFixedHeight: true,
@@ -490,57 +478,5 @@ class _ProfileScreenState extends State<ProfileScreen> {
         onPressed: () => _userBloc.followUser.add(followUser),
       ),
     );
-  }
-}
-
-class _ProfileOutfitsGrid extends StatefulWidget {
-  String userId;
-
-  @override
-  __ProfileOutfitsGridState createState() => __ProfileOutfitsGridState();
-}
-
-class __ProfileOutfitsGridState extends State<_ProfileOutfitsGrid> {
-  OutfitBloc _outfitBloc;
-
-  @override
-  void initState() {
-    super.initState();
-  }
-  
-  @override
-  Widget build(BuildContext context) {
-    _initBlocs();
-    return StreamBuilder<bool>(
-      stream: _outfitBloc.isLoading,
-      initialData: false,
-      builder: (ctx, loadingSnap) => StreamBuilder<List<Outfit>>(
-        stream: _outfitBloc.selectedOutfits,
-        initialData: [],
-        builder: (ctx, outfitsSnap) {
-          return OutfitsGrid(
-            isLoading: loadingSnap.data,
-            outfits: outfitsSnap.data,
-            hasFixedHeight: true,
-            onReachEnd: () {
-              _outfitBloc.loadUserOutfits.add(
-                LoadOutfits(
-                  userId: widget.userId,
-                  startAfterOutfit: outfitsSnap.data.last
-                )
-              );
-            },
-          );
-        }
-      )
-    );
-  }
-  _initBlocs() {
-    if(_outfitBloc==null){
-      _outfitBloc=  OutfitBlocProvider.of(context);
-      _outfitBloc.loadUserOutfits.add(LoadOutfits(
-        userId: widget.userId,
-      ));
-    }
   }
 }

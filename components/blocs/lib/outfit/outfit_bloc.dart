@@ -9,8 +9,8 @@ class OutfitBloc{
 
   final _exploredOutfitsController = BehaviorSubject<List<Outfit>>(seedValue: []);
   Stream<List<Outfit>> get exploredOutfits => _exploredOutfitsController.stream; 
-  final _savedOutfitsController = BehaviorSubject<List<Outfit>>(seedValue: []);
-  Stream<List<Outfit>> get savedOutfits => _savedOutfitsController.stream; 
+  final _lookbookOutfitsController = BehaviorSubject<List<Outfit>>(seedValue: []);
+  Stream<List<Outfit>> get lookbookOutfits => _lookbookOutfitsController.stream; 
   final _myOutfitsController = BehaviorSubject<List<Outfit>>(seedValue: []);
   Stream<List<Outfit>> get myOutfits => _myOutfitsController.stream; 
   final _selectedOutfitsController = BehaviorSubject<List<Outfit>>(seedValue: []);
@@ -26,13 +26,25 @@ class OutfitBloc{
   Sink<LoadOutfits> get loadUserOutfits => _loadUserOutfitsController;
   final _loadFeedOutfitsController = PublishSubject<LoadOutfits>();
   Sink<LoadOutfits> get loadFeedOutfits => _loadFeedOutfitsController;
-  final _loadSavedOutfitsController = PublishSubject<LoadOutfits>();
-  Sink<LoadOutfits> get loadSavedOutfits => _loadSavedOutfitsController;
+  final _loadLookbookOutfitsController = PublishSubject<LoadOutfits>();
+  Sink<LoadOutfits> get loadLookbookOutfits => _loadLookbookOutfitsController;
 
   final _selectedOutfitController = BehaviorSubject<Outfit>(seedValue: null);
   Stream<Outfit> get selectedOutfit => _selectedOutfitController;
   final _selectOutfitController = PublishSubject<LoadOutfit>();
   Sink<LoadOutfit> get selectOutfit => _selectOutfitController; 
+
+  final _loadLookbooksController = PublishSubject<LoadLookbooks>();
+  Sink<LoadLookbooks> get loadLookbooks => _loadLookbooksController;
+  final _lookbooksController = BehaviorSubject<List<Lookbook>>(seedValue: []);
+  Stream<List<Lookbook>> get lookbooks => _lookbooksController.stream; 
+  
+  final _createLookbookController = PublishSubject<AddLookbook>();
+  Sink<AddLookbook> get createLookbook => _createLookbookController;
+  final _editLookbookController = PublishSubject<EditLookbook>();
+  Sink<EditLookbook> get editLookbook => _editLookbookController;
+  final _deleteLookbookController = PublishSubject<Lookbook>();
+  Sink<Lookbook> get deleteLookbook => _deleteLookbookController;
   
   final _uploadOutfitsController = PublishSubject<UploadOutfit>();
   Sink<UploadOutfit> get uploadOutfit => _uploadOutfitsController;
@@ -43,6 +55,8 @@ class OutfitBloc{
 
   final _saveOutfitController = PublishSubject<OutfitSave>();
   Sink<OutfitSave> get saveOutfit => _saveOutfitController;
+  final _deleteSaveController = PublishSubject<DeleteSave>();
+  Sink<DeleteSave> get deleteSave => _deleteSaveController;
   final _rateOutfitController = PublishSubject<OutfitRating>();
   Sink<OutfitRating> get rateOutfit => _rateOutfitController;
 
@@ -61,21 +75,27 @@ class OutfitBloc{
   OutfitBloc(this.repository) {
     _exploredOutfitsController.addStream(repository.getOutfits(SearchModes.EXPLORE));
     _myOutfitsController.addStream(repository.getOutfits(SearchModes.MINE));
-    _savedOutfitsController.addStream(repository.getOutfits(SearchModes.SAVED));
+    _lookbookOutfitsController.addStream(repository.getOutfits(SearchModes.SAVED));
     _selectedOutfitsController.addStream(repository.getOutfits(SearchModes.SELECTED));
     _selectedOutfitController.addStream(repository.getOutfit(SearchModes.SELECTED_SINGLE));
     _feedOutfitsController.addStream(repository.getOutfits(SearchModes.FEED));
+    _lookbooksController.addStream(repository.getLookbooks());
 
     _subscriptions = <StreamSubscription<dynamic>>[
-      _exploreOutfitsController.distinct().listen(_exploreOutfits),
+      _exploreOutfitsController.listen(_exploreOutfits),
       _loadMyOutfitsController.distinct().listen(_loadMyOutfits),
-      _loadUserOutfitsController.distinct().listen(_loadUserOutfits),
-      _loadFeedOutfitsController.distinct().listen(_loadFeedOutfits),
-      _loadSavedOutfitsController.distinct().listen(_loadSavedOutfits),
+      _loadUserOutfitsController.listen(_loadUserOutfits),
+      _loadFeedOutfitsController.listen(_loadFeedOutfits),
+      _loadLookbookOutfitsController.distinct().listen(_loadLookbookOutfits),
+      _loadLookbooksController.listen(_loadLookbooks),
       _uploadOutfitsController.listen(_uploadOutfit),
       _editOutfitController.listen(_editOutfit),
       _deleteOutfitController.listen(_deleteOutfit),
+      _createLookbookController.listen(_createLookbook),
+      _editLookbookController.listen(_editLookbook),
+      _deleteLookbookController.listen(_deleteLookbook),
       _saveOutfitController.listen(_saveOutfit),
+      _deleteSaveController.listen(_deleteSave),
       _rateOutfitController.listen(_rateOutfit),
       _selectOutfitController.listen(_loadOutfit),
     ];
@@ -97,7 +117,7 @@ class OutfitBloc{
     loadOutfits.searchMode = SearchModes.SELECTED;
     await _loadOutfits(loadOutfits);
   }
-  _loadSavedOutfits(LoadOutfits loadOutfits) async {
+  _loadLookbookOutfits(LoadOutfits loadOutfits) async {
     loadOutfits.searchMode = SearchModes.SAVED;
     await _loadOutfits(loadOutfits);
   }
@@ -109,6 +129,16 @@ class OutfitBloc{
     _successController.add(success);
     if(!success){
       _errorController.add("Failed to load outfits");
+    }
+  }
+
+  _loadLookbooks(LoadLookbooks loadLookbooks) async {
+    _loadingController.add(true);
+    final success = await repository.loadLookbooks(loadLookbooks);
+    _loadingController.add(false);
+    _successController.add(success);
+    if(!success){
+      _errorController.add("Failed to load lookbooks");
     }
   }
 
@@ -131,7 +161,7 @@ class OutfitBloc{
     if(success){
       _successMessageController.add("Edit successful!");
     }else{
-      _errorController.add("Failed to create new outfit");
+      _errorController.add("Failed to edit outfit");
     }
   }
 
@@ -147,6 +177,38 @@ class OutfitBloc{
     }
   }
 
+  _createLookbook(AddLookbook addLookbook) async {
+    _loadingController.add(true);
+    final success = await repository.createLookbook(addLookbook);
+    _loadingController.add(false);
+    _successController.add(success);
+    if(success){
+      _successMessageController.add("Lookbook created!");
+    }else{
+      _errorController.add("Failed to create new lookbook");
+    }
+  }
+  _editLookbook(EditLookbook editLookbook) async {
+    final success = await repository.editLookbook(editLookbook);
+    _successController.add(success);
+    if(success){
+      _successMessageController.add("Edit successful!");
+    }else{
+      _errorController.add("Failed to edit lookbook");
+    }
+  }
+
+  _deleteLookbook(Lookbook lookbook) async {
+    _loadingController.add(true);
+    final success = await repository.deleteLookbook(lookbook);
+    _loadingController.add(false);
+    _successController.add(success);
+    if(success){
+      _successMessageController.add("Delete successful!");
+    }else{
+      _errorController.add("Failed to delete lookbook");
+    }
+  }
 
   _rateOutfit(OutfitRating outfitRating) async {
     final success = await repository.rateOutfit(outfitRating);
@@ -158,14 +220,25 @@ class OutfitBloc{
   }
 
   _saveOutfit(OutfitSave saveData) async {
-    bool isSaved = saveData.outfit.isSaved;
-    final success = await repository.saveOutfit(saveData);
+    final resId = await repository.saveOutfit(saveData);
+    final success = resId != -1;
     if(success){
-      if(!isSaved) {
-        _successMessageController.add("Outfit saved!");
+      if(resId == 0){
+        _successMessageController.add("Item already exists in lookbook!");
+      }else{
+        _successMessageController.add("Added to lookbook!");
       }
     }else{
-      _errorController.add("Failed to save to outfit");
+      _errorController.add("Failed to add to lookbook");
+    }
+  }
+
+  _deleteSave(DeleteSave deleteSave) async {
+    final success = await repository.deleteSave(deleteSave);
+    if(success){
+      _successMessageController.add("Removed from lookbook!");
+    }else{
+      _errorController.add("Failed to remove from lookbook");
     }
   }
 
@@ -183,19 +256,26 @@ class OutfitBloc{
   void dispose() {
     _exploredOutfitsController.close();
     _myOutfitsController.close();
-    _savedOutfitsController.close();
+    _lookbookOutfitsController.close();
     _selectedOutfitsController.close();
     _feedOutfitsController.close();
     _exploreOutfitsController.close();
     _loadMyOutfitsController.close();
     _loadFeedOutfitsController.close();
     _loadUserOutfitsController.close();
-    _loadSavedOutfitsController.close();
+    _loadLookbookOutfitsController.close();
+    _loadLookbooksController.close();
+    _lookbooksController.close();
     _uploadOutfitsController.close();
     _editOutfitController.close();
+    _deleteOutfitController.close();
+    _createLookbookController.close();
+    _editLookbookController.close();
+    _deleteLookbookController.close();
     _selectedOutfitController.close();
     _selectOutfitController.close();
     _saveOutfitController.close();
+    _deleteSaveController.close();
     _rateOutfitController.close();
     _loadingController.close();
     _isBackgroundLoadingController.close();

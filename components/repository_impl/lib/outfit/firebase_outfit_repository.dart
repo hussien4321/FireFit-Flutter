@@ -26,17 +26,33 @@ class FirebaseOutfitRepository implements OutfitRepository {
 
   Stream<Outfit> getOutfit(SearchModes searchMode) => cache.getOutfit(searchMode);
 
+  Stream<List<Lookbook>> getLookbooks() => cache.getLookbooks();
+
   Future<bool> loadOutfits(LoadOutfits loadOutfits) async {
-    await cache.clearOutfits(loadOutfits.searchMode);
+    if(searchModesToNOTClearEachTime.every((sm) => sm!=loadOutfits.searchMode)){
+      await cache.clearOutfits(loadOutfits.searchMode);
+    }
     return loadMoreOutfits(loadOutfits);
   }
   
+
+  Future<void> clearOutfits(SearchModes searchMode) => cache.clearOutfits(searchMode);
+
   Future<bool> loadMoreOutfits(LoadOutfits loadOutfits) async {
-    await Future.delayed(Duration(seconds: 2));
     return cloudFunctions.getHttpsCallable(functionName: 'getOutfits').call(loadOutfits.toJson())
     .then((res) async {
       List<Outfit> outfits = _resToOutfitList(res);
       outfits.forEach((outfit) => cache.addOutfit(outfit, loadOutfits.searchMode));
+      return true;
+    })
+    .catchError((err) => false);
+  }
+
+  Future<bool> loadLookbooks(LoadLookbooks loadLookbooks) async {
+    return cloudFunctions.getHttpsCallable(functionName: 'getLookbooks').call(loadLookbooks.toJson())
+    .then((res) async {
+      List<Lookbook> lookbooks = _resToLookbookList(res);
+      lookbooks.forEach((lookbook) => cache.addLookbook(lookbook));
       return true;
     })
     .catchError((err) => false);
@@ -62,6 +78,12 @@ class FirebaseOutfitRepository implements OutfitRepository {
     return List<Outfit>.from(res.data['res'].map((data){
       Map<String, dynamic> formattedDoc = Map<String, dynamic>.from(data);
       return Outfit.fromMap(formattedDoc);
+    }).toList());
+  }
+  List<Lookbook> _resToLookbookList(HttpsCallableResult res){
+    return List<Lookbook>.from(res.data['res'].map((data){
+      Map<String, dynamic> formattedDoc = Map<String, dynamic>.from(data);
+      return Lookbook.fromMap(formattedDoc);
     }).toList());
   }
 
@@ -134,6 +156,19 @@ class FirebaseOutfitRepository implements OutfitRepository {
     });
   }
 
+  Future<bool> editLookbook(EditLookbook editLookbook) async {
+  cache.editLookbook(editLookbook);
+    return cloudFunctions.getHttpsCallable(functionName: 'editLookbook').call(editLookbook.toJson())
+    .then((res) async {
+      bool status = res.data['res'];
+      return status;
+    })
+    .catchError((err) {
+      print(err.message);
+      return false;
+    });
+  }
+
 
   
   Future<bool> deleteOutfit(Outfit outfit) async {
@@ -152,21 +187,43 @@ class FirebaseOutfitRepository implements OutfitRepository {
     });
   }
 
-  Future<bool> saveOutfit(OutfitSave saveData) async {
-    cache.saveOutfit(saveData);
+  Future<int> saveOutfit(OutfitSave saveData) async {
     return cloudFunctions.getHttpsCallable(functionName: 'saveOutfit').call(saveData.toJson())
     .then((res) async {
-      if(saveData.outfit.isSaved){
-        cache.addSave(saveData, res.data['ref']);;
-      }else{
-        cache.deleteSave(saveData.outfit);
+      int saveId = res.data['ref'];
+      bool isNewSave = saveId > 0;
+      if(isNewSave){
+        await cache.addSave(saveData, saveId);
       }
+      return saveId;
+    })
+    .catchError((err) {
+      return -1;
+    });
+  }
+
+  Future<bool> deleteSave(DeleteSave deleteSave){
+    cache.deleteSave(deleteSave);
+    return cloudFunctions.getHttpsCallable(functionName: 'deleteSave').call(deleteSave.toJson())
+    .then((res) async {
       return true;
     })
     .catchError((err) {
       return false;
     });
   }
+  Future<bool> deleteLookbook(Lookbook lookbook){
+    cache.deleteLookbook(lookbook);
+    return cloudFunctions.getHttpsCallable(functionName: 'deleteLookbook').call(lookbook.toJson())
+    .then((res) async {
+      return true;
+    })
+    .catchError((err) {
+      return false;
+    });
+  }
+
+  Future<void> clearLookbooks() => cache.clearLookbooks();
 
   Future<bool> rateOutfit(OutfitRating outfitRating) async {
     cache.rateOutfit(outfitRating);
@@ -196,6 +253,27 @@ class FirebaseOutfitRepository implements OutfitRepository {
       return false;
     });
   }
+
+  Future<bool> createLookbook(AddLookbook addLookbook){
+    return cloudFunctions.getHttpsCallable(functionName: 'addLookbook').call(addLookbook.toJson())
+    .then((res) async {
+      int lookbookId = res.data['res'];
+      Lookbook lookbook = Lookbook(
+        lookbookId: lookbookId,
+        userId: addLookbook.userId,
+        name: addLookbook.name,
+        description: addLookbook.description,
+        createdAt: DateTime.now(),
+      );
+      await cache.addLookbook(lookbook);
+      return true;
+    })
+    .catchError((err) {
+      print(err.message);
+      return false;
+    });
+  }
+
 
 
   Future<bool> likeComment(CommentLike commentlike) async {

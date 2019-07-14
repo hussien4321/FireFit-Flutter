@@ -208,27 +208,17 @@ class _MainAppBarState extends State<MainAppBar> {
   Widget _buildScaffold({Widget body}){
     return Stack(
       children: <Widget>[
-        Scaffold(
-          resizeToAvoidBottomInset: false,
+        CustomScaffold(
           backgroundColor: Colors.white,
-          appBar: AppBar(
-            leading: _buildMenuButton(),
-            title: Text(
-              pages[currentIndex],
-              style:TextStyle(
-                fontWeight: FontWeight.w300,
-                fontStyle: FontStyle.italic,
-                letterSpacing: 1.2,
-              ),
-            ),
-            centerTitle: true,
-            actions: <Widget>[
-              _buildUploadButton(),
-              _buildNotificationsButton(),
-            ],
-            elevation: 0.0,
-            backgroundColor: Colors.transparent,
-          ),
+          leading: _buildMenuButton(),
+          title: pages[currentIndex],
+          allCaps: true,
+          actions: <Widget>[
+            _buildUploadButton(),
+            _buildNotificationsButton(),
+          ],
+          elevation: 0.0,
+          appbarColor: Colors.transparent,
           body: body
         ),
         _buildShading(),

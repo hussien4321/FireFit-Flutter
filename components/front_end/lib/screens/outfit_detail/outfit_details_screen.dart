@@ -480,11 +480,10 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
             onPressed: () => _rateOutfit(),
           ),
           _actionButton(
-            icon: Icons.star_border,
-            text: 'Save',
-            selected: outfit.isSaved,
+            icon: Icons.playlist_add,
+            text: 'Add to\nLookbook',
             selectedIcon: Icons.star,
-            onPressed: () => _outfitBloc.saveOutfit.add(saveData)
+            onPressed: () => AddToLookbookDialog.launch(context, outfitSave: saveData)
           ),
         ],
       ),
@@ -552,7 +551,8 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
                 ),
                 Text(
                   '$text${selected? 'd':''}', 
-                  style: Theme.of(context).textTheme.caption
+                  style: Theme.of(context).textTheme.caption,
+                  textAlign: TextAlign.center,
                 ),
               ],
             ),

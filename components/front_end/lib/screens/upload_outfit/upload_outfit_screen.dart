@@ -11,6 +11,7 @@ import 'package:front_end/services.dart';
 import 'package:flutter/services.dart';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
+import 'package:overlay_support/overlay_support.dart';
 
 class UploadOutfitScreen extends StatefulWidget {
   @override
@@ -18,7 +19,7 @@ class UploadOutfitScreen extends StatefulWidget {
 }
 
 
-class _UploadOutfitScreenState extends State<UploadOutfitScreen> with LoadingAndErrorDialogs, SnackbarMessages {
+class _UploadOutfitScreenState extends State<UploadOutfitScreen> with LoadingAndErrorDialogs {
   List<Asset> images = List<Asset>();
 
   Preferences preferences = Preferences();
@@ -72,34 +73,21 @@ class _UploadOutfitScreenState extends State<UploadOutfitScreen> with LoadingAnd
   @override
   Widget build(BuildContext context) {
     _initBlocs();
-    return Scaffold(
-      key: scaffoldKey,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        title: Text(
-          'New Outfit',
-          style: TextStyle(
-            inherit: true,
-            fontWeight: FontWeight.w300,
-            fontStyle: FontStyle.italic,
-            letterSpacing: 1.2,
-          ),
-        ),
-        centerTitle: true,
-        actions: <Widget>[
-          IconButton(
-            icon: Icon(Icons.send),
-            color: uploadOutfit.canBeUploaded ? Colors.green : Colors.orange,
-            onPressed: () {
-              if(uploadOutfit.canBeUploaded){
-                _uploadOutfit();
-              }else{
-                displayNoticeSnackBar(context, 'Finish steps 1-3 first!');
-              }
-            },
-          )
-        ],
-      ),
+    return CustomScaffold(
+      title: 'New Outfit',
+      actions: <Widget>[
+        IconButton(
+          icon: Icon(Icons.send),
+          color: uploadOutfit.canBeUploaded ? Colors.green : Colors.orange,
+          onPressed: () {
+            if(uploadOutfit.canBeUploaded){
+              _uploadOutfit();
+            }else{
+              toast("Finish steps 1-3 first!");
+            }
+          },
+        )
+      ],
       body: _buildBody(),
     );
   }
@@ -143,7 +131,7 @@ class _UploadOutfitScreenState extends State<UploadOutfitScreen> with LoadingAnd
 
   StreamSubscription _errorListener(){
     return _outfitBloc.hasError.listen((errorMessage) {
-      displayErrorSnackBar(context, errorMessage);
+      toast(errorMessage);
     });
   }
 

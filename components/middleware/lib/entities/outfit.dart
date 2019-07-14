@@ -13,8 +13,7 @@ class Outfit {
   User poster;
   DateTime createdAt;
   int userRating;
-  bool isSaved;
-  SearchOutfit searchOutfit ;
+  SearchOutfit searchOutfit;
   Save save;
 
   Outfit({
@@ -28,7 +27,6 @@ class Outfit {
     this.commentsCount,
     this.poster,
     this.createdAt,
-    this.isSaved
   });
 
   bool get hasCompleteData => commentsCount != null;
@@ -57,7 +55,6 @@ class Outfit {
     ratingsCount = map['ratings_count'];
     commentsCount = map['comments_count'];
     userRating = map['user_rating'];
-    isSaved = map['is_saved'] == 1;
     poster = User.fromMap(map);
     searchOutfit = SearchOutfit.fromMap(map);
     save = Save.fromMap(map);
@@ -77,7 +74,6 @@ class Outfit {
     'user_rating' : userRating,
     'outfit_created_at' : createdAt.toIso8601String(), 
     'comments_count':commentsCount,
-    'is_saved': isSaved ? 1 : 0, 
   };
 
 }

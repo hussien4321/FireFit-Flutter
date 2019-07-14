@@ -1,13 +1,13 @@
 class Save {
   int saveId;
   int outfitId;
-  String userId;
+  int lookbookId;
   DateTime createdAt;
 
   Save({
     this.saveId,
     this.outfitId,
-    this.userId,
+    this.lookbookId,
     this.createdAt,
   });
 
@@ -15,7 +15,7 @@ class Save {
     if(map['save_id'] != null){
       saveId = map['save_id'];
       outfitId = map['save_outfit_id'];
-      userId = map['save_user_id'];
+      lookbookId = map['save_lookbook_id'];
       createdAt = DateTime.parse(map['save_created_at']);
     }
   } 
@@ -23,7 +23,7 @@ class Save {
   Map<String, dynamic> toJson() => {
     'save_id' : saveId, 
     'save_outfit_id' : outfitId,
-    'save_user_id' : userId,
+    'save_lookbook_id' : lookbookId,
     'save_created_at' : createdAt?.toIso8601String(),
   };
 

@@ -32,6 +32,16 @@ class CachedOutfitRepository {
       conflictAlgorithm: conflictAlgorithm,
     );
   }
+  
+  Future<int> addLookbook(Lookbook lookbook){
+    _incrementLookbookCount(lookbook);
+      return streamDatabase.insert(
+      'lookbook',
+      lookbook.toJson(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+  
 
   Future<int> addOutfitSearch(int outfitId, SearchModes searchMode) async {
     SearchOutfit searchOutfit =SearchOutfit(
@@ -46,7 +56,7 @@ class CachedOutfitRepository {
   }
 
 
-  Future<int> _addOutfitSave(Save save) async {
+  Future<void> _addOutfitSave(Save save) async {
     if(save.saveId!=null){
       return streamDatabase.insert(
         'save',
@@ -57,18 +67,45 @@ class CachedOutfitRepository {
   }
 
   Future<int> deleteOutfit(Outfit outfitToDelete) async {
+    await _decrementOutfitCount(outfitToDelete.poster.userId);
     return streamDatabase.delete(
       'outfit',
       where: 'outfit_id = ?',
       whereArgs: [outfitToDelete.outfitId],
     );
   }
-  Future<int> deleteSave(Outfit outfitToDelete) async {
+  Future<int> deleteSave(DeleteSave deleteSave) async {
+    await _deleteOutfitSearch(deleteSave.save.outfitId, SearchModes.SAVED);
+    await _decrementLookbookOutfitsCount(deleteSave.save.lookbookId, deleteSave.userId);
     return streamDatabase.delete(
       'save',
-      where: 'save_outfit_id = ?',
-      whereArgs: [outfitToDelete.outfitId],
+      where: 'save_id=?',
+      whereArgs: [deleteSave.save.saveId],
     );
+  }
+  Future<int> _deleteOutfitSearch(int outfitId, SearchModes searchMode) async {
+    return streamDatabase.delete(
+      'outfit_search',
+      where: 'search_outfit_id = ? AND search_outfit_mode = ?',
+      whereArgs: [outfitId, searchModeToString(searchMode)],
+    );
+  }
+
+  Future<int> _deleteSavesFromLookbook(int lookbookId) async {
+    return streamDatabase.delete(
+      'save',
+      where: 'save_lookbook_id=?',
+      whereArgs: [lookbookId],
+    );
+  }
+  Future<void> deleteLookbook(Lookbook lookbook) async {
+    await streamDatabase.delete(
+      'lookbook',
+      where: 'lookbook_id=?',
+      whereArgs: [lookbook.lookbookId],
+    );
+    await _deleteSavesFromLookbook(lookbook.lookbookId);
+    return _decrementLookbookCount(lookbook);
   }
 
   Future<int> deleteComment(DeleteComment deleteComment) async {
@@ -82,26 +119,28 @@ class CachedOutfitRepository {
 
   Future<void> saveOutfit(OutfitSave saveData) async {
     Outfit outfit = saveData.outfit;
-    outfit.isSaved =!outfit.isSaved;
     await addOutfit(outfit, SearchModes.SAVED);
-    if(!outfit.isSaved){
-      return _clearOutfitSearchesForOutfit(SearchModes.SAVED, outfit);
-    }
   }
 
-  Future<int> addSave(OutfitSave saveData, int saveId) {
+  Future<void> addSave(OutfitSave saveData, int saveId) async {
     Save save =Save(
-      userId: saveData.userId,
+      lookbookId: saveData.lookbookId,
       outfitId: saveData.outfit.outfitId,
       createdAt: DateTime.now(),
       saveId: saveId
     );
     saveData.outfit.save = save;
-    return addOutfit(saveData.outfit, SearchModes.SAVED);
+    await addOutfit(saveData.outfit, SearchModes.SAVED);
+    return _incrementLookbookOutfitsCount(saveData.lookbookId, saveData.userId);
   }
 
   Future<void> editOutfit(EditOutfit editOutfit) {
     return streamDatabase.executeAndTrigger(['outfit'], "UPDATE outfit SET style=?, title=?, description=? WHERE outfit_id=?", [editOutfit.style, editOutfit.title, editOutfit.description, editOutfit.outfitId]);
+  }
+
+  Future<void> editLookbook(EditLookbook editLookbook) async {
+    await streamDatabase.executeAndTrigger(['lookbook'], "UPDATE lookbook SET lookbook_name=? WHERE lookbook_id=?", [editLookbook.name, editLookbook.lookbookId]);
+    return streamDatabase.executeAndTrigger(['lookbook'], "UPDATE lookbook SET lookbook_description=? WHERE lookbook_id=?", [editLookbook.description, editLookbook.lookbookId]);
   }
 
   Future<int> rateOutfit(OutfitRating outfitRating) async {
@@ -110,7 +149,7 @@ class CachedOutfitRepository {
     double average = outfit.averageRating;
     double total = outfit.ratingsCount.toDouble();
     if(outfit.hasRating){
-      average = ((average * total) - outfit.userRating) / (total - 1);
+      average = total == 1 ? 0 : ((average * total) - outfit.userRating) / (total - 1);
       total--;
       userCache.incrementFlamesCount(outfit.poster.userId, outfit.userRating, decrement: true);
     }
@@ -158,6 +197,9 @@ class CachedOutfitRepository {
     String searchModeString = searchModeToString(searchMode);
     await streamDatabase.execute("DELETE FROM outfit_search WHERE search_outfit_mode=? AND search_outfit_id=?", [searchModeString, outfit.outfitId]);
   }
+  Future<void> clearLookbooks() async {
+    await streamDatabase.executeAndTrigger(['lookbook'], "DELETE FROM lookbook");
+  }
 
   Future<void> clearComments() async {
     await streamDatabase.executeAndTrigger(['comment'], "DELETE FROM comment");
@@ -182,7 +224,7 @@ class CachedOutfitRepository {
         queryStream = streamDatabase.createRawQuery(['outfit'], 'SELECT * FROM outfit LEFT JOIN user ON user_id=poster_user_id LEFT JOIN outfit_search ON outfit_id=search_outfit_id WHERE search_outfit_mode=? ORDER BY outfit_created_at desc', [searchModeString]);
         break;
       case SearchModes.SAVED:
-        queryStream = streamDatabase.createRawQuery(['outfit', 'save'], 'SELECT * FROM outfit LEFT JOIN user ON poster_user_id=user_id LEFT JOIN outfit_search ON outfit_id=search_outfit_id LEFT JOIN save ON outfit_id=save_outfit_id WHERE is_saved=1 AND search_outfit_mode=? ORDER BY save_created_at desc', [searchModeString]);
+        queryStream = streamDatabase.createRawQuery(['outfit', 'save'], 'SELECT * FROM outfit LEFT JOIN user ON poster_user_id=user_id LEFT JOIN outfit_search ON outfit_id=search_outfit_id LEFT JOIN save ON outfit_id=save_outfit_id WHERE search_outfit_mode=? ORDER BY save_created_at desc', [searchModeString]);
         break;
       default:
         break;
@@ -192,10 +234,36 @@ class CachedOutfitRepository {
     }).asBroadcastStream();
   }
 
+  Stream<List<Lookbook>> getLookbooks(){
+    return streamDatabase.createRawQuery(['lookbook'], 'SELECT * FROM lookbook ORDER BY lookbook_created_at desc')
+    .mapToList((data) {
+      return Lookbook.fromMap(data);
+    }).asBroadcastStream();
+  }
+
+
   Future<void> _incrementOutfitLikes(Outfit outfit) async {
     return streamDatabase.executeAndTrigger(['outfit'], "UPDATE outfit SET likes_count=likes_count+1 WHERE outfit_id=?", [outfit.outfitId]);
   }
   
+  Future<void> _incrementLookbookCount(Lookbook lookbook) async {
+    return streamDatabase.executeAndTrigger(['user'], "UPDATE user SET number_of_lookbooks=number_of_lookbooks+1 WHERE user_id=?", [lookbook.userId]);
+  }
+  Future<void> _decrementLookbookCount(Lookbook lookbook) async {
+    // print('userId:${lookbook.userId} numberOfOutfits:${lookbook.numberOfOutfits}');
+    await streamDatabase.executeAndTrigger(['user'], "UPDATE user SET number_of_lookbooks=number_of_lookbooks-1 WHERE user_id=?", [lookbook.userId]);
+    return streamDatabase.executeAndTrigger(['user'], "UPDATE user SET number_of_lookbook_outfits=number_of_lookbook_outfits-${lookbook.numberOfOutfits} WHERE user_id=?", [lookbook.userId]);
+  }
+
+  Future<void> _incrementLookbookOutfitsCount(int lookbookId, String userId) async {
+    await streamDatabase.executeAndTrigger(['user'], "UPDATE user SET number_of_lookbook_outfits=number_of_lookbook_outfits+1 WHERE user_id=?", [userId]);
+    return streamDatabase.executeAndTrigger(['lookbook'], "UPDATE lookbook SET number_of_outfits=number_of_outfits+1 WHERE lookbook_id=?", [lookbookId]);
+  }
+  Future<void> _decrementLookbookOutfitsCount(int lookbookId, String userId) async {
+    await streamDatabase.executeAndTrigger(['user', ], "UPDATE user SET number_of_lookbook_outfits=number_of_lookbook_outfits-1 WHERE user_id=?", [userId]);
+    return streamDatabase.executeAndTrigger(['lookbook', 'outfit', 'save'], "UPDATE lookbook SET number_of_outfits=number_of_outfits-1 WHERE lookbook_id=?", [lookbookId]);
+  }
+
   Future<void> _incrementCommentsCount(int outfitId) async {
     return streamDatabase.executeAndTrigger(['outfit'], "UPDATE outfit SET comments_count=comments_count+1 WHERE outfit_id=?", [outfitId]);
   }
@@ -306,6 +374,7 @@ class CachedOutfitRepository {
   Future<void> incrementOutfitCount(String userId){
     return streamDatabase.executeAndTrigger(['user'], "UPDATE user SET number_of_outfits=number_of_outfits+1 WHERE user_id=?", [userId]);
   }
-    
-
+  Future<void> _decrementOutfitCount(String userId){
+    return streamDatabase.executeAndTrigger(['user'], "UPDATE user SET number_of_outfits=number_of_outfits-1 WHERE user_id=?", [userId]);
+  }
 }

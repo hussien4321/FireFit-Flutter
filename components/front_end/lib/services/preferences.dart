@@ -9,12 +9,14 @@ class Preferences {
   static final String _VERSION = '_VERSION';
   static final String CURRENT_CLOTHES_STYLE = 'CURRENT_CLOTHES_STYLE';
   static final String DEFAULT_START_PAGE = 'DEFAULT_START_PAGE';
+  static final String LOOKBOOKS_SORT_BY_SIZE = 'LOOKBOOKS_SORT_BY_SIZE';
   
 
   final Map<String, dynamic> _initialPreferences = {
-    _VERSION: 2,
+    _VERSION: 3,
     CURRENT_CLOTHES_STYLE : 'casualwear',
     DEFAULT_START_PAGE: AppConfig.MAIN_PAGES.first,
+    LOOKBOOKS_SORT_BY_SIZE: false
   };
 
   Map<String, dynamic> _currentPreferences = {};

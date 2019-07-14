@@ -11,7 +11,7 @@ class AppTitle extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           Container(
-            padding: EdgeInsets.symmetric(horizontal: 8),
+            padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(8),
               color: Colors.white54
@@ -22,7 +22,7 @@ class AppTitle extends StatelessWidget {
               children: <Widget>[
                 Text(
                   'FireFit',
-                  style: Theme.of(context).textTheme.display3.copyWith(
+                  style: Theme.of(context).textTheme.display1.copyWith(
                     color: Colors.black,
                     letterSpacing: 1.2,
                     fontWeight: FontWeight.w300,

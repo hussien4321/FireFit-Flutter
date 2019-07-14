@@ -103,8 +103,13 @@ class _IntroScreenState extends State<IntroScreen> {
           Expanded(
             child: Center(
               child: Text(
-                '"Discover, share & upgrade your fashion style"',
-                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontStyle: FontStyle.italic, ),
+                'Discover, share & upgrade your fashion',
+                style: Theme.of(context).textTheme.headline.copyWith(
+                  color: Colors.white, 
+                  fontWeight: FontWeight.w300, 
+                  fontStyle: FontStyle.italic,
+                ),
+                textAlign: TextAlign.center,
               ),
             ),
           ),

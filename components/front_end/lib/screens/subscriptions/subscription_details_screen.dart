@@ -9,26 +9,14 @@ class SubscriptionDetailsScreen extends StatefulWidget {
 class _SubscriptionDetailsScreenState extends State<SubscriptionDetailsScreen> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        title: Text(
-          'FireFit+',
-          style: TextStyle(
-            inherit: true,
-            fontWeight: FontWeight.w300,
-            fontStyle: FontStyle.italic,
-            letterSpacing: 1.2,
-          ),
-        ),
-        centerTitle: true,
-        actions: <Widget>[
-          IconButton(
-            icon: Icon(Icons.restore),
-            onPressed: null,
-          )
-        ],
-      ),
+    return CustomScaffold(
+      title: 'FireFit+',
+      actions: <Widget>[
+        IconButton(
+          icon: Icon(Icons.restore),
+          onPressed: null,
+        )
+      ],
       body: UnderConstructionNotice(),
     );
   }

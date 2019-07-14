@@ -4,6 +4,11 @@ enum SearchModes {
   EXPLORE, MINE, SAVED, SELECTED, SELECTED_SINGLE, FEED, NOTIFICATIONS, FOLLOWERS, FOLLOWING, TEMP
 }
 
+List<SearchModes> searchModesToNOTClearEachTime = [
+  SearchModes.MINE,
+  SearchModes.NOTIFICATIONS,
+];
+
 String searchModeToString(SearchModes searchMode){
   switch (searchMode) {
     case SearchModes.EXPLORE:
@@ -39,11 +44,16 @@ class LoadOutfits {
   String category;
   bool sortByTop;
   bool forceLoad;
+  int lookbookId;
+  //TO ADD: Date range, Country code
+
   
   LoadOutfits({
     this.userId,
     this.startAfterOutfit,
+    this.searchMode,
     this.category,
+    this.lookbookId,
     this.sortByTop = false,
     this.forceLoad = false,
   });
@@ -53,6 +63,7 @@ class LoadOutfits {
     o.userId == userId &&
     o.startAfterOutfit == startAfterOutfit &&
     !o.forceLoad &&
+    o.lookbookId == lookbookId&&
     o.category == category&&
     o.sortByTop == sortByTop;
   }
@@ -60,6 +71,7 @@ class LoadOutfits {
   Map<String, dynamic> toJson() => {
     'search_mode': searchModeToString(searchMode),
     'user_id': userId,
+    'lookbook_id': lookbookId,
     'start_after_outfit': startAfterOutfit?.toJson(),
     'start_after_save':startAfterOutfit?.save?.toJson(),
     'category': category,

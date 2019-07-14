@@ -3,16 +3,18 @@ import 'package:middleware/middleware.dart';
 class OutfitSave {
 
   String userId;
+  int lookbookId;
   Outfit outfit;
 
   OutfitSave({
     this.userId,
     this.outfit,
+    this.lookbookId,
   });
 
   Map<String, dynamic> toJson() => {
-    'save_user_id': userId,
+    'user_id': userId,
+    'lookbook_id' : lookbookId,
     'outfit_id' : outfit.outfitId,
-    'is_saved' : outfit.isSaved,
   };
 }

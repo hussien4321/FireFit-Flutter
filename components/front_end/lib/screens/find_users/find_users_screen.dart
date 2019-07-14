@@ -21,20 +21,8 @@ class _FindUsersScreenState extends State<FindUsersScreen> {
   @override
   Widget build(BuildContext context) {
     _initBlocs();
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        title: Text(
-          'Find Users',
-          style: TextStyle(
-            inherit: true,
-            fontWeight: FontWeight.w300,
-            fontStyle: FontStyle.italic,
-            letterSpacing: 1.2,
-          ),
-        ),
-        centerTitle: true,
-      ),
+    return CustomScaffold(
+      title:'Find User',
       body: _content(),
     );
   }
@@ -83,6 +71,7 @@ class _FindUsersScreenState extends State<FindUsersScreen> {
       focusNode: usernameFocus,
       controller: usernameController,
       onChanged: _parseUsername,
+      onSubmitted: (s) => _search(),
       textCapitalization: TextCapitalization.none,
       textColor: Colors.black,
       title: 'Username',

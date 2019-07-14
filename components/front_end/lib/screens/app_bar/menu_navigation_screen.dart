@@ -47,7 +47,7 @@ class _MenuNavigationScreenState extends State<MenuNavigationScreen> {
                           onPressed: () => widget.onPageSelected(0)
                         ),
                         _menuOption(
-                          title: 'FIND USERS',
+                          title: 'FIND USER',
                           iconData: FontAwesomeIcons.search,
                           onPressed: () => CustomNavigator.goToFindUsersScreen(context)
                         ),

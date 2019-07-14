@@ -19,7 +19,7 @@ void main({
 }) {
   runApp(
     UserBlocProvider(
-      bloc:  UserBloc(userRepository),
+      bloc:  UserBloc(userRepository, outfitRepository),
       child: OutfitBlocProvider(
         bloc:  OutfitBloc(outfitRepository),
         child: CommentBlocProvider(

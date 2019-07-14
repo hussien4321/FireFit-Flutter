@@ -130,19 +130,19 @@ class _FeedOutfitsState extends State<FeedOutfits> {
       child: GestureDetector(
         onTap: () => _openDetailedOutfit(outfit, ctx),
         child: Card(
-          elevation: 5,
+          elevation: 2,
           child: Container(
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(24),
               color: Colors.white,
             ),
-            padding: EdgeInsets.symmetric(horizontal: 16.0),
+            padding: EdgeInsets.all(8.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: <Widget>[
                 _postBasicData(index, outfit, ctx),
                 _outfitFullImageCard(outfit, ctx),
-                _outfitStats(outfit, ctx),
+                // _outfitActions(outfit),
               ],
             ),
           ),
@@ -159,7 +159,7 @@ class _FeedOutfitsState extends State<FeedOutfits> {
 
   Widget _postBasicData(int index, Outfit outfit, BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(vertical: 8.0),
+      padding: EdgeInsets.only(bottom: 8.0),
       child: Row(
         children: <Widget>[
           ProfilePicWithShadow(
@@ -174,6 +174,10 @@ class _FeedOutfitsState extends State<FeedOutfits> {
                   TextSpan(
                     text: outfit.poster.name,
                     style: Theme.of(context).textTheme.subtitle
+                  ),
+                  TextSpan(
+                    text: '\nUploaded an outfit',
+                    style: Theme.of(context).textTheme.caption
                   ),
                 ]
               ),
@@ -193,18 +197,7 @@ class _FeedOutfitsState extends State<FeedOutfits> {
       width: double.infinity,
       child: AspectRatio(
         aspectRatio: 2/3,
-        child: Hero(
-          tag: outfit.images.first,  
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(8),
-            child: CachedNetworkImage(
-              imageUrl: outfit.images[0],
-              fit: BoxFit.cover,
-              alignment: Alignment.center,
-              fadeInDuration: Duration(),
-            ),
-          ),
-        ),
+        child: OutfitMainCard(outfit: outfit,)
       ),
     );
   }

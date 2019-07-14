@@ -68,23 +68,11 @@ class _EditUserScreenState extends State<EditUserScreen> with LoadingAndErrorDia
   @override
   Widget build(BuildContext context) {
     _initBlocs();
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        title: Text(
-          'Edit Profile',
-          style: TextStyle(
-            inherit: true,
-            fontWeight: FontWeight.w300,
-            fontStyle: FontStyle.italic,
-            letterSpacing: 1.2,
-          ),
-        ),
-        centerTitle: true,
-        actions: <Widget>[
-          _saveOutfitButton()
-        ],
-      ),
+    return CustomScaffold(
+      title: "Edit Profile",
+      actions: <Widget>[
+        _saveOutfitButton()
+      ],
       body: SingleChildScrollView(
         child: Container(
           padding: EdgeInsets.only(left: 8, right: 8, top: 8),

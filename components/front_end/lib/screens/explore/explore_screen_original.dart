@@ -338,7 +338,6 @@ class _ExploreScreenOriginalState extends State<ExploreScreenOriginal> {
               color: Colors.amberAccent,
               icon: Icons.star,
               disabled: allDisabled,
-              selected: currentOutfit?.isSaved == true,
               onPressed: () => _outfitBloc.saveOutfit.add(saveData),
             ),
           ],

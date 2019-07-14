@@ -63,21 +63,8 @@ class _CommentsScreenState extends State<CommentsScreen> {
   @override
   Widget build(BuildContext context) {
     _initBlocs();
-    return Scaffold(
-      appBar: AppBar(
-        elevation: 1.0,
-        title: Text(
-          'Comments',
-          style: TextStyle(
-            inherit: true,
-            fontWeight: FontWeight.w300,
-            fontStyle: FontStyle.italic,
-            letterSpacing: 1.2,
-          ),
-        ),
-        centerTitle: true,
-        backgroundColor: Colors.white,
-      ),
+    return CustomScaffold(
+      title: "Comments",
       body: Container(
         child: StreamBuilder<bool>(
           stream: _outfitBloc.isLoading,

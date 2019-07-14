@@ -54,27 +54,14 @@ class _LogInScreenState extends State<LogInScreen> with LoadingAndErrorDialogs {
   @override
   Widget build(BuildContext context) {
     _initBlocs();
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 2,
-        title: Text(
-          widget.isRegistering ? 'Create account' : 'Sign in',
-          style: TextStyle(
-            inherit: true,
-            fontWeight: FontWeight.w300,
-            fontStyle: FontStyle.italic,
-            letterSpacing: 1.2,
-          ),
-        ),
-        centerTitle: true,
-        actions: <Widget>[
-          IconButton(
-            icon: Icon(FontAwesomeIcons.signInAlt),
-            onPressed: _logIn,
-          )
-        ],
-      ),
+    return CustomScaffold(
+      title: widget.isRegistering ? 'Create account' : 'Sign in',
+      actions: <Widget>[
+        IconButton(
+          icon: Icon(FontAwesomeIcons.signInAlt),
+          onPressed: _logIn,
+        )
+      ],
       body: Form(
         key: _formKey,
         child: Column(

@@ -180,101 +180,48 @@ class _ExploreScreenState extends State<ExploreScreen> with SingleTickerProvider
 
   Widget _buildOutfitCard(Outfit outfit, int index) {
     return _card(
-      child: GestureDetector(
-        onTap: () => _openOutfit(outfit),
-        child: Stack(
-          children: <Widget>[
-            _outfitImage(outfit),
-            _outfitBasicInfo(outfit),
-          ],
-        ),
-      ),
+      child: OutfitMainCard(outfit: outfit)
     );
   }
 
-  Widget _card({Widget child}) {
+  Widget _card({Widget child, bool addShadow = true}) {
+    List<BoxShadow> shadows = [];
+    if(addShadow){
+      shadows.add(
+        BoxShadow(
+          color: Colors.black54,
+          blurRadius: 2,
+          offset: Offset(1, 1)
+        )
+      );
+    }
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 4),
+      padding: EdgeInsets.all(4),
       child: Align(
         alignment: Alignment.center,
         child: AspectRatio(
           aspectRatio: 2/3,
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(16.0),
-            child: child
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(8.0),
+              boxShadow: shadows
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(8.0),
+              child: child,
+            ),
           )
         )
       )
     );
   }
 
-  _openOutfit(Outfit outfit) {
-    CustomNavigator.goToOutfitDetailsScreen(context, false, outfitId: outfit.outfitId);
-  }
-
-  Widget _outfitImage(Outfit outfit){
-    return Hero(
-      tag: outfit.images.first,
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.grey,
-          image: DecorationImage(
-            fit: BoxFit.cover,
-            image: CachedNetworkImageProvider(outfit.images.first)
-          ),
-        ),
-      ),
-    );
-  }
-  Widget _outfitBasicInfo(Outfit outfit){
-    return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            Colors.transparent,
-            Colors.black26
-          ],
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-        ),
-      ),
-      child: Align(
-        alignment: Alignment.bottomCenter,
-        child: Container(
-          padding: const EdgeInsets.all(8.0),
-          decoration: BoxDecoration(
-          ),
-          width: double.infinity,
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: <Widget>[
-              Expanded(
-                child: Text(
-                  outfit.title,
-                  style: Theme.of(context).textTheme.display1.copyWith(
-                    color: Colors.white
-                  ),
-                  textAlign: TextAlign.start,
-                  softWrap: true,
-                  overflow: TextOverflow.fade,
-                ),
-              ),
-              outfit.hasMultipleImages ? Icon(
-                Icons.photo_library,
-                color: Colors.white,
-              ) : Container(),
-            ],
-          ),
-        ),
-      ),
-    );
-  } 
-
   Widget _endCard(bool isLoading) {
     return _card(
+      addShadow: false,
       child: Container(
         decoration: BoxDecoration(
+          color: Colors.white,
           gradient: LinearGradient(
             colors: [
               Colors.grey[300],

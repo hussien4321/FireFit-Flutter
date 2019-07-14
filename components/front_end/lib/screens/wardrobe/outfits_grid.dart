@@ -10,13 +10,16 @@ class OutfitsGrid extends StatefulWidget {
   final bool hasFixedHeight;
   final RefreshCallback onRefresh;
   final VoidCallback onReachEnd;
+  final String emptyText;
+  final OutfitOverlay customOverlay;
 
-  OutfitsGrid({this.outfits, this.isLoading, this.onReachEnd, this.onRefresh, this.hasFixedHeight = false});
+  OutfitsGrid({this.outfits, this.isLoading, this.onReachEnd, this.onRefresh, this.emptyText, this.customOverlay ,this.hasFixedHeight = false});
 
   @override
   _OutfitsGridState createState() => _OutfitsGridState();
 }
 
+typedef Widget OutfitOverlay(Outfit outfit);
 class _OutfitsGridState extends State<OutfitsGrid> {
 
   ScrollController _controller;
@@ -62,7 +65,7 @@ class _OutfitsGridState extends State<OutfitsGrid> {
         widget.outfits.isEmpty ? Container() : _displayGrid(hasRefresh), 
         Container(
           padding: EdgeInsets.all(12.0),
-          child: widget.isLoading ? _loadingMoreNotice() : _endOfListNotice(),
+          child: widget.isLoading ? _loadingMoreNotice() : (widget.outfits.isEmpty ? _endOfListNotice() : Container()),
         )
       ],
     );
@@ -104,12 +107,19 @@ class _OutfitsGridState extends State<OutfitsGrid> {
         borderRadius: BorderRadius.circular(8),
         child: GestureDetector(
           onTap: () => _openDetailedOutfit(outfit, ctx),
-          child: Hero(
-            tag: outfit.images.first,  
-            child: CachedNetworkImage(
-              imageUrl: outfit.images[0],
-              fit: BoxFit.fitHeight,
-            ),
+          child: Stack(
+            children: <Widget>[
+              SizedBox.expand(
+                child: Hero(
+                  tag: outfit.images.first,  
+                  child: CachedNetworkImage(
+                    imageUrl: outfit.images[0],
+                    fit: BoxFit.fitHeight,
+                  ),
+                ),
+              ),
+              widget.customOverlay == null ? Container() : widget.customOverlay(outfit),
+            ],
           ),
         ),
       ),
@@ -144,11 +154,15 @@ class _OutfitsGridState extends State<OutfitsGrid> {
   }
 
   Widget _endOfListNotice() {
-    return Center(
-      child: Text(
-        'No ${widget.outfits.isEmpty ? '' : 'more '}outfits to display',
-        style: Theme.of(context).textTheme.subtitle.copyWith(
-          color: Colors.black54
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      child: Center(
+        child: Text(
+          widget.emptyText,
+          style: Theme.of(context).textTheme.subtitle.copyWith(
+            color: Colors.black54
+          ),
+          textAlign: TextAlign.center,
         ),
       ),
     );
