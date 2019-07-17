@@ -36,7 +36,9 @@ class _CommentsScreenState extends State<CommentsScreen> {
 
   bool canSendComment = false;
   TextEditingController commentTextController = new TextEditingController();
+  FocusNode commentFocus =FocusNode();
 
+  Comment replyingToComment;
 
   Comment lastComment;
 
@@ -97,7 +99,7 @@ class _CommentsScreenState extends State<CommentsScreen> {
                     builder: (ctx, snap) {
                       if(snap.data.length>0){
                         lastComment = snap.data.last;
-                      } 
+                      }
                       return Expanded(
                         child: PullToRefreshOverlay(
                           matchSize: false,
@@ -162,37 +164,10 @@ class _CommentsScreenState extends State<CommentsScreen> {
       child: Material(
         color: Colors.grey[300],
         child: InkWell(
-          child: Row(
+          child: Column(
             children: <Widget>[
-              Expanded(
-                child: Container(
-                  margin: EdgeInsets.symmetric(vertical: 8.0, horizontal: 8.0),
-                  padding: EdgeInsets.symmetric(horizontal: 16.0),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(16.0)
-                  ),
-                  child: TextField(
-                    autofocus: widget.focusComment,
-                    controller: commentTextController,
-                    onChanged: (text) {
-                      setState(() {
-                        canSendComment = text.isNotEmpty;                      
-                      });
-                    },
-                    onSubmitted: (s) => _sendComment(outfit),
-                    textCapitalization: TextCapitalization.sentences,
-                    decoration: InputDecoration(
-                      border: InputBorder.none,
-                      hintText: 'Add a comment...'
-                    ),
-                  ),
-                ),
-              ),
-              canSendComment ? IconButton(
-                icon: Icon(Icons.send),
-                onPressed: () => _sendComment(outfit),
-              ) : Container(),
+              replyingToComment!=null ? _replyingToComment() : Container(),
+              _commentTextField(outfit)
             ],
           ),
         ),
@@ -200,17 +175,127 @@ class _CommentsScreenState extends State<CommentsScreen> {
     );
   }
 
+  Widget _replyingToComment() {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      child: Row(
+        children: <Widget>[
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                RichText(
+                  text: TextSpan(
+                    children: [
+                      TextSpan(
+                        text: 'Replying to: ',
+                        style: Theme.of(context).textTheme.button.apply(
+                          color: Colors.blue,
+                        ),
+                      ),
+                      TextSpan(
+                        text: replyingToComment.commenter.name,
+                        style: Theme.of(context).textTheme.caption.copyWith(
+                          color: Colors.black,
+                          fontWeight: FontWeight.bold
+                        ),
+                      ),
+                      TextSpan(
+                        text: "'s Comment",
+                        style: Theme.of(context).textTheme.caption.copyWith(
+                          color: Colors.black,
+                        ),
+                      ),
+                    ]
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 4.0),
+                  child: Text(
+                    replyingToComment.text,
+                    style: Theme.of(context).textTheme.body2.apply(
+                      color: Colors.grey[700]
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+
+              ],
+            ),
+          ),
+          Container(
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.white
+            ),
+            child: IconButton(
+              icon: Icon(Icons.close),
+              onPressed: () => _cancelReply(),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  _cancelReply() {
+    setState(() {
+      replyingToComment = null;    
+    });
+  }
+
+  Widget _commentTextField(Outfit outfit) {
+    return Row(
+      children: <Widget>[
+        Expanded(
+          child: Container(
+            margin: EdgeInsets.symmetric(vertical: 8.0, horizontal: 8.0),
+            padding: EdgeInsets.symmetric(horizontal: 16.0),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16.0)
+            ),
+            child: TextField(
+              autofocus: widget.focusComment,
+              focusNode: commentFocus,
+              controller: commentTextController,
+              onChanged: (text) {
+                setState(() {
+                  canSendComment = text.isNotEmpty;                      
+                });
+              },
+              onSubmitted: (s) => _sendComment(outfit),
+              textCapitalization: TextCapitalization.sentences,
+              decoration: InputDecoration(
+                border: InputBorder.none,
+                hintText: 'Add a comment...'
+              ),
+            ),
+          ),
+        ),
+        canSendComment ? IconButton(
+          icon: Icon(Icons.send),
+          onPressed: () => _sendComment(outfit),
+        ) : Container(),
+      ],
+    );
+  }
   _sendComment(Outfit outfit) {
     AddComment addComment = new AddComment(
       commentText: commentTextController.text,
       outfit: outfit,
       userId: userId,
+      replyingToComment: replyingToComment,
     );
     setState(() {
      canSendComment = false; 
     });
+    commentFocus.unfocus();
     _commentBloc.addComment.add(addComment);
     commentTextController.clear();
+    setState(() {
+     replyingToComment = null; 
+    });
   }
 
   Widget _buildOutfitText(Outfit outfit) {
@@ -297,138 +382,23 @@ class _CommentsScreenState extends State<CommentsScreen> {
   }
 
   Widget _buildCommentField(Comment comment) {
-    bool isCurrentUser = userId == comment.commenter.userId;
-    return InkWell(
-      highlightColor:  Colors.blueGrey,
-      onLongPress: isCurrentUser ?  ()=>_confirmDelete(comment) : null,
-      child: Container(
-        padding: EdgeInsets.only(bottom: 4.0, left: 8.0, right: 8.0),
-        child: Column(
-          children: <Widget>[
-            Row(
-              children: <Widget>[
-                Padding(
-                  padding: const EdgeInsets.only(top: 16.0),
-                  child: ProfilePicWithShadow(
-                    heroTag: '${comment.commentId}-'+comment.commenter.profilePicUrl,
-                    userId: comment.commenter.userId,
-                    url: comment.commenter.profilePicUrl,
-                    pagesSinceOutfitScreen: widget.pagesSinceOutfitScreen,
-                    pagesSinceProfileScreen: widget.pagesSinceProfileScreen,
-                  ),
-                ),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: <Widget>[
-                      Padding(
-                        padding: EdgeInsets.only(left: 8.0, bottom: 2.0),
-                        child: Text(
-                          comment.commenter.name,
-                          style: Theme.of(context).textTheme.subtitle
-                        ),
-                      ),
-                      Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(20.0),
-                          color: Colors.grey[350]
-                        ),
-                        width: double.infinity,
-                        padding: EdgeInsets.all(8.0),
-                        child: Text(
-                          comment.text,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                comment.commentId <= 0 ? 
-                Container(
-                  margin: EdgeInsets.only(top: 16, left: 8.0),
-                  child: Center(
-                    child: CircularProgressIndicator()
-                  )
-                ) : 
-                Padding(
-                  padding: const EdgeInsets.only(top: 16.0),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: <Widget>[
-                      IconButton(
-                        icon: Icon(
-                          comment.isLiked ? FontAwesomeIcons.solidHeart :  FontAwesomeIcons.heart,
-                          color: Colors.redAccent,
-                        ),
-                        onPressed: () => _likeComment(comment),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            Container(
-              padding: EdgeInsets.only(left: 48),
-              width: double.infinity,
-              child: Row(
-                children: <Widget>[
-                  Text(
-                    DateFormatter.dateToRecentFormat(comment.uploadDate),
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey,
-                      fontStyle: FontStyle.italic
-                    )
-                  ),
-                  Padding(padding: EdgeInsets.only(right: 8.0),),
-                  Text(
-                    '${comment.likesCount} like${comment.likesCount == 1 ? '': 's'}',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey,
-                      fontWeight: FontWeight.bold
-                    ),
-                  ),
-                ],
-              )
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-
-  _confirmDelete(Comment comment){
-    DeleteComment deleteComment = DeleteComment(
+    if(comment.replyTo!=null){
+      return Container();
+    }
+    return CommentField(
       comment: comment,
       outfitId: widget.outfitId,
+      userId: userId,
+      pagesSinceOutfitScreen: widget.pagesSinceOutfitScreen,
+      pagesSinceProfileScreen: widget.pagesSinceProfileScreen,
+      onStartReplyTo: _startReply,
     );
-    return showDialog(
-      context: context,
-      builder: (secondContext) {
-        return YesNoDialog(
-          title: 'Delete Comment',
-          description: 'Are you sure you want to delete this comment?',
-          yesText: 'Yes',
-          noText: 'Cancel',
-          onYes: () {
-            _commentBloc.deleteComment.add(deleteComment);
-          },
-          onDone: () {
-            Navigator.pop(context);
-          },
-        );
-      }
-    ) ?? false;
   }
 
-  _likeComment(Comment comment) {
-    CommentLike commentLike =CommentLike(
-      comment: comment,
-      outfitId: widget.outfitId,
-      userId: userId
-    );
-    _commentBloc.likeComment.add(commentLike);
+  _startReply(Comment comment) {
+    setState(() {    
+      replyingToComment=comment;
+    });
   }
+
 }

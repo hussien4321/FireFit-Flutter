@@ -16,6 +16,9 @@ class CommentBloc {
   final _loadCommentsController = PublishSubject<LoadComments>();
   Sink<LoadComments> get loadComments => _loadCommentsController; 
   
+  final _loadRepliesController = PublishSubject<LoadComments>();
+  Sink<LoadComments> get loadReplies => _loadRepliesController; 
+  
   final _likeCommentController = PublishSubject<CommentLike>();
   Sink<CommentLike> get likeComment => _likeCommentController; 
   
@@ -24,6 +27,9 @@ class CommentBloc {
   
   final _loadingController = PublishSubject<bool>();
   Observable<bool> get isLoading => _loadingController.stream;
+  
+  final _loadingReplyController = PublishSubject<bool>();
+  Observable<bool> get isLoadingReply => _loadingReplyController.stream;
 
   final _successController = PublishSubject<bool>();
   Observable<bool> get isSuccessful => _successController.stream;
@@ -37,12 +43,12 @@ class CommentBloc {
     _commentsController.addStream(repository.getComments());
     _subscriptions = <StreamSubscription<dynamic>>[
       _loadCommentsController.distinct().listen(_loadComments),
+      _loadRepliesController.listen(_loadReplies),
       _likeCommentController.listen(_likeComment),
       _addCommentController.listen(_addComment),
       _deleteCommentController.listen(_deleteComment),
     ];
   }
-
 
   _loadComments(LoadComments loadComments) async {
     _loadingController.add(true);
@@ -51,6 +57,16 @@ class CommentBloc {
     _successController.add(success);
     if(!success){
       _errorController.add("Failed to load comments");
+    }
+  }
+
+  _loadReplies(LoadComments loadComments) async {
+    _loadingReplyController.add(true);
+    final success = await repository.loadMoreComments(loadComments);
+    _loadingReplyController.add(false);
+    _successController.add(success);
+    if(!success){
+      _errorController.add("Failed to load replies");
     }
   }
 
@@ -81,10 +97,12 @@ class CommentBloc {
   void dispose() {
     _addCommentController.close();
     _loadCommentsController.close();
+    _loadRepliesController.close();
     _commentsController.close();
     _likeCommentController.close();
     _deleteCommentController.close();
     _loadingController.close();
+    _loadingReplyController.close();
     _successController.close();
     _errorController.close();
     _successMessageController.close();

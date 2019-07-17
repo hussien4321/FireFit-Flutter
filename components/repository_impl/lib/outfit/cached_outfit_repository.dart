@@ -110,6 +110,9 @@ class CachedOutfitRepository {
 
   Future<int> deleteComment(DeleteComment deleteComment) async {
     _decrementCommentsCount(deleteComment.outfitId);
+    if(deleteComment.comment.replyTo!=null){
+      _decrementCommentReplyCount(deleteComment.comment.replyTo);
+    }
     return streamDatabase.delete(
       'comment',
       where: 'comment_id = ?',
@@ -264,6 +267,14 @@ class CachedOutfitRepository {
     return streamDatabase.executeAndTrigger(['lookbook', 'outfit', 'save'], "UPDATE lookbook SET number_of_outfits=number_of_outfits-1 WHERE lookbook_id=?", [lookbookId]);
   }
 
+  Future<void> _incrementCommentReplyCount(int commentId) {
+    return streamDatabase.executeAndTrigger(['comment'], "UPDATE comment SET comment_replies_count=comment_replies_count+1 WHERE comment_id=?", [commentId]);
+  }
+
+  Future<void> _decrementCommentReplyCount(int commentId) {
+    return streamDatabase.executeAndTrigger(['comment'], "UPDATE comment SET comment_replies_count=comment_replies_count-1 WHERE comment_id=?", [commentId]);
+  }
+
   Future<void> _incrementCommentsCount(int outfitId) async {
     return streamDatabase.executeAndTrigger(['outfit'], "UPDATE outfit SET comments_count=comments_count+1 WHERE outfit_id=?", [outfitId]);
   }
@@ -282,6 +293,8 @@ class CachedOutfitRepository {
       'comment_body': addComment.commentText,
       'comment_likes_count': 0,
       'comment_is_liked': 0,
+      'comment_reply_to': addComment.replyingToComment?.commentId,
+      'comment_replies_count': 0,
       'comment_created_at': DateTime.now().toIso8601String(),
     };
     return _addComment(newComment);
@@ -293,10 +306,12 @@ class CachedOutfitRepository {
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
   }
-  Future<int> updateComment(AddComment addComment, int tempCommentId, int actualCommentId) async { 
-    await streamDatabase.rawDelete([], 'DELETE FROM comment WHERE comment_id=$tempCommentId');
-    _incrementCommentsCount(addComment.outfit.outfitId);
-    return addNewComment(addComment, actualCommentId);
+  Future<void> updateComment(AddComment addComment, int tempCommentId, int actualCommentId) async { 
+    await streamDatabase.rawUpdate(['comment'], 'UPDATE comment SET comment_id=? WHERE comment_id=?', [actualCommentId, tempCommentId]);
+    if(addComment.replyingToComment != null){
+      await _incrementCommentReplyCount(addComment.replyingToComment.commentId);
+    }
+    return _incrementCommentsCount(addComment.outfit.outfitId);
   }
   Future<int> addComment(Comment comment) async { 
     await userCache.addUser(comment.commenter, SearchModes.TEMP);

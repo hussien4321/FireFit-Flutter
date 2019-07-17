@@ -27,7 +27,7 @@ class LocalDatabase {
 
   Future<Database> initDb() async {
     String path = join(await getDatabasesPath(), "mira_mira.db");
-    Database theDB = await openDatabase(path, version: 1, onCreate: _onCreate, onUpgrade: _onUpgrade, onDowngrade: _onDowngrade);
+    Database theDB = await openDatabase(path, version: 3, onCreate: _onCreate, onUpgrade: _onUpgrade, onDowngrade: _onDowngrade);
     return theDB;
   }
 
@@ -54,6 +54,12 @@ class LocalDatabase {
       await db.execute("CREATE TABLE notification (notification_id INTEGER PRIMARY KEY, notification_type TEXT, notification_created_at DATETIME, notification_ref_user_id TEXT, notification_ref_outfit_id INTEGER, notification_ref_comment_id INTEGER, notification_is_seen TINYINT DEFAULT 0)");
       await db.execute("CREATE TABLE lookbook (lookbook_id INTEGER PRIMARY KEY, lookbook_name TEXT, lookbook_description TEXT, lookbook_user_id TEXT, number_of_outfits INTEGER DEFAULT 0, lookbook_created_at DATETIME)");
       await db.execute("CREATE TABLE save (save_id INTEGER PRIMARY KEY, save_outfit_id INTEGER, save_lookbook_id INTEGER, save_created_at DATETIME)");
+    }
+    if(version == 2){
+      await db.execute("ALTER TABLE comment ADD COLUMN comment_reply_to INTEGER");
+    }
+    if(version == 3){
+      await db.execute("ALTER TABLE comment ADD COLUMN comment_replies_count INTEGER DEFAULT 0");
     }
   }
 

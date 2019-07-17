@@ -5,17 +5,20 @@ class LoadComments {
   String userId;
   int outfitId;
   Comment startAfterComment;
+  int replyTo;
   
   LoadComments({
     this.userId,
     this.outfitId,
     this.startAfterComment,
+    this.replyTo,
   });
 
   Map<String, dynamic> toJson() => {
     'user_id': userId,
     'outfit_id': outfitId,
     'start_after_comment': startAfterComment?.toJson(),
+    'comment_reply_to': replyTo,
   };
 
 
@@ -24,6 +27,7 @@ class LoadComments {
     return o is LoadComments &&
     o.userId == userId &&
     o.outfitId == outfitId &&
+    o.replyTo == replyTo && 
     o.startAfterComment?.commentId == startAfterComment?.commentId;
   }
 }
