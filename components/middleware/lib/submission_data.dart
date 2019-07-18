@@ -16,6 +16,7 @@ export 'submission_data/notification/mark_notifications_seen.dart';
 export 'submission_data/outfit/edit_outfit.dart';
 export 'submission_data/outfit/load_outfit.dart';
 export 'submission_data/outfit/load_outfits.dart';
+export 'submission_data/outfit/outfit_filters.dart';
 export 'submission_data/outfit/outfit_rating.dart';
 export 'submission_data/outfit/upload_outfit.dart';
 

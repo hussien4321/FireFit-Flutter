@@ -19,6 +19,7 @@ class AddComment {
     'poster_user_id': outfit.poster.userId,
     'comment_outfit_id' : outfit.outfitId,
     'comment_reply_to' :replyingToComment?.commentId,
+    'comment_reply_to_user_id' :replyingToComment?.commenter?.userId,
     'comment_body' :commentText,
   };
 }

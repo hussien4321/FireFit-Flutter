@@ -3,6 +3,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:convert';
 import 'package:helpers/helpers.dart';
+import 'package:middleware/middleware.dart';
 
 class Preferences {
 
@@ -10,13 +11,19 @@ class Preferences {
   static final String CURRENT_CLOTHES_STYLE = 'CURRENT_CLOTHES_STYLE';
   static final String DEFAULT_START_PAGE = 'DEFAULT_START_PAGE';
   static final String LOOKBOOKS_SORT_BY_SIZE = 'LOOKBOOKS_SORT_BY_SIZE';
+
+  //TODO: CLEAR THESE PREFERENCES EVERY TIME U LOG OUT (MAYBE DO SO FOR ALL?)
+  static final String EXPLORE_PAGE_FILTERS = 'EXPLORE_PAGE_FILTERS';
+  static final String EXPLORE_PAGE_SORT_BY_TOP = 'EXPLORE_PAGE_SORT_BY_TOP';
   
 
   final Map<String, dynamic> _initialPreferences = {
-    _VERSION: 3,
+    _VERSION: 4,
     CURRENT_CLOTHES_STYLE : 'casualwear',
     DEFAULT_START_PAGE: AppConfig.MAIN_PAGES.first,
-    LOOKBOOKS_SORT_BY_SIZE: false
+    LOOKBOOKS_SORT_BY_SIZE: false,
+    EXPLORE_PAGE_FILTERS: OutfitFilters().toJson(),
+    EXPLORE_PAGE_SORT_BY_TOP: false,
   };
 
   Map<String, dynamic> _currentPreferences = {};

@@ -6,9 +6,10 @@ class NotificationIcon extends StatelessWidget {
   final IconData iconData;
   final int messages;
   final Color color;
+  final Color iconColor;
   final bool showBubble;
 
-  NotificationIcon({this.child, this.iconData, this.showBubble = false, this.color, this.messages = 0});
+  NotificationIcon({this.child, this.iconData, this.showBubble = false, this.color, this.iconColor, this.messages = 0});
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +26,7 @@ class NotificationIcon extends StatelessWidget {
             right: 0,
             child: new Container(
               decoration: new BoxDecoration(
-                color: Colors.red,
+                color: iconColor == null ? Colors.red : iconColor,
                 shape: BoxShape.circle,
               ),
               constraints: BoxConstraints(

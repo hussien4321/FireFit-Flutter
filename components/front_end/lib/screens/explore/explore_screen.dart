@@ -8,8 +8,10 @@ import 'package:flutter/gestures.dart';
 import 'package:front_end/screens.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:country_code_picker/country_code.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:front_end/services.dart';
 import 'dart:async';
 
 class ExploreScreen extends StatefulWidget {
@@ -31,13 +33,17 @@ class _ExploreScreenState extends State<ExploreScreen> with SingleTickerProvider
 
   OutfitBloc _outfitBloc;
   
+  OutfitFilters outfitFilters =OutfitFilters();
+  bool isSortByTop = false;
+
+  Preferences preferences = Preferences();
+
   int index = 0;
 
   @override
   void initState() {
     super.initState();
   }
-
   @override
   Widget build(BuildContext context) {
     _initBlocs();
@@ -56,6 +62,8 @@ class _ExploreScreenState extends State<ExploreScreen> with SingleTickerProvider
             _outfitBloc.exploreOutfits.add(LoadOutfits(
               userId: userId,
               forceLoad: true,
+              sortByTop: isSortByTop,
+              filters: outfitFilters,
             ));
           },
           child: Column(
@@ -86,10 +94,21 @@ class _ExploreScreenState extends State<ExploreScreen> with SingleTickerProvider
     if(_outfitBloc==null){
       _outfitBloc = OutfitBlocProvider.of(context);
       userId = await UserBlocProvider.of(context).existingAuthId.first;
+      await _loadFiltersFromPreferences();
       _outfitBloc.exploreOutfits.add(LoadOutfits(
         userId: userId,
+        filters: outfitFilters,
+        sortByTop: isSortByTop
       ));
     }
+  }
+  _loadFiltersFromPreferences() async {
+    final newSortByTop = await preferences.getPreference(Preferences.EXPLORE_PAGE_SORT_BY_TOP);
+    final filterData = await preferences.getPreference(Preferences.EXPLORE_PAGE_FILTERS);
+    setState(() {
+      isSortByTop = newSortByTop;
+      outfitFilters = OutfitFilters.fromMap(filterData);
+    });
   }
 
   Widget _searchDetailsBar(){
@@ -102,14 +121,17 @@ class _ExploreScreenState extends State<ExploreScreen> with SingleTickerProvider
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 Text(
-                  'Freshest Fits',
+                  isSortByTop ? 'Hottest Fits' : 'Freshest Fits',
                   style: Theme.of(context).textTheme.display1.copyWith(
                     color: Colors.black,
                     fontWeight: FontWeight.bold
                   ),
                 ),
                 Text(
-                  'Most recently uploaded outfits!',
+                  _searchTagline(),
+                  maxLines: 1,
+                  softWrap: true,
+                  overflow: TextOverflow.ellipsis,
                   style: Theme.of(context).textTheme.caption.copyWith(
                     fontStyle: FontStyle.italic
                   ),
@@ -119,33 +141,77 @@ class _ExploreScreenState extends State<ExploreScreen> with SingleTickerProvider
           ),
           IconButton(
             onPressed: _openFilters,
-            icon: Icon(Icons.tune),
+            icon: NotificationIcon(
+              iconData: Icons.tune,
+              showBubble: hasCustomSearchQuery,
+              iconColor: Colors.blue,
+            ),
           ),
         ],
       ),
     );
   }
+  String _searchTagline() {
+    String tagline = "";
+    if(isSortByTop){
+      tagline+="Highest rated";
+    }else{
+      tagline+="Most recently uploaded";
+    }
+    if(outfitFilters.genderIsMale!=null){
+      if(outfitFilters.genderIsMale){
+        tagline+=" male";
+      }else{
+        tagline+=" female";
+      }
+    }
+    if(outfitFilters.style!=null){
+      tagline +=" ${outfitFilters.style}";
+    }
+    tagline += " outfits";
+    if(isSortByTop){
+      tagline+=" of all time";
+    }
+    tagline+="!";
+    return tagline;
+  }
+  _addCountryTagline(){
+    String countryTagline = "";
+    countryTagline+="from";
+    if(outfitFilters.countryCode!=null){
+      CountryCode country = CountryPicker.getCountry(outfitFilters.countryCode);
+      if(CountryPicker.countriesWithTheInFrontOfName().contains(country)){
+        countryTagline+= " the";
+      }
+      countryTagline+=" ${country.name}";
+    }else{
+      countryTagline+=" around the world";
+    }
+    return countryTagline;
+  }
+
+  bool get hasCustomSearchQuery => !outfitFilters.isEmpty || isSortByTop;
 
   _openFilters(){
-    return showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text('Still in progress'),
-        content: Text('Filters coming soon!'),
-        actions: <Widget>[
-          FlatButton(
-            child: Text(
-              'Close',
-              style: TextStyle(
-                inherit: true,
-                color: Colors.deepOrange,
-              ),
-            ),
-            onPressed: Navigator.of(ctx).pop,
-          )
-        ],
-      )
+    FiltersDialog.launch(context,
+      filters: outfitFilters,
+      sortByTop: isSortByTop,
+      onSearch: _onSearch
     );
+  }
+  _onSearch(LoadOutfits filterData) {
+    setState(() {
+      outfitFilters = filterData.filters;
+      isSortByTop = filterData.sortByTop;
+    });
+    preferences.updatePreference(Preferences.EXPLORE_PAGE_SORT_BY_TOP, isSortByTop);
+    preferences.updatePreference(Preferences.EXPLORE_PAGE_FILTERS, outfitFilters.toJson());
+    _outfitBloc.exploreOutfits.add(LoadOutfits(
+      filters: filterData.filters,
+      sortByTop: filterData.sortByTop,
+      userId: userId,
+    ));
+
   }
 
   Widget _outfitsCarousel(List<Outfit> outfits, bool isLoading) {
@@ -159,10 +225,12 @@ class _ExploreScreenState extends State<ExploreScreen> with SingleTickerProvider
               enlargeCenterPage: true,
               onPageChanged: (i) {
                 setState(() => index = i);
-                if(i+1>=outfits.length){
+                if(i+1>=outfits.length && outfits.length>0){
                   _outfitBloc.exploreOutfits.add(LoadOutfits(
                     userId: userId,
-                    startAfterOutfit: outfits.last
+                    startAfterOutfit: outfits.last,
+                    filters: outfitFilters,
+                    sortByTop: isSortByTop,
                   ));
                 }
               },
@@ -253,7 +321,7 @@ class _ExploreScreenState extends State<ExploreScreen> with SingleTickerProvider
                 ),
                 textAlign: TextAlign.center,
               ),
-              Text(isLoading ? 'Please wait while we find you more fire fits!' : 'Try a different search filter or refresh the page to see new fits!',
+              Text(isLoading ? 'Please wait while we find you more fire fits!' : 'Try a different search filter or refresh the page to check for new fits!',
                 style: Theme.of(context).textTheme.subtitle.copyWith(
                   color: Colors.white
                 ),

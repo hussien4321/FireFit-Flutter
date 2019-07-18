@@ -165,7 +165,7 @@ class _NotificationTabState extends State<NotificationTab> {
         loadOutfit: true
       );
     }
-    if(widget.notification.type == NotificationType.NEW_COMMENT || widget.notification.type == NotificationType.COMMENT_LIKE){
+    if(widget.notification.type == NotificationType.NEW_COMMENT || widget.notification.type == NotificationType.COMMENT_LIKE || widget.notification.type == NotificationType.COMMENT_REPLY){
       CustomNavigator.goToCommentsScreen(
         context,
         outfitId: refOutfit.outfitId,

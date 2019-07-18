@@ -6,9 +6,11 @@ import 'package:meta/meta.dart';
 class CountrySticker extends StatelessWidget {
 
   final String countryCode;
+  final Color color;
 
   CountrySticker({
-    @required this.countryCode
+    @required this.countryCode,
+    this.color,
   });
 
   @override
@@ -37,7 +39,9 @@ class CountrySticker extends StatelessWidget {
           ),
           Text(
             selectedItem.code,
-            style: Theme.of(context).textTheme.button,
+            style: Theme.of(context).textTheme.button.apply(
+              color: color == null ? Colors.black : color,
+            ),
           ),
         ],
       ),

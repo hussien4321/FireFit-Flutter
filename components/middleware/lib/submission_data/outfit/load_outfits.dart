@@ -1,4 +1,4 @@
-import 'package:middleware/entities.dart';
+import 'package:middleware/middleware.dart';
 
 enum SearchModes {
   EXPLORE, MINE, SAVED, SELECTED, SELECTED_SINGLE, FEED, NOTIFICATIONS, FOLLOWERS, FOLLOWING, TEMP
@@ -41,22 +41,25 @@ class LoadOutfits {
   SearchModes searchMode;
   String userId;
   Outfit startAfterOutfit;
-  String category;
   bool sortByTop;
   bool forceLoad;
   int lookbookId;
-  //TO ADD: Date range, Country code
+  OutfitFilters filters;
 
   
   LoadOutfits({
     this.userId,
     this.startAfterOutfit,
     this.searchMode,
-    this.category,
+    this.filters,
     this.lookbookId,
     this.sortByTop = false,
     this.forceLoad = false,
-  });
+  }) {
+    if(filters==null){
+      filters=OutfitFilters();
+    }
+  }
 
   bool operator ==(o) {
     return o is LoadOutfits &&
@@ -64,7 +67,7 @@ class LoadOutfits {
     o.startAfterOutfit == startAfterOutfit &&
     !o.forceLoad &&
     o.lookbookId == lookbookId&&
-    o.category == category&&
+    o.filters == filters &&
     o.sortByTop == sortByTop;
   }
 
@@ -74,7 +77,7 @@ class LoadOutfits {
     'lookbook_id': lookbookId,
     'start_after_outfit': startAfterOutfit?.toJson(),
     'start_after_save':startAfterOutfit?.save?.toJson(),
-    'category': category,
+    'filters': filters == null || filters.isEmpty ? null : filters.toJson(),
     'sort_by_top': sortByTop,
   };
 

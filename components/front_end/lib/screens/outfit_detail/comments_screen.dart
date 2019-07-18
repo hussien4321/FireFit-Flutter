@@ -85,14 +85,6 @@ class _CommentsScreenState extends State<CommentsScreen> {
               return Column(
                 children: [
                   _commentInput(outfit),
-                  _buildOutfitText(outfit),
-                  _buildCommentsCount(outfit),
-                  Container(
-                    margin: EdgeInsets.only(top: 4),
-                    width: double.infinity,
-                    height: 0.5,
-                    color: Colors.grey.withOpacity(0.5)
-                  ),
                   StreamBuilder<List<Comment>>(
                     stream: _commentBloc.comments,
                     initialData: [],
@@ -112,13 +104,13 @@ class _CommentsScreenState extends State<CommentsScreen> {
                           child: ListView(
                             padding: EdgeInsets.all(0),
                             controller: _controller,
-                            children: snap.data.map((comment) => _buildCommentField(comment)).toList()..add(
+                            children: [_outfitOverview(outfit)]..addAll(snap.data.map((comment) => _buildCommentField(comment)).toList()..add(
                               StreamBuilder<bool>(
                                 stream: _commentBloc.isLoading,
                                 initialData: false,
                                 builder: (ctx, loadingSnap) => loadingSnap.data ? _loadingPlaceholder() : Container(),
                               )
-                            )
+                            ))
                           ),
                         ),
                       );
@@ -131,6 +123,21 @@ class _CommentsScreenState extends State<CommentsScreen> {
         ),
       ),
     );
+  }
+
+  Widget _outfitOverview(Outfit outfit) {
+    return Column(
+      children: <Widget>[
+        _buildOutfitText(outfit),
+        _buildCommentsCount(outfit),
+        Container(
+          margin: EdgeInsets.only(top: 4),
+          width: double.infinity,
+          height: 0.5,
+          color: Colors.grey.withOpacity(0.5)
+        ),
+      ],
+    );  
   }
 
   _loadingPlaceholder() {

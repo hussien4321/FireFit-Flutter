@@ -1,6 +1,6 @@
 import 'package:middleware/entities.dart';
 
-enum NotificationType { OUTFIT_RATING, NEW_COMMENT, COMMENT_LIKE, NEW_FOLLOW, NEW_OUTFIT }
+enum NotificationType { OUTFIT_RATING, NEW_COMMENT, COMMENT_REPLY, COMMENT_LIKE, NEW_FOLLOW, NEW_OUTFIT }
 
 class OutfitNotification {
   int notificationId;
@@ -21,6 +21,8 @@ class OutfitNotification {
     switch(type.toLowerCase()){
       case 'new-comment':
         return NotificationType.NEW_COMMENT;
+      case 'new-comment-reply':
+        return NotificationType.COMMENT_REPLY;
       case 'new-comment-like':
         return NotificationType.COMMENT_LIKE;
       case 'new-outfit-rating':
@@ -38,6 +40,8 @@ class OutfitNotification {
     switch(type){
       case NotificationType.NEW_COMMENT:
         return 'new-comment';
+      case NotificationType.COMMENT_REPLY:
+        return 'new-comment-reply';
       case NotificationType.COMMENT_LIKE:
         return 'new-comment-like';
       case NotificationType.OUTFIT_RATING:
@@ -82,6 +86,8 @@ class OutfitNotification {
     switch(type){
       case NotificationType.NEW_COMMENT:
         return 'New comment';
+      case NotificationType.COMMENT_REPLY:
+        return 'New reply';
       case NotificationType.COMMENT_LIKE:
         return 'Comment liked';
       case NotificationType.OUTFIT_RATING:
@@ -99,6 +105,8 @@ class OutfitNotification {
     switch(type){
       case NotificationType.NEW_COMMENT:
         return 'has commented on your outfit';
+      case NotificationType.COMMENT_REPLY:
+        return 'has replied to your comment';
       case NotificationType.COMMENT_LIKE:
         return 'has liked your comment on the outfit';
       case NotificationType.OUTFIT_RATING:

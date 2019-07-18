@@ -263,8 +263,8 @@ class _CommentFieldState extends State<CommentField> {
           List<Comment> replies = new List<Comment>.from(commentsSnap.data);
           replies.removeWhere((comment) => comment.replyTo != widget.comment.commentId);
           replies.sort((commentA, commentB) => commentA.uploadDate.compareTo(commentB.uploadDate));
-          return Padding(
-            padding: const EdgeInsets.only(left: 56.0, right: 8),
+          return Container(
+            padding: const EdgeInsets.only(left: 8.0, right: 8),
             child: Column(
               children: replies.map((reply) => _replyField(reply)).toList()..add(_replyEndTag(
                 isLoading: isLoadingSnap.data,
@@ -279,102 +279,115 @@ class _CommentFieldState extends State<CommentField> {
   }
 
   Widget _replyField(Comment reply) {
-    return Container(
-      child: Column(
-        children: <Widget>[
-          InkWell(
-            highlightColor:  Colors.blueGrey,
-            onLongPress: isCurrentUser(reply) ?  ()=>_confirmDelete(reply) : null,
-            child: Row(
-              children: <Widget>[
-                Padding(
-                  padding: const EdgeInsets.only(top: 16.0),
-                  child: ProfilePicWithShadow(
-                    heroTag: '${reply.commentId}-'+reply.commenter.profilePicUrl,
-                    userId: reply.commenter.userId,
-                    url: reply.commenter.profilePicUrl,
-                    pagesSinceOutfitScreen: widget.pagesSinceOutfitScreen,
-                    pagesSinceProfileScreen: widget.pagesSinceProfileScreen,
-                  ),
-                ),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: <Widget>[
-                      Padding(
-                        padding: EdgeInsets.only(left: 8.0, bottom: 2.0),
-                        child: Text(
-                          reply.commenter.name,
-                          style: Theme.of(context).textTheme.subtitle
-                        ),
-                      ),
-                      Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(20.0),
-                          color: Colors.grey[350]
-                        ),
-                        width: double.infinity,
-                        padding: EdgeInsets.all(8.0),
-                        child: Text(
-                          reply.text,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                reply.commentId <= 0 ? 
-                Container(
-                  margin: EdgeInsets.only(top: 16, left: 8.0),
-                  child: Center(
-                    child: CircularProgressIndicator()
-                  )
-                ) : 
-                Padding(
-                  padding: const EdgeInsets.only(top: 16.0),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: <Widget>[
-                      IconButton(
-                        icon: Icon(
-                          reply.isLiked ? FontAwesomeIcons.solidHeart :  FontAwesomeIcons.heart,
-                          color: Colors.redAccent,
-                        ),
-                        onPressed: () => _likeComment(reply),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+    return Row(
+      children: <Widget>[
+        Container(
+          width: 48,
+          child: Center(
+            child: Icon(
+              Icons.arrow_forward_ios,
+              color: Colors.black54,
             ),
           ),
-          Container(
-            padding: EdgeInsets.only(left: 48),
-            width: double.infinity,
-            child: Row(
-              children: <Widget>[
-                Text(
-                  DateFormatter.dateToRecentFormat(reply.uploadDate),
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey,
-                    fontStyle: FontStyle.italic
-                  )
+        ),
+        Expanded(
+          child: Column(
+            children: <Widget>[
+              InkWell(
+                highlightColor:  Colors.blueGrey,
+                onLongPress: isCurrentUser(reply) ?  ()=>_confirmDelete(reply) : null,
+                child: Row(
+                  children: <Widget>[
+                    Padding(
+                      padding: const EdgeInsets.only(top: 16.0),
+                      child: ProfilePicWithShadow(
+                        heroTag: '${reply.commentId}-'+reply.commenter.profilePicUrl,
+                        userId: reply.commenter.userId,
+                        url: reply.commenter.profilePicUrl,
+                        pagesSinceOutfitScreen: widget.pagesSinceOutfitScreen,
+                        pagesSinceProfileScreen: widget.pagesSinceProfileScreen,
+                      ),
+                    ),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          Padding(
+                            padding: EdgeInsets.only(left: 8.0, bottom: 2.0),
+                            child: Text(
+                              reply.commenter.name,
+                              style: Theme.of(context).textTheme.subtitle
+                            ),
+                          ),
+                          Container(
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(20.0),
+                              color: Colors.grey[350]
+                            ),
+                            width: double.infinity,
+                            padding: EdgeInsets.all(8.0),
+                            child: Text(
+                              reply.text,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    reply.commentId <= 0 ? 
+                    Container(
+                      margin: EdgeInsets.only(top: 16, left: 8.0),
+                      child: Center(
+                        child: CircularProgressIndicator()
+                      )
+                    ) : 
+                    Padding(
+                      padding: const EdgeInsets.only(top: 16.0),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: <Widget>[
+                          IconButton(
+                            icon: Icon(
+                              reply.isLiked ? FontAwesomeIcons.solidHeart :  FontAwesomeIcons.heart,
+                              color: Colors.redAccent,
+                            ),
+                            onPressed: () => _likeComment(reply),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-                Padding(padding: EdgeInsets.only(right: 8.0),),
-                Text(
-                  '${reply.likesCount} like${reply.likesCount == 1 ? '': 's'}',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey,
-                    fontWeight: FontWeight.bold
-                  ),
-                ),
-              ],
-            )
+              ),
+              Container(
+                padding: EdgeInsets.only(left: 48),
+                width: double.infinity,
+                child: Row(
+                  children: <Widget>[
+                    Text(
+                      DateFormatter.dateToRecentFormat(reply.uploadDate),
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey,
+                        fontStyle: FontStyle.italic
+                      )
+                    ),
+                    Padding(padding: EdgeInsets.only(right: 8.0),),
+                    Text(
+                      '${reply.likesCount} like${reply.likesCount == 1 ? '': 's'}',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey,
+                        fontWeight: FontWeight.bold
+                      ),
+                    ),
+                  ],
+                )
+              ),
+            ],
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
@@ -383,7 +396,8 @@ class _CommentFieldState extends State<CommentField> {
       return Container();
     }
     return Center(
-      child: Padding(
+      child: Container(
+        margin: EdgeInsets.only(left: 48),
         padding: const EdgeInsets.all(8.0),
         child: isLoading ? _loadingTag() : _loadMoreTag(reply)
       )

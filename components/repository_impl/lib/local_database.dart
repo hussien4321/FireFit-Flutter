@@ -27,7 +27,7 @@ class LocalDatabase {
 
   Future<Database> initDb() async {
     String path = join(await getDatabasesPath(), "mira_mira.db");
-    Database theDB = await openDatabase(path, version: 3, onCreate: _onCreate, onUpgrade: _onUpgrade, onDowngrade: _onDowngrade);
+    Database theDB = await openDatabase(path, version: 4, onCreate: _onCreate, onUpgrade: _onUpgrade, onDowngrade: _onDowngrade);
     return theDB;
   }
 
@@ -60,6 +60,9 @@ class LocalDatabase {
     }
     if(version == 3){
       await db.execute("ALTER TABLE comment ADD COLUMN comment_replies_count INTEGER DEFAULT 0");
+    }
+    if(version == 4){
+      await db.execute("ALTER TABLE outfit ADD COLUMN hidden_rating REAL DEFAULT 3");
     }
   }
 

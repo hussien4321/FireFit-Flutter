@@ -8,6 +8,7 @@ class Outfit {
   String description;
   String style;
   double averageRating;
+  double hiddenRating;
   int ratingsCount;
   int commentsCount;
   User poster;
@@ -23,6 +24,7 @@ class Outfit {
     this.description, 
     this.style,
     this.averageRating,
+    this.hiddenRating,
     this.ratingsCount,
     this.commentsCount,
     this.poster,
@@ -55,6 +57,7 @@ class Outfit {
     ratingsCount = map['ratings_count'];
     commentsCount = map['comments_count'];
     userRating = map['user_rating'];
+    hiddenRating =  map['hidden_rating']?.toDouble();
     poster = User.fromMap(map);
     searchOutfit = SearchOutfit.fromMap(map);
     save = Save.fromMap(map);
@@ -72,6 +75,7 @@ class Outfit {
     'average_rating':averageRating,
     'ratings_count' :ratingsCount,
     'user_rating' : userRating,
+    'hidden_rating': hiddenRating,
     'outfit_created_at' : createdAt.toIso8601String(), 
     'comments_count':commentsCount,
   };
