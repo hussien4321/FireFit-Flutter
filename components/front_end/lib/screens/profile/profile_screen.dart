@@ -5,6 +5,8 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:front_end/helper_widgets.dart';
 import 'package:front_end/providers.dart';
 import 'package:front_end/screens.dart';
+import 'package:front_end/services.dart';
+
 
 enum UserOption { EDIT, REPORT }
 
@@ -40,6 +42,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final double profilePicSize = 100; 
   Outfit lastOutfit;
 
+  bool isSortingByTop = false;
+  Preferences preferences = Preferences();
+
   @override
   void initState() {
     super.initState();
@@ -52,6 +57,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         LoadOutfits(
           userId: widget.userId,
           startAfterOutfit: lastOutfit,
+          sortByTop: isSortingByTop,
         )
       );
     }
@@ -99,13 +105,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
       _outfitBloc = OutfitBlocProvider.of(context);
       _userBloc.selectUser.add(widget.userId);
       currentUserId = await _userBloc.existingAuthId.first;
+      await _loadFiltersFromPreferences();
       _outfitBloc.loadUserOutfits.add(
         LoadOutfits(
-          userId: widget.userId
+          userId: widget.userId,
+          sortByTop: isSortingByTop,
         )
       );
       followUser.followerUserId = currentUserId;
     }
+  }
+
+  _loadFiltersFromPreferences() async {
+    final newSortByTop = await preferences.getPreference(Preferences.SELECTED_USER_OUTFITS_SORT_BY_TOP);
+    setState(() {
+      isSortingByTop = newSortByTop;
+    });
   }
 
   Widget _profileScaffold(User user, bool isLoadingOutfits){
@@ -133,6 +148,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   LoadOutfits(
                     userId: widget.userId,
                     forceLoad: true,
+                    sortByTop: isSortingByTop,
                   )
                 );
               },
@@ -428,12 +444,53 @@ class _ProfileScreenState extends State<ProfileScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
-          _sectionHeader("Outfits"),
+          Row(
+            children: <Widget>[
+              Expanded(
+                child: _sectionHeader("Outfits"),
+              ),
+              _sortingButton(user),
+            ],
+          ),
           _outfitsGrid(isLoadingOutfits),
         ],
       ),
     );
   }
+
+  Widget _sortingButton(User user){
+    bool enabled = user != null && user.numberOfOutfits > 0;
+    return FlatButton(
+      child: Row(
+        children: <Widget>[
+          Text(
+            isSortingByTop ? 'Top rated' : 'Last Uploaded',
+            style: TextStyle(
+              inherit: true,
+              color: enabled ? Colors.blue : Colors.grey,
+            ),
+          ),
+          Icon(
+            Icons.trending_up,
+            color: enabled ? Colors.blue : Colors.grey,
+          ),
+        ],
+      ),
+      onPressed: enabled ? _sortList : null,
+    );
+  }
+
+  _sortList() {
+    setState(() {
+      isSortingByTop = !isSortingByTop;
+    });
+    preferences.updatePreference(Preferences.WARDROBE_SORT_BY_TOP, isSortingByTop);
+    _outfitBloc.loadUserOutfits.add(LoadOutfits(
+      userId: widget.userId,
+      sortByTop: isSortingByTop,
+    ));
+  }
+
 
   Widget _outfitsGrid(bool isLoading) {
     return StreamBuilder<List<Outfit>>(
@@ -443,10 +500,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
         if(outfitsSnap.data != null && outfitsSnap.data.isNotEmpty){
           lastOutfit=outfitsSnap.data.last;
         }
+        List<Outfit> outfits = outfitsSnap.data;
+        if(outfits.isNotEmpty){
+          outfits = sortOutfits(outfits, isSortingByTop);
+        }
         return OutfitsGrid(
           emptyText: 'This user has no outfits, follow them to get notified when they upload one!',
           isLoading: isLoading,
-          outfits: outfitsSnap.data,
+          outfits: outfits,
           hasFixedHeight: true,
           pagesSinceProfileScreen: widget.pagesSinceProfileScreen+1,
           pagesSinceOutfitScreen: widget.pagesSinceOutfitScreen,

@@ -149,7 +149,7 @@ class CachedOutfitRepository {
   Future<int> rateOutfit(OutfitRating outfitRating) async {
     Outfit outfit = outfitRating.outfit;
     int ratingValue = outfitRating.ratingValue;
-    double average = outfit.averageRating;
+    double average = outfit.trueAverageRating;
     double total = outfit.ratingsCount.toDouble();
     if(outfit.hasRating){
       average = total == 1 ? 0 : ((average * total) - outfit.userRating) / (total - 1);
@@ -180,7 +180,7 @@ class CachedOutfitRepository {
     }
     await _clearOutfitSearches(searchMode);
     await _clearOutfits(searchMode);
-    if(searchMode!=SearchModes.MINE){
+    if(searchMode!=SearchModes.MINE && searchMode!=SearchModes.SELECTED){
       await userCache.clearUsers(searchMode);
     }
   }

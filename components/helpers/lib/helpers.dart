@@ -4,6 +4,7 @@ export 'src/constants.dart';
 export 'src/keys.dart';
 export 'src/localization.dart';
 export 'src/routes.dart';
+export 'src/fashion_messages.dart';
 export 'src/theme.dart';
 export 'src/date_formatter.dart';
 export 'uuid.dart';

@@ -52,34 +52,39 @@ class OutfitMainCard extends StatelessWidget {
     return Align(
       alignment: Alignment.bottomCenter,
       child: Container(
-        padding: const EdgeInsets.only(left: 8, bottom: 8, right: 8, top: 32),
+        padding: const EdgeInsets.only(left: 8, bottom: 8, right: 8, top: 20),
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [
               Colors.transparent,
-              Colors.black54
+              Colors.black87
             ],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),
         ),
         width: double.infinity,
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          mainAxisAlignment: MainAxisAlignment.start,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.end,
           children: <Widget>[
-            Expanded(
-              child: Text(
-                outfit.title,
-                style: Theme.of(context).textTheme.subhead.copyWith(
-                  color: Colors.white,
+            Row(
+              children: <Widget>[
+                Expanded(
+                  child: Text(
+                    outfit.title,
+                    style: Theme.of(context).textTheme.subhead.copyWith(
+                      color: Colors.white,
+                    ),
+                    textAlign: TextAlign.start,
+                    softWrap: true,
+                    overflow: TextOverflow.fade,
+                  ),
                 ),
-                textAlign: TextAlign.start,
-                softWrap: true,
-                overflow: TextOverflow.fade,
-              ),
+              ],
             ),
-            OutfitStats(outfit: outfit),
+            OutfitStats(outfit: outfit, size: 16,),
           ],
         ),
       ),

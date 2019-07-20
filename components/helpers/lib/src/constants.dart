@@ -16,4 +16,5 @@ class AppConfig {
     "wardrobe",
     "lookbooks",
   ];
+
 }

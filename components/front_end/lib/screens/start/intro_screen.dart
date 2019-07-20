@@ -80,16 +80,9 @@ class _IntroScreenState extends State<IntroScreen> {
         foregroundDecoration: BoxDecoration(
           color: Colors.black38
         ),
-        child: FadeInImage(
-          image: NetworkImage(
-            'https://firebasestorage.googleapis.com/v0/b/skilful-tape-240120.appspot.com/o/public_resources%2Fsplash%20screen%2Ffashion_walk.gif?alt=media&token=f9adb6a0-9324-4113-8e91-ab0952a8aa06',
-          ),
-          placeholder: AssetImage(
-            'assets/splash.jpg',
-          ),
+        child: Image.asset(
+          'assets/splash/splash_1.jpg',
           fit: BoxFit.cover,
-          fadeOutDuration: Duration(),
-          fadeInDuration: Duration(),
         ),
       ),
     );
@@ -101,15 +94,18 @@ class _IntroScreenState extends State<IntroScreen> {
         children: <Widget>[
           AppTitle(),
           Expanded(
-            child: Center(
-              child: Text(
-                'Discover, share & upgrade your fashion',
-                style: Theme.of(context).textTheme.headline.copyWith(
-                  color: Colors.white, 
-                  fontWeight: FontWeight.w300, 
-                  fontStyle: FontStyle.italic,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: Center(
+                child: Text(
+                  'Feel more confident in your\nunique style',
+                  style: Theme.of(context).textTheme.headline.copyWith(
+                    color: Colors.white, 
+                    fontWeight: FontWeight.w300, 
+                    fontStyle: FontStyle.italic,
+                  ),
+                  textAlign: TextAlign.center,
                 ),
-                textAlign: TextAlign.center,
               ),
             ),
           ),

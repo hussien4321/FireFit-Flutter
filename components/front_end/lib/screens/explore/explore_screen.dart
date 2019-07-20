@@ -77,7 +77,11 @@ class _ExploreScreenState extends State<ExploreScreen> with SingleTickerProvider
                     stream: _outfitBloc.exploredOutfits,
                     initialData: [],
                     builder: (ctx, outfitsSnap) {
-                      return _outfitsCarousel(outfitsSnap.data, isLoadingSnap.data);
+                      List<Outfit> outfits = outfitsSnap.data;
+                      if(outfits.length>0){
+                        outfits = sortOutfits(outfits, isSortByTop);
+                      }
+                      return _outfitsCarousel(outfits, isLoadingSnap.data);
                     }
                   )
                 )
@@ -88,7 +92,6 @@ class _ExploreScreenState extends State<ExploreScreen> with SingleTickerProvider
       ),
     );
   }
-
 
   _initBlocs() async {
     if(_outfitBloc==null){
@@ -206,6 +209,9 @@ class _ExploreScreenState extends State<ExploreScreen> with SingleTickerProvider
     });
     preferences.updatePreference(Preferences.EXPLORE_PAGE_SORT_BY_TOP, isSortByTop);
     preferences.updatePreference(Preferences.EXPLORE_PAGE_FILTERS, outfitFilters.toJson());
+    print('outfitFilters');
+    print(outfitFilters.toJson());
+    print(outfitFilters.dateRange);
     _outfitBloc.exploreOutfits.add(LoadOutfits(
       filters: filterData.filters,
       sortByTop: filterData.sortByTop,
@@ -234,7 +240,7 @@ class _ExploreScreenState extends State<ExploreScreen> with SingleTickerProvider
                   ));
                 }
               },
-              items: outfits.map((outfit) => _buildOutfitCard(outfit, index)).toList()..add(_endCard(isLoading)),
+              items: outfits.map((outfit) => _buildOutfitCard(outfit, index)).toList()..add(_endCard(isLoading, outfits.isEmpty)),
               enableInfiniteScroll: false,
               viewportFraction: 0.8,
             ),
@@ -284,7 +290,7 @@ class _ExploreScreenState extends State<ExploreScreen> with SingleTickerProvider
     );
   }
 
-  Widget _endCard(bool isLoading) {
+  Widget _endCard(bool isLoading, bool isEmpty) {
     return _card(
       addShadow: false,
       child: Container(
@@ -315,7 +321,7 @@ class _ExploreScreenState extends State<ExploreScreen> with SingleTickerProvider
                 color: Colors.white,
                 size: 48,
               ),
-              Text(isLoading ? 'Loading Fits' : 'No more items',
+              Text(isLoading ? 'Loading Fits' : (isEmpty? 'No Fits Found' : 'No More Fits'),
                 style: Theme.of(context).textTheme.display1.copyWith(
                   color: Colors.white
                 ),

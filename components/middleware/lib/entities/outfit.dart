@@ -7,7 +7,7 @@ class Outfit {
   String title;
   String description;
   String style;
-  double averageRating;
+  double _averageRating;
   double hiddenRating;
   int ratingsCount;
   int commentsCount;
@@ -23,13 +23,19 @@ class Outfit {
     this.title, 
     this.description, 
     this.style,
-    this.averageRating,
     this.hiddenRating,
     this.ratingsCount,
     this.commentsCount,
     this.poster,
     this.createdAt,
   });
+
+  set averageRating(double newRating) => _averageRating = newRating;
+  double get averageRating {
+    int roundedRating = (_averageRating*10).round();
+    return roundedRating/10;
+  }
+  double get trueAverageRating => averageRating;
 
   bool get hasCompleteData => commentsCount != null;
 
@@ -53,7 +59,7 @@ class Outfit {
     }
     images = _images;
     style = map['style'];
-    averageRating = map['average_rating'] == null ? 0 : double.parse(map['average_rating'].toString());
+    _averageRating = map['average_rating'] == null ? 0 : double.parse(map['average_rating'].toString());
     ratingsCount = map['ratings_count'];
     commentsCount = map['comments_count'];
     userRating = map['user_rating'];
@@ -72,7 +78,7 @@ class Outfit {
     'title' : title, 
     'description' : description, 
     'style' : style,
-    'average_rating':averageRating,
+    'average_rating': _averageRating,
     'ratings_count' :ratingsCount,
     'user_rating' : userRating,
     'hidden_rating': hiddenRating,

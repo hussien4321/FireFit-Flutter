@@ -11,6 +11,9 @@ class Preferences {
   static final String CURRENT_CLOTHES_STYLE = 'CURRENT_CLOTHES_STYLE';
   static final String DEFAULT_START_PAGE = 'DEFAULT_START_PAGE';
   static final String LOOKBOOKS_SORT_BY_SIZE = 'LOOKBOOKS_SORT_BY_SIZE';
+  static final String LOOKBOOK_SORT_BY_TOP = 'LOOKBOOK_SORT_BY_TOP';
+  static final String WARDROBE_SORT_BY_TOP = 'WARDROBE_SORT_BY_TOP';
+  static final String SELECTED_USER_OUTFITS_SORT_BY_TOP = 'SELECTED_USER_OUTFITS_SORT_BY_TOP';
 
   //TODO: CLEAR THESE PREFERENCES EVERY TIME U LOG OUT (MAYBE DO SO FOR ALL?)
   static final String EXPLORE_PAGE_FILTERS = 'EXPLORE_PAGE_FILTERS';
@@ -18,12 +21,15 @@ class Preferences {
   
 
   final Map<String, dynamic> _initialPreferences = {
-    _VERSION: 4,
+    _VERSION: 5,
     CURRENT_CLOTHES_STYLE : 'casualwear',
     DEFAULT_START_PAGE: AppConfig.MAIN_PAGES.first,
     LOOKBOOKS_SORT_BY_SIZE: false,
     EXPLORE_PAGE_FILTERS: OutfitFilters().toJson(),
     EXPLORE_PAGE_SORT_BY_TOP: false,
+    LOOKBOOK_SORT_BY_TOP: false,
+    WARDROBE_SORT_BY_TOP: false,
+    SELECTED_USER_OUTFITS_SORT_BY_TOP: false,
   };
 
   Map<String, dynamic> _currentPreferences = {};

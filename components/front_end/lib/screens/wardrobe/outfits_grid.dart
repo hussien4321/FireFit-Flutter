@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:middleware/middleware.dart';
 import 'package:front_end/helper_widgets.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class OutfitsGrid extends StatefulWidget {
 
@@ -124,10 +125,33 @@ class _OutfitsGridState extends State<OutfitsGrid> {
                   ),
                 ),
               ),
+              _outfitData(outfit),
               widget.customOverlay == null ? Container() : widget.customOverlay(outfit),
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _outfitData(Outfit outfit) {
+    return Positioned(
+      left: 0,
+      right: 0,
+      bottom: 0,
+      child: Container(
+        padding: EdgeInsets.symmetric(vertical: 4, horizontal: 2),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              Colors.transparent,
+              Colors.black54
+            ],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          )
+        ),
+        child: OutfitStats(outfit: outfit,)
       ),
     );
   }

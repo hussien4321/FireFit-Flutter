@@ -20,6 +20,14 @@ class AppTitle extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
+                Padding(
+                  padding: const EdgeInsets.only(right: 4.0),
+                  child: Image.asset(
+                    'assets/firefit_logo.png',
+                    width: 30,
+                    height: 30,
+                  ),
+                ),
                 Text(
                   'FireFit',
                   style: Theme.of(context).textTheme.display1.copyWith(
@@ -28,11 +36,6 @@ class AppTitle extends StatelessWidget {
                     fontWeight: FontWeight.w300,
                   ),
                   textAlign: TextAlign.center,
-                ),
-                Image.asset(
-                  'assets/firefit_logo.png',
-                  width: 48,
-                  height: 48,
                 ),
               ],
             ),

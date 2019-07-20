@@ -49,7 +49,7 @@ class _RatingBarState extends State<RatingBar> {
 
   Widget _ratingIcon(int ratingThreshold){
     bool showRating = widget.value != null && ratingThreshold<= widget.value;
-    bool showHalfRating = widget.value != null && widget.value > (ratingThreshold-0.5) && widget.value < ratingThreshold;
+    bool showHalfRating = widget.value != null && widget.value >= (ratingThreshold-0.5) && widget.value < ratingThreshold;
     return SizedBox(
       width: widget.size,
       height: widget.size,

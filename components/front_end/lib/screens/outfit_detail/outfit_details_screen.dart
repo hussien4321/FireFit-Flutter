@@ -368,22 +368,30 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          // Text(
-          //   'Rating:',
-          //   style: Theme.of(context).textTheme.display1.copyWith(
-          //     color: Colors.red[900],
-          //     fontSize: 28,
-          //     fontWeight: FontWeight.bold,
-          //     fontStyle: FontStyle.italic
-          //   ),
-          // ),
+          Expanded(
+            child: Text(
+              outfit.averageRating.toString(),
+              style: Theme.of(context).textTheme.subtitle.copyWith(
+                color: Colors.red[900],
+              ),
+              textAlign: TextAlign.end,
+            ),
+          ),
           Container(
             padding: EdgeInsets.all(4),
             child: RatingBar(
               value: outfit?.averageRating,
               size: 28,
             ),
-          )
+          ),
+          Expanded(
+            child: Text(
+              '${outfit.ratingsCount} rating${outfit.ratingsCount==1?'':'s'}',
+              style: Theme.of(context).textTheme.subtitle.copyWith(
+                color: Colors.red[900],
+              ),
+            ),
+          ),
         ],
       ),
     );

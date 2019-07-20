@@ -76,6 +76,7 @@ class _FiltersDialogState extends State<FiltersDialog> {
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             _sortByTab(),
+            sortByTop? _dateTab() : Container(),
             _genderTab(),
             _styleTab(),
             _countryTab(),
@@ -149,6 +150,37 @@ class _FiltersDialogState extends State<FiltersDialog> {
             value: sortByTop,
             onChanged: (newSortByTop) => setState(() => sortByTop = newSortByTop),
           )
+        )
+      ],
+    );
+  }
+  Widget _dateTab(){
+    List<DateRanges> dateRanges = [null];
+    dateRanges..addAll(DateRanges.values);
+    return Row(
+      children: <Widget>[
+        Expanded(
+          child: Text(
+            'Date Range',
+            style: Theme.of(context).textTheme.button.apply(color: Colors.grey),
+          ),
+        ),
+        Expanded(
+          child: DropdownButton(
+            isExpanded: true,
+            items: dateRanges.map((newDateRange) => DropdownMenuItem(
+              value: newDateRange,
+              child: Text(
+                newDateRange==null ? 'All time' : dateRangeToString(newDateRange),
+                style: TextStyle(
+                  inherit: true,
+                  color: newDateRange == null ? Colors.black : Colors.blue
+                ),
+              ),
+            )).toList(),
+            value: filters.dateRange,
+            onChanged: (newDateRange) => setState(() => filters.dateRange = newDateRange),
+          ),
         )
       ],
     );

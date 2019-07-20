@@ -5,6 +5,7 @@ import 'package:middleware/middleware.dart';
 import 'package:front_end/helper_widgets.dart';
 import 'package:front_end/screens.dart';
 import 'dart:async';
+import 'package:front_end/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 enum LookbookOption { EDIT, DELETE }
@@ -29,6 +30,9 @@ class _LookbookScreenState extends State<LookbookScreen> {
 
   bool isEditing = false;
 
+  Preferences preferences = Preferences();
+  bool isSortingByTop = false;
+
   @override
   void initState() {
     super.initState();
@@ -52,12 +56,21 @@ class _LookbookScreenState extends State<LookbookScreen> {
     if(_outfitBloc==null){
       _outfitBloc = OutfitBlocProvider.of(context);
       userId = await UserBlocProvider.of(context).existingAuthId.first;
+      await _loadFiltersFromPreferences();
       _outfitBloc.loadLookbookOutfits.add(LoadOutfits(
         userId: userId,
+        sortByTop: isSortingByTop,
         lookbookId: lookbook.lookbookId,
       ));
     }
   }
+  _loadFiltersFromPreferences() async {
+    final newSortByTop = await preferences.getPreference(Preferences.LOOKBOOK_SORT_BY_TOP);
+    setState(() {
+      isSortingByTop = newSortByTop;
+    });
+  }
+
 
 
   Widget _lookbookOptions(){
@@ -133,6 +146,9 @@ class _LookbookScreenState extends State<LookbookScreen> {
             if(lookbooksSnap.hasData && lookbooksSnap.data != null){
               lookbook = lookbooksSnap.data.firstWhere((lb) => lb.lookbookId==lookbook.lookbookId, orElse: null);
             }
+            if(outfits.length>0){
+              outfits = sortLookbookOutfits(outfits, isSortingByTop);
+            }
             return Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
@@ -188,23 +204,23 @@ class _LookbookScreenState extends State<LookbookScreen> {
   Widget _lookbookOutfitsOverview(bool isLoading, List<Outfit> outfits) {
     return Column(
       children: <Widget>[
-        outfits.isEmpty ? Container() : _lookbookOutfitsManagementOptions(),
+        _lookbookOutfitsManagementOptions(outfits),
         _outfitsGrid(isLoading, outfits),
       ],
     );
   }
 
-  Widget _lookbookOutfitsManagementOptions(){
+  Widget _lookbookOutfitsManagementOptions(List<Outfit> outfits){
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: <Widget>[
-        _newLookbookButton(),
-        _sortingButton(),
+        _removeFitButton(),
+        _sortingButton(outfits),
       ],
     );
   }
 
-  Widget _newLookbookButton() {
+  Widget _removeFitButton() {
     return FlatButton(
       child: Row(
         children: <Widget>[
@@ -234,28 +250,41 @@ class _LookbookScreenState extends State<LookbookScreen> {
     });
   }
 
-  Widget _sortingButton() {
+  Widget _sortingButton(List<Outfit> outfits) {
+    bool enabled = outfits.isNotEmpty;
     return FlatButton(
       child: Row(
         children: <Widget>[
           Padding(
             padding: const EdgeInsets.only(right: 4),
             child: Text(
-              'Last Added',
+              isSortingByTop ? 'Top rated' : 'Last Added',
               style: TextStyle(
                 inherit: true,
-                color: Colors.grey,
+                color: enabled ? Colors.blue : Colors.grey,
               ),
             ),
           ),
           Icon(
             Icons.trending_up,
-            color: Colors.grey,
+            color: enabled ? Colors.blue : Colors.grey,
           ),
         ],
       ),
-      onPressed: () {},
-    );
+      onPressed: enabled ? _sortList : null,
+    );  
+  }
+
+  _sortList() {
+    setState(() {
+      isSortingByTop = !isSortingByTop;
+    });
+    preferences.updatePreference(Preferences.LOOKBOOK_SORT_BY_TOP, isSortingByTop);
+    _outfitBloc.loadLookbookOutfits.add(LoadOutfits(
+      userId: userId,
+      sortByTop: isSortingByTop,
+      lookbookId: lookbook.lookbookId,
+    ));
   }
 
   Widget _outfitsGrid(bool isLoading, List<Outfit> outfits) { 
@@ -267,6 +296,7 @@ class _LookbookScreenState extends State<LookbookScreen> {
       onRefresh: () async {
         _outfitBloc.loadMyOutfits.add(LoadOutfits(
           userId: userId,
+          sortByTop: isSortingByTop,
           lookbookId: lookbook.lookbookId,
           forceLoad: true,
         ));
@@ -274,6 +304,7 @@ class _LookbookScreenState extends State<LookbookScreen> {
       onReachEnd: () => _outfitBloc.loadLookbookOutfits.add(
         LoadOutfits(
           userId: userId,        
+          sortByTop: isSortingByTop,
           lookbookId: lookbook.lookbookId,
           startAfterOutfit: outfits.last
         )
