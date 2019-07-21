@@ -246,7 +246,7 @@ class _ExploreScreenState extends State<ExploreScreen> with SingleTickerProvider
             ),
           )
         ),
-        _fireButton(outfits, index),
+        _outfitInteractionButtons(outfits, index),
       ],
     );
                      
@@ -340,7 +340,7 @@ class _ExploreScreenState extends State<ExploreScreen> with SingleTickerProvider
     );
   }
 
-  Widget _fireButton(List<Outfit> outfits, int index) {
+  Widget _outfitInteractionButtons(List<Outfit> outfits, int index) {
     Outfit currentOutfit = outfits.length <= index ? null : outfits[index];
     bool hasOutfit =currentOutfit != null;
     bool hasRating =currentOutfit?.hasRating == true;
@@ -349,24 +349,70 @@ class _ExploreScreenState extends State<ExploreScreen> with SingleTickerProvider
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
-          RawMaterialButton(
-            fillColor: !hasOutfit ? Colors.grey : hasRating ? Colors.red[900] : Colors.lightBlue,
-            elevation: hasRating ? 0 : 2,
-            shape: CircleBorder(),
-            onPressed: currentOutfit == null ? null : () => _giveRating(currentOutfit),
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Image.asset(
-                'assets/flame_full.png',
-                width: 32,
-                height: 32,
-              ),
+          _actionButton(
+            icon: Icon(
+              Icons.comment,
+              size: 24,
+            ),
+            hasData: hasOutfit,
+            onPressed: () => _loadCommentsPage(currentOutfit),
+          ),
+          _actionButton(
+            icon: Image.asset(
+              'assets/firefit_logo.png',
+              width: 32,
+              height: 32,
+            ),
+            hasData: hasOutfit,
+            selected: hasRating,
+            unselectedColor: Colors.blue,
+            hideBorder: true,
+            iconPadding: 8,
+            onPressed: () => _giveRating(currentOutfit),
+          ),
+          _actionButton(
+            icon: Icon(
+              Icons.playlist_add,
+              size: 24,
+            ),
+            hasData: hasOutfit,
+            onPressed: () => AddToLookbookDialog.launch(context, outfitSave: OutfitSave(
+                outfit: currentOutfit,
+                userId: userId,
+              )
             )
-          )
+          ),
         ],
       ),
+    );  
+  }
+
+  _loadCommentsPage(Outfit outfit) {
+    CustomNavigator.goToCommentsScreen(context,
+      focusComment: false,
+      outfitId: outfit.outfitId,
+      isComingFromExploreScreen: true,
     );
   }
+
+
+  _actionButton({Widget icon, bool hasData = false, bool selected = false, double iconPadding = 4.0, Color unselectedColor = Colors.white, bool hideBorder = false, VoidCallback onPressed}){
+    return RawMaterialButton(
+      fillColor: !hasData ? Colors.grey : selected ? Colors.red : unselectedColor,
+      elevation: hasData ? 2 : 0,
+      shape: CircleBorder(
+        side: BorderSide(
+          color: Colors.grey.withOpacity(hideBorder ? 0.0 : 0.5),
+          width: 0.5
+        )
+      ),
+      onPressed: hasData ? onPressed : null,
+      child: Padding(
+        padding: EdgeInsets.all(iconPadding),
+        child: icon,
+      )
+    );
+  } 
 
   _giveRating(Outfit currentOutfit) {
     return showDialog(

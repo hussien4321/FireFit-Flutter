@@ -13,6 +13,7 @@ class CommentField extends StatefulWidget {
   final String userId;
   final int pagesSinceOutfitScreen;
   final int pagesSinceProfileScreen;
+  final bool isComingFromExploreScreen;
   final ValueChanged<Comment> onStartReplyTo;
 
   CommentField({
@@ -21,6 +22,7 @@ class CommentField extends StatefulWidget {
     this.userId,
     this.pagesSinceOutfitScreen = 0,
     this.pagesSinceProfileScreen = 0,
+    this.isComingFromExploreScreen = false,
     this.onStartReplyTo,
   });
 
@@ -69,6 +71,7 @@ class _CommentFieldState extends State<CommentField> {
                     url: comment.commenter.profilePicUrl,
                     pagesSinceOutfitScreen: widget.pagesSinceOutfitScreen,
                     pagesSinceProfileScreen: widget.pagesSinceProfileScreen,
+                    isComingFromExploreScreen: widget.isComingFromExploreScreen,
                   ),
                 ),
                 Expanded(

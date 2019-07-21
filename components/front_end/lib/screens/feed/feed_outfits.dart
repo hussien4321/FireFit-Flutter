@@ -126,7 +126,7 @@ class _FeedOutfitsState extends State<FeedOutfits> {
 
   Widget _buildOutfitCard(int index, Outfit outfit, BuildContext ctx, bool isFirst) {
     return Container(
-      margin: EdgeInsets.only(top: isFirst ? 32 : 0 , bottom: 32.0, left: 32, right: 32),
+      margin: EdgeInsets.only(top: isFirst ? 16 : 0 , bottom: 16.0, left: 32, right: 32),
       child: GestureDetector(
         onTap: () => _openDetailedOutfit(outfit, ctx),
         child: Card(

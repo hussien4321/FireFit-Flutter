@@ -22,11 +22,11 @@ class CarouselSliderWithIndicator extends StatefulWidget {
 class _CarouselSliderWithIndicatorState extends State<CarouselSliderWithIndicator> {
   int _current = 0;
 
-  final double ICON_SIZE = 6;
+  final double ICON_SIZE = 8;
   final double ICON_HORIZONTAL_MARGIN = 2;
   final double ICON_VERTICAL_MARGIN = 8;
   final Color SELECTED_ICON_COLOR = Colors.blue;
-  final Color UNSELECTED_ICON_COLOR = Colors.grey;
+  final Color UNSELECTED_ICON_COLOR = Colors.black;
 
   @override
   Widget build(BuildContext context) {
@@ -64,7 +64,7 @@ class _CarouselSliderWithIndicatorState extends State<CarouselSliderWithIndicato
                 margin: EdgeInsets.only(left: ICON_HORIZONTAL_MARGIN, right: ICON_HORIZONTAL_MARGIN, top: ICON_VERTICAL_MARGIN),
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: _current == index ? SELECTED_ICON_COLOR : UNSELECTED_ICON_COLOR
+                  color: indexes.length<=1 ? Colors.transparent: ( _current == index ? SELECTED_ICON_COLOR : UNSELECTED_ICON_COLOR)
                 )
               );
             }

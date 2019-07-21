@@ -14,6 +14,7 @@ class CommentsScreen extends StatefulWidget {
   final bool focusComment;
   final int pagesSinceOutfitScreen;
   final int pagesSinceProfileScreen;
+  final bool isComingFromExploreScreen;
   
   CommentsScreen({
     this.outfitId,
@@ -21,6 +22,7 @@ class CommentsScreen extends StatefulWidget {
     this.focusComment = false,
     this.pagesSinceOutfitScreen = 0,
     this.pagesSinceProfileScreen = 0,
+    this.isComingFromExploreScreen = false,
   });
 
   @override
@@ -322,6 +324,7 @@ class _CommentsScreenState extends State<CommentsScreen> {
                 url: outfit.poster.profilePicUrl,
                 pagesSinceOutfitScreen: widget.pagesSinceOutfitScreen,
                 pagesSinceProfileScreen: widget.pagesSinceProfileScreen,
+                isComingFromExploreScreen: widget.isComingFromExploreScreen,
               ),
             ),
             Expanded(
@@ -378,6 +381,7 @@ class _CommentsScreenState extends State<CommentsScreen> {
       outfitId: widget.outfitId,
       pagesSinceOutfitScreen: widget.pagesSinceOutfitScreen,
       pagesSinceProfileScreen: widget.pagesSinceProfileScreen,
+      isComingFromExploreScreen: widget.isComingFromExploreScreen,
     );
   }
   
@@ -398,6 +402,7 @@ class _CommentsScreenState extends State<CommentsScreen> {
       userId: userId,
       pagesSinceOutfitScreen: widget.pagesSinceOutfitScreen,
       pagesSinceProfileScreen: widget.pagesSinceProfileScreen,
+      isComingFromExploreScreen: widget.isComingFromExploreScreen,
       onStartReplyTo: _startReply,
     );
   }

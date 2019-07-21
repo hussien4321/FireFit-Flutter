@@ -234,69 +234,51 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
               },
               child: ListView(
                 children: <Widget>[
-                  Container(
-                    decoration: BoxDecoration(
-                      image: DecorationImage(
-                        image: CachedNetworkImageProvider(
-                          outfit.images.first
-                        ),
-                        fit: BoxFit.cover,
-                      ),
-                       boxShadow: []
-                    ),
-                    child: Stack(
-                      children: <Widget>[
-                        Positioned(
-                          top: 0,
-                          bottom: 0,
-                          left: 0,
-                          right: 0,
-                          child: BackdropFilter(
-                            filter: ImageFilter.blur(sigmaX: 7, sigmaY: 7),
-                            child: Container(
-                              color: Colors.white.withOpacity(0.5),
-                            ),
-                          ),
-                        ),
-                        Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: <Widget>[
-                            _outfitTitle(),    
-                            _buildOutfitImage(),
-                            _buildRatingsSummary(),
-                            _styleSummary(),
-                            Padding(padding: EdgeInsets.only(bottom: 8),),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                  Container(
-                    color: Colors.white,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: <Widget>[
-                            UserPreviewCard(
-                              outfit.poster,
-                              isPoster: true,
-                              pagesSinceOutfitScreen: widget.pagesSinceOutfitScreen+1,
-                              pagesSinceProfileScreen: widget.pagesSinceProfileScreen,
-                            ),
-                            _buildOutfitDescription(),
-                            _actionButtons(),
-                            _commentsPreview(),
-                          ],
-                        )
-                      ],
-                    ),
-                  ),
+                  _outfitMainDetails(),
+                  _outfitFurtherDetails(),
                 ],
               ),
             ),
+          ),
+          _actionButtons(),
+        ],
+      ),
+    );
+  }
+
+  Widget _outfitMainDetails() {
+    return Container(
+      decoration: BoxDecoration(
+        image: DecorationImage(
+          image: CachedNetworkImageProvider(
+            outfit.images.first
+          ),
+          fit: BoxFit.cover,
+        ),
+      ),
+      child: Stack(
+        children: <Widget>[
+          Positioned(
+            top: 0,
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 7, sigmaY: 7),
+              child: Container(
+                color: Colors.white.withOpacity(0.5),
+              ),
+            ),
+          ),
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              _outfitTitle(),    
+              _buildOutfitImage(),
+              _buildRatingsSummary(),
+              _commentsPreview(),
+              Padding(padding: EdgeInsets.only(bottom: 8),),
+            ],
           ),
         ],
       ),
@@ -305,12 +287,10 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
 
   Widget _outfitTitle() {
     return Padding(
-      padding: EdgeInsets.only(left: 64, right: 64, top: 12),
+      padding: EdgeInsets.only(left: 32, right: 32, top: 8),
       child: Text(
         outfit.title,
         style: Theme.of(context).textTheme.headline.copyWith(
-            fontWeight: FontWeight.w300,
-            fontStyle: FontStyle.italic,
             letterSpacing: 1.2,
         ),
         textAlign: TextAlign.center,
@@ -324,13 +304,13 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
       imageIndexes.add(i);
     }
     return Container(
-      padding: EdgeInsets.only(top: 16),
+      padding: EdgeInsets.only(top: 8),
       child: SizedBox(
-        height: 300.0,
+        height: 250.0,
         child: Container(
           child: CarouselSliderWithIndicator(
-            height: 300,
-            viewportFraction: 0.7,
+            height: 250,
+            viewportFraction: 0.6,
             enableInfiniteScroll: false,
             items: imageIndexes.map((index) => _loadImage(index)).toList(),
           ),
@@ -364,7 +344,7 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
   Widget _buildRatingsSummary(){
     return Container(
       width: double.infinity,
-      margin: EdgeInsets.symmetric(vertical: 8.0, horizontal: 8.0),
+      margin: EdgeInsets.only(left: 8, right: 8, top: 4),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: <Widget>[
@@ -386,7 +366,7 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
           ),
           Expanded(
             child: Text(
-              '${outfit.ratingsCount} rating${outfit.ratingsCount==1?'':'s'}',
+              '${outfit.ratingsCount} Rating${outfit.ratingsCount==1?'':'s'}',
               style: Theme.of(context).textTheme.subtitle.copyWith(
                 color: Colors.red[900],
               ),
@@ -396,29 +376,52 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
       ),
     );
   }
-
-  Widget _styleSummary() {
-    return RichText(
-      text: TextSpan(
-        children: [
-          TextSpan(
-            text: outfit.style
+  
+  Widget _outfitFurtherDetails() {
+    return Container(
+      color: Colors.white,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          UserPreviewCard(
+            outfit.poster,
+            isPoster: true,
+            pagesSinceOutfitScreen: widget.pagesSinceOutfitScreen+1,
+            pagesSinceProfileScreen: widget.pagesSinceProfileScreen,
           ),
-          TextSpan(
-            text: ' - '
+          _styleSummary(),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8.0),
+            child: _buildOutfitDescription(),
           ),
-          TextSpan(
-            text: DateFormatter.dateToSimpleFormat(outfit.createdAt)
-          )
         ],
-        style: Theme.of(context).textTheme.subtitle.copyWith(
-          fontStyle: FontStyle.italic,
-          color: Colors.black45
-        ),
-      ),
+      )
     );
   }
   
+  Widget _styleSummary() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: <Widget>[
+          Text(
+            outfit.style,
+            style: Theme.of(context).textTheme.subtitle.copyWith(
+              color: Colors.black45
+            )
+          ),
+          Text(
+            DateFormatter.dateToSimpleFormat(outfit.createdAt),
+            style: Theme.of(context).textTheme.subtitle.copyWith(
+              color: Colors.black45
+            )
+          ),
+        ],
+      ),
+    );
+  }
   Widget _buildOutfitDescription() {
     if(outfit.description == null){
       return Center(
@@ -426,9 +429,9 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
           padding: EdgeInsets.symmetric(horizontal: 16.0),
           child: Text(
             "No description has been added",
-            style: TextStyle(
-              color: Colors.grey,
-              fontStyle: FontStyle.italic
+            style: Theme.of(context).textTheme.subhead.copyWith(
+              color: Colors.black,
+              fontWeight: FontWeight.w300
             ),
           ),
         ),
@@ -443,23 +446,24 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
           Padding(
             padding: EdgeInsets.only(left: 8.0, bottom: 4.0),
             child: Text(
-              "Description:",
-              style: TextStyle(
-                color: Colors.grey,
-                fontStyle: FontStyle.italic
+              "Description",
+              style: Theme.of(context).textTheme.headline.copyWith(
+                color: Colors.black,
+                fontWeight: FontWeight.w300
               ),
             ),
           ),
           Container(
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20.0),
+              borderRadius: BorderRadius.circular(8.0),
               color: Colors.grey[350]
             ),
             width: double.infinity,
-            margin: EdgeInsets.only(bottom: 16.0),
             padding: EdgeInsets.all(8.0),
             child: Text(
               outfit.description,
+              style: Theme.of(context).textTheme.body1.copyWith(
+              ),
             ),
           ),
         ],
@@ -472,34 +476,42 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
       outfit: outfit,
       userId: userId,
     );
-    return Padding(
-      padding: EdgeInsets.symmetric(vertical: 8),
-      child: Row(
-        mainAxisSize: MainAxisSize.max,
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: <Widget>[
-          _actionButton(
-            icon: Icons.add_comment,
-            text: 'Commment',
-            onPressed: () => _loadCommentsPage(
-              focusComment: true,
-            ),
+    return Row(
+      mainAxisSize: MainAxisSize.max,
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: <Widget>[
+        _actionButton(
+          icon: Icon(
+            Icons.add_comment,
+            size: 24,
           ),
-          _actionButton(
-            icon: FontAwesomeIcons.fireAlt,
-            selectedIcon: FontAwesomeIcons.fire,
-            text: 'Rate',
-            selected: outfit.hasRating,
-            onPressed: () => _rateOutfit(),
+          text: 'Commment',
+          onPressed: () => _loadCommentsPage(
+            focusComment: true,
           ),
-          _actionButton(
-            icon: Icons.playlist_add,
-            text: 'Add to\nLookbook',
-            selectedIcon: Icons.star,
-            onPressed: () => AddToLookbookDialog.launch(context, outfitSave: saveData)
+        ),
+        _actionButton(
+          icon: Image.asset(
+            'assets/firefit_logo.png',
+            width: 24,
+            height: 24,
           ),
-        ],
-      ),
+          text: 'Rate',
+          unselectedColor: Colors.blue,
+          selected: outfit.hasRating,
+          iconPadding: 8,
+          onPressed: () => _rateOutfit(),
+        ),
+        _actionButton(
+          icon: Icon(
+            Icons.playlist_add,
+            size: 24,
+          ),
+          isEnd: true,
+          text: 'Add to',
+          onPressed: () => AddToLookbookDialog.launch(context, outfitSave: saveData)
+        ),
+      ],
     );
   }
 
@@ -523,18 +535,18 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
     );
   }
 
-  Widget _actionButton({IconData icon, String text, bool selected = false, IconData selectedIcon, VoidCallback onPressed, bool isEnd = false}){
+  Widget _actionButton({Widget icon, String text, Color unselectedColor = Colors.white, double iconPadding = 4.0, bool selected = false, VoidCallback onPressed, bool isEnd = false}){
     return Expanded(
       child: Material(
-        color: Colors.white,
+        color: Colors.black,
         child: InkWell(
           onTap: onPressed,
           child: Container(
-            padding: EdgeInsets.symmetric(vertical: 8),
+            padding: EdgeInsets.symmetric(vertical: 4),
             decoration: isEnd ? null :BoxDecoration(
               border: BorderDirectional(
                 end: BorderSide(
-                  color: Colors.grey[300],
+                  color: Colors.white,
                   width: 0.5
                 ),
               ),
@@ -542,29 +554,21 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 2.0),
-                  child: Material(
-                    elevation: selected ? 0 : 1,
-                    shape: CircleBorder(
-                      side: BorderSide(
-                        color: Colors.black,
-                        width: 0.5
-                      )                    
-                    ),
-                    color: selected? Colors.black : Colors.white,
-                    child: Container(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Icon(
-                        selected ? selectedIcon : icon,
-                        color: selected ? Colors.white : Colors.black
-                      )
-                    ),
-                  ),
+                RawMaterialButton(
+                  fillColor: selected ? Colors.red : unselectedColor,
+                  elevation: 2,
+                  shape: CircleBorder(),
+                  onPressed: onPressed,
+                  child: Padding(
+                    padding: EdgeInsets.all(iconPadding),
+                    child: icon,
+                  )
                 ),
                 Text(
                   '$text${selected? 'd':''}', 
-                  style: Theme.of(context).textTheme.caption,
+                  style: Theme.of(context).textTheme.caption.copyWith(
+                    color: selected? Colors.red : unselectedColor
+                  ),
                   textAlign: TextAlign.center,
                 ),
               ],
@@ -576,19 +580,23 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
   }
 
   Widget _commentsPreview(){
-    return Padding(
-      padding: EdgeInsets.only(left: 8, bottom: 8),
-      child: Material(
-        color: Colors.white,
-        child: InkWell(
-          onTap: () => _loadCommentsPage(),
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 8, vertical: 16),
-            child: Text(
-              'View all ${outfit.commentsCount} comment${outfit.commentsCount==1?'':'s'}',
-              style: Theme.of(context).textTheme.subtitle.copyWith(
-                color: Colors.black
-              ),
+    String text = '0 Comments';
+    if(outfit.commentsCount==1){
+      text = 'View 1 Comment';
+    }
+    else if(outfit.commentsCount>1){
+      text = 'View all ${outfit.commentsCount} Comments';
+    }
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () => _loadCommentsPage(),
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+          child: Text(
+            text,
+            style: Theme.of(context).textTheme.subtitle.copyWith(
+              color: Colors.blue[900]
             ),
           ),
         ),

@@ -11,6 +11,7 @@ class ProfilePicWithShadow extends StatelessWidget {
   final heroTag;
   final int pagesSinceOutfitScreen;
   final int pagesSinceProfileScreen;
+  final bool isComingFromExploreScreen;
   
   ProfilePicWithShadow({
     this.url, 
@@ -21,6 +22,7 @@ class ProfilePicWithShadow extends StatelessWidget {
     this.heroTag,
     this.pagesSinceOutfitScreen = 0,
     this.pagesSinceProfileScreen = 0,
+    this.isComingFromExploreScreen = false,
   });
   
   @override
@@ -60,7 +62,8 @@ class ProfilePicWithShadow extends StatelessWidget {
       userId: userId,
       heroTag: heroTag,
       pagesSinceOutfitScreen: pagesSinceOutfitScreen,
-      pagesSinceProfileScreen: pagesSinceProfileScreen
+      pagesSinceProfileScreen: pagesSinceProfileScreen,
+      isComingFromExploreScreen: isComingFromExploreScreen,
     );
   }
 }

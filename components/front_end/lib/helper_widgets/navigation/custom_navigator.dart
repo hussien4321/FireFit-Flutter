@@ -16,6 +16,7 @@ class CustomNavigator {
     String heroTag,
     int pagesSinceOutfitScreen = 0, 
     int pagesSinceProfileScreen = 0,
+    bool isComingFromExploreScreen = false, 
   }) {
     pagesSinceProfileScreen += pagesSinceProfileScreen>0 ? 1 : 0;
     // print('goToProfileScreen pagesSinceProfileScreen:$pagesSinceProfileScreen pagesSinceOutfitScreen:$pagesSinceOutfitScreen');
@@ -41,7 +42,7 @@ class CustomNavigator {
         )
       ),
       (Route<dynamic> route) {
-        bool removePrevious = numberOfPagesToRemove>0;
+        bool removePrevious = numberOfPagesToRemove>0 || isComingFromExploreScreen;
         numberOfPagesToRemove--;
         bool isFirst = route.isFirst;
         return !removePrevious || isFirst; 
@@ -53,7 +54,8 @@ class CustomNavigator {
     int outfitId, 
     bool loadOutfit = false, 
     int pagesSinceOutfitScreen = 0, 
-    int pagesSinceProfileScreen = 0, 
+    int pagesSinceProfileScreen = 0,
+    bool isComingFromExploreScreen = false, 
   }) {
     pagesSinceOutfitScreen += pagesSinceOutfitScreen>0 ? 1 : 0;
     // print('goToOutfitDetailsScreen pagesSinceProfileScreen:$pagesSinceProfileScreen pagesSinceOutfitScreen:$pagesSinceOutfitScreen');
@@ -79,7 +81,7 @@ class CustomNavigator {
         )
       ),
       (Route<dynamic> route) {
-        bool removePrevious = numberOfPagesToRemove>0;
+        bool removePrevious = numberOfPagesToRemove>0 || isComingFromExploreScreen;
         numberOfPagesToRemove--;
         bool isFirst = route.isFirst;
         return !removePrevious || isFirst; 
@@ -153,6 +155,7 @@ class CustomNavigator {
   static Future<T> goToCommentsScreen<T extends Object>(BuildContext context, {int outfitId, bool focusComment = false, bool loadOutfit = false, 
     int pagesSinceOutfitScreen = 0, 
     int pagesSinceProfileScreen = 0,
+    bool isComingFromExploreScreen = false,
   }) {
     pagesSinceProfileScreen += pagesSinceProfileScreen>0 ? 1 :0;
     // print('goToCommentsScreen pagesSinceProfileScreen:$pagesSinceProfileScreen pagesSinceOutfitScreen:$pagesSinceOutfitScreen');
@@ -163,6 +166,7 @@ class CustomNavigator {
         loadOutfit: loadOutfit,
         pagesSinceOutfitScreen: pagesSinceOutfitScreen,
         pagesSinceProfileScreen: pagesSinceProfileScreen,
+        isComingFromExploreScreen: isComingFromExploreScreen,
       ),
       settings: RouteSettings(
         name: '/comments'

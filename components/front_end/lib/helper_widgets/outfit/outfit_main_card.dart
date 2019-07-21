@@ -76,6 +76,7 @@ class OutfitMainCard extends StatelessWidget {
                     outfit.title,
                     style: Theme.of(context).textTheme.subhead.copyWith(
                       color: Colors.white,
+                      fontWeight: FontWeight.bold
                     ),
                     textAlign: TextAlign.start,
                     softWrap: true,
