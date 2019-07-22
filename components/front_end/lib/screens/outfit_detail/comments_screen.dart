@@ -46,6 +46,8 @@ class _CommentsScreenState extends State<CommentsScreen> {
 
   ScrollController _controller;
 
+  int showingRepliesForId;
+
   @override
   void initState() {
     super.initState();
@@ -76,7 +78,7 @@ class _CommentsScreenState extends State<CommentsScreen> {
       body: Container(
         child: StreamBuilder<bool>(
           stream: _outfitBloc.isLoading,
-          initialData: true,
+          initialData: false,
           builder: (context, loadingSnap) => StreamBuilder<Outfit>(
             stream: _outfitBloc.selectedOutfit,
             builder: (context, outfitSnap) {
@@ -101,7 +103,9 @@ class _CommentsScreenState extends State<CommentsScreen> {
                             _commentBloc.loadComments.add(LoadComments(
                               userId: userId,
                               outfitId: widget.outfitId,
+                              forceLoad: true,
                             ));
+                            showingRepliesForId = null;
                           },
                           child: ListView(
                             padding: EdgeInsets.all(0),
@@ -404,6 +408,14 @@ class _CommentsScreenState extends State<CommentsScreen> {
       pagesSinceProfileScreen: widget.pagesSinceProfileScreen,
       isComingFromExploreScreen: widget.isComingFromExploreScreen,
       onStartReplyTo: _startReply,
+      isShowingReplies: comment.commentId == showingRepliesForId,
+      onUpdateReplies: (showingReplies) {
+        if(showingReplies){
+          setState(() => showingRepliesForId = comment.commentId);
+        }else{
+          setState(() => showingRepliesForId = null);
+        }
+      }
     );
   }
 

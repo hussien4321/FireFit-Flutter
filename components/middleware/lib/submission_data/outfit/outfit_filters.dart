@@ -56,7 +56,7 @@ class OutfitFilters {
     this.countryCode,
   });
 
-  bool get isEmpty => startDate==null && endDate == null && genderIsMale == null && style == null && countryCode == null;
+  bool get isEmpty => startDate==null && endDate == null && dateRange ==null && genderIsMale == null && style == null && countryCode == null;
 
   bool operator ==(o) {
     return o is OutfitFilters &&

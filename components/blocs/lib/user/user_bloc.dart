@@ -1,10 +1,12 @@
 import 'dart:async';
 import 'package:rxdart/rxdart.dart';
 import 'package:middleware/middleware.dart';
+import 'package:blocs/blocs.dart';
 
 class UserBloc {
   final UserRepository _repository;
   final OutfitRepository _outfitRepository;
+  final Preferences _preferences;
 
   List<StreamSubscription<dynamic>> _subscriptions;
 
@@ -83,7 +85,7 @@ class UserBloc {
   Sink<FollowUser> get followUser => _followUserController;
 
 
-  UserBloc(this._repository, this._outfitRepository) {
+  UserBloc(this._repository, this._outfitRepository, this._preferences) {
     _subscriptions = <StreamSubscription<dynamic>>[
       _logInController.listen(_logInUser),
       _registerController.listen(_registerUser),
@@ -107,7 +109,7 @@ class UserBloc {
     _followersController.addStream(_repository.getUsers(SearchModes.FOLLOWERS));
     _followingController.addStream(_repository.getUsers(SearchModes.FOLLOWING));
     _accountStatusController = Observable.combineLatest3<String, User, bool, UserAccountStatus>(existingAuthId, _currentUserController, _loadingController, _redirectPath).asBroadcastStream().debounce(Duration(milliseconds: 300));
-    _resetCurrentUserStatus();
+    _resetCurrentUserStatus(isFirstTimeLoad: true);
   }
 
   UserAccountStatus _redirectPath(String authId, User currentUser, bool isLoading){
@@ -125,10 +127,13 @@ class UserBloc {
     }
   }
 
-  _resetCurrentUserStatus() async {
+  _resetCurrentUserStatus({bool isFirstTimeLoad = false}) async {
       String userId = await _repository.existingAuthId();
       _existingAuthController.add(userId);
       await _loadCurrentUser();
+      if(isFirstTimeLoad && userId!=null){
+        await _loadStartupStreams();
+      }
   }
 
   _logInUser(LogInForm logInForm) async {
@@ -138,22 +143,55 @@ class UserBloc {
     if(success){
       await _resetCurrentUserStatus();
       await _loadFirstTimeStreams();
+      await _loadStartupStreams();
       _successController.add(true);
     }else{
-      _errorController.add('Failed to log in');
+      _errorController.add("Failed to log in");
     }
   } 
 
   _loadFirstTimeStreams() async {
     await _outfitRepository.clearLookbooks();
+    bool sortBySize = await _preferences.getPreference(Preferences.LOOKBOOKS_SORT_BY_SIZE);
     _outfitRepository.loadLookbooks(LoadLookbooks(
       userId: _currentUserId,
+      sortBySize: sortBySize,
     ));
     searchModesToNOTClearEachTime.forEach((searchMode) async {
       await _outfitRepository.clearOutfits(searchMode);
+      bool sortByTop = await getSortByTop(searchMode);
       _outfitRepository.loadOutfits(LoadOutfits(
         userId: _currentUserId,
         searchMode: searchMode,
+        sortByTop: sortByTop,
+      ));
+    });
+  }
+
+  Future<dynamic> getSortByTop(SearchModes searchMode) async {
+    switch (searchMode) {
+      case SearchModes.MINE:
+        return _preferences.getPreference(Preferences.WARDROBE_SORT_BY_TOP);
+      case SearchModes.EXPLORE:
+        return _preferences.getPreference(Preferences.EXPLORE_PAGE_SORT_BY_TOP);
+      default:
+        return false;
+    }
+  }
+
+  _loadStartupStreams() async {
+    searchModesToClearOnStart.forEach((searchMode) async {
+      await _outfitRepository.clearOutfits(searchMode);
+      bool sortByTop = await getSortByTop(searchMode);
+      OutfitFilters filters =OutfitFilters();
+      if(searchMode ==SearchModes.EXPLORE){
+        filters = OutfitFilters.fromMap(await _preferences.getPreference(Preferences.EXPLORE_PAGE_FILTERS));
+      }
+      _outfitRepository.loadOutfits(LoadOutfits(
+        userId: _currentUserId,
+        searchMode: searchMode,
+        sortByTop: sortByTop,
+        filters: filters,
       ));
     });
   }
@@ -173,6 +211,7 @@ class UserBloc {
   _logOutUser([_]) async {
       _existingAuthController.add(null);
       await _repository.logOut();
+      _preferences.resetPreferences();
       _successMessageController.add("Sign out successful!");
   }
 
@@ -207,6 +246,7 @@ class UserBloc {
     _loadingController.add(false);
     if(success){
       await _loadFirstTimeStreams();
+      await _loadStartupStreams();
       _successController.add(true);
     }else{
       _errorController.add('Failed to create, this might be because the username has now been taken.');

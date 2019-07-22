@@ -39,7 +39,7 @@ class _FeedScreenState extends State<FeedScreen> {
               return FeedOutfits(
                 isLoading: isLoadingSnap.data,
                 outfits: outfitsSnap.data,
-                onRefresh: () {
+                onRefresh: () async {
                   _outfitBloc.loadFeedOutfits.add(LoadOutfits(
                     userId: userId,
                     forceLoad: true,
@@ -63,9 +63,9 @@ class _FeedScreenState extends State<FeedScreen> {
     if(_outfitBloc==null){
       _outfitBloc = OutfitBlocProvider.of(context);
       userId = await UserBlocProvider.of(context).existingAuthId.first;
-      _outfitBloc.loadFeedOutfits.add(LoadOutfits(
-        userId: userId
-      ));
+      // _outfitBloc.loadFeedOutfits.add(LoadOutfits(
+      //   userId: userId
+      // ));
     }
   }
 }

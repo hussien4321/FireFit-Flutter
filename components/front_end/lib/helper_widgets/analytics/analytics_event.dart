@@ -27,17 +27,36 @@ class AnalyticsEvents {
 
   //Navigation
   logCustomScreen(String path) => _analytics.setCurrentScreen(screenName: path);
-  outfitViewed(Outfit outfit) => _analytics.logViewItem(
-    itemId: outfit.outfitId.toString(), 
-    itemCategory: 'outfit', 
-    itemName: outfit.title
+  outfitViewed(Outfit outfit) => _analytics.logEvent(
+    name:'outfit_viewed',
+    parameters: {
+      'itemId': outfit.outfitId.toString(), 
+      'itemName': outfit.title
+    },
   );
-  profileViewed(User user) => _analytics.logViewItem(
-    itemId: user.userId, 
-    itemCategory: 'user',
-    itemName: user.username
+  profileViewed(User user) => _analytics.logEvent(
+    name: 'profile_viewed',
+    parameters: {
+      'itemId': user.userId, 
+      'itemName': user.username
+    },
   );
 
   //Outfit
   outfitUploaded() => _analytics.logEvent(name: "outfit_uploaded");
+
+
+  //Exception
+  catchException({
+    String code,
+    String message,
+    dynamic details
+  }) => _analytics.logEvent(
+    name: "app_exception",
+    parameters: {
+      "code" : code,
+      "message":message,
+      "details":details
+    }
+  );
 }

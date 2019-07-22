@@ -5,7 +5,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:front_end/helper_widgets.dart';
 import 'package:front_end/providers.dart';
 import 'package:front_end/screens.dart';
-import 'package:front_end/services.dart';
+import 'package:helpers/helpers.dart';
 
 
 enum UserOption { EDIT, REPORT }

@@ -7,7 +7,7 @@ import 'package:front_end/screens.dart';
 import 'package:blocs/blocs.dart';
 import 'package:front_end/providers.dart';
 import 'dart:async';
-import 'package:front_end/services.dart';
+import 'package:helpers/helpers.dart';
 import 'package:flutter/services.dart';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';

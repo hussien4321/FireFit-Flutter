@@ -4,7 +4,7 @@
 
 import 'package:front_end/main.dart' as app;
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:front_end/services.dart';
+import 'package:blocs/blocs.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -12,10 +12,16 @@ import 'package:repository_impl/repository_impl.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:streamqflite/streamqflite.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:flutter/foundation.dart';
 
 void main() async {
-  
-  new Preferences();
+  Crashlytics crashlytics = Crashlytics.instance;
+  FlutterError.onError = (FlutterErrorDetails details) {
+    crashlytics.onError(details);
+  };
+
+  Preferences preferences = new Preferences();
   CloudFunctions functions = CloudFunctions.instance;
   FirebaseStorage storage = FirebaseStorage.instance;
   FirebaseImageUploader imageUploader = FirebaseImageUploader(
@@ -30,10 +36,12 @@ void main() async {
     streamDatabase: streamDatabase,
     userCache: userCache,
   );
+  FirebaseAnalytics analytics = FirebaseAnalytics();
   FirebaseOutfitRepository outfitRepository = FirebaseOutfitRepository(
     cloudFunctions: functions,
     imageUploader: imageUploader,
     cache: outfitCache,
+    analytics: analytics,
   );
   FirebaseUserRepository userRepository= FirebaseUserRepository(
     auth: auth,
@@ -42,14 +50,15 @@ void main() async {
     cloudFunctions: functions,
     imageUploader: imageUploader,
     messaging: messaging,
+    analytics: analytics,
   );
-  FirebaseAnalytics analytics = FirebaseAnalytics();
   
 
   app.main(
     outfitRepository: outfitRepository,
     userRepository: userRepository,
     messaging: messaging,
-    analytics: analytics
+    analytics: analytics,
+    preferences: preferences,
   );
 }

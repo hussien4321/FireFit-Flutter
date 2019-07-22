@@ -8,6 +8,10 @@ List<SearchModes> searchModesToNOTClearEachTime = [
   SearchModes.MINE,
   SearchModes.NOTIFICATIONS,
 ];
+List<SearchModes> searchModesToClearOnStart = [
+  SearchModes.EXPLORE,
+  SearchModes.FEED,
+];
 
 String searchModeToString(SearchModes searchMode){
   switch (searchMode) {
@@ -61,14 +65,14 @@ class LoadOutfits {
     }
   }
 
-  bool operator ==(o) {
-    return o is LoadOutfits &&
-    o.userId == userId &&
-    o.startAfterOutfit == startAfterOutfit &&
-    !o.forceLoad &&
-    o.lookbookId == lookbookId&&
-    o.filters == filters &&
-    o.sortByTop == sortByTop;
+  bool operator ==(newData) {
+    return newData is LoadOutfits &&
+    newData.userId == userId &&
+    newData.startAfterOutfit == startAfterOutfit &&
+    !newData.forceLoad &&
+    newData.lookbookId == lookbookId&&
+    newData.filters == filters &&
+    newData.sortByTop == sortByTop;
   }
 
   Map<String, dynamic> toJson() => {

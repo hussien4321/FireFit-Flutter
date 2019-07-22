@@ -11,7 +11,7 @@ import 'package:rxdart/rxdart.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:overlay_support/overlay_support.dart';
 import 'package:overlay_support/src/notification/overlay_notification.dart';
-import 'package:front_end/services.dart';
+import 'package:helpers/helpers.dart';
 
 class MainAppBar extends StatefulWidget {
 
@@ -106,7 +106,8 @@ class _MainAppBarState extends State<MainAppBar> {
       _subscriptions = <StreamSubscription<dynamic>>[
         _logInStatusListener(),
       ]..addAll(_successToastListeners())
-      ..addAll(_uploadImagesListeners());
+      ..addAll(_uploadImagesListeners())
+      ..addAll(_errorListeners());
       _userBloc.loadCurrentUser.add(null);
       _userBloc.refreshVerificationEmail.add(null);
       userId = await _userBloc.existingAuthId.first;
@@ -134,6 +135,19 @@ class _MainAppBarState extends State<MainAppBar> {
         Navigator.pushReplacementNamed(context, RouteConverters.getFromAccountStatus(accountStatus));
       }
     });
+  }
+
+  
+  List<StreamSubscription> _errorListeners() => [ 
+    _userBloc.hasError.listen((message) => _errorDialog(message)),
+    _outfitBloc.hasError.listen((message) => _errorDialog(message)),
+  ];
+
+  _errorDialog(String message){
+    ErrorDialog.launch(
+      context,
+      message: message,
+    );
   }
 
   List<StreamSubscription> _successToastListeners() => [

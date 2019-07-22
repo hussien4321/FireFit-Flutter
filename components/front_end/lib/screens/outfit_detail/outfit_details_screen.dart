@@ -476,42 +476,54 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
       outfit: outfit,
       userId: userId,
     );
-    return Row(
-      mainAxisSize: MainAxisSize.max,
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: <Widget>[
-        _actionButton(
-          icon: Icon(
-            Icons.add_comment,
-            size: 24,
+    return Container(
+      decoration: BoxDecoration(
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black54,
+            blurRadius: 2
+          )
+        ]
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.max,
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: <Widget>[
+          _actionButton(
+            icon: Icon(
+              Icons.add_comment,
+              size: 24,
+            ),
+            text: 'Comment',
+            onPressed: () => _loadCommentsPage(
+              focusComment: true,
+            ),
           ),
-          text: 'Commment',
-          onPressed: () => _loadCommentsPage(
-            focusComment: true,
+          _actionButton(
+            icon: Image.asset(
+              'assets/firefit_logo.png',
+              width: 24,
+              height: 24,
+            ),
+            text: 'Rate',
+            unselectedColor: Colors.blue,
+            unselectedBackgroundColor: Colors.blue,
+            selected: outfit.hasRating,
+            iconPadding: 8,
+            hideBorder: true,
+            onPressed: () => _rateOutfit(),
           ),
-        ),
-        _actionButton(
-          icon: Image.asset(
-            'assets/firefit_logo.png',
-            width: 24,
-            height: 24,
+          _actionButton(
+            icon: Icon(
+              Icons.playlist_add,
+              size: 24,
+            ),
+            isEnd: true,
+            text: 'Add to',
+            onPressed: () => AddToLookbookDialog.launch(context, outfitSave: saveData)
           ),
-          text: 'Rate',
-          unselectedColor: Colors.blue,
-          selected: outfit.hasRating,
-          iconPadding: 8,
-          onPressed: () => _rateOutfit(),
-        ),
-        _actionButton(
-          icon: Icon(
-            Icons.playlist_add,
-            size: 24,
-          ),
-          isEnd: true,
-          text: 'Add to',
-          onPressed: () => AddToLookbookDialog.launch(context, outfitSave: saveData)
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -535,10 +547,10 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
     );
   }
 
-  Widget _actionButton({Widget icon, String text, Color unselectedColor = Colors.white, double iconPadding = 4.0, bool selected = false, VoidCallback onPressed, bool isEnd = false}){
+  Widget _actionButton({Widget icon, String text, Color unselectedColor = Colors.black, Color unselectedBackgroundColor = Colors.white,  double iconPadding = 4.0, bool selected = false, VoidCallback onPressed, bool isEnd = false, bool hideBorder = false}){
     return Expanded(
       child: Material(
-        color: Colors.black,
+        color: Colors.white,
         child: InkWell(
           onTap: onPressed,
           child: Container(
@@ -546,7 +558,7 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
             decoration: isEnd ? null :BoxDecoration(
               border: BorderDirectional(
                 end: BorderSide(
-                  color: Colors.white,
+                  color: Colors.black,
                   width: 0.5
                 ),
               ),
@@ -555,9 +567,14 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
                 RawMaterialButton(
-                  fillColor: selected ? Colors.red : unselectedColor,
+                  fillColor: selected ? Colors.red : unselectedBackgroundColor,
                   elevation: 2,
-                  shape: CircleBorder(),
+                  shape: CircleBorder(
+                    side: BorderSide(
+                      color: Colors.grey.withOpacity(hideBorder ? 0.0 : 0.5),
+                      width: 0.5
+                    )
+                  ),
                   onPressed: onPressed,
                   child: Padding(
                     padding: EdgeInsets.all(iconPadding),

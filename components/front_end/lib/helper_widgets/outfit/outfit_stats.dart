@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:middleware/middleware.dart';
-import 'package:front_end/helper_widgets.dart';
-import 'package:helpers/helpers.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class OutfitStats extends StatelessWidget {
 

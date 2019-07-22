@@ -15,6 +15,8 @@ class CommentField extends StatefulWidget {
   final int pagesSinceProfileScreen;
   final bool isComingFromExploreScreen;
   final ValueChanged<Comment> onStartReplyTo;
+  final bool isShowingReplies;
+  final ValueChanged<bool> onUpdateReplies;
 
   CommentField({
     this.comment, 
@@ -24,6 +26,8 @@ class CommentField extends StatefulWidget {
     this.pagesSinceProfileScreen = 0,
     this.isComingFromExploreScreen = false,
     this.onStartReplyTo,
+    this.isShowingReplies = false,
+    this.onUpdateReplies,
   });
 
   @override
@@ -34,7 +38,11 @@ class _CommentFieldState extends State<CommentField> {
 
   CommentBloc _commentBloc;
 
-  bool isShowingReplies = false;
+
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +50,7 @@ class _CommentFieldState extends State<CommentField> {
     return Column(
       children: <Widget>[
         _originalComment(widget.comment),
-        isShowingReplies ? _replies() : Container(),
+        widget.isShowingReplies ? _replies() : Container(),
       ],
     );
   }
@@ -225,7 +233,7 @@ class _CommentFieldState extends State<CommentField> {
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
                 Text(
-                  isShowingReplies ? 'Hide replies' : 'Show ${comment.repliesCount} Repl${comment.repliesCount==1?'y':'ies'}',
+                  widget.isShowingReplies ? 'Hide replies' : 'Show ${comment.repliesCount} Repl${comment.repliesCount==1?'y':'ies'}',
                   style: TextStyle(
                     fontSize: 12,
                     color: Colors.black,
@@ -233,7 +241,7 @@ class _CommentFieldState extends State<CommentField> {
                   ),
                 ),
                 Icon(
-                  isShowingReplies ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
+                  widget.isShowingReplies ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
                   size: 18,
                 )
               ],
@@ -245,8 +253,8 @@ class _CommentFieldState extends State<CommentField> {
   }
 
   _toggleReplies() {
-    setState(() => isShowingReplies = !isShowingReplies);
-    if(isShowingReplies){
+    widget.onUpdateReplies(!widget.isShowingReplies);
+    if(!widget.isShowingReplies){
       _commentBloc.loadReplies.add(LoadComments(
         outfitId: widget.outfitId,
         userId: widget.userId,
@@ -256,13 +264,13 @@ class _CommentFieldState extends State<CommentField> {
   }
 
   Widget _replies() {
-    return StreamBuilder<bool>(
-      stream: _commentBloc.isLoadingReply,
-      initialData: false,
-      builder: (ctx, isLoadingSnap) => StreamBuilder<List<Comment>>(
-        stream: _commentBloc.comments,
-        initialData: [],
-        builder: (ctx, commentsSnap) {
+    return StreamBuilder<List<Comment>>(
+      stream: _commentBloc.comments,
+      initialData: [],
+      builder: (ctx, commentsSnap) => StreamBuilder<bool>(
+        stream: _commentBloc.isLoadingReply,
+        initialData: false,
+        builder: (ctx, isLoadingSnap) {
           List<Comment> replies = new List<Comment>.from(commentsSnap.data);
           replies.removeWhere((comment) => comment.replyTo != widget.comment.commentId);
           replies.sort((commentA, commentB) => commentA.uploadDate.compareTo(commentB.uploadDate));

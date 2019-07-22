@@ -6,8 +6,10 @@ import 'package:repository_impl/repository_impl.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:middleware/middleware.dart';
 import 'package:helpers/helpers.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:path/path.dart';
 import 'package:meta/meta.dart';
+import 'package:repository_impl/exception_handler.dart';
 
 class FirebaseUserRepository implements UserRepository {
   static const String dbPath = 'users';
@@ -19,6 +21,7 @@ class FirebaseUserRepository implements UserRepository {
   final CachedOutfitRepository outfitCache;
   final CachedUserRepository userCache;
   final FirebaseMessaging messaging;
+  final FirebaseAnalytics analytics;
 
 
   FirebaseUserRepository({
@@ -28,6 +31,7 @@ class FirebaseUserRepository implements UserRepository {
     @required this.outfitCache,
     @required this.userCache,
     @required this.messaging,
+    @required this.analytics,
   });
 
   Future<String> existingAuthId() async {
@@ -48,20 +52,16 @@ class FirebaseUserRepository implements UserRepository {
     }
     return specificAuthInstance.register(fields: logInData.fields) 
       .then((user) => true)
-      .catchError((e) => false);
+      .catchError((exception) => catchExceptionWithBool(exception, analytics));
   }
   
   Future<bool> logIn(LogInForm logInData) {
     AuthInstance specificAuthInstance = _getSpecificAuthInstance(logInData.method);
     return specificAuthInstance.signIn(fields: logInData.fields) 
       .then((user) async {
-        await _loadCurrentUser(user);
-        return true;
+        return _loadCurrentUser(user);
       })
-      .catchError((err) {
-        print('catchError :$err');
-        return false;
-      });
+      .catchError((exception) => catchExceptionWithBool(exception, analytics));
   }
 
   AuthInstance _getSpecificAuthInstance(LogInMethod method) {
@@ -89,11 +89,7 @@ class FirebaseUserRepository implements UserRepository {
 
       return _checkImageUploaded(userId);
     })
-    .catchError((err) {
-      print('failed creation!');
-      print(err.message);
-      return false;
-    });
+    .catchError((exception) => catchExceptionWithBool(exception, analytics));
   }
 
   _generateFileName(String imagePath, String userId){
@@ -135,9 +131,7 @@ class FirebaseUserRepository implements UserRepository {
       await userCache.addUser(user, loadUser.searchMode);
       return true;
     })
-    .catchError((err) {
-      return false;
-    });
+    .catchError((exception) => catchExceptionWithBool(exception, analytics));
   }
 
   Future<bool> _loadCurrentUser(FirebaseUser user) {
@@ -170,9 +164,7 @@ class FirebaseUserRepository implements UserRepository {
       }
       return userList.first;
     })
-    .catchError((err) {
-      return null;
-    });
+    .catchError((exception) => null);
   }
 
   Future<bool> editUser(EditUser editUser) {
@@ -191,7 +183,7 @@ class FirebaseUserRepository implements UserRepository {
         return true;
       }
     })
-    .catchError((err) => false);
+    .catchError((exception) => catchExceptionWithBool(exception, analytics));
   }
 
 
@@ -227,9 +219,7 @@ class FirebaseUserRepository implements UserRepository {
         return false;
       }
     })
-    .catchError((err) {
-      return false;
-    });
+    .catchError((exception) => catchExceptionWithBool(exception, analytics));
   }
 
   Future<bool> hasEmailVerified() async {
@@ -260,18 +250,16 @@ class FirebaseUserRepository implements UserRepository {
     .then((res) {
       return res.data['res'].toString() == 'true';
     })
-    .catchError((err) {
-      return true;
-    });
+    .catchError((exception) => catchExceptionWithBool(exception, analytics));
   }
 
   Future<void> registerNotificationToken(String userId) async {
     String notificationToken = await messaging.getToken();
     messaging.requestNotificationPermissions();
-    return cloudFunctions.getHttpsCallable(functionName: 'registerNotificationToken').call({
+    await cloudFunctions.getHttpsCallable(functionName: 'registerNotificationToken').call({
       'user_id' : userId,
       'notification_token' : notificationToken
-    });
+    }).catchError((exception) => catchExceptionWithBool(exception, analytics));
   }
 
   Future<void> logOut() async {
@@ -283,7 +271,8 @@ class FirebaseUserRepository implements UserRepository {
   Future<bool> deleteUser(String userId) async {
     return cloudFunctions.getHttpsCallable(functionName: 'deleteUser').call({
       'user_id' : userId,
-    }).then((res) {
+    })
+    .then((res) {
       bool success = res.data['res'] == true;
       if(success){
         messaging.deleteInstanceID();
@@ -291,9 +280,8 @@ class FirebaseUserRepository implements UserRepository {
         auth.signOut();
       }
       return success;
-    }).catchError((err){
-      return false;
-    });
+    })
+    .catchError((exception) => catchExceptionWithBool(exception, analytics));
   }
 
   Stream<User> getUser(SearchModes searchMode) => userCache.getUser(searchMode);
@@ -330,10 +318,7 @@ class FirebaseUserRepository implements UserRepository {
       }
       return true;
     })
-    .catchError((err) {
-      print(err);
-      return false;
-    });
+    .catchError((exception) => catchExceptionWithBool(exception, analytics));
   }
 
   Future<bool> markNotificationsSeen(MarkNotificationsSeen markSeen) async {
@@ -342,20 +327,14 @@ class FirebaseUserRepository implements UserRepository {
     .then((res) {
       return true;
     })
-    .catchError((err) {
-      print(err);
-      return false;
-    });
+    .catchError((exception) => catchExceptionWithBool(exception, analytics));
   }
 
   Future<bool> followUser(FollowUser followUser) async {
     await userCache.followUser(followUser);
     return cloudFunctions.getHttpsCallable(functionName: 'followUser').call(followUser.toJson())
     .then((res) => res.data['res'] == true)
-    .catchError((err) {
-      print(err);
-      return false;
-    });
+    .catchError((exception) => catchExceptionWithBool(exception, analytics));
   }
   
   Future<bool> loadFollowing(LoadUsers loadUsers) => _loadFollowUsers(loadUsers, functionName: 'getFollowing');
@@ -376,12 +355,7 @@ class FirebaseUserRepository implements UserRepository {
       users.forEach((user) => userCache.addUser(user, loadUsers.searchMode));
       return true;
     })
-    .catchError((err) {
-      print('failed on func $functionName');
-      print(err.message);
-      return false;
-    });
-
+    .catchError((exception) => catchExceptionWithBool(exception, analytics));
   }
 }
 

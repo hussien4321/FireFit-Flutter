@@ -3,7 +3,7 @@ import 'package:front_end/helper_widgets.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:blocs/blocs.dart';
 import 'package:front_end/providers.dart';
-import 'package:front_end/services.dart';
+import 'package:helpers/helpers.dart';
 import 'package:middleware/middleware.dart';
 import 'package:helpers/helpers.dart';
 

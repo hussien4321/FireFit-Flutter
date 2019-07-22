@@ -109,7 +109,7 @@ class CachedOutfitRepository {
   }
 
   Future<int> deleteComment(DeleteComment deleteComment) async {
-    _decrementCommentsCount(deleteComment.outfitId);
+    _decrementCommentsCount(deleteComment.outfitId, deleteComment.comment.repliesCount);
     if(deleteComment.comment.replyTo!=null){
       _decrementCommentReplyCount(deleteComment.comment.replyTo);
     }
@@ -278,8 +278,9 @@ class CachedOutfitRepository {
   Future<void> _incrementCommentsCount(int outfitId) async {
     return streamDatabase.executeAndTrigger(['outfit'], "UPDATE outfit SET comments_count=comments_count+1 WHERE outfit_id=?", [outfitId]);
   }
-  Future<void> _decrementCommentsCount(int outfitId) async {
-    return streamDatabase.executeAndTrigger(['outfit'], "UPDATE outfit SET comments_count=comments_count-1 WHERE outfit_id=?", [outfitId]);
+  Future<void> _decrementCommentsCount(int outfitId, int numReplies) async {
+    int diff = numReplies + 1; 
+    return streamDatabase.executeAndTrigger(['outfit'], "UPDATE outfit SET comments_count=comments_count-? WHERE outfit_id=?", [diff, outfitId]);
   }
   
   Future<void> _incrementCommentLikesCount(Comment comment) async {

@@ -3,7 +3,7 @@ import 'package:blocs/blocs.dart';
 import 'package:front_end/providers.dart';
 import 'package:middleware/middleware.dart';
 import 'package:front_end/screens.dart';
-import 'package:front_end/services.dart';
+import 'package:helpers/helpers.dart';
 import 'package:helpers/helpers.dart';
 import 'package:front_end/helper_widgets.dart';
 import 'dart:math';
@@ -83,7 +83,8 @@ class _WardrobeScreenState extends State<WardrobeScreen> {
           ),
           child: Text( 
             motivationalMessage,
-            style: Theme.of(context).textTheme.subhead.apply(color: Colors.black),
+            style: Theme.of(context).textTheme.subhead.apply(color: Colors.black54),
+            textAlign: TextAlign.center,
           ),
         ),
       ),

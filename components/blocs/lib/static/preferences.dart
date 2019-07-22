@@ -100,6 +100,8 @@ class Preferences {
     keysToDelete.forEach((key) => _currentPreferences.remove(key));
   }
 
+  void resetPreferences() => _jsonFile.writeAsStringSync(json.encode(_initialPreferences));
+
   void updatePreference(String key, dynamic value) {
     Map<String, dynamic> content = {key: value};
     Map<String, dynamic> jsonFileContent = json.decode(_jsonFile.readAsStringSync());
@@ -113,5 +115,4 @@ class Preferences {
     var preferences = await currentPreferences;
     return preferences[key];
   }
-  
 } 

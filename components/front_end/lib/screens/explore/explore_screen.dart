@@ -11,7 +11,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:country_code_picker/country_code.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:front_end/services.dart';
+import 'package:helpers/helpers.dart';
 import 'dart:async';
 
 class ExploreScreen extends StatefulWidget {
@@ -72,16 +72,16 @@ class _ExploreScreenState extends State<ExploreScreen> with SingleTickerProvider
               Expanded(
                 child: StreamBuilder<bool>(
                   stream: _outfitBloc.isLoading,
-                  initialData: true,
+                  initialData: false,
                   builder: (ctx, isLoadingSnap) => StreamBuilder<List<Outfit>>(
                     stream: _outfitBloc.exploredOutfits,
                     initialData: [],
                     builder: (ctx, outfitsSnap) {
                       List<Outfit> outfits = outfitsSnap.data;
-                      if(outfits.length>0){
-                        outfits = sortOutfits(outfits, isSortByTop);
-                      }
-                      return _outfitsCarousel(outfits, isLoadingSnap.data);
+                        if(outfits.length>0){
+                          outfits = sortOutfits(outfits, isSortByTop);
+                        }
+                        return _outfitsCarousel(outfits, isLoadingSnap.data);
                     }
                   )
                 )
@@ -98,11 +98,11 @@ class _ExploreScreenState extends State<ExploreScreen> with SingleTickerProvider
       _outfitBloc = OutfitBlocProvider.of(context);
       userId = await UserBlocProvider.of(context).existingAuthId.first;
       await _loadFiltersFromPreferences();
-      _outfitBloc.exploreOutfits.add(LoadOutfits(
-        userId: userId,
-        filters: outfitFilters,
-        sortByTop: isSortByTop
-      ));
+      // _outfitBloc.exploreOutfits.add(LoadOutfits(
+      //   userId: userId,
+      //   filters: outfitFilters,
+      //   sortByTop: isSortByTop
+      // ));
     }
   }
   _loadFiltersFromPreferences() async {
@@ -209,9 +209,6 @@ class _ExploreScreenState extends State<ExploreScreen> with SingleTickerProvider
     });
     preferences.updatePreference(Preferences.EXPLORE_PAGE_SORT_BY_TOP, isSortByTop);
     preferences.updatePreference(Preferences.EXPLORE_PAGE_FILTERS, outfitFilters.toJson());
-    print('outfitFilters');
-    print(outfitFilters.toJson());
-    print(outfitFilters.dateRange);
     _outfitBloc.exploreOutfits.add(LoadOutfits(
       filters: filterData.filters,
       sortByTop: filterData.sortByTop,

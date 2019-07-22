@@ -16,10 +16,11 @@ void main({
   @required UserRepository userRepository,
   @required FirebaseMessaging messaging,
   @required FirebaseAnalytics analytics,
+  @required Preferences preferences,
 }) {
   runApp(
     UserBlocProvider(
-      bloc:  UserBloc(userRepository, outfitRepository),
+      bloc:  UserBloc(userRepository, outfitRepository, preferences),
       child: OutfitBlocProvider(
         bloc:  OutfitBloc(outfitRepository),
         child: CommentBlocProvider(

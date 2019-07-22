@@ -82,11 +82,11 @@ class OutfitBloc{
     _lookbooksController.addStream(repository.getLookbooks());
 
     _subscriptions = <StreamSubscription<dynamic>>[
-      _exploreOutfitsController.listen(_exploreOutfits),
+      _exploreOutfitsController.distinct().listen(_exploreOutfits),
       _loadMyOutfitsController.distinct().listen(_loadMyOutfits),
       _loadUserOutfitsController.listen(_loadUserOutfits),
-      _loadFeedOutfitsController.listen(_loadFeedOutfits),
-      _loadLookbookOutfitsController.distinct().listen(_loadLookbookOutfits),
+      _loadFeedOutfitsController.distinct().listen(_loadFeedOutfits),
+      _loadLookbookOutfitsController.listen(_loadLookbookOutfits),
       _loadLookbooksController.listen(_loadLookbooks),
       _uploadOutfitsController.listen(_uploadOutfit),
       _editOutfitController.listen(_editOutfit),

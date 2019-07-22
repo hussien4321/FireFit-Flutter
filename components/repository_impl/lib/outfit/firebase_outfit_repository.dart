@@ -2,9 +2,12 @@ import 'package:cloud_functions/cloud_functions.dart';
 import 'package:middleware/middleware.dart';
 import 'package:repository_impl/repository_impl.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:meta/meta.dart';
 import 'package:helpers/helpers.dart';
 import 'package:path/path.dart';
+import 'package:flutter/foundation.dart';
+import 'package:repository_impl/exception_handler.dart';
 import 'dart:math';
 import 'dart:async';
 
@@ -15,11 +18,13 @@ class FirebaseOutfitRepository implements OutfitRepository {
   final CloudFunctions cloudFunctions;
   final FirebaseImageUploader imageUploader;
   final CachedOutfitRepository cache;
+  final FirebaseAnalytics analytics;
 
   const FirebaseOutfitRepository({
     @required this.cloudFunctions,
     @required this.imageUploader,
     @required this.cache,
+    @required this.analytics,
   });
 
   Stream<List<Outfit>> getOutfits(SearchModes searchMode) => cache.getOutfits(searchMode);
@@ -45,8 +50,9 @@ class FirebaseOutfitRepository implements OutfitRepository {
       outfits.forEach((outfit) => cache.addOutfit(outfit, loadOutfits.searchMode));
       return true;
     })
-    .catchError((err) => false);
+    .catchError((exception) => catchExceptionWithBool(exception, analytics));
   }
+
 
   Future<bool> loadLookbooks(LoadLookbooks loadLookbooks) async {
     return cloudFunctions.getHttpsCallable(functionName: 'getLookbooks').call(loadLookbooks.toJson())
@@ -55,7 +61,7 @@ class FirebaseOutfitRepository implements OutfitRepository {
       lookbooks.forEach((lookbook) => cache.addLookbook(lookbook));
       return true;
     })
-    .catchError((err) => false);
+    .catchError((exception) => catchExceptionWithBool(exception, analytics));
   }
 
   Future<bool> loadOutfit(LoadOutfit loadOutfit) async {
@@ -67,7 +73,7 @@ class FirebaseOutfitRepository implements OutfitRepository {
         outfits.forEach((outfit) => cache.addOutfit(outfit, loadOutfit.searchModes));
         return true;
       })
-      .catchError((err) => false);
+      .catchError((exception) => catchExceptionWithBool(exception, analytics));
     }else{
       cache.addOutfitSearch(loadOutfit.outfitId, loadOutfit.searchModes);
       return true;
@@ -96,10 +102,7 @@ class FirebaseOutfitRepository implements OutfitRepository {
 
       return _checkOutfitImageUploaded(outfitId, uploadOutfit.posterUserId);
     })
-    .catchError((err) {
-      print(err.message);
-      return false;
-    });
+    .catchError((exception) => catchExceptionWithBool(exception, analytics));
   }
 
   _generateFileNames(List<String> imagePaths, int outfitId, UploadOutfit uploadOutfit){
@@ -139,7 +142,7 @@ class FirebaseOutfitRepository implements OutfitRepository {
       await cache.incrementOutfitCount(loadOutfit.userId);
       return true;
     })
-    .catchError((err) => false);
+    .catchError((exception) => catchExceptionWithBool(exception, analytics));
   }
 
   Future<bool> editOutfit(EditOutfit editOutfit) async {
@@ -149,10 +152,7 @@ class FirebaseOutfitRepository implements OutfitRepository {
       bool status = res.data['res'];
       return status;
     })
-    .catchError((err) {
-      print(err.message);
-      return false;
-    });
+    .catchError((exception) => catchExceptionWithBool(exception, analytics));
   }
 
   Future<bool> editLookbook(EditLookbook editLookbook) async {
@@ -162,10 +162,7 @@ class FirebaseOutfitRepository implements OutfitRepository {
       bool status = res.data['res'];
       return status;
     })
-    .catchError((err) {
-      print(err.message);
-      return false;
-    });
+    .catchError((exception) => catchExceptionWithBool(exception, analytics));
   }
 
 
@@ -180,10 +177,7 @@ class FirebaseOutfitRepository implements OutfitRepository {
       bool status = res.data['res'];
       return status;
     })
-    .catchError((err) {
-      print(err);
-      return false;
-    });
+    .catchError((exception) => catchExceptionWithBool(exception, analytics));
   }
 
   Future<int> saveOutfit(OutfitSave saveData) async {
@@ -196,30 +190,20 @@ class FirebaseOutfitRepository implements OutfitRepository {
       }
       return saveId;
     })
-    .catchError((err) {
-      return -1;
-    });
+    .catchError((exception) => catchExceptionWithInt(exception, analytics));
   }
 
   Future<bool> deleteSave(DeleteSave deleteSave){
     cache.deleteSave(deleteSave);
     return cloudFunctions.getHttpsCallable(functionName: 'deleteSave').call(deleteSave.toJson())
-    .then((res) async {
-      return true;
-    })
-    .catchError((err) {
-      return false;
-    });
+    .then((res) => true)
+    .catchError((exception) => catchExceptionWithBool(exception, analytics));
   }
   Future<bool> deleteLookbook(Lookbook lookbook){
     cache.deleteLookbook(lookbook);
     return cloudFunctions.getHttpsCallable(functionName: 'deleteLookbook').call(lookbook.toJson())
-    .then((res) async {
-      return true;
-    })
-    .catchError((err) {
-      return false;
-    });
+    .then((res) => true)
+    .catchError((exception) => catchExceptionWithBool(exception, analytics));
   }
 
   Future<void> clearLookbooks() => cache.clearLookbooks();
@@ -231,10 +215,7 @@ class FirebaseOutfitRepository implements OutfitRepository {
       bool status = res.data['res'];
       return status;
     })
-    .catchError((err) {
-      print(err.message);
-      return false;
-    });
+    .catchError((exception) => catchExceptionWithBool(exception, analytics));
   }
   Future<bool> addComment(AddComment addComment) async {
     Random tempIdGenerator =new Random();
@@ -247,10 +228,7 @@ class FirebaseOutfitRepository implements OutfitRepository {
       await cache.updateComment(addComment, tempCommentId ,actualCommentId);
       return true;
     })
-    .catchError((err) {
-      print(err.message);
-      return false;
-    });
+    .catchError((exception) => catchExceptionWithBool(exception, analytics));
   }
 
   Future<bool> createLookbook(AddLookbook addLookbook){
@@ -267,10 +245,7 @@ class FirebaseOutfitRepository implements OutfitRepository {
       await cache.addLookbook(lookbook);
       return true;
     })
-    .catchError((err) {
-      print(err.message);
-      return false;
-    });
+    .catchError((exception) => catchExceptionWithBool(exception, analytics));
   }
 
 
@@ -282,10 +257,7 @@ class FirebaseOutfitRepository implements OutfitRepository {
       bool status = res.data['res'];
       return status;
     })
-    .catchError((err) {
-      print(err);
-      return false;
-    });
+    .catchError((exception) => catchExceptionWithBool(exception, analytics));
   }
 
   
@@ -302,10 +274,7 @@ class FirebaseOutfitRepository implements OutfitRepository {
       _saveCommentsList(res.data);
       return true;
     })
-    .catchError((err) {
-      print(err);
-      return false;
-    });
+    .catchError((exception) => catchExceptionWithBool(exception, analytics));
   }
 
   _saveCommentsList(dynamic response){
@@ -323,10 +292,7 @@ class FirebaseOutfitRepository implements OutfitRepository {
       bool status = res.data['res'];
       return status;
     })
-    .catchError((err) {
-      print(err);
-      return false;
-    });
+    .catchError((exception) => catchExceptionWithBool(exception, analytics));
   }
 
 
