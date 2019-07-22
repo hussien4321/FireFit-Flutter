@@ -15,6 +15,8 @@ class CommentField extends StatefulWidget {
   final int pagesSinceProfileScreen;
   final bool isComingFromExploreScreen;
   final ValueChanged<Comment> onStartReplyTo;
+  final bool isLoadingReply;
+  final List<Comment> comments;
   final bool isShowingReplies;
   final ValueChanged<bool> onUpdateReplies;
 
@@ -26,6 +28,8 @@ class CommentField extends StatefulWidget {
     this.pagesSinceProfileScreen = 0,
     this.isComingFromExploreScreen = false,
     this.onStartReplyTo,
+    this.isLoadingReply = false,
+    this.comments,
     this.isShowingReplies = false,
     this.onUpdateReplies,
   });
@@ -264,28 +268,18 @@ class _CommentFieldState extends State<CommentField> {
   }
 
   Widget _replies() {
-    return StreamBuilder<List<Comment>>(
-      stream: _commentBloc.comments,
-      initialData: [],
-      builder: (ctx, commentsSnap) => StreamBuilder<bool>(
-        stream: _commentBloc.isLoadingReply,
-        initialData: false,
-        builder: (ctx, isLoadingSnap) {
-          List<Comment> replies = new List<Comment>.from(commentsSnap.data);
-          replies.removeWhere((comment) => comment.replyTo != widget.comment.commentId);
-          replies.sort((commentA, commentB) => commentA.uploadDate.compareTo(commentB.uploadDate));
-          return Container(
-            padding: const EdgeInsets.only(left: 8.0, right: 8),
-            child: Column(
-              children: replies.map((reply) => _replyField(reply)).toList()..add(_replyEndTag(
-                isLoading: isLoadingSnap.data,
-                isComplete: replies.length >= widget.comment.repliesCount,
-                reply: replies.length == 0 ? null : replies.last,
-              )),
-            ),
-          );
-        },
-      )
+    List<Comment> replies = new List<Comment>.from(widget.comments);
+    replies.removeWhere((comment) => comment.replyTo != widget.comment.commentId);
+    replies.sort((commentA, commentB) => commentA.uploadDate.compareTo(commentB.uploadDate));
+    return Container(
+      padding: const EdgeInsets.only(left: 8.0, right: 8),
+      child: Column(
+        children: replies.map((reply) => _replyField(reply)).toList()..add(_replyEndTag(
+          isLoading: widget.isLoadingReply,
+          isComplete: replies.length >= widget.comment.repliesCount,
+          reply: replies.length == 0 ? null : replies.last,
+        )),
+      ),
     );
   }
 

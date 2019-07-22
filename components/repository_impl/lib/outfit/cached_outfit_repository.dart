@@ -13,7 +13,7 @@ class CachedOutfitRepository {
   CachedOutfitRepository({@required this.streamDatabase, @required this.userCache});
 
   Future<int> addOutfit(Outfit outfit, SearchModes searchMode) async {
-    addOutfitSearch(outfit.outfitId, searchMode);
+    await addOutfitSearch(outfit.outfitId, searchMode);
     await userCache.addUser(outfit.poster, searchMode);
     if(searchMode==SearchModes.SAVED){
       await _addOutfitSave(outfit.save);

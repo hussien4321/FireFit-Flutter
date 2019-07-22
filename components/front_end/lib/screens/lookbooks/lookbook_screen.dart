@@ -149,13 +149,7 @@ class _LookbookScreenState extends State<LookbookScreen> {
             if(outfits.length>0){
               outfits = sortLookbookOutfits(outfits, isSortingByTop);
             }
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                _lookbookDetails(),
-                _lookbookOutfitsOverview(isLoading, outfits),
-              ],
-            );
+            return _outfitsGrid(isLoading, outfits);
           }
         );
       }
@@ -198,15 +192,6 @@ class _LookbookScreenState extends State<LookbookScreen> {
     return Text(
       hasDescription ? lookbook.description : 'No description added',
       style: hasDescription ? Theme.of(context).textTheme.subhead.apply(color: Colors.grey[700]) : Theme.of(context).textTheme.caption,
-    );
-  }
-
-  Widget _lookbookOutfitsOverview(bool isLoading, List<Outfit> outfits) {
-    return Column(
-      children: <Widget>[
-        _lookbookOutfitsManagementOptions(outfits),
-        _outfitsGrid(isLoading, outfits),
-      ],
     );
   }
 
@@ -289,6 +274,12 @@ class _LookbookScreenState extends State<LookbookScreen> {
 
   Widget _outfitsGrid(bool isLoading, List<Outfit> outfits) { 
     return OutfitsGrid(
+      leading: Column(
+        children: <Widget>[
+          _lookbookDetails(),
+          _lookbookOutfitsManagementOptions(outfits),
+        ],
+      ),
       isLoading: isLoading,
       outfits: outfits,
       customOverlay: isEditing ? _editOverlay : null,

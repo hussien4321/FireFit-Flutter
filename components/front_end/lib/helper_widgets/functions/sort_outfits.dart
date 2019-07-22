@@ -28,7 +28,8 @@ List<Outfit> sortLookbookOutfits(List<Outfit> outfits, bool isSortingByTop){
       return firstValue;
     });
   }else{
-    outfits.sort((a, b) => -a.save.createdAt?.compareTo(b.save.createdAt));
+    outfits.sort((a, b) => a.save?.createdAt==null||b.save?.createdAt==null ? 1 : -a.save.createdAt.compareTo(b.save.createdAt));
+    
   }
   return outfits;
 }

@@ -68,7 +68,7 @@ class LoadOutfits {
   bool operator ==(newData) {
     return newData is LoadOutfits &&
     newData.userId == userId &&
-    newData.startAfterOutfit == startAfterOutfit &&
+    (newData.startAfterOutfit == startAfterOutfit && newData.startAfterOutfit!=null && startAfterOutfit!=null) &&
     !newData.forceLoad &&
     newData.lookbookId == lookbookId&&
     newData.filters == filters &&

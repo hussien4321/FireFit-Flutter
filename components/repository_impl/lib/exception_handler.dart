@@ -12,13 +12,13 @@ int catchExceptionWithInt(dynamic exception, FirebaseAnalytics analytics) {
 }
 
 catchException(dynamic exception, FirebaseAnalytics analytics) {
-  if(exception is CloudFunctionsException){
+  if(exception != null && exception is CloudFunctionsException){
+    print('code:${exception.code}, message:${exception.message}, details:${exception.details}');
     analytics.logEvent(
-      name: "app_exception",
+      name: "firebase_crash",
       parameters: {
-        "code" : exception.code,
-        "message": exception.message,
-        "details": exception.details,
+        "code" : exception?.code,
+        "message": exception?.message,
       }
     );
   }

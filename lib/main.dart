@@ -18,7 +18,9 @@ import 'package:flutter/foundation.dart';
 void main() async {
   Crashlytics crashlytics = Crashlytics.instance;
   FlutterError.onError = (FlutterErrorDetails details) {
-    crashlytics.onError(details);
+    if(details.stack!=null){
+      crashlytics.onError(details);
+    }
   };
 
   Preferences preferences = new Preferences();

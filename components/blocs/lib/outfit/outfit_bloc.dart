@@ -84,9 +84,9 @@ class OutfitBloc{
     _subscriptions = <StreamSubscription<dynamic>>[
       _exploreOutfitsController.distinct().listen(_exploreOutfits),
       _loadMyOutfitsController.distinct().listen(_loadMyOutfits),
-      _loadUserOutfitsController.listen(_loadUserOutfits),
+      _loadUserOutfitsController.distinct().listen(_loadUserOutfits),
       _loadFeedOutfitsController.distinct().listen(_loadFeedOutfits),
-      _loadLookbookOutfitsController.listen(_loadLookbookOutfits),
+      _loadLookbookOutfitsController.distinct().listen(_loadLookbookOutfits),
       _loadLookbooksController.listen(_loadLookbooks),
       _uploadOutfitsController.listen(_uploadOutfit),
       _editOutfitController.listen(_editOutfit),

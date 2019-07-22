@@ -45,6 +45,7 @@ class _CommentsScreenState extends State<CommentsScreen> {
   Comment lastComment;
 
   ScrollController _controller;
+  List<Comment> comments = [];
 
   int showingRepliesForId;
 
@@ -89,38 +90,49 @@ class _CommentsScreenState extends State<CommentsScreen> {
               return Column(
                 children: [
                   _commentInput(outfit),
-                  StreamBuilder<List<Comment>>(
-                    stream: _commentBloc.comments,
-                    initialData: [],
-                    builder: (ctx, snap) {
-                      if(snap.data.length>0){
-                        lastComment = snap.data.last;
-                      }
-                      return Expanded(
-                        child: PullToRefreshOverlay(
-                          matchSize: false,
-                          onRefresh: () async {
-                            _commentBloc.loadComments.add(LoadComments(
-                              userId: userId,
-                              outfitId: widget.outfitId,
-                              forceLoad: true,
-                            ));
-                            showingRepliesForId = null;
-                          },
-                          child: ListView(
-                            padding: EdgeInsets.all(0),
-                            controller: _controller,
-                            children: [_outfitOverview(outfit)]..addAll(snap.data.map((comment) => _buildCommentField(comment)).toList()..add(
-                              StreamBuilder<bool>(
-                                stream: _commentBloc.isLoading,
-                                initialData: false,
-                                builder: (ctx, loadingSnap) => loadingSnap.data ? _loadingPlaceholder() : Container(),
+                  StreamBuilder<bool>(
+                    stream: _commentBloc.isLoading,
+                    initialData: false,
+                    builder: (ctx, loadingCommentSnap) =>StreamBuilder<bool>(
+                      stream: _commentBloc.isLoadingReply,
+                      initialData: false,
+                      builder: (ctx, loadingReplySnap) =>StreamBuilder<List<Comment>>(
+                        stream: _commentBloc.comments,
+                        initialData: [],
+                        builder: (ctx, snap) {
+                          if(snap.data.length>0){
+                            lastComment = snap.data.last;
+                            if(!loadingCommentSnap.data && !loadingReplySnap.data){
+                              comments = snap.data;
+                            }
+                          }
+                          if(snap.data.isEmpty){
+                            comments = [];
+                          }
+                          return Expanded(
+                            child: PullToRefreshOverlay(
+                              matchSize: false,
+                              onRefresh: () async {
+                                _commentBloc.loadComments.add(LoadComments(
+                                  userId: userId,
+                                  outfitId: widget.outfitId,
+                                  forceLoad: true,
+                                ));
+                                showingRepliesForId = null;
+                              },
+                              child: ListView(
+                                padding: EdgeInsets.all(0),
+                                controller: _controller,
+                                children: [_outfitOverview(outfit)]..addAll(comments.map((comment) => _buildCommentField(comment, loadingReplySnap.data, comments)).toList()..add(
+                                  loadingCommentSnap.data ? _loadingPlaceholder() : 
+                                  comments.isEmpty ? _emptyNotice() : Container()
+                                ))
                               )
-                            ))
-                          ),
-                        ),
-                      );
-                    },
+                            )
+                          );
+                        }
+                      )
+                    )
                   )
                 ]
               );
@@ -128,6 +140,18 @@ class _CommentsScreenState extends State<CommentsScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _emptyNotice() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.only(left: 32, right:32, top: 16),
+      child: Text(
+        'Be the first to leave some feedback for this fit!',
+        style: Theme.of(context).textTheme.subhead,
+        textAlign: TextAlign.center,
+      )
     );
   }
 
@@ -160,14 +184,14 @@ class _CommentsScreenState extends State<CommentsScreen> {
       _commentBloc = CommentBlocProvider.of(context);
       _outfitBloc = OutfitBlocProvider.of(context);
       userId = await UserBlocProvider.of(context).existingAuthId.first;
-      _commentBloc.loadComments.add(LoadComments(
-        userId: userId,
-        outfitId: widget.outfitId,
-      ));
       _outfitBloc.selectOutfit.add(LoadOutfit(
         outfitId: widget.outfitId,
         userId: userId,
         loadFromCloud: widget.loadOutfit
+      ));
+      _commentBloc.loadComments.add(LoadComments(
+        userId: userId,
+        outfitId: widget.outfitId,
       ));
     }
   }
@@ -396,7 +420,7 @@ class _CommentsScreenState extends State<CommentsScreen> {
     );
   }
 
-  Widget _buildCommentField(Comment comment) {
+  Widget _buildCommentField(Comment comment, bool isLoadingReply, List<Comment> comments) {
     if(comment.replyTo!=null){
       return Container();
     }
@@ -408,6 +432,8 @@ class _CommentsScreenState extends State<CommentsScreen> {
       pagesSinceProfileScreen: widget.pagesSinceProfileScreen,
       isComingFromExploreScreen: widget.isComingFromExploreScreen,
       onStartReplyTo: _startReply,
+      isLoadingReply: isLoadingReply,
+      comments: comments,
       isShowingReplies: comment.commentId == showingRepliesForId,
       onUpdateReplies: (showingReplies) {
         if(showingReplies){

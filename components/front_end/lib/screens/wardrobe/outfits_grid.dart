@@ -6,6 +6,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class OutfitsGrid extends StatefulWidget {
 
+  final Widget leading;
   final bool isLoading;
   final List<Outfit> outfits;
   final bool hasFixedHeight;
@@ -16,7 +17,7 @@ class OutfitsGrid extends StatefulWidget {
   final int pagesSinceOutfitScreen;
   final int pagesSinceProfileScreen;
 
-  OutfitsGrid({this.outfits, this.isLoading, this.onReachEnd, this.onRefresh, this.emptyText, this.customOverlay ,
+  OutfitsGrid({this.leading, this.outfits, this.isLoading, this.onReachEnd, this.onRefresh, this.emptyText, this.customOverlay ,
     this.hasFixedHeight = false,
     this.pagesSinceOutfitScreen = 0,
     this.pagesSinceProfileScreen = 0,
@@ -66,6 +67,7 @@ class _OutfitsGridState extends State<OutfitsGrid> {
       shrinkWrap: true,
       controller: _controller,
       children: <Widget>[
+        widget.leading!=null ? widget.leading : Container(),
         Padding(
           padding: EdgeInsets.only(bottom: 4),
         ),

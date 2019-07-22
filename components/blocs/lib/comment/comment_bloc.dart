@@ -25,10 +25,10 @@ class CommentBloc {
   final _deleteCommentController = PublishSubject<DeleteComment>();
   Sink<DeleteComment> get deleteComment => _deleteCommentController; 
   
-  final _loadingController = PublishSubject<bool>();
+  final _loadingController = BehaviorSubject<bool>(seedValue: false);
   Observable<bool> get isLoading => _loadingController.stream;
   
-  final _loadingReplyController = PublishSubject<bool>();
+  final _loadingReplyController = BehaviorSubject<bool>(seedValue: false);
   Observable<bool> get isLoadingReply => _loadingReplyController.stream;
 
   final _successController = PublishSubject<bool>();

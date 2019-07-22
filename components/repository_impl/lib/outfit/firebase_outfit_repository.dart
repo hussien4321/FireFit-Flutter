@@ -43,11 +43,13 @@ class FirebaseOutfitRepository implements OutfitRepository {
 
   Future<void> clearOutfits(SearchModes searchMode) => cache.clearOutfits(searchMode);
 
-  Future<bool> loadMoreOutfits(LoadOutfits loadOutfits) async {
+  Future<bool> loadMoreOutfits(LoadOutfits loadOutfits) {
     return cloudFunctions.getHttpsCallable(functionName: 'getOutfits').call(loadOutfits.toJson())
     .then((res) async {
       List<Outfit> outfits = _resToOutfitList(res);
-      outfits.forEach((outfit) => cache.addOutfit(outfit, loadOutfits.searchMode));
+      for(int i = 0; i < outfits.length; i++){
+        await cache.addOutfit(outfits[i], loadOutfits.searchMode);
+      }
       return true;
     })
     .catchError((exception) => catchExceptionWithBool(exception, analytics));
@@ -271,18 +273,20 @@ class FirebaseOutfitRepository implements OutfitRepository {
   Future<bool> loadMoreComments(LoadComments loadComments) async {
     return cloudFunctions.getHttpsCallable(functionName: 'loadComments').call(loadComments.toJson())
     .then((res) async {
-      _saveCommentsList(res.data);
+      await _saveCommentsList(res.data);
       return true;
     })
     .catchError((exception) => catchExceptionWithBool(exception, analytics));
   }
 
-  _saveCommentsList(dynamic response){
+  _saveCommentsList(dynamic response) async {
     List<Comment> comments = List<Comment>.from(response['res'].map((data){
       Map<String, dynamic> formattedDoc = Map<String, dynamic>.from(data);
       return Comment.fromMap(formattedDoc);
     }).toList());
-    comments.forEach((comment) => cache.addComment(comment));
+    for(int i = 0; i < comments.length; i++){
+      await cache.addComment(comments[i]);
+    }
   }
 
   Future<bool> deleteComment(DeleteComment deleteComment) async {

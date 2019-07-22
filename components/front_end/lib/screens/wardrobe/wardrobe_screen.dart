@@ -38,12 +38,7 @@ class _WardrobeScreenState extends State<WardrobeScreen> {
   @override
   Widget build(BuildContext context) {
     _initBlocs();
-    return Column(
-      children: <Widget>[
-        _wardrobeMotivation(),
-        _outfitsGrid(),
-      ],
-    );
+    return _outfitsGrid();
   }
   
   _initBlocs() async {
@@ -52,10 +47,10 @@ class _WardrobeScreenState extends State<WardrobeScreen> {
       _userBloc = UserBlocProvider.of(context);
       userId = await _userBloc.existingAuthId.first;
       await _loadFiltersFromPreferences();
-      _outfitBloc.loadMyOutfits.add(LoadOutfits(
-        userId: userId,
-        sortByTop: isSortingByTop
-      ));
+      // _outfitBloc.loadMyOutfits.add(LoadOutfits(
+      //   userId: userId,
+      //   sortByTop: isSortingByTop
+      // ));
     }
   }
 
@@ -104,9 +99,8 @@ class _WardrobeScreenState extends State<WardrobeScreen> {
     );
   }
   Widget _outfitsCount(User user){
-    int numberOfOutfits = user==null ? 0 : user.numberOfOutfits;
-    return Text(
-      '$numberOfOutfits Upload${numberOfOutfits==1?'':'s'}',
+    return user==null ? Container() : Text(
+      '${user.numberOfOutfits} Upload${user.numberOfOutfits==1?'':'s'}',
       style: Theme.of(context).textTheme.title.apply(
         color: Colors.black54
       ),
@@ -164,29 +158,30 @@ class _WardrobeScreenState extends State<WardrobeScreen> {
               if(outfits.isNotEmpty){
                 outfits = sortOutfits(outfits, isSortingByTop);
               }
-              return Column(
-                children: <Widget>[
-                  _wardrobeSortOptions(streamUser),
-                  OutfitsGrid(
-                    emptyText: 'You have no outfits in your wardrobe, upload a new outfit to display it here',
-                    isLoading: isLoading,
-                    outfits: outfitsSnap.data,
-                    onRefresh: () async {
-                      _outfitBloc.loadMyOutfits.add(LoadOutfits(
-                        userId: userId,
-                        forceLoad: true,
-                        sortByTop: isSortingByTop,
-                      ));
-                    },
-                    onReachEnd: () => (_outfitBloc.loadMyOutfits).add(
-                      LoadOutfits(
-                        userId: userId,
-                        startAfterOutfit: outfitsSnap.data.last,
-                        sortByTop: isSortingByTop,
-                      )
-                    ),
-                  ),
-                ],
+              return OutfitsGrid(
+                leading: Column(
+                  children: <Widget>[
+                    _wardrobeMotivation(),
+                    _wardrobeSortOptions(streamUser),
+                  ],
+                ),
+                emptyText: 'You have no outfits in your wardrobe, upload a new outfit to display it here',
+                isLoading: isLoading,
+                outfits: outfitsSnap.data,
+                onRefresh: () async {
+                  _outfitBloc.loadMyOutfits.add(LoadOutfits(
+                    userId: userId,
+                    forceLoad: true,
+                    sortByTop: isSortingByTop,
+                  ));
+                },
+                onReachEnd: () => (_outfitBloc.loadMyOutfits).add(
+                  LoadOutfits(
+                    userId: userId,
+                    startAfterOutfit: outfitsSnap.data.last,
+                    sortByTop: isSortingByTop,
+                  )
+                ),
               );
             },
           );
@@ -194,5 +189,4 @@ class _WardrobeScreenState extends State<WardrobeScreen> {
       ),
     );
   }
-
 }

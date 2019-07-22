@@ -26,7 +26,14 @@ class OutfitsStream extends StatelessWidget {
           stream: outfitsStream,
           initialData: [],
           builder: (ctx, outfitsSnap) {
-            return builder(isLoadingSnap.data, outfitsSnap.data);
+            List<Outfit> outfits = [];
+            if(!isLoadingSnap.data&&outfitsSnap.data.isNotEmpty){
+              outfits =outfitsSnap.data;
+            }
+            if(!isLoadingSnap.data && outfitsSnap.data.isEmpty){
+              outfits = [];
+            }
+            return builder(isLoadingSnap.data, outfits);
           }
         );
       }

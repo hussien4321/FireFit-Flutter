@@ -340,8 +340,8 @@ class FirebaseUserRepository implements UserRepository {
   Future<bool> loadFollowing(LoadUsers loadUsers) => _loadFollowUsers(loadUsers, functionName: 'getFollowing');
   Future<bool> loadFollowers(LoadUsers loadUsers) => _loadFollowUsers(loadUsers, functionName: 'getFollowers');
   
-  Future<bool> _loadFollowUsers(LoadUsers loadUsers, {String functionName}){
-    userCache.clearUsers(loadUsers.searchMode);
+  Future<bool> _loadFollowUsers(LoadUsers loadUsers, {String functionName}) async {
+    await userCache.clearUsers(loadUsers.searchMode);
     return _loadMoreFollowUsers(loadUsers, functionName:functionName);
   }
 
@@ -352,7 +352,9 @@ class FirebaseUserRepository implements UserRepository {
     return cloudFunctions.getHttpsCallable(functionName: functionName).call(loadUsers.toJson())
     .then((res) async {
       List<User> users = _resToUserList(res);
-      users.forEach((user) => userCache.addUser(user, loadUsers.searchMode));
+      for(int i = 0; i < users.length; i++){
+        await userCache.addUser(users[i], loadUsers.searchMode);
+      }
       return true;
     })
     .catchError((exception) => catchExceptionWithBool(exception, analytics));
