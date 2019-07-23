@@ -71,7 +71,7 @@ class _CommentFieldState extends State<CommentField> {
       child: Column(
         children: <Widget>[
           InkWell(
-            highlightColor:  Colors.blueGrey,
+            highlightColor:  Colors.grey[700],
             onLongPress: isCurrentUser(comment) ?  ()=>_confirmDelete(comment) : null,
             child: Row(
               children: <Widget>[

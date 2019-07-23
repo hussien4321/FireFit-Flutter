@@ -49,6 +49,8 @@ class _CommentsScreenState extends State<CommentsScreen> {
 
   int showingRepliesForId;
 
+  bool isOpeningPage = true;
+
   @override
   void initState() {
     super.initState();
@@ -124,7 +126,7 @@ class _CommentsScreenState extends State<CommentsScreen> {
                                 padding: EdgeInsets.all(0),
                                 controller: _controller,
                                 children: [_outfitOverview(outfit)]..addAll(comments.map((comment) => _buildCommentField(comment, loadingReplySnap.data, comments)).toList()..add(
-                                  loadingCommentSnap.data ? _loadingPlaceholder() : 
+                                  loadingCommentSnap.data||isOpeningPage ? _loadingPlaceholder() : 
                                   comments.isEmpty ? _emptyNotice() : Container()
                                 ))
                               )
@@ -193,6 +195,11 @@ class _CommentsScreenState extends State<CommentsScreen> {
         userId: userId,
         outfitId: widget.outfitId,
       ));
+      Future.delayed(Duration(milliseconds: 500), () {
+        if(mounted){
+          setState(() => isOpeningPage = false);
+        }
+      });
     }
   }
   
@@ -337,7 +344,7 @@ class _CommentsScreenState extends State<CommentsScreen> {
 
   Widget _buildOutfitText(Outfit outfit) {
     return InkWell(
-      highlightColor: Colors.blueGrey,
+      highlightColor: Colors.grey[700],
       onTap: _openOutfit,
       child: Container(
         padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 8.0),
@@ -378,6 +385,8 @@ class _CommentsScreenState extends State<CommentsScreen> {
                     child: Text(
                       outfit.description,
                       style: Theme.of(context).textTheme.caption,
+                      maxLines: 3,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                 ],

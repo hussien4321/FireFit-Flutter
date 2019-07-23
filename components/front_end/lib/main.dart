@@ -22,7 +22,7 @@ void main({
     UserBlocProvider(
       bloc:  UserBloc(userRepository, outfitRepository, preferences),
       child: OutfitBlocProvider(
-        bloc:  OutfitBloc(outfitRepository),
+        bloc:  OutfitBloc(outfitRepository, userRepository, preferences),
         child: CommentBlocProvider(
           bloc: CommentBloc(outfitRepository),
           child: NotificationBlocProvider(

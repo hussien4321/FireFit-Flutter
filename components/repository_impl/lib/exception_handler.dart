@@ -15,7 +15,7 @@ catchException(dynamic exception, FirebaseAnalytics analytics) {
   if(exception != null && exception is CloudFunctionsException){
     print('code:${exception.code}, message:${exception.message}, details:${exception.details}');
     analytics.logEvent(
-      name: "firebase_crash",
+      name: "crash_firebase",
       parameters: {
         "code" : exception?.code,
         "message": exception?.message,

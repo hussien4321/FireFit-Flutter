@@ -11,6 +11,7 @@ class CustomTextField extends StatelessWidget {
   final Widget prefix;
   final FocusNode focusNode;
   final Color textColor;
+  final int maxLength;
   final bool autofocus;
 
   CustomTextField({
@@ -25,6 +26,7 @@ class CustomTextField extends StatelessWidget {
     this.titleStyle,
     this.textColor,
     this.hintText,
+    this.maxLength,
     this.prefix,
   });
 
@@ -66,6 +68,8 @@ class CustomTextField extends StatelessWidget {
             onSubmitted: onSubmitted,
             textCapitalization: textCapitalization,
             textInputAction: textInputAction,
+            maxLength: maxLength,
+            maxLengthEnforced: true,
             style: Theme.of(context).textTheme.display1.apply(color: textColor != null ? textColor : Colors.black),
             decoration: new InputDecoration.collapsed(
               hintText: hintText,

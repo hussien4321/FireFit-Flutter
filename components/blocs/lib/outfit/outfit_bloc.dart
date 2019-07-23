@@ -1,10 +1,14 @@
 import 'dart:async';
 import 'package:rxdart/rxdart.dart';
 import 'package:middleware/middleware.dart';
+import 'package:blocs/blocs.dart';
 
 class OutfitBloc{
 
   final OutfitRepository repository;
+  final UserRepository _userRepository;
+  final Preferences _preferences;
+
   List<StreamSubscription<dynamic>> _subscriptions;
 
   final _exploredOutfitsController = BehaviorSubject<List<Outfit>>(seedValue: []);
@@ -72,7 +76,7 @@ class OutfitBloc{
   final _errorController = PublishSubject<String>();
   Observable<String> get hasError => _errorController.stream;
   
-  OutfitBloc(this.repository) {
+  OutfitBloc(this.repository, this._userRepository, this._preferences) {
     _exploredOutfitsController.addStream(repository.getOutfits(SearchModes.EXPLORE));
     _myOutfitsController.addStream(repository.getOutfits(SearchModes.MINE));
     _lookbookOutfitsController.addStream(repository.getOutfits(SearchModes.SAVED));
@@ -172,6 +176,20 @@ class OutfitBloc{
     _successController.add(success);
     if(success){
       _successMessageController.add("Delete successful!");
+      
+      String userId = outfit.poster.userId;
+      
+      bool sortBySize = await _preferences.getPreference(Preferences.LOOKBOOKS_SORT_BY_SIZE);
+      _loadLookbooks(LoadLookbooks(
+        userId: userId,
+        sortBySize: sortBySize,
+      ));
+      
+      _userRepository.loadUserDetails(LoadUser(
+        currentUserId: userId,
+        searchMode: SearchModes.MINE,
+        userId: userId,
+      ), SearchModes.MINE);
     }else{
       _errorController.add("Failed to delete outfit");
     }

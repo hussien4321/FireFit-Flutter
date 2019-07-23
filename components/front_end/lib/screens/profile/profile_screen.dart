@@ -40,7 +40,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   final double splashSize = 200;
   final double profilePicSize = 100; 
-  Outfit lastOutfit;
+
+  List<Outfit> outfits = [];
 
   bool isSortingByTop = false;
   Preferences preferences = Preferences();
@@ -56,7 +57,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       _outfitBloc.loadUserOutfits.add(
         LoadOutfits(
           userId: widget.userId,
-          startAfterOutfit: lastOutfit,
+          startAfterOutfit: outfits.last,
           sortByTop: isSortingByTop,
         )
       );
@@ -497,10 +498,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
       stream: _outfitBloc.selectedOutfits,
       initialData: [],
       builder: (ctx, outfitsSnap) {
-        if(outfitsSnap.data != null && outfitsSnap.data.isNotEmpty){
-          lastOutfit=outfitsSnap.data.last;
+        if(!isLoading) {
+          outfits =outfitsSnap.data;
         }
-        List<Outfit> outfits = outfitsSnap.data;
         if(outfits.isNotEmpty){
           outfits = sortOutfits(outfits, isSortingByTop);
         }

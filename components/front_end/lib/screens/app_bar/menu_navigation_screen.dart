@@ -125,19 +125,25 @@ class _MenuNavigationScreenState extends State<MenuNavigationScreen> {
                   margin: EdgeInsets.all(8.0),
                 ),
               ),
-              Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Text(
-                    user.name,
-                    style: Theme.of(context).textTheme.headline,
-                  ),
-                  Text(
-                    '@${user.username}',
-                    style: Theme.of(context).textTheme.caption,
-                  )
-                ],
+              Flexible(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(
+                      user.name,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.headline,
+                    ),
+                    Text(
+                      '@${user.username}',
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.caption,
+                    )
+                  ],
+                ),
               )
             ],
           ),

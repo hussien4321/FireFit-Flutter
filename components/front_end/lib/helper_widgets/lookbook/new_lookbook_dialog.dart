@@ -151,7 +151,8 @@ class _NewLookbookDialogState extends State<NewLookbookDialog> {
             decoration: InputDecoration.collapsed(
               hintText: 'Name'
             ),
-            maxLength: 30,
+            maxLength: 50,
+            maxLengthEnforced: true,
             textCapitalization: TextCapitalization.words,
           ),
           Container(
@@ -175,6 +176,8 @@ class _NewLookbookDialogState extends State<NewLookbookDialog> {
             hintText: 'Description\n(optional)'
           ),
           maxLines: 3,
+          maxLength: 300,
+          maxLengthEnforced: true,
           textCapitalization: TextCapitalization.sentences,
           textInputAction: TextInputAction.newline,
         ),

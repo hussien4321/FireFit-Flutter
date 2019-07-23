@@ -68,6 +68,7 @@ class _UsernamePageState extends State<UsernamePage> with SnackbarMessages {
                           textColor: Colors.blue,
                           onSubmitted: (t) => FocusScope.of(context).requestFocus(usernameFocus),
                           title: 'Display Name',
+                          maxLength: 50,
                           titleStyle: Theme.of(context).textTheme.subtitle,
                           hintText: 'Dave Jefferson',
                           textCapitalization: TextCapitalization.words,
@@ -89,6 +90,7 @@ class _UsernamePageState extends State<UsernamePage> with SnackbarMessages {
                           textColor: widget.onboardUser.isUsernameTaken == null ? Colors.black : (widget.onboardUser.isUsernameTaken ? Colors.red : Colors.blue),
                           title: 'Username',
                           hintText: 'unique_name',
+                          maxLength: 30,
                           titleStyle: Theme.of(context).textTheme.subtitle,
                           textInputAction: TextInputAction.next,
                           prefix: Text(

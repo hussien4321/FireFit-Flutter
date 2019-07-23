@@ -228,6 +228,8 @@ class _UploadOutfitScreenState extends State<UploadOutfitScreen> with LoadingAnd
             uploadOutfit.title = newTitle;
           });
         },
+        maxLength: 50,
+        maxLengthEnforced: true,
         textCapitalization: TextCapitalization.words,
         style: Theme.of(context).textTheme.display1.apply(color: Colors.black),
         decoration: new InputDecoration.collapsed(
@@ -259,7 +261,7 @@ class _UploadOutfitScreenState extends State<UploadOutfitScreen> with LoadingAnd
         },
         textCapitalization: TextCapitalization.sentences,
         maxLines: 5,
-        maxLength: 300,
+        maxLength: 500,
         maxLengthEnforced: true,
         style: Theme.of(context).textTheme.subhead,
         decoration: new InputDecoration.collapsed(

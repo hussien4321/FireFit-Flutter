@@ -42,7 +42,7 @@ class CommentBloc {
   CommentBloc(this.repository) {
     _commentsController.addStream(repository.getComments());
     _subscriptions = <StreamSubscription<dynamic>>[
-      _loadCommentsController.distinct().listen(_loadComments),
+      _loadCommentsController.listen(_loadComments),
       _loadRepliesController.listen(_loadReplies),
       _likeCommentController.listen(_likeComment),
       _addCommentController.listen(_addComment),

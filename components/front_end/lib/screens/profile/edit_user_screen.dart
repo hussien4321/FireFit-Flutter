@@ -292,28 +292,32 @@ class _EditUserScreenState extends State<EditUserScreen> with LoadingAndErrorDia
 
 
   Widget _buildNameField() {
-    return Container(
-      padding: EdgeInsets.all(8.0),
-      margin: EdgeInsets.only(bottom: 8.0),
-      width: double.infinity,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20.0),
-        color: Colors.grey[350]
-      ),
-      child: TextField(
-        controller: _nameController,
-        onChanged: (newName) {
-          setState((){
-          editUserData.name = newName;
-          });
-        },
-        onSubmitted: (t) => FocusScope.of(context).requestFocus(bioFocus),
-        textCapitalization: TextCapitalization.words,
-        textInputAction: TextInputAction.next,
-        style: Theme.of(context).textTheme.display1.apply(color: Colors.black),
-        decoration: new InputDecoration.collapsed(
-          hintText: "Theme/mood of this look...",
-          hintStyle: Theme.of(context).textTheme.headline.apply(color: Colors.black.withOpacity(0.5))
+    return Flexible(
+      child: Container(
+        padding: EdgeInsets.all(8.0),
+        margin: EdgeInsets.only(bottom: 8.0),
+        width: double.infinity,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20.0),
+          color: Colors.grey[350]
+        ),
+        child: TextField(
+          controller: _nameController,
+          onChanged: (newName) {
+            setState((){
+            editUserData.name = newName;
+            });
+          },
+          maxLength: 50,
+          maxLengthEnforced: true,
+          onSubmitted: (t) => FocusScope.of(context).requestFocus(bioFocus),
+          textCapitalization: TextCapitalization.words,
+          textInputAction: TextInputAction.next,
+          style: Theme.of(context).textTheme.display1.apply(color: Colors.black),
+          decoration: new InputDecoration.collapsed(
+            hintText: "Theme/mood of this look...",
+            hintStyle: Theme.of(context).textTheme.headline.apply(color: Colors.black.withOpacity(0.5))
+          ),
         ),
       ),
     );
@@ -342,7 +346,7 @@ class _EditUserScreenState extends State<EditUserScreen> with LoadingAndErrorDia
         textCapitalization: TextCapitalization.sentences,
         textInputAction: TextInputAction.newline,
         maxLines: 5,
-        maxLength: 300,
+        maxLength: 500,
         maxLengthEnforced: true,
         style: Theme.of(context).textTheme.subhead,
         decoration: new InputDecoration.collapsed(

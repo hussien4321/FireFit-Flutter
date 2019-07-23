@@ -190,6 +190,8 @@ class _EditOutfitScreenState extends State<EditOutfitScreen> with LoadingAndErro
           editOutfitData.title = newTitle;
           });
         },
+        maxLength: 50,
+        maxLengthEnforced: true,
         onSubmitted: (t) => FocusScope.of(context).requestFocus(descriptionFocus),
         textCapitalization: TextCapitalization.words,
         textInputAction: TextInputAction.next,
@@ -225,7 +227,7 @@ class _EditOutfitScreenState extends State<EditOutfitScreen> with LoadingAndErro
         textCapitalization: TextCapitalization.sentences,
         textInputAction: TextInputAction.newline,
         maxLines: 5,
-        maxLength: 300,
+        maxLength: 500,
         maxLengthEnforced: true,
         style: Theme.of(context).textTheme.subhead,
         decoration: new InputDecoration.collapsed(
