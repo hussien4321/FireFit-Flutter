@@ -10,6 +10,8 @@ class NotificationBloc {
 
   final _registerNotificationTokenController = PublishSubject<String>();
   Sink<String> get registerNotificationToken => _registerNotificationTokenController;
+  final _updateNotificationTokenController = PublishSubject<UpdateToken>();
+  Sink<UpdateToken> get updateNotificationToken => _updateNotificationTokenController;
   final _loadStaticNotificationsController = PublishSubject<LoadNotifications>();
   Sink<LoadNotifications> get loadStaticNotifications => _loadStaticNotificationsController;
   final _loadLiveNotificationsController = PublishSubject<LoadNotifications>();
@@ -33,6 +35,7 @@ class NotificationBloc {
   NotificationBloc(this.repository) {
     _subscriptions = <StreamSubscription<dynamic>>[
       _registerNotificationTokenController.listen(_registerNotificationToken),
+      _updateNotificationTokenController.listen(_updateNotificationToken),
       _loadStaticNotificationsController.listen(_loadStaticNotifications),
       _loadLiveNotificationsController.listen(_loadLiveNotifications),
       _markNotificationsSeenController.listen(_markNotificationsSeen)
@@ -43,6 +46,8 @@ class NotificationBloc {
   _registerNotificationToken(String userId) async {
     repository.registerNotificationToken(userId);
   }
+
+  _updateNotificationToken(UpdateToken updateToken) => repository.updateNotificationToken(updateToken);
 
   _loadStaticNotifications(LoadNotifications loadNotifications) async {
     _loadNotifications(LoadNotifications(
@@ -78,6 +83,7 @@ class NotificationBloc {
   void dispose() {
     _registerNotificationTokenController.close();
     _loadStaticNotificationsController.close();
+    _updateNotificationTokenController.close();
     _loadLiveNotificationsController.close();
     _notificationsController.close();
     _markNotificationsSeenController.close();

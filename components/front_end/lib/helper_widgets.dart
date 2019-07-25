@@ -33,6 +33,7 @@ export 'helper_widgets/lookbook/lookbook_card.dart';
 
 export 'helper_widgets/notices/app_title.dart';
 export 'helper_widgets/notices/custom_banner.dart';
+export 'helper_widgets/notices/item_not_found.dart';
 export 'helper_widgets/notices/under_construction_notice.dart';
 export 'helper_widgets/notices/verification_dialog.dart';
 

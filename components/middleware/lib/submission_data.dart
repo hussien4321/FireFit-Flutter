@@ -12,6 +12,7 @@ export 'submission_data/lookbook/load_lookbooks.dart';
 
 export 'submission_data/notification/load_notifications.dart';
 export 'submission_data/notification/mark_notifications_seen.dart';
+export 'submission_data/notification/update_token.dart';
 
 export 'submission_data/outfit/edit_outfit.dart';
 export 'submission_data/outfit/load_outfit.dart';

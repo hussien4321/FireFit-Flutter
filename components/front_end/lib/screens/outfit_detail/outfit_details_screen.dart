@@ -56,26 +56,27 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
   @override
   Widget build(BuildContext context) {
     _initBlocs();
-    return StreamBuilder<bool>(
-      stream: _outfitBloc.isLoading,
-      initialData: false,
-      builder: (ctx, isLoadingSnap) => StreamBuilder<Outfit>(
-        stream: _outfitBloc.selectedOutfit,
-        builder: (ctx, outfitSnap) {
-          if(isLoadingSnap.data || !outfitSnap.hasData && outfitSnap.data == null){
-            return _overlayScaffold(
-              body: _outfitLoadingPlaceholder()
-            );
-          }else{
-            if(outfit==null){
-              AnalyticsEvents(context).outfitViewed(outfitSnap.data);
+    return _overlayScaffold(
+      body: StreamBuilder<bool>(
+        stream: _outfitBloc.isLoading,
+        initialData: true,
+        builder: (ctx, isLoadingSnap) => StreamBuilder<Outfit>(
+          stream: _outfitBloc.selectedOutfit,
+          builder: (ctx, outfitSnap) {
+            if(isLoadingSnap.data){
+              return _outfitLoadingPlaceholder();
+            }else if(!outfitSnap.hasData || outfitSnap.data == null) {
+              return _outfitLoadingPlaceholder();
+              // return ItemNotFound(itemType: 'Outfit');
+            }else{
+              if(outfit==null){
+                AnalyticsEvents(context).outfitViewed(outfitSnap.data);
+              }
+              outfit = outfitSnap.data;
+              return  _buildMainBody();
             }
-            outfit = outfitSnap.data;
-            return _overlayScaffold(
-              body: _buildMainBody()
-            );
           }
-        }
+        ),
       ),
     );
   }

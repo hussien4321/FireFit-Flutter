@@ -254,12 +254,18 @@ class FirebaseUserRepository implements UserRepository {
   }
 
   Future<void> registerNotificationToken(String userId) async {
-    String notificationToken = await messaging.getToken();
     messaging.requestNotificationPermissions();
-    await cloudFunctions.getHttpsCallable(functionName: 'registerNotificationToken').call({
-      'user_id' : userId,
-      'notification_token' : notificationToken
-    }).catchError((exception) => catchExceptionWithBool(exception, analytics));
+    String notificationToken = await messaging.getToken();
+    return updateNotificationToken(UpdateToken(
+      userId: userId,
+      token: notificationToken,
+    ));
+  }
+  
+
+  Future<void> updateNotificationToken(UpdateToken updateToken) async {
+    await cloudFunctions.getHttpsCallable(functionName: 'registerNotificationToken').call(updateToken.toJson())
+      .catchError((exception) => catchExceptionWithBool(exception, analytics));
   }
 
   Future<void> logOut() async {

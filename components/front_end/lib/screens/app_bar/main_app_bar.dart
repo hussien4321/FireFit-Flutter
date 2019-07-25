@@ -104,6 +104,7 @@ class _MainAppBarState extends State<MainAppBar> {
         onMessage: (res) => _loadNewNotifications(),
       );
       _subscriptions = <StreamSubscription<dynamic>>[
+        _tokenRefreshListener(),
         _logInStatusListener(),
       ]..addAll(_successToastListeners())
       ..addAll(_uploadImagesListeners())
@@ -125,6 +126,11 @@ class _MainAppBarState extends State<MainAppBar> {
       userId: userId
     ));
   }
+
+  StreamSubscription _tokenRefreshListener() => widget.messaging.onTokenRefresh.listen((newToken) => _notificationBloc.updateNotificationToken.add(UpdateToken(
+    userId: userId,
+    token: newToken,
+  )));
   
   StreamSubscription _logInStatusListener() { 
     return _userBloc.accountStatus.listen((accountStatus) {

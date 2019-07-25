@@ -84,8 +84,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
             builder: (ctx, loadingOutfitsSnap) => StreamBuilder<User>(
               stream: _userBloc.selectedUser,
               builder: (ctx, snap) {
-                if(loadingSnap.data || !snap.hasData){
+              print('isLoading (hasData:${loadingSnap.hasData}, data:${loadingSnap.data}) / snap (hasData:${snap.hasData}, data:${snap.data})');
+                if(loadingSnap.data){
                   return Center(child: CircularProgressIndicator(),);
+                }else if(!snap.hasData || snap.data == null){
+                  return Center(child: CircularProgressIndicator(),);
+                  // return ItemNotFound(itemType: 'User',);
                 }
                 if(followUser.followed == null){
                   AnalyticsEvents(context).profileViewed(snap.data);
