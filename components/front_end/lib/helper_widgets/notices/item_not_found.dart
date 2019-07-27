@@ -31,17 +31,19 @@ class ItemNotFound extends StatelessWidget {
                     ),
                   ),
                   Padding(
-                    padding: const EdgeInsets.only(bottom: 16.0),
+                    padding: EdgeInsets.only(bottom: 16.0),
                     child: Text(
-                      '404 ERROR',
+                      '$itemType not found',
                       style: Theme.of(context).textTheme.title.copyWith(
                         color: Colors.red
                       ),
                     ),
                   ),
                   Text(
-                    "$itemType cannot be found\nThis may be due to the $itemType being deleted.",
-                    style: Theme.of(context).textTheme.body2,
+                    "This may be due to the $itemType being deleted.",
+                    style: Theme.of(context).textTheme.body2.copyWith(
+                      color: Colors.grey,
+                    ),
                     textAlign: TextAlign.center,
                   ),
                 ],

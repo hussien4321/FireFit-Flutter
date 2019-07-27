@@ -12,6 +12,8 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:overlay_support/overlay_support.dart';
 import 'package:overlay_support/src/notification/overlay_notification.dart';
 import 'package:helpers/helpers.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter/services.dart';
 
 class MainAppBar extends StatefulWidget {
 
@@ -29,7 +31,7 @@ class _MainAppBarState extends State<MainAppBar> {
   final GlobalKey<InnerDrawerState> _dmDrawerKey = GlobalKey<InnerDrawerState>();
   final GlobalKey<InnerDrawerState> _menuDrawerKey = GlobalKey<InnerDrawerState>();
 
-  Preferences _preferences =Preferences();
+  Preferences _preferences = Preferences();
 
   UserBloc _userBloc;
   OutfitBloc _outfitBloc;
@@ -66,7 +68,16 @@ class _MainAppBarState extends State<MainAppBar> {
   void initState() {
     super.initState();
     _loadDefaultPageIndex();
+    SystemChannels.lifecycle.setMessageHandler((msg){
+      if(msg==AppLifecycleState.resumed.toString()) {
+        _dismissOpenNotifications();
+        return null;
+      }
+    });
+
   }
+
+
 
   _loadDefaultPageIndex() async {
     int newIndex = pages.indexOf(await _preferences.getPreference(Preferences.DEFAULT_START_PAGE));
@@ -100,6 +111,7 @@ class _MainAppBarState extends State<MainAppBar> {
       _outfitBloc =OutfitBlocProvider.of(context);
       _notificationBloc = NotificationBlocProvider.of(context);
       _commentBloc =CommentBlocProvider.of(context);
+      _dismissOpenNotifications();
       widget.messaging.configure(
         onMessage: (res) => _loadNewNotifications(),
       );
@@ -120,6 +132,11 @@ class _MainAppBarState extends State<MainAppBar> {
   }
 
   _logCurrentScreen() => AnalyticsEvents(context).logCustomScreen('/${AppConfig.MAIN_PAGES_PATHS[currentIndex]}');
+
+  _dismissOpenNotifications(){
+    FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = new FlutterLocalNotificationsPlugin();
+    flutterLocalNotificationsPlugin.cancelAll();
+  }
 
   _loadNewNotifications() {
     _notificationBloc.loadLiveNotifications.add(LoadNotifications(

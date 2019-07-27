@@ -19,6 +19,7 @@ dependencies:
     path: components/front_end/
   repository_impl:
     path: components/repository_impl/
+  firebase_crashlytics: ^0.1.0+1
 dependency_overrides:
   path_provider: ^1.1.0
 

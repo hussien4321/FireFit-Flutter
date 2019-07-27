@@ -19,7 +19,7 @@ void main() async {
   Crashlytics crashlytics = Crashlytics.instance;
   FlutterError.onError = (FlutterErrorDetails details) {
     if(details.stack!=null){
-      crashlytics.onError(details);
+      crashlytics.recordFlutterError(details);
     }
   };
 

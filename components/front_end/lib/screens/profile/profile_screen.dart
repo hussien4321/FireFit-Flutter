@@ -75,21 +75,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _initBlocs();
     return Scaffold(
       body: StreamBuilder<bool>(
-        stream: _userBloc.isLoading,
+        stream: _userBloc.noUserFound,
         initialData: false,
-        builder: (ctx, loadingSnap){
-          return StreamBuilder<bool>(
+        builder: (ctx, noUserFoundSnap) => StreamBuilder<bool>(
+          stream: _userBloc.isLoading,
+          initialData: false,
+          builder: (ctx, loadingSnap) => StreamBuilder<bool>(
             stream: _outfitBloc.isLoading,
             initialData: false,
             builder: (ctx, loadingOutfitsSnap) => StreamBuilder<User>(
               stream: _userBloc.selectedUser,
               builder: (ctx, snap) {
-              print('isLoading (hasData:${loadingSnap.hasData}, data:${loadingSnap.data}) / snap (hasData:${snap.hasData}, data:${snap.data})');
-                if(loadingSnap.data){
+                if(noUserFoundSnap.data){
+                  return _userNotFound();
+                }
+                if(loadingSnap.data || !snap.hasData || snap.data == null){
                   return Center(child: CircularProgressIndicator(),);
-                }else if(!snap.hasData || snap.data == null){
-                  return Center(child: CircularProgressIndicator(),);
-                  // return ItemNotFound(itemType: 'User',);
                 }
                 if(followUser.followed == null){
                   AnalyticsEvents(context).profileViewed(snap.data);
@@ -98,8 +99,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 return _profileScaffold(snap.data, loadingOutfitsSnap.data);
               },
             ),
-          );
-        }
+          )
+        )
       ),
     );
   }
@@ -108,7 +109,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if(_userBloc == null){
       _userBloc = UserBlocProvider.of(context);
       _outfitBloc = OutfitBlocProvider.of(context);
-      _userBloc.selectUser.add(widget.userId);
+      _userBloc.selectUser.add('widget.userId');
       currentUserId = await _userBloc.existingAuthId.first;
       await _loadFiltersFromPreferences();
       _outfitBloc.loadUserOutfits.add(
@@ -128,15 +129,36 @@ class _ProfileScreenState extends State<ProfileScreen> {
     });
   }
 
+  Widget _userNotFound() {
+    return SafeArea(
+      child: Stack(
+        children: <Widget>[
+          Center(
+            child: ItemNotFound(itemType: 'User'),
+          ),
+          Positioned(
+            left: 4,
+            top: 4,
+            child: _closeButton(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _closeButton() {
+    return IconButton(
+      icon: Icon(
+        Icons.arrow_back,
+        color: Colors.black,
+      ),
+      onPressed: Navigator.of(context).pop,
+    );
+  }
+
   Widget _profileScaffold(User user, bool isLoadingOutfits){
     return CustomScaffold(
-      leading: IconButton(
-        icon: Icon(
-          Icons.arrow_back,
-          color: Colors.black,
-        ),
-        onPressed: Navigator.of(context).pop,
-      ),
+      leading: _closeButton(),
       title: isCurrentUser ? "My Profile" :
         "${user.name}'s Profile",
       actions: <Widget>[

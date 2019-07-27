@@ -44,15 +44,8 @@ class CachedOutfitRepository {
   
 
   Future<int> addOutfitSearch(int outfitId, SearchModes searchMode) async {
-    SearchOutfit searchOutfit =SearchOutfit(
-      outfitId: outfitId,
-      searchMode: searchModeToString(searchMode),
-    );
-    return streamDatabase.insert(
-      'outfit_search',
-      searchOutfit.toJson(),
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
+    String searchModeString = searchModeToString(searchMode);
+    return streamDatabase.rawInsert(['outfit_search','outfit'], "INSERT INTO outfit_search (search_outfit_id, search_outfit_mode) VALUES (?, ?)", [outfitId, searchModeString]);
   }
 
 

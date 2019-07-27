@@ -67,6 +67,9 @@ class OutfitBloc{
   final _isBackgroundLoadingController = PublishSubject<bool>();
   Observable<bool> get isBackgroundLoading => _isBackgroundLoadingController.stream;
 
+  final _noOutfitFoundController = PublishSubject<bool>();
+  Observable<bool> get noOutfitFound => _noOutfitFoundController.stream;
+
   final _loadingController = PublishSubject<bool>();
   Observable<bool> get isLoading => _loadingController.stream;
   final _successController = PublishSubject<bool>();
@@ -263,7 +266,15 @@ class OutfitBloc{
   _loadOutfit(LoadOutfit loadOutfit) async {
     loadOutfit.searchModes = SearchModes.SELECTED_SINGLE;
     _loadingController.add(true);
-    final success = await repository.loadOutfit(loadOutfit);
+    bool success = false;
+    try {
+      success =  await repository.loadOutfit(loadOutfit);     
+    } on NoItemFoundException catch (_) {
+      print('caught _noOutfitFoundController!');
+      success = true;
+      _noOutfitFoundController.add(true);
+    }
+    
     _loadingController.add(false);
     _successController.add(success);
     if(!success){
@@ -289,6 +300,7 @@ class OutfitBloc{
     _deleteOutfitController.close();
     _createLookbookController.close();
     _editLookbookController.close();
+    _noOutfitFoundController.close();
     _deleteLookbookController.close();
     _selectedOutfitController.close();
     _selectOutfitController.close();

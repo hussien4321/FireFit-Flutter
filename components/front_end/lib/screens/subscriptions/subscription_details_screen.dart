@@ -56,7 +56,7 @@ class _SubscriptionDetailsScreenState extends State<SubscriptionDetailsScreen> {
         items: <Widget>[
           BenefitOverview(
             icon: FontAwesomeIcons.cameraRetro,
-            title: 'Unlimited of daily uploads',
+            title: 'Unlimited daily uploads',
             description: 'Go wild experimenting with new fits all day long with no limits!',
           ),
           BenefitOverview(
@@ -118,7 +118,7 @@ class _SubscriptionDetailsScreenState extends State<SubscriptionDetailsScreen> {
             color: Colors.blue,
             padding: EdgeInsets.all(16),
             child: Text(
-              'Take your fashion to the next level!',
+              'Take my style to the next level!',
               style: Theme.of(context).textTheme.subhead.copyWith(
                 color: Colors.white,
                 fontWeight: FontWeight.w300

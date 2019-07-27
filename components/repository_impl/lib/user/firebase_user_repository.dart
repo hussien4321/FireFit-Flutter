@@ -150,6 +150,10 @@ class FirebaseUserRepository implements UserRepository {
     if(user !=null){
       await userCache.addUser(user, searchMode);
       return true;
+    }else{
+      if(searchMode ==SearchModes.SELECTED){
+        throw NoItemFoundException();
+      }
     }
     return false;
   }

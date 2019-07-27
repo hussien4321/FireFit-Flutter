@@ -56,6 +56,9 @@ class UserBloc {
   final _isBackgroundLoadingController = PublishSubject<bool>();
   Observable<bool> get isBackgroundLoading => _isBackgroundLoadingController.stream;
 
+  final _noUserFoundController = PublishSubject<bool>();
+  Observable<bool> get noUserFound => _noUserFoundController.stream;
+
   final _loadingController = PublishSubject<bool>();
   Observable<bool> get isLoading => _loadingController.stream;
   final _isLoadingFollowsController = PublishSubject<bool>();
@@ -271,13 +274,17 @@ class UserBloc {
 
   _loadSelectedUser(String userId) async {
     _loadingController.add(true);
-    await _repository.loadUserDetails(
-      LoadUser(
-        userId: userId,
-        currentUserId: _currentUserId
-      ),
-      SearchModes.SELECTED
-    );
+    try{
+      await _repository.loadUserDetails(
+        LoadUser(
+          userId: userId,
+          currentUserId: _currentUserId
+        ),
+        SearchModes.SELECTED
+      );
+    } on NoItemFoundException catch (_) {
+      _noUserFoundController.add(true);
+    }
     _loadingController.add(false);
   }
 
@@ -342,6 +349,7 @@ class UserBloc {
     _followUserController.close();
     _selectUserController.close();
     _searchUserController.close();
+    _noUserFoundController.close();
     _loadingController.close();
     _logInController.close();
     _logOutController.close();

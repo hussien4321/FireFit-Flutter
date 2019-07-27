@@ -68,16 +68,25 @@ class FirebaseOutfitRepository implements OutfitRepository {
 
   Future<bool> loadOutfit(LoadOutfit loadOutfit) async {
     await cache.clearOutfits(loadOutfit.searchModes);
-    if(loadOutfit.loadFromCloud){
+    if(!loadOutfit.loadFromCloud){
       return cloudFunctions.getHttpsCallable(functionName: 'getOutfit').call(loadOutfit.toJson())
       .then((res) async {
         List<Outfit> outfits = _resToOutfitList(res);
-        outfits.forEach((outfit) => cache.addOutfit(outfit, loadOutfit.searchModes));
+        if(outfits.isNotEmpty){
+          await cache.addOutfit(outfits.first, loadOutfit.searchModes);
+        }else{
+          throw NoItemFoundException();
+        }
         return true;
       })
-      .catchError((exception) => catchExceptionWithBool(exception, analytics));
+      .catchError((exception) {
+        if(exception is NoItemFoundException){
+          throw NoItemFoundException();
+        }
+        return catchExceptionWithBool(exception, analytics);
+      });
     }else{
-      cache.addOutfitSearch(loadOutfit.outfitId, loadOutfit.searchModes);
+      await cache.addOutfitSearch(loadOutfit.outfitId, loadOutfit.searchModes);
       return true;
     }
   }
