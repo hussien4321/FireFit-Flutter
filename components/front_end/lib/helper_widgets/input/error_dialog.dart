@@ -34,7 +34,7 @@ class _ErrorDialogState extends State<ErrorDialog> {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
           Text(
-            'Error Detected!',
+            'Error',
             style: Theme.of(context).textTheme.title.copyWith(
               color: Colors.red[900],
               fontWeight: FontWeight.bold

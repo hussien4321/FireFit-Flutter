@@ -55,7 +55,7 @@ class _LogInScreenState extends State<LogInScreen> with LoadingAndErrorDialogs {
   Widget build(BuildContext context) {
     _initBlocs();
     return CustomScaffold(
-      title: widget.isRegistering ? 'Create account' : 'Sign in',
+      title: widget.isRegistering ? 'Create account' : 'Log in',
       actions: <Widget>[
         IconButton(
           icon: Icon(FontAwesomeIcons.signInAlt),

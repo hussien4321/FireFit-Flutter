@@ -49,6 +49,9 @@ export 'helper_widgets/outfit/style_sticker.dart';
 export 'helper_widgets/overlays/custom_scaffold.dart';
 export 'helper_widgets/overlays/pull_to_refresh_overlay.dart';
 
+export 'helper_widgets/settings/settings_header.dart';
+export 'helper_widgets/settings/settings_option.dart';
+
 export 'helper_widgets/state/loading_and_error_dialogs.dart';
 export 'helper_widgets/state/snackbar_messages.dart';
 

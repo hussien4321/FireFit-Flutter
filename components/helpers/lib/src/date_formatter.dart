@@ -17,6 +17,12 @@ class DateFormatter {
     }
   }
 
+  static String dateToDMYFormat(DateTime dateTime){
+    String dateString = "";
+    dateString += "${dateTime.day<10?'0':''}${dateTime.day}/${dateTime.month<10?'0':''}${dateTime.month}/${dateTime.year.toString().substring(2,4)}";
+    return dateString;
+  }
+
   static String dateToLongFormat(DateTime dateTime){
     String dateString = "";
     dateString += "${_monthToString(dateTime.month)} ${dateTime.day}${_daySuffix(dateTime)} ${dateTime.year}";

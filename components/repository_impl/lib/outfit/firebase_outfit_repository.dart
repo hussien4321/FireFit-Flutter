@@ -68,7 +68,7 @@ class FirebaseOutfitRepository implements OutfitRepository {
 
   Future<bool> loadOutfit(LoadOutfit loadOutfit) async {
     await cache.clearOutfits(loadOutfit.searchModes);
-    if(!loadOutfit.loadFromCloud){
+    if(loadOutfit.loadFromCloud){
       return cloudFunctions.getHttpsCallable(functionName: 'getOutfit').call(loadOutfit.toJson())
       .then((res) async {
         List<Outfit> outfits = _resToOutfitList(res);

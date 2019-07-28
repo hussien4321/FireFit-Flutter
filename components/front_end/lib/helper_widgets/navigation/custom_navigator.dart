@@ -220,6 +220,16 @@ class CustomNavigator {
       )
     ));
   }
+
+  static Future<T> goToFeedbackScreen<T extends Object>(BuildContext context) {
+    return Navigator.push(context, MaterialPageRoute(
+      builder: (context) => FeedbackScreen(
+      ),
+      settings: RouteSettings(
+        name: '/feedback'
+      )
+    ));
+  }
 }
 
 class SlideRightRoute extends PageRouteBuilder {

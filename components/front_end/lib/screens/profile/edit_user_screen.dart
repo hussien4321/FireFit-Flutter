@@ -313,7 +313,7 @@ class _EditUserScreenState extends State<EditUserScreen> with LoadingAndErrorDia
           onSubmitted: (t) => FocusScope.of(context).requestFocus(bioFocus),
           textCapitalization: TextCapitalization.words,
           textInputAction: TextInputAction.next,
-          style: Theme.of(context).textTheme.display1.apply(color: Colors.black),
+          style: Theme.of(context).textTheme.headline.apply(color: Colors.black),
           decoration: new InputDecoration.collapsed(
             hintText: "Theme/mood of this look...",
             hintStyle: Theme.of(context).textTheme.headline.apply(color: Colors.black.withOpacity(0.5))

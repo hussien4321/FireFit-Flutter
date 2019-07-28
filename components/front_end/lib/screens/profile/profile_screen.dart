@@ -109,7 +109,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if(_userBloc == null){
       _userBloc = UserBlocProvider.of(context);
       _outfitBloc = OutfitBlocProvider.of(context);
-      _userBloc.selectUser.add('widget.userId');
+      _userBloc.selectUser.add(widget.userId);
       currentUserId = await _userBloc.existingAuthId.first;
       await _loadFiltersFromPreferences();
       _outfitBloc.loadUserOutfits.add(

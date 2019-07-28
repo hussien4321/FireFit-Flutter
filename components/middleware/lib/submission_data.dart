@@ -24,6 +24,8 @@ export 'submission_data/outfit/upload_outfit.dart';
 export 'submission_data/save/delete_save.dart';
 export 'submission_data/save/outfit_save.dart';
 
+export 'submission_data/settings/feedback_request.dart';
+
 export 'submission_data/user/edit_user.dart';
 export 'submission_data/user/follow_user.dart';
 export 'submission_data/user/load_user.dart';

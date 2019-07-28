@@ -3,8 +3,9 @@ import 'package:blocs/blocs.dart';
 import 'package:front_end/providers.dart';
 import 'package:front_end/helper_widgets.dart';
 import 'package:helpers/helpers.dart';
-import 'package:helpers/helpers.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'dart:async';
+import 'package:package_info/package_info.dart';
 
 class SettingsScreen extends StatefulWidget {
   @override
@@ -21,6 +22,8 @@ class _SettingsScreenState extends State<SettingsScreen> with LoadingAndErrorDia
   Preferences preferences = Preferences();
   String currentDefaultPage;
 
+  String version = 'Loading...';
+
   @override
   void dispose() {
     _subscriptions?.forEach((subscription) => subscription.cancel());
@@ -31,6 +34,7 @@ class _SettingsScreenState extends State<SettingsScreen> with LoadingAndErrorDia
   void initState() {
     super.initState();
     _loadPreferencesData();
+    _loadVersion();
   }
 
   _loadPreferencesData() async {
@@ -41,26 +45,92 @@ class _SettingsScreenState extends State<SettingsScreen> with LoadingAndErrorDia
     });
   }
 
+  _loadVersion() {
+    PackageInfo.fromPlatform().then((PackageInfo packageInfo) {
+      setState(() {
+        version = packageInfo.version;      
+      });
+  });
+
+  }
+
   @override
   Widget build(BuildContext context) {
     _initBlocs();
     return CustomScaffold(
+      backgroundColor: Colors.white,
       title:'Settings',
       allCaps: true,
-      body: Container(
-        padding: EdgeInsets.only(left: 8, right: 8),
-        child: SingleChildScrollView(
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.only(bottom: 32.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              _sectionHeader('MENU'),
-              _defaultStartPage(),
-              _sectionHeader('ACCOUNT'),
-              _signOut(),
-              _deleteAccount(),
+              SettingsHeader('Config'),
+              SettingsOption(
+                icon: FontAwesomeIcons.wrench,
+                name: 'Default start page',
+                action: _defaultStartPageDropdown(),
+              ),
+              SettingsHeader('Support'),
+              SettingsOption(
+                icon: Icons.email,
+                name: 'Suggest improvements',
+                onTap: () => CustomNavigator.goToFeedbackScreen(context),
+              ),
+              SettingsOption(
+                icon:  FontAwesomeIcons.question,
+                name: 'FAQ',
+              ),
+              SettingsHeader('Social'),
+              SettingsOption(
+                icon:  FontAwesomeIcons.smile,
+                name: 'Invite a friend',
+              ),
+              SettingsOption(
+                icon:  FontAwesomeIcons.twitter,
+                name: 'Follow us',
+              ),
+              SettingsHeader('About'),
+              SettingsOption(
+                icon:  FontAwesomeIcons.phone,
+                name: 'Version',
+                action: Text(
+                  version,
+                  style: Theme.of(context).textTheme.caption,
+                )
+              ),
+              SettingsOption(
+                icon:  FontAwesomeIcons.lock,
+                name: 'Privacy policy',
+              ),
+              SettingsOption(
+                icon:  FontAwesomeIcons.envelopeOpenText,
+                name: 'Terms of service',
+              ),
+              SettingsOption(
+                icon:  FontAwesomeIcons.copyright,
+                name: 'Copyrights',
+              ),
+              SettingsHeader('Account'),
+              SettingsOption(
+                icon:  Icons.delete_forever,
+                iconColor: Colors.red,
+                name: 'Delete account',
+                onTap: _confirmDelete,
+              ),
+              SettingsOption(
+                icon:  FontAwesomeIcons.signOutAlt,
+                iconColor: Colors.red,
+                name: 'Log out',
+                textColor: Colors.red,
+                centerText: true,
+                onTap: _confirmLogOut,
+              ),
             ],
           ),
-        )
+        ),
       )
     );
   }
@@ -87,91 +157,38 @@ class _SettingsScreenState extends State<SettingsScreen> with LoadingAndErrorDia
     });
   }
 
-  Widget _sectionHeader(String title){
-    return Container(
-      width: double.infinity,
-      margin: EdgeInsets.only(bottom: 8, top: 16),
-      decoration: BoxDecoration(
-        border: BorderDirectional(
-          bottom: BorderSide(
-            color: Colors.grey,
-            width: 0.5
-          )
-        )
-      ),
-      child: Text(
-        title,
-        style: Theme.of(context).textTheme.title.copyWith(
-          inherit: true,
-          fontWeight: FontWeight.w600,
-          fontStyle: FontStyle.italic,
-          letterSpacing: 1.2,
-        ),
-      ),
-    );
-  }
-
-  Widget _defaultStartPage() {
+  Widget _defaultStartPageDropdown() {
     List<String> pages = AppConfig.MAIN_PAGES;
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: <Widget>[
-        Text(
-          'Default start page'
-        ),
-        DropdownButton(
-          value: currentDefaultPage,
-          items: pages.map((page) {
-            return DropdownMenuItem(
-              child: Text(
-                page,
-                style: TextStyle(
-                  inherit: true,
-                  color: page ==currentDefaultPage ? Colors.blue: Colors.grey
-                ),
-              ),
-              value: page,
-            );
-          }).toList(),
-          onChanged: (newPage) {
-            preferences.updatePreference(Preferences.DEFAULT_START_PAGE, newPage);
-            setState(() {
-             currentDefaultPage = newPage; 
-            });
-          },
-        ),
-      ],
+    return DropdownButton(
+      value: currentDefaultPage,
+      items: pages.map((page) {
+        return DropdownMenuItem(
+          child: Text(
+            page,
+            style: TextStyle(
+              inherit: true,
+              color: page ==currentDefaultPage ? Colors.blue: Colors.grey
+            ),
+          ),
+          value: page,
+        );
+      }).toList(),
+      onChanged: (newPage) {
+        preferences.updatePreference(Preferences.DEFAULT_START_PAGE, newPage);
+        setState(() {
+          currentDefaultPage = newPage; 
+        });
+      },
     );
   }
 
-  Widget _signOut() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: <Widget>[
-        Expanded(
-          child: FlatButton(
-            child: Text(
-              'Sign out',
-              style:TextStyle(
-                fontWeight: FontWeight.w500,
-                fontSize: 22.0,
-                color: Colors.redAccent[700],
-              ),
-              textAlign: TextAlign.center,
-            ),
-            onPressed: _confirmLogOut,
-          ),
-        )
-      ],
-    );
-  }
   _confirmLogOut() {
     return showDialog(
       context: context,
       builder: (secondContext) {
         return YesNoDialog(
-          title: 'Sign out',
-          description: 'Are you sure you want to sign out?',
+          title: 'Log out',
+          description: 'Are you sure you want to log out?',
           yesText: 'Yes',
           noText: 'Cancel',
           onYes: () {
@@ -184,23 +201,6 @@ class _SettingsScreenState extends State<SettingsScreen> with LoadingAndErrorDia
         );
       }
     ) ?? false;
-  }
-
-  Widget _deleteAccount() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: <Widget>[
-        Expanded(
-          child: FlatButton(
-            child: Text(
-              'Delete Account',
-              style: Theme.of(context).textTheme.button.apply(color: Colors.red),
-            ),
-            onPressed: _confirmDelete,
-          ),
-        )
-      ],
-    );
   }
 
   _confirmDelete(){

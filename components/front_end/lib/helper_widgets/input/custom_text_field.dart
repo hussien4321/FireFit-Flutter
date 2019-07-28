@@ -70,7 +70,7 @@ class CustomTextField extends StatelessWidget {
             textInputAction: textInputAction,
             maxLength: maxLength,
             maxLengthEnforced: true,
-            style: Theme.of(context).textTheme.display1.apply(color: textColor != null ? textColor : Colors.black),
+            style: Theme.of(context).textTheme.headline.apply(color: textColor != null ? textColor : Colors.black),
             decoration: new InputDecoration.collapsed(
               hintText: hintText,
               hintStyle: Theme.of(context).textTheme.headline.apply(color: Colors.black.withOpacity(0.5)),

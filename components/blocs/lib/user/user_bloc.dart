@@ -26,7 +26,7 @@ class UserBloc {
   final _followersController = BehaviorSubject<List<User>>();
   Stream<List<User>> get followers => _followersController;
   final _followingController = BehaviorSubject<List<User>>();
-  Stream<List<User>> get following => _followingController;
+  Stream<List<User>> get following => _followingController; 
   final _loadFollowersController = PublishSubject<LoadUsers>();
   Sink<LoadUsers> get loadFollowers => _loadFollowersController; 
   final _loadFollowingController = PublishSubject<LoadUsers>();
@@ -49,6 +49,8 @@ class UserBloc {
   final _deleteUserController = PublishSubject<void>();
   Sink<void> get deleteUser => _deleteUserController;
 
+  final _sendFeedbackController = PublishSubject<FeedbackRequest>();
+  Sink<FeedbackRequest> get sendFeedback => _sendFeedbackController;
   
   final _onboardController = PublishSubject<OnboardUser>();
   Sink<OnboardUser> get onboard => _onboardController;
@@ -106,6 +108,7 @@ class UserBloc {
       _followUserController.listen(_followUser),
       _loadFollowersController.listen(_loadFollowers),
       _loadFollowingController.listen(_loadFollowing),
+      _sendFeedbackController.listen(_sendFeedback),
     ];
     _selectedUserController.addStream(_repository.getUser(SearchModes.SELECTED));
     _currentUserController.addStream(_repository.getUser(SearchModes.MINE));
@@ -337,6 +340,16 @@ class UserBloc {
     _isLoadingFollowsController.add(false);
   }
 
+  _sendFeedback(FeedbackRequest feedbackRequest) async {
+    _loadingController.add(true);
+    bool success = await _repository.sendFeedback(feedbackRequest);
+    _loadingController.add(false);
+    _successController.add(success);
+    if(!success){
+      _errorController.add("Failed to send feedback");
+    }
+  }
+
   void dispose() {
     _currentUserController.close();
     _existingAuthController.close();
@@ -349,7 +362,11 @@ class UserBloc {
     _followUserController.close();
     _selectUserController.close();
     _searchUserController.close();
+    _sendFeedbackController.close();
     _noUserFoundController.close();
+    _checkUsernameController.close();
+    _refreshVerificationEmailController.close();
+    _resendEmailController.close();
     _loadingController.close();
     _logInController.close();
     _logOutController.close();

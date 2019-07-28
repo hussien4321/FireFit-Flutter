@@ -294,6 +294,15 @@ class FirebaseUserRepository implements UserRepository {
     .catchError((exception) => catchExceptionWithBool(exception, analytics));
   }
 
+  Future<bool> sendFeedback(FeedbackRequest feedbackRequest) {
+    return cloudFunctions.getHttpsCallable(functionName: 'sendFeedback').call(feedbackRequest.toJson())
+    .then((res) {
+      return res.data['res'].toString() == 'true';
+    })
+    .catchError((exception) => catchExceptionWithBool(exception, analytics));
+  }
+
+
   Stream<User> getUser(SearchModes searchMode) => userCache.getUser(searchMode);
   
   Stream<List<User>> getUsers(SearchModes searchMode) => userCache.getUsers(searchMode);

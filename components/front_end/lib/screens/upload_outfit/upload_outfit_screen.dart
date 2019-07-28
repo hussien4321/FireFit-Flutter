@@ -41,6 +41,7 @@ class _UploadOutfitScreenState extends State<UploadOutfitScreen> with LoadingAnd
   void initState() {
     super.initState();
     uploadOutfit = UploadOutfit();
+    uploadOutfit.title = "OOTD (${DateFormatter.dateToDMYFormat(DateTime.now())})";
     titleTextEdit = TextEditingController(text: uploadOutfit.title);
     descriptionTextEdit = TextEditingController(text: uploadOutfit.description);
     _initTempGallery();
@@ -231,7 +232,7 @@ class _UploadOutfitScreenState extends State<UploadOutfitScreen> with LoadingAnd
         maxLength: 50,
         maxLengthEnforced: true,
         textCapitalization: TextCapitalization.words,
-        style: Theme.of(context).textTheme.display1.apply(color: Colors.black),
+        style: Theme.of(context).textTheme.headline.apply(color: Colors.black),
         decoration: new InputDecoration.collapsed(
           hintText: "Theme/mood of this look...",
           hintStyle: Theme.of(context).textTheme.headline.apply(color: Colors.black.withOpacity(0.5))
