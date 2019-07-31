@@ -79,7 +79,7 @@ class _MenuNavigationScreenState extends State<MenuNavigationScreen> {
                         _menuOption(
                           title: 'FIREFIT+',
                           iconData: FontAwesomeIcons.fireAlt,
-                          color: Color.fromRGBO(255, 203, 20, 1.0),
+                          color: Color.fromRGBO(225, 173, 0, 1.0),
                           onPressed: () => CustomNavigator.goToSubscriptionDetailsScreen(context)
                         ),
                         _menuOption(

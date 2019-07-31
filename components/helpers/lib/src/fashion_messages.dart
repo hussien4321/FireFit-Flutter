@@ -1,9 +1,9 @@
 class FashionMessages {
   
   static final List<String> MOTIVATIONAL_MESSAGES = [
-    "Be you, the real you!",
+    "Dress for yourself and no one else!",
     "You decide what kind of image to show the world each day",
     "Dress how you want to deep down",
-    "Thinking of trying a new style?",    
+    "Try something new today",     
   ]; 
 }

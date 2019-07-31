@@ -93,6 +93,7 @@ class _UsernamePageState extends State<UsernamePage> with SnackbarMessages {
                           maxLength: 30,
                           titleStyle: Theme.of(context).textTheme.subtitle,
                           textInputAction: TextInputAction.next,
+                          textStyle: Theme.of(context).textTheme.display1,
                           prefix: Text(
                             ' @',
                             style: Theme.of(context).textTheme.title.copyWith(fontSize: 32),

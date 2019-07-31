@@ -24,7 +24,7 @@ class SettingsOption extends StatelessWidget {
   Widget build(BuildContext context) {
     Widget leading = Padding(
       padding: const EdgeInsets.only(right: 8.0),
-      child: Icon(
+      child: icon == null ? Container() : Icon(
         icon,
         color: iconColor,
         size: 16,
@@ -60,7 +60,7 @@ class SettingsOption extends StatelessWidget {
         ],
       ),
     );
-    if(action==null){
+    if(onTap!=null){
       body = InkWell(
         onTap: onTap,
         child: body,

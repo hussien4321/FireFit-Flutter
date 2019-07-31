@@ -7,7 +7,7 @@ class CustomTextField extends StatelessWidget {
   final TextCapitalization textCapitalization;
   final TextInputAction textInputAction;
   final String title, hintText;
-  final TextStyle titleStyle;
+  final TextStyle titleStyle, textStyle;
   final Widget prefix;
   final FocusNode focusNode;
   final Color textColor;
@@ -24,6 +24,7 @@ class CustomTextField extends StatelessWidget {
     this.textInputAction,
     this.title,
     this.titleStyle,
+    this.textStyle,
     this.textColor,
     this.hintText,
     this.maxLength,
@@ -32,6 +33,10 @@ class CustomTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    TextStyle selectedTextStyle = Theme.of(context).textTheme.headline;
+    if(textStyle != null){
+      selectedTextStyle = textStyle;
+    }
     return Column(
       children: <Widget>[
         Container(
@@ -70,7 +75,7 @@ class CustomTextField extends StatelessWidget {
             textInputAction: textInputAction,
             maxLength: maxLength,
             maxLengthEnforced: true,
-            style: Theme.of(context).textTheme.headline.apply(color: textColor != null ? textColor : Colors.black),
+            style: selectedTextStyle.apply(color: textColor != null ? textColor : Colors.black),
             decoration: new InputDecoration.collapsed(
               hintText: hintText,
               hintStyle: Theme.of(context).textTheme.headline.apply(color: Colors.black.withOpacity(0.5)),

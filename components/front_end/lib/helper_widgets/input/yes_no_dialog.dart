@@ -5,8 +5,9 @@ class YesNoDialog extends StatelessWidget {
 
   final String title, description, yesText, noText, icon;
   final VoidCallback onYes, onNo, onDone;
+  final Color yesColor, noColor;
 
-  YesNoDialog({this.title, this.description, this.yesText, this.noText, this.onYes, this.onNo, this.onDone, this.icon});
+  YesNoDialog({this.title, this.description, this.yesText, this.noText, this.onYes, this.onNo, this.onDone, this.icon, this.yesColor = Colors.blue, this.noColor});
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +40,7 @@ class YesNoDialog extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: <Widget>[
                   _customFlatButton(context,
-                    color: Theme.of(context).errorColor,
+                    color: noColor != null ? noColor : Theme.of(context).errorColor,
                     text: noText,
                     onTap: () {
                       if(onNo != null){
@@ -50,7 +51,7 @@ class YesNoDialog extends StatelessWidget {
                   ),
                   Padding( padding: EdgeInsets.all(8.0)),
                   _customFlatButton(context,
-                    color: Colors.blue,
+                    color: yesColor,
                     text: yesText,
                     onTap: () {
                       onYes();

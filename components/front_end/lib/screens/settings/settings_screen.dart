@@ -4,8 +4,10 @@ import 'package:front_end/providers.dart';
 import 'package:front_end/helper_widgets.dart';
 import 'package:helpers/helpers.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'dart:async';
 import 'package:package_info/package_info.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:overlay_support/overlay_support.dart';
+import 'package:share/share.dart';
 
 class SettingsScreen extends StatefulWidget {
   @override
@@ -15,20 +17,14 @@ class SettingsScreen extends StatefulWidget {
 class _SettingsScreenState extends State<SettingsScreen> with LoadingAndErrorDialogs {
   
   UserBloc _userBloc;
-  List<StreamSubscription<dynamic>> _subscriptions;
-  
-  bool isOverlayShowing = false;
   
   Preferences preferences = Preferences();
   String currentDefaultPage;
 
   String version = 'Loading...';
 
-  @override
-  void dispose() {
-    _subscriptions?.forEach((subscription) => subscription.cancel());
-    super.dispose();
-  }
+  String username;
+  String _twitterURL = "https://www.twitter.com/nfrealmusic";
 
   @override
   void initState() {
@@ -82,15 +78,18 @@ class _SettingsScreenState extends State<SettingsScreen> with LoadingAndErrorDia
               SettingsOption(
                 icon:  FontAwesomeIcons.question,
                 name: 'FAQ',
+                onTap: () => CustomNavigator.goToFAQScreen(context),
               ),
               SettingsHeader('Social'),
               SettingsOption(
                 icon:  FontAwesomeIcons.smile,
                 name: 'Invite a friend',
+                onTap: _shareApp,
               ),
               SettingsOption(
                 icon:  FontAwesomeIcons.twitter,
-                name: 'Follow us',
+                name: 'Follow us @firefitappteam',
+                onTap: _openTwitter,
               ),
               SettingsHeader('About'),
               SettingsOption(
@@ -118,7 +117,7 @@ class _SettingsScreenState extends State<SettingsScreen> with LoadingAndErrorDia
                 icon:  Icons.delete_forever,
                 iconColor: Colors.red,
                 name: 'Delete account',
-                onTap: _confirmDelete,
+                onTap: () => CustomNavigator.goToDeleteAccountScreen(context),
               ),
               SettingsOption(
                 icon:  FontAwesomeIcons.signOutAlt,
@@ -138,23 +137,8 @@ class _SettingsScreenState extends State<SettingsScreen> with LoadingAndErrorDia
   _initBlocs(){
     if(_userBloc == null){
       _userBloc =UserBlocProvider.of(context);
-      _subscriptions = <StreamSubscription<dynamic>>[
-        _loadingListener(),
-      ];
+      _userBloc.selectedUser.first.then((user) => username = user.username);
     }
-  }
-
-  StreamSubscription _loadingListener(){
-    return _userBloc.isLoading.listen((loadingStatus) {
-      if(loadingStatus && !isOverlayShowing){
-        startLoading("Deleting user", context);
-        isOverlayShowing = true;
-      }
-      if(!loadingStatus && isOverlayShowing){
-        isOverlayShowing = false;
-        stopLoading(context);
-      }
-    });
   }
 
   Widget _defaultStartPageDropdown() {
@@ -181,6 +165,17 @@ class _SettingsScreenState extends State<SettingsScreen> with LoadingAndErrorDia
       },
     );
   }
+  
+  _shareApp() => Share.share('I thought you might be interested in this fashion app for sharing and discussing your daily looks: https://firefitapp.com \n\nYou can find my profile by searching for @$username in the app!');
+  
+  _openTwitter() async {
+    if (await canLaunch(_twitterURL)) {
+      await launch(_twitterURL);
+    } else {
+      toast("Failed to open browser");
+    }
+  }
+
 
   _confirmLogOut() {
     return showDialog(
@@ -194,26 +189,6 @@ class _SettingsScreenState extends State<SettingsScreen> with LoadingAndErrorDia
           onYes: () {
             _userBloc.logOut.add(null);
             Navigator.pop(context);
-          },
-          onDone: () {
-            Navigator.pop(context);
-          },
-        );
-      }
-    ) ?? false;
-  }
-
-  _confirmDelete(){
-    return showDialog(
-      context: context,
-      builder: (secondContext) {
-        return YesNoDialog(
-          title: 'Delete Account',
-          description: 'Are you sure you want to delete this account?\n(NOTE: This action is PERMANENT and cannot be undone!)',
-          yesText: 'Yes',
-          noText: 'Cancel',
-          onYes: () {
-            _userBloc.deleteUser.add(null);
           },
           onDone: () {
             Navigator.pop(context);

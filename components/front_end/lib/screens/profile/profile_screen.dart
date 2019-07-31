@@ -438,7 +438,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           _sectionHeader("User Bio"),
           Text(
             user.bio,
-            style: Theme.of(context).textTheme.caption,
+            style: Theme.of(context).textTheme.subhead.copyWith(color: Colors.orange[900]),
           ),
         ],
       ),
@@ -486,7 +486,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _sortingButton(User user){
-    bool enabled = user != null && user.numberOfOutfits > 0;
+    bool enabled = user != null && user.numberOfOutfits != null && user.numberOfOutfits > 0;
     return FlatButton(
       child: Row(
         children: <Widget>[

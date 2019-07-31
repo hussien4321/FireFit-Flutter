@@ -26,6 +26,8 @@ export 'screens/profile/edit_user_screen.dart';
 export 'screens/profile/profile_screen.dart';
 export 'screens/profile/follow_users_screen.dart';
 
+export 'screens/settings/delete_account_screen.dart';
+export 'screens/settings/faq_screen.dart';
 export 'screens/settings/feedback_screen.dart';
 export 'screens/settings/settings_screen.dart';
 

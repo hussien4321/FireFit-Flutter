@@ -223,10 +223,26 @@ class CustomNavigator {
 
   static Future<T> goToFeedbackScreen<T extends Object>(BuildContext context) {
     return Navigator.push(context, MaterialPageRoute(
-      builder: (context) => FeedbackScreen(
-      ),
+      builder: (context) => FeedbackScreen(),
       settings: RouteSettings(
         name: '/feedback'
+      )
+    ));
+  }
+
+  static Future<T> goToFAQScreen<T extends Object>(BuildContext context) {
+    return Navigator.push(context, MaterialPageRoute(
+      builder: (context) => FAQScreen(),
+      settings: RouteSettings(
+        name: '/faq'
+      )
+    ));
+  }
+  static Future<T> goToDeleteAccountScreen<T extends Object>(BuildContext context) {
+    return Navigator.push(context, MaterialPageRoute(
+      builder: (context) => DeleteAccountScreen(),
+      settings: RouteSettings(
+        name: '/delete-account'
       )
     ));
   }

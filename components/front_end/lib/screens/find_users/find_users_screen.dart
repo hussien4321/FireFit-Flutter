@@ -78,6 +78,7 @@ class _FindUsersScreenState extends State<FindUsersScreen> {
       hintText: 'unique_name',
       titleStyle: Theme.of(context).textTheme.subtitle,
       textInputAction: TextInputAction.next,
+      textStyle: Theme.of(context).textTheme.display1,
       prefix: Text(
         ' @',
         style: Theme.of(context).textTheme.title.copyWith(fontSize: 32),

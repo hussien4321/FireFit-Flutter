@@ -298,7 +298,7 @@ class UserBloc {
         username: username,
         currentUserId: _currentUserId
       ),
-      SearchModes.SELECTED
+      SearchModes.TEMP
     );
     _loadingController.add(false);
   }
@@ -321,7 +321,7 @@ class UserBloc {
     if(success){
       _successMessageController.add(isFollowing ?  "User unfollowed!" : "Now following user!");
     }else{
-      _errorController.add("Failed to complete task");
+      _errorController.add("Failed to follow user");
     }
   }
 

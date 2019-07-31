@@ -563,7 +563,7 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
             decoration: isEnd ? null :BoxDecoration(
               border: BorderDirectional(
                 end: BorderSide(
-                  color: Colors.black,
+                  color: Colors.grey.withOpacity(0.5),
                   width: 0.5
                 ),
               ),

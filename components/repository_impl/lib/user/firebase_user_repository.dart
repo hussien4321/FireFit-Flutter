@@ -151,7 +151,7 @@ class FirebaseUserRepository implements UserRepository {
       await userCache.addUser(user, searchMode);
       return true;
     }else{
-      if(searchMode ==SearchModes.SELECTED){
+      if(searchMode==SearchModes.SELECTED){
         throw NoItemFoundException();
       }
     }
