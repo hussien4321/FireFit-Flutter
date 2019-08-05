@@ -26,7 +26,7 @@ class OutfitStats extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 2),
               child: Image.asset(
-                'assets/firefit_mini_icon.png',
+                'assets/flame_white.png',
                 width: size,
                 height: size,
               )

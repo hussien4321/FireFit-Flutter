@@ -380,9 +380,13 @@ class CachedOutfitRepository {
     }).asBroadcastStream();
   }
 
-  Future<void> incrementOutfitCount(String userId){
-    return streamDatabase.executeAndTrigger(['user'], "UPDATE user SET number_of_outfits=number_of_outfits+1 WHERE user_id=?", [userId]);
+  Future<void> incrementOutfitCount(String userId, DateTime lastUploadDate, bool isOnWardrobePage){
+    final nowDate = DateTime.now();
+    bool isToday = nowDate.year == lastUploadDate.year && nowDate.month == lastUploadDate.month && nowDate.day == lastUploadDate.day;
+    print('isToday : $isToday');
+    return streamDatabase.executeAndTrigger(['user'], "UPDATE user SET number_of_outfits=number_of_outfits+1, ${isToday ? ' posts_on_day=posts_on_day+1' : ' posts_on_day=1'}, last_upload_date=?, has_new_upload=${isOnWardrobePage?'0':'1'} WHERE user_id=?", [DateTime.now().toIso8601String(), userId]);
   }
+
   Future<void> _decrementOutfitCount(String userId){
     return streamDatabase.executeAndTrigger(['user'], "UPDATE user SET number_of_outfits=number_of_outfits-1 WHERE user_id=?", [userId]);
   }

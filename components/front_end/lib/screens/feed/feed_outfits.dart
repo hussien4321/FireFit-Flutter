@@ -80,7 +80,7 @@ class _FeedOutfitsState extends State<FeedOutfits> {
       text: TextSpan(
         children: [
           TextSpan(
-            text: 'No ${moreTag}outfits to display\n',
+            text: 'No ${moreTag}outfits\n',
             style: Theme.of(ctx).textTheme.subtitle.copyWith(
             ),
           ),

@@ -1,13 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:front_end/helper_widgets.dart';
+import 'package:blocs/blocs.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class SubscriptionDetailsScreen extends StatefulWidget {
+
+  final int initialPage;
+  final bool hasSubscription;
+  final ValueChanged<bool> onUpdateSubscriptionStatus;
+
+  SubscriptionDetailsScreen({this.initialPage = 0, this.hasSubscription, this.onUpdateSubscriptionStatus});
+
   @override
   _SubscriptionDetailsScreenState createState() => _SubscriptionDetailsScreenState();
 }
 
 class _SubscriptionDetailsScreenState extends State<SubscriptionDetailsScreen> {
+
+  Preferences _preferences = Preferences();
+  bool hasSubscription;
+  
+  @override
+  void initState() {
+    super.initState();
+    hasSubscription = widget.hasSubscription;
+  }
+
   @override
   Widget build(BuildContext context) {
     return CustomScaffold(
@@ -53,6 +71,7 @@ class _SubscriptionDetailsScreenState extends State<SubscriptionDetailsScreen> {
       child: CarouselSliderWithIndicator(
         viewportFraction: 1.0,
         enableInfiniteScroll: false,
+        initialPage: widget.initialPage,
         items: <Widget>[
           BenefitOverview(
             icon: FontAwesomeIcons.cameraRetro,
@@ -67,12 +86,7 @@ class _SubscriptionDetailsScreenState extends State<SubscriptionDetailsScreen> {
           BenefitOverview(
             icon: FontAwesomeIcons.server,
             title: 'Unlimited lookbooks storage',
-            description: 'Have even more fun editing & creating lookbooks with no limits for number of outfits added.\n(Free version is 100 max)',
-          ),
-          BenefitOverview(
-            icon: FontAwesomeIcons.bolt,
-            title: '2 Boosts a month',
-            description: "Boost your outfit to the front of the inspiration page for 6 hours so you can get extra feedback on experimental outfits!",
+            description: 'Enjoy unlimited number of outfits across all your customized lookbooks for every style',
           ),
           BenefitOverview(
             icon: FontAwesomeIcons.globeEurope,
@@ -101,27 +115,34 @@ class _SubscriptionDetailsScreenState extends State<SubscriptionDetailsScreen> {
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               Text(
-                'MONTHLY',
+                hasSubscription ? 'Status': 'Monthly',
                 style: Theme.of(context).textTheme.headline.copyWith(
                   fontWeight: FontWeight.w200
                 ),
               ),
               Text(
-                  '\$6.99 USD',
+                  hasSubscription ? 'Active 🙌' : '\$6.99 USD',
                   style: Theme.of(context).textTheme.headline.copyWith(
+                    fontWeight: FontWeight.bold
                   ),
                 ),
             ],
           ),
-          RaisedButton(
-            onPressed: () {},
-            color: Colors.blue,
-            padding: EdgeInsets.all(16),
-            child: Text(
-              'Take my style to the next level!',
-              style: Theme.of(context).textTheme.subhead.copyWith(
-                color: Colors.white,
-                fontWeight: FontWeight.w300
+          //TODO: REMOVE THIS DETECTOR!
+          GestureDetector(
+            onTap: _unlockSubscription,
+            child: RaisedButton(
+              onPressed: hasSubscription ? null : _unlockSubscription,
+              color: Colors.blue,
+              padding: EdgeInsets.all(16),
+              child: Text(
+                hasSubscription ? 
+                'We appreciate your support! ❤️' :
+                'Take my style to the next level!' ,
+                style: Theme.of(context).textTheme.subhead.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w300
+                ),
               ),
             ),
           )
@@ -129,62 +150,13 @@ class _SubscriptionDetailsScreenState extends State<SubscriptionDetailsScreen> {
       ),
     );
   }
-}
 
-class BenefitOverview extends StatelessWidget {
-
-  final IconData icon;
-  final String title, description;
-
-  BenefitOverview({
-    this.icon,
-    this.title,
-    this.description,
-  });
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-      child: Column(
-        children: [
-          Container(
-            padding: EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black45,
-                  blurRadius: 2,
-                  offset: Offset(0, 2)
-                ),
-              ]
-            ),
-            child: Icon(
-              icon,
-              size: 48,
-              color: Colors.blue,
-            )
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8.0),
-            child: Text(
-              title,
-              style: Theme.of(context).textTheme.title,
-              textAlign: TextAlign.center,
-            ),
-          ),
-          Flexible(
-            child: Text(
-              description,
-              style: Theme.of(context).textTheme.subtitle.copyWith(
-                color: Colors.grey
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ),
-        ]
-      ),
-    );
+  _unlockSubscription(){
+    bool newStatus = !hasSubscription;
+    setState(() {
+      hasSubscription = newStatus;
+    });
+    _preferences.updatePreference(Preferences.HAS_SUBSCRIPTION_ACTIVE, newStatus);
+    widget.onUpdateSubscriptionStatus(newStatus);
   }
 }

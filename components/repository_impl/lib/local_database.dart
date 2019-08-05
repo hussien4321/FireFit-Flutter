@@ -27,7 +27,7 @@ class LocalDatabase {
 
   Future<Database> initDb() async {
     String path = join(await getDatabasesPath(), "mira_mira.db");
-    Database theDB = await openDatabase(path, version: 6, onCreate: _onCreate, onUpgrade: _onUpgrade, onDowngrade: _onDowngrade);
+    Database theDB = await openDatabase(path, version: 8, onCreate: _onCreate, onUpgrade: _onUpgrade, onDowngrade: _onDowngrade);
     return theDB;
   }
 
@@ -38,9 +38,23 @@ class LocalDatabase {
 
 
   void _onUpgrade(Database db, int versionFrom, int versionTo) async {
-    for(int i =versionFrom; i < versionTo; i++){
+    int startVersion = versionFrom + 1;
+    startVersion = skipUnnecessaryVersions(versionFrom);
+    for(int i = startVersion; i <= versionTo; i++){
       int nextVersion = i + 1;
       await _applyMigration(db, nextVersion);
+    }
+  }
+
+  skipUnnecessaryVersions(int startVersion) {
+    switch (startVersion) {
+      case 1:
+      case 2:
+      case 3:
+      case 4:
+        return 5;
+      default:
+        return startVersion;
     }
   }
 
@@ -76,6 +90,21 @@ class LocalDatabase {
       await db.execute("CREATE TABLE notification (notification_id INTEGER PRIMARY KEY, notification_type TEXT, notification_created_at DATETIME, notification_ref_user_id TEXT, notification_ref_outfit_id INTEGER, notification_ref_comment_id INTEGER, notification_is_seen TINYINT DEFAULT 0)");
       await db.execute("CREATE TABLE lookbook (lookbook_id INTEGER PRIMARY KEY, lookbook_name TEXT, lookbook_description TEXT, lookbook_user_id TEXT, number_of_outfits INTEGER DEFAULT 0, lookbook_created_at DATETIME)");
       await db.execute("CREATE TABLE save (save_id INTEGER PRIMARY KEY, save_outfit_id INTEGER, save_lookbook_id INTEGER, save_created_at DATETIME)");
+    }
+    if(version == 7){
+      try {
+        await db.execute("ALTER TABLE user ADD COLUMN posts_on_day INTEGER DEFAULT 0");
+        await db.execute("ALTER TABLE user ADD COLUMN last_upload_date DATETIME");
+      } on DatabaseException catch (_) {
+
+      }
+    }
+    if(version == 8) {
+      try {
+        await db.execute("ALTER TABLE user ADD COLUMN has_new_upload TINYINT DEFAULT 0");
+      } on DatabaseException catch (_) {
+
+      }
     }
   }
   Future<void> _deleteAll(Database db) async {

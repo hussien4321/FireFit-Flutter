@@ -3,7 +3,7 @@ enum DateRanges {
   PAST_WEEK,
   PAST_MONTH,
   PAST_YEAR,
-  // CUSTOM,
+  CUSTOM,
 }
 
 String dateRangeToString(DateRanges dateRange) {
@@ -16,8 +16,8 @@ String dateRangeToString(DateRanges dateRange) {
       return 'Past month';
     case DateRanges.PAST_YEAR:
       return 'Past year';
-    // case DateRanges.CUSTOM:
-    //   return 'Custom';
+    case DateRanges.CUSTOM:
+      return 'Custom';
     default:
       return null;
   }
@@ -33,8 +33,8 @@ DateRanges dateRangeFromString(String stringVal) {
       return DateRanges.PAST_MONTH;
     case 'Past year':
       return DateRanges.PAST_YEAR;
-    // case 'Custom':
-    //   return DateRanges.CUSTOM;
+    case 'Custom':
+      return DateRanges.CUSTOM;
     default:
       return null;
   }

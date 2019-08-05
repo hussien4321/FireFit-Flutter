@@ -200,6 +200,7 @@ class _ProfilePicPageState extends State<ProfilePicPage> {
       isStillOpen: () => mounted,
       selectedAssets: selectedAssets,
       currentImages: currentImages,
+      title: 'Select picture'
     );
     if(takenImages.isNotEmpty){
       widget.onboardUser.profilePicUrl = takenImages.first;

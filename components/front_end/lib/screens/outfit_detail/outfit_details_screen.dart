@@ -8,6 +8,8 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:front_end/screens.dart';
 import 'package:front_end/helper_widgets.dart';
 import 'dart:ui';
+import 'package:overlay_support/overlay_support.dart';
+import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 enum OutfitOption { EDIT, REPORT, DELETE }
@@ -41,10 +43,15 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
   bool canSendComment = false;
   TextEditingController commentTextController = new TextEditingController();
   
+  int maxOutfitStorage = RemoteConfigHelpers.defaults[RemoteConfigHelpers.LOOKBOOKS_OUTFITS_LIMIT];
+  bool hasMaxLookbookOutfits = false;
+
   @override
   void initState() {
     super.initState();
-    // SystemChrome.setEnabledSystemUIOverlays([]);
+    RemoteConfig.instance.then((remoteConfig) {
+      maxOutfitStorage = remoteConfig.getInt(RemoteConfigHelpers.LOOKBOOKS_OUTFITS_LIMIT);
+    });
   }
 
   @override
@@ -56,30 +63,32 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
   @override
   Widget build(BuildContext context) {
     _initBlocs();
-    return _overlayScaffold(
-      body: StreamBuilder<bool>(
-        stream: _outfitBloc.noOutfitFound,
-        initialData: false,
-        builder: (ctx, noOutfitFoundSnap) => 
-          StreamBuilder<bool>(
-          stream: _outfitBloc.isLoading,
-          initialData: true,
-          builder: (ctx, isLoadingSnap) => StreamBuilder<Outfit>(
-            stream: _outfitBloc.selectedOutfit,
-            builder: (ctx, outfitSnap) {
-              if(noOutfitFoundSnap.data) {
-                return ItemNotFound(itemType: 'Outfit');
-              } else if(isLoadingSnap.data || !outfitSnap.hasData || outfitSnap.data == null){
-                return _outfitLoadingPlaceholder();
-              }else{
-                if(outfit==null){
-                  AnalyticsEvents(context).outfitViewed(outfitSnap.data);
-                }
-                outfit = outfitSnap.data;
-                return  _buildMainBody();
+    return StreamBuilder<bool>(
+      stream: _outfitBloc.noOutfitFound,
+      initialData: false,
+      builder: (ctx, noOutfitFoundSnap) => 
+        StreamBuilder<bool>(
+        stream: _outfitBloc.isLoading,
+        initialData: true,
+        builder: (ctx, isLoadingSnap) => StreamBuilder<Outfit>(
+          stream: _outfitBloc.selectedOutfit,
+          builder: (ctx, outfitSnap) {
+            if(noOutfitFoundSnap.data) {
+              return ItemNotFound(itemType: 'Outfit');
+            } else if(isLoadingSnap.data || !outfitSnap.hasData || outfitSnap.data == null){
+              return _overlayScaffold(
+                body: _outfitLoadingPlaceholder()
+              );
+            }else{
+              if(outfit==null){
+                AnalyticsEvents(context).outfitViewed(outfitSnap.data);
               }
+              outfit = outfitSnap.data;
+              return  _overlayScaffold(
+                body: _buildMainBody()
+              );
             }
-          ),
+          }
         ),
       ),
     );
@@ -88,7 +97,12 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
   _initBlocs() async {
     if(_outfitBloc==null){
       _outfitBloc = OutfitBlocProvider.of(context);
-      userId = await UserBlocProvider.of(context).existingAuthId.first;
+      final _userBloc = UserBlocProvider.of(context);
+      userId = await _userBloc.existingAuthId.first;
+      _userBloc.currentUser.first.then((user) {
+        setState(() => hasMaxLookbookOutfits = user.numberOfLookbookOutfits >= maxOutfitStorage);
+      });
+
       _outfitBloc.selectOutfit.add(LoadOutfit(
         outfitId: widget.outfitId,
         userId: userId,
@@ -312,13 +326,11 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
       padding: EdgeInsets.only(top: 8),
       child: SizedBox(
         height: 250.0,
-        child: Container(
-          child: CarouselSliderWithIndicator(
-            height: 250,
-            viewportFraction: 0.6,
-            enableInfiniteScroll: false,
-            items: imageIndexes.map((index) => _loadImage(index)).toList(),
-          ),
+        child: CarouselSliderWithIndicator(
+          height: 250,
+          viewportFraction: 0.6,
+          enableInfiniteScroll: false,
+          items: imageIndexes.map((index) => _loadImage(index)).toList(),
         ),
       ),
     );
@@ -336,7 +348,8 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
           )
         ]
       ),
-      child: ImageGalleryPreview(
+      child: 
+      ImageGalleryPreview(
         imageUrls: outfit.images,
         currentIndex: index, 
         title: 'Outfit Image',
@@ -506,7 +519,7 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
           ),
           _actionButton(
             icon: Image.asset(
-              'assets/firefit_logo.png',
+              'assets/flame_full.png',
               width: 24,
               height: 24,
             ),
@@ -522,10 +535,18 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
             icon: Icon(
               Icons.playlist_add,
               size: 24,
+              color: hasMaxLookbookOutfits ? Colors.red : Colors.black,
             ),
             isEnd: true,
             text: 'Add to',
-            onPressed: () => AddToLookbookDialog.launch(context, outfitSave: saveData)
+            unselectedColor: hasMaxLookbookOutfits ? Colors.red : Colors.black,
+            onPressed: () {
+              if(hasMaxLookbookOutfits) {
+                toast("Max storage reached");
+              } else {
+                AddToLookbookDialog.launch(context, outfitSave: saveData);
+              }
+            }
           ),
         ],
       ),

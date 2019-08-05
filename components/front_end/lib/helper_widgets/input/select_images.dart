@@ -7,10 +7,10 @@ import 'dart:ui';
 
 class SelectImages {
 
-  static Future<List<String>> addImages({int count, String dirPath, List<Asset> selectedAssets, List<String> currentImages, bool Function() isStillOpen}) async {
+  static Future<List<String>> addImages({int count, String dirPath, List<Asset> selectedAssets, List<String> currentImages, bool Function() isStillOpen, String title = 'Select outfit'}) async {
     List<Asset> resultList = List<Asset>();
     try {
-      resultList = await _pickImages(count, selectedAssets);
+      resultList = await _pickImages(count, selectedAssets, title);
     } on PlatformException catch (e) {
       print('FAILED: ${e.message}');
     }
@@ -23,7 +23,7 @@ class SelectImages {
   }
   
 
-  static Future<List<Asset>> _pickImages(int count, List<Asset> selectedAssets) => MultiImagePicker.pickImages(
+  static Future<List<Asset>> _pickImages(int count, List<Asset> selectedAssets, String title) => MultiImagePicker.pickImages(
     maxImages: count,
     enableCamera: false,
     selectedAssets: selectedAssets,
@@ -34,7 +34,7 @@ class SelectImages {
       actionBarColor: "#808080",
       statusBarColor: "#808080",
       lightStatusBar: true,
-      actionBarTitle: 'Select outfit'
+      actionBarTitle: title
     )
   );
   

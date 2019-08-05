@@ -23,7 +23,7 @@ class AppTitle extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.only(right: 4.0),
                   child: Image.asset(
-                    'assets/firefit_logo.png',
+                    'assets/flame_full.png',
                     width: 30,
                     height: 30,
                   ),

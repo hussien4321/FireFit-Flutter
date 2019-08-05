@@ -111,7 +111,7 @@ class FirebaseOutfitRepository implements OutfitRepository {
       List<String> fileNames = _generateFileNames(uploadOutfit.images, outfitId, uploadOutfit);
       await imageUploader.uploadImages(uploadOutfit.images, fileNames);
 
-      return _checkOutfitImageUploaded(outfitId, uploadOutfit.posterUserId);
+      return _checkOutfitImageUploaded(outfitId, uploadOutfit.posterUserId, uploadOutfit.lastUploadDate, uploadOutfit.isOnWardrobePage);
     })
     .catchError((exception) => catchExceptionWithBool(exception, analytics));
   }
@@ -125,14 +125,14 @@ class FirebaseOutfitRepository implements OutfitRepository {
     return imageFiles;
   }
 
-  Future<bool> _checkOutfitImageUploaded(int outfitId, String userId) async {
+  Future<bool> _checkOutfitImageUploaded(int outfitId, String userId, DateTime lastUploadDate, bool isOnWardrobePage) async {
     LoadOutfit loadOutfit = LoadOutfit(
       outfitId: outfitId,
       userId: userId,
     );
     for(int i = 0; i < AppConfig.NUMBER_OF_POLL_ATTEMPTS; i++){
       print('polling for outfit attempt:$i time=${DateTime.now()}');
-      bool success = await _getUploadedOutfit(loadOutfit);
+      bool success = await _getUploadedOutfit(loadOutfit, lastUploadDate, isOnWardrobePage);
       if(success){
         return true;
       }
@@ -141,7 +141,7 @@ class FirebaseOutfitRepository implements OutfitRepository {
     return false;
   }
 
-  Future<bool> _getUploadedOutfit(LoadOutfit loadOutfit) {
+  Future<bool> _getUploadedOutfit(LoadOutfit loadOutfit, DateTime lastUploadDate, bool isOnWardrobePage) {
     return cloudFunctions.getHttpsCallable(functionName: 'getOutfit').call(loadOutfit.toJson())
     .then((res) async {
       List<Outfit> outfits = _resToOutfitList(res);
@@ -150,7 +150,7 @@ class FirebaseOutfitRepository implements OutfitRepository {
       }
       Outfit newOutfit = outfits.first;
       await cache.addOutfit(newOutfit, SearchModes.MINE);
-      await cache.incrementOutfitCount(loadOutfit.userId);
+      await cache.incrementOutfitCount(loadOutfit.userId, lastUploadDate, isOnWardrobePage);
       return true;
     })
     .catchError((exception) => catchExceptionWithBool(exception, analytics));

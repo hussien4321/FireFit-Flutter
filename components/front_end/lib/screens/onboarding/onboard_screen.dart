@@ -253,7 +253,9 @@ class _OnboardScreenState extends State<OnboardScreen> with SnackbarMessages, Lo
 
   StreamSubscription _listenForChangesToAuthStatus(){
     return userBloc.accountStatus.listen((accountStatus) {
+      print('ONBOARD - got status = $accountStatus');
       if(accountStatus!=null && accountStatus !=UserAccountStatus.PENDING_ONBOARDING){
+        print('ONBOARD - started');
         if(isOverlayShowing){
           stopLoading(context);
         }
@@ -262,7 +264,7 @@ class _OnboardScreenState extends State<OnboardScreen> with SnackbarMessages, Lo
         }else{
           AnalyticsEvents(context).onboardingCompleted();
         }
-        Navigator.pushReplacementNamed(context, RouteConverters.getFromAccountStatus(accountStatus));
+        CustomNavigator.goToPageAtRoot(context, RouteConverters.getFromAccountStatus(accountStatus));
       }
     });
   }

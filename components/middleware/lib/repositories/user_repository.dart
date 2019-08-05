@@ -16,7 +16,9 @@ abstract class UserRepository {
   Future<bool> loadNotifications(LoadNotifications loadNotifications);
   Future<bool> loadMoreNotifications(LoadNotifications loadNotifications);
   Future<bool> markNotificationsSeen(MarkNotificationsSeen markSeen);
+  Future<bool> markWardrobeSeen(String userId);
   Stream<List<OutfitNotification>> getNotifications();
+
   
   Future<bool> followUser(FollowUser followUser);
   Future<bool> loadFollowers(LoadUsers loadUsers);

@@ -14,6 +14,7 @@ import 'package:overlay_support/src/notification/overlay_notification.dart';
 import 'package:helpers/helpers.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter/services.dart';
+import 'package:firebase_admob/firebase_admob.dart';
 
 class MainAppBar extends StatefulWidget {
 
@@ -46,38 +47,40 @@ class _MainAppBarState extends State<MainAppBar> {
 
   String userId;
 
-  Widget currentPage = ExploreScreen();
+  bool hasSubscription = false;
+
+  InterstitialAd myInterstitial;
 
   int currentIndex = 0;
-  List<Widget> currentPages = [
-    ExploreScreen(),
+
+  List<Widget> get currentPages => [
+    ExploreScreen(
+      onShowAd: _showAd,
+      hasSubscription: hasSubscription,
+      onUpdateSubscriptionStatus: _onUpdateSubscriptionStatus,
+    ),
     FeedScreen(),
     WardrobeScreen(),
-    LookbooksScreen(),
+    LookbooksScreen(
+      hasSubscription: hasSubscription,
+      onUpdateSubscriptionStatus: _onUpdateSubscriptionStatus,
+    ),
   ];
   List<String> pages = AppConfig.MAIN_PAGES;
-
-  @override
-  void dispose() {
-    super.dispose();
-    _subscriptions?.forEach((subscription) => subscription.cancel());
-    _isSliderOpenController.close();
-  }
 
   @override
   void initState() {
     super.initState();
     _loadDefaultPageIndex();
+    _loadSubscriptionStatus();
     SystemChannels.lifecycle.setMessageHandler((msg){
       if(msg==AppLifecycleState.resumed.toString()) {
         _dismissOpenNotifications();
         return null;
       }
     });
-
+    RemoteConfigHelpers.fetchValues();
   }
-
-
 
   _loadDefaultPageIndex() async {
     int newIndex = pages.indexOf(await _preferences.getPreference(Preferences.DEFAULT_START_PAGE));
@@ -88,6 +91,49 @@ class _MainAppBarState extends State<MainAppBar> {
      currentIndex = newIndex; 
     });
   }
+
+  _loadSubscriptionStatus() async {
+    bool newHasSubscription = await _preferences.getPreference(Preferences.HAS_SUBSCRIPTION_ACTIVE);
+    setState(() {
+      hasSubscription = newHasSubscription;
+    });
+    if(!hasSubscription){
+      myInterstitial = createInterstitialAd();
+    }
+  }
+
+  InterstitialAd createInterstitialAd() {
+    return InterstitialAd(
+      adUnitId: AdmobTools.testAdUnitId,
+      targetingInfo: AdmobTools.targetingInfo,
+      listener: (MobileAdEvent event) {
+        if(event == MobileAdEvent.closed){
+          myInterstitial = createInterstitialAd()..load();
+        }
+      },
+    )..load();
+  }
+
+
+  _showAd() async {
+    if(!hasSubscription){
+      bool isLoaded = await myInterstitial.isLoaded();
+      if(!isLoaded){
+        await myInterstitial.load();
+      }
+      myInterstitial.show();
+    }
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _subscriptions?.forEach((subscription) => subscription.cancel());
+    _isSliderOpenController.close();
+    myInterstitial?.dispose();
+    myInterstitial = null;
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -118,6 +164,7 @@ class _MainAppBarState extends State<MainAppBar> {
       _subscriptions = <StreamSubscription<dynamic>>[
         _tokenRefreshListener(),
         _logInStatusListener(),
+        _showAdsListener(),
       ]..addAll(_successToastListeners())
       ..addAll(_uploadImagesListeners())
       ..addAll(_errorListeners());
@@ -149,13 +196,17 @@ class _MainAppBarState extends State<MainAppBar> {
     token: newToken,
   )));
   
+  StreamSubscription _showAdsListener() { 
+    return _outfitBloc.showAd.listen((i) => _showAd());
+  }
+
   StreamSubscription _logInStatusListener() { 
     return _userBloc.accountStatus.listen((accountStatus) {
       if(accountStatus!=null && accountStatus != UserAccountStatus.LOGGED_IN){
         if(accountStatus ==UserAccountStatus.LOGGED_OUT){
           AnalyticsEvents(context).logOut();
         }
-        Navigator.pushReplacementNamed(context, RouteConverters.getFromAccountStatus(accountStatus));
+        CustomNavigator.goToPageAtRoot(context, RouteConverters.getFromAccountStatus(accountStatus));
       }
     });
   }
@@ -228,6 +279,8 @@ class _MainAppBarState extends State<MainAppBar> {
             _logCurrentScreen();
           }
         },
+        hasSubscription: hasSubscription,
+        onUpdateSubscriptionStatus: _onUpdateSubscriptionStatus,
       ),
       innerDrawerCallback: _updateMainScreenDimming,
       scaffold: _buildScaffold(
@@ -235,6 +288,8 @@ class _MainAppBarState extends State<MainAppBar> {
       )
     );
   }
+
+  _onUpdateSubscriptionStatus(bool newSubscriptionStatus) => hasSubscription = newSubscriptionStatus;
 
   _updateMainScreenDimming(bool isOpen){
     setState(() {
@@ -246,6 +301,7 @@ class _MainAppBarState extends State<MainAppBar> {
     return Stack(
       children: <Widget>[
         CustomScaffold(
+          resizeToAvoidBottomPadding: false,
           backgroundColor: Colors.white,
           leading: _buildMenuButton(),
           title: pages[currentIndex],
@@ -265,13 +321,13 @@ class _MainAppBarState extends State<MainAppBar> {
 
   Widget _buildMenuButton() {
     return StreamBuilder<bool>(
-      stream: _userBloc.currentUser.map((user) => user.hasNewFeedOutfits),
+      stream: _userBloc.currentUser.map((user) => user.hasNewFeedOutfits || user.hasNewUpload),
       initialData: false,
-      builder: (context, hasFeedSnap) {
+      builder: (context, hasDataSnap) {
         return IconButton(
           icon: NotificationIcon(
               iconData: Icons.menu,
-              showBubble: hasFeedSnap.data == true,
+              showBubble: hasDataSnap.data == true,
             ),
           onPressed: () => _menuDrawerKey.currentState.open(),
         );
@@ -289,7 +345,11 @@ class _MainAppBarState extends State<MainAppBar> {
         if(!_userBloc.isEmailVerified.value){
           _requestEmailVerification();
         } else {
-          CustomNavigator.goToUploadOutfitScreen(context);
+          CustomNavigator.goToUploadOutfitScreen(context,
+            hasSubscription: hasSubscription,
+            onUpdateSubscriptionStatus: _onUpdateSubscriptionStatus,
+            isOnWardrobePage: currentIndex == 2,
+          );
         }
       }
     );

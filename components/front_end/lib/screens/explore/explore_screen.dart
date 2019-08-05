@@ -5,16 +5,20 @@ import 'package:middleware/middleware.dart';
 import 'package:front_end/providers.dart';
 import 'package:front_end/helper_widgets.dart';
 import 'package:flutter/gestures.dart';
-import 'package:front_end/screens.dart';
 import 'package:carousel_slider/carousel_slider.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:country_code_picker/country_code.dart';
-import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:helpers/helpers.dart';
-import 'dart:async';
+import 'package:firebase_remote_config/firebase_remote_config.dart';
+import 'package:overlay_support/overlay_support.dart';
 
 class ExploreScreen extends StatefulWidget {
+
+  final VoidCallback onShowAd;
+  final bool hasSubscription;
+  final ValueChanged<bool> onUpdateSubscriptionStatus;
+
+  ExploreScreen({this.onShowAd, this.hasSubscription, this.onUpdateSubscriptionStatus});
+
   @override
   _ExploreScreenState createState() => _ExploreScreenState();
 }
@@ -25,7 +29,9 @@ class _ExploreScreenState extends State<ExploreScreen> with SingleTickerProvider
 
   String userId;
 
-  int adCounter = 50;
+  int adCounter = 0;
+  int adFrequency = RemoteConfigHelpers.defaults[RemoteConfigHelpers.CAROUSEL_AD_FREQUENCY_KEY];
+  int maxOutfitStorage = RemoteConfigHelpers.defaults[RemoteConfigHelpers.LOOKBOOKS_OUTFITS_LIMIT];
 
   bool isPaginationDropdownInFocus = false;
   bool isFilterDropdownInFocus = false;
@@ -37,12 +43,17 @@ class _ExploreScreenState extends State<ExploreScreen> with SingleTickerProvider
   bool isSortByTop = false;
 
   Preferences preferences = Preferences();
-
   int index = 0;
 
+  bool hasMaxLookbookOutfits = false;
+  
   @override
   void initState() {
     super.initState();
+    RemoteConfig.instance.then((remoteConfig) {
+      adFrequency = remoteConfig.getInt(RemoteConfigHelpers.CAROUSEL_AD_FREQUENCY_KEY);
+      maxOutfitStorage = remoteConfig.getInt(RemoteConfigHelpers.LOOKBOOKS_OUTFITS_LIMIT);
+    });
   }
   @override
   Widget build(BuildContext context) {
@@ -96,13 +107,12 @@ class _ExploreScreenState extends State<ExploreScreen> with SingleTickerProvider
   _initBlocs() async {
     if(_outfitBloc==null){
       _outfitBloc = OutfitBlocProvider.of(context);
-      userId = await UserBlocProvider.of(context).existingAuthId.first;
+      final _userBloc = UserBlocProvider.of(context);
+      userId = await _userBloc.existingAuthId.first;
+      _userBloc.currentUser.first.then((user) {
+        setState(() => hasMaxLookbookOutfits = user.numberOfLookbookOutfits >= maxOutfitStorage);
+      });
       await _loadFiltersFromPreferences();
-      // _outfitBloc.exploreOutfits.add(LoadOutfits(
-      //   userId: userId,
-      //   filters: outfitFilters,
-      //   sortByTop: isSortByTop
-      // ));
     }
   }
   _loadFiltersFromPreferences() async {
@@ -199,7 +209,9 @@ class _ExploreScreenState extends State<ExploreScreen> with SingleTickerProvider
     FiltersDialog.launch(context,
       filters: outfitFilters,
       sortByTop: isSortByTop,
-      onSearch: _onSearch
+      onSearch: _onSearch,
+      hasSubscription: widget.hasSubscription,
+      onUpdateSubscriptionStatus: widget.onUpdateSubscriptionStatus,
     );
   }
   _onSearch(LoadOutfits filterData) {
@@ -227,6 +239,7 @@ class _ExploreScreenState extends State<ExploreScreen> with SingleTickerProvider
               height: double.infinity,
               enlargeCenterPage: true,
               onPageChanged: (i) {
+                _incrementAdCounter();
                 setState(() => index = i);
                 if(i+1>=outfits.length && outfits.length>0){
                   _outfitBloc.exploreOutfits.add(LoadOutfits(
@@ -245,8 +258,15 @@ class _ExploreScreenState extends State<ExploreScreen> with SingleTickerProvider
         ),
         _outfitInteractionButtons(outfits, index),
       ],
-    );
-                     
+    );                
+  }
+
+  _incrementAdCounter(){
+    adCounter++;
+    if(adCounter>= adFrequency){
+      adCounter = 0;
+      widget.onShowAd();
+    }
   }
 
   Widget _buildOutfitCard(Outfit outfit, int index) {
@@ -356,7 +376,7 @@ class _ExploreScreenState extends State<ExploreScreen> with SingleTickerProvider
           ),
           _actionButton(
             icon: Image.asset(
-              'assets/firefit_logo.png',
+              'assets/flame_full.png',
               width: 32,
               height: 32,
             ),
@@ -371,13 +391,20 @@ class _ExploreScreenState extends State<ExploreScreen> with SingleTickerProvider
             icon: Icon(
               Icons.playlist_add,
               size: 24,
+              color: hasMaxLookbookOutfits ? Colors.red : Colors.black,
             ),
             hasData: hasOutfit,
-            onPressed: () => AddToLookbookDialog.launch(context, outfitSave: OutfitSave(
-                outfit: currentOutfit,
-                userId: userId,
-              )
-            )
+            onPressed: () {
+              if(hasMaxLookbookOutfits) {
+                toast("Max storage reached");
+              } else {
+                AddToLookbookDialog.launch(context, outfitSave: OutfitSave(
+                    outfit: currentOutfit,
+                    userId: userId,
+                  )
+                );
+              }
+            }
           ),
         ],
       ),

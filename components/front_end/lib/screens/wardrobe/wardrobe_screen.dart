@@ -47,6 +47,7 @@ class _WardrobeScreenState extends State<WardrobeScreen> {
       _userBloc = UserBlocProvider.of(context);
       userId = await _userBloc.existingAuthId.first;
       await _loadFiltersFromPreferences();
+      _userBloc.markWardrobeSeen.add(userId);
       // _outfitBloc.loadMyOutfits.add(LoadOutfits(
       //   userId: userId,
       //   sortByTop: isSortingByTop

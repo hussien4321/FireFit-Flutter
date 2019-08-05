@@ -41,6 +41,9 @@ dependencies:
   pull_to_refresh: ^1.4.6
   flutter_local_notifications: ^0.8.0
   firebase_analytics: ^3.0.3
+  firebase_admob: ^0.9.0+3
+  firebase_remote_config: ^0.2.0+5
+  date_range_picker: ^1.0.5
   page_transition: ^1.1.4
   package_info: ^0.4.0+6
   share: ^0.6.2+1

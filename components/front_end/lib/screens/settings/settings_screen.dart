@@ -137,7 +137,7 @@ class _SettingsScreenState extends State<SettingsScreen> with LoadingAndErrorDia
   _initBlocs(){
     if(_userBloc == null){
       _userBloc =UserBlocProvider.of(context);
-      _userBloc.selectedUser.first.then((user) => username = user.username);
+      _userBloc.selectedUser.first.then((user) => username = user?.username);
     }
   }
 

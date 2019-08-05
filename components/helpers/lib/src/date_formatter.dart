@@ -16,6 +16,30 @@ class DateFormatter {
       return 'now';
     }
   }
+  static String dateToRecentOnlyFormat(DateTime dateTime){
+    DateTime current = DateTime.now();
+    Duration diff = current.difference(dateTime);
+
+    if(diff.inDays>=30) {
+      return 'over 1 month ago';
+    }    
+    else if(diff.inDays>=7) {
+      int weeks = (diff.inDays/7).floor(); 
+      return '$weeks week${weeks==1?'':'s'} ago';
+    }
+    else if(diff.inDays!=0) {
+      return '${diff.inDays} day${diff.inDays==1?'':'s'} ago';
+    }
+    else if(diff.inHours!=0){
+      return '${diff.inHours}h ago';
+    }
+    else if(diff.inMinutes!=0){
+      return '${diff.inMinutes}m ago';
+    }
+    else{
+      return 'now';
+    }
+  }
 
   static String dateToDMYFormat(DateTime dateTime){
     String dateString = "";

@@ -279,6 +279,7 @@ class _EditUserScreenState extends State<EditUserScreen> with LoadingAndErrorDia
       isStillOpen: () => mounted,
       selectedAssets: selectedAssets,
       currentImages: currentImages,
+      title: 'Select picture'
     );
     if(takenImages.isNotEmpty){
       editUserData.profilePicUrl = takenImages.first;

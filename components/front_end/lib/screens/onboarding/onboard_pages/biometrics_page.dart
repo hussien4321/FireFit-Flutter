@@ -98,55 +98,32 @@ class BiometricsPage extends StatelessWidget {
               style: Theme.of(context).textTheme.subtitle,
             ),
           ),
-          Icon(
-            isMale? FontAwesomeIcons.male : FontAwesomeIcons.female,
-            color: Colors.blue,
+          InkWell(
+            onTap: () => _switchGender(),
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Icon(
+                    isMale? FontAwesomeIcons.male : FontAwesomeIcons.female,
+                    color: Colors.blue,
+                  ),
+                  Padding(
+                    padding: EdgeInsets.only(right: 4.0),
+                    child: Text(
+                      isMale ? 'Male' : 'Female',
+                      style: TextStyle(
+                        inherit: true,
+                        color: Colors.blue
+                      )
+                    ),
+                  ),
+                  Icon(Icons.compare_arrows),
+                ],
+              ),
+            ),
           ),
-          Text(
-            isMale ? 'Male' : 'Female',
-            style: TextStyle(
-              inherit: true,
-              color: Colors.blue
-            )
-          ),
-          IconButton(
-            icon: Icon(Icons.compare_arrows),
-            onPressed: () => _switchGender(),
-          ),
-          // RaisedButton(
-          //   shape: RoundedRectangleBorder(
-          //     borderRadius: BorderRadius.only(
-          //       topLeft: Radius.circular(5.0), 
-          //       bottomLeft: Radius.circular(5.0), 
-          //       topRight: Radius.circular(0.0), 
-          //       bottomRight: Radius.circular(0.0), 
-          //     ),
-          //   ),
-          //   color: Theme.of(context).disabledColor,
-          //   disabledColor: Theme.of(context).accentColor,
-          //   child: Icon(
-          //     FontAwesomeIcons.male,
-          //     color: Colors.white,
-          //   ),
-          //   onPressed: hasGenderSelected && isMale ? null : () => _switchGender(newGenderIsMale: true)
-          // ),
-          // RaisedButton(
-          //   shape: RoundedRectangleBorder(
-          //     borderRadius: BorderRadius.only(
-          //       topLeft: Radius.circular(0.0), 
-          //       bottomLeft: Radius.circular(0.0), 
-          //       topRight: Radius.circular(5.0), 
-          //       bottomRight: Radius.circular(5.0), 
-          //     ),
-          //   ),
-          //   color: Theme.of(context).disabledColor,
-          //   disabledColor: Theme.of(context).accentColor,
-          //   child: Icon(
-          //     FontAwesomeIcons.female,
-          //     color: Colors.white,
-          //   ),
-          //   onPressed:  hasGenderSelected && !isMale ? null : () => _switchGender(newGenderIsMale: false)
-          // ),
         ],
       ),
     );

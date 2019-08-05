@@ -7,12 +7,14 @@ class CarouselSliderWithIndicator extends StatefulWidget {
   final double height;
   final double viewportFraction;
   final bool enableInfiniteScroll;
+  final int initialPage;
 
   CarouselSliderWithIndicator({
     this.items,
     this.height,
     this.viewportFraction,
     this.enableInfiniteScroll,
+    this.initialPage = 0,
   });
 
   @override
@@ -27,6 +29,34 @@ class _CarouselSliderWithIndicatorState extends State<CarouselSliderWithIndicato
   final double ICON_VERTICAL_MARGIN = 8;
   final Color SELECTED_ICON_COLOR = Colors.blue;
   final Color UNSELECTED_ICON_COLOR = Colors.black;
+  
+  PageController pageController;
+
+  CarouselSlider cs;
+  
+  @override
+  void initState() {
+    super.initState();
+    _current = widget.initialPage;
+    pageController = new PageController(initialPage: widget.initialPage);
+    cs = CarouselSlider(
+      items: widget.items.map((item) => Padding(
+        padding: EdgeInsets.only(bottom: ICON_SIZE + (ICON_VERTICAL_MARGIN)),
+        child: item,
+      )).toList(),
+      height: widget.height,
+      enableInfiniteScroll: widget.enableInfiniteScroll,
+      enlargeCenterPage: true,
+      viewportFraction: widget.viewportFraction,
+      onPageChanged: (index) {
+        setState(() {
+          _current = pageController.page.round();
+        });
+      },
+      initialPage: widget.initialPage,
+    );
+    pageController = cs.pageController;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -34,23 +64,12 @@ class _CarouselSliderWithIndicatorState extends State<CarouselSliderWithIndicato
     for(int i = 0; i<widget.items.length; i++){
       indexes.add(i);
     }
+
+
+
     return Stack(
       children: [
-        CarouselSlider(
-          items: widget.items.map((item) => Padding(
-            padding: EdgeInsets.only(bottom: ICON_SIZE + (ICON_VERTICAL_MARGIN)),
-            child: item,
-          )).toList(),
-          height: widget.height,
-          enableInfiniteScroll: widget.enableInfiniteScroll,
-          enlargeCenterPage: true,
-          viewportFraction: widget.viewportFraction,
-          onPageChanged: (index) {
-            setState(() {
-              _current = index;
-            });
-          },
-        ),
+        cs,
         Positioned(
           bottom: 0.0,
           left: 0.0,

@@ -59,7 +59,9 @@ class FirebaseUserRepository implements UserRepository {
     AuthInstance specificAuthInstance = _getSpecificAuthInstance(logInData.method);
     return specificAuthInstance.signIn(fields: logInData.fields) 
       .then((user) async {
-        return _loadCurrentUser(user);
+        print('found user!');
+        return true;
+        // return _loadCurrentUser(user);
       })
       .catchError((exception) => catchExceptionWithBool(exception, analytics));
   }
@@ -338,6 +340,10 @@ class FirebaseUserRepository implements UserRepository {
       return true;
     })
     .catchError((exception) => catchExceptionWithBool(exception, analytics));
+  }
+
+  Future<bool> markWardrobeSeen(String userId) async {
+    await userCache.markWardrobeSeen(userId);
   }
 
   Future<bool> markNotificationsSeen(MarkNotificationsSeen markSeen) async {

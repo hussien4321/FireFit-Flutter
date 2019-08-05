@@ -120,6 +120,10 @@ class CachedUserRepository {
     return _markNotificationTypeAsSeen(notificationType);
   }
 
+  Future<void> markWardrobeSeen(String userId){
+    return streamDatabase.executeAndTrigger(['user'], "UPDATE user SET has_new_upload=0 WHERE user_id=?", [userId]);
+  }
+
   Future<void> _markNotificationTypeAsSeen(String notificationType){
     return streamDatabase.query('notification', columns: ["COUNT(*) AS 'count'"], where: 'notification_is_seen=0 AND notification_type=?', whereArgs: [notificationType]).then(
       (res) {

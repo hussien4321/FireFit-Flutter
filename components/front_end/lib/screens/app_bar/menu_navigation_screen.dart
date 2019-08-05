@@ -10,9 +10,16 @@ import 'package:front_end/screens.dart';
 class MenuNavigationScreen extends StatefulWidget {
   
   final int index;
+  final bool hasSubscription;
+  final ValueChanged<bool> onUpdateSubscriptionStatus;
   final ValueChanged<int> onPageSelected;
 
-  MenuNavigationScreen({this.index, this.onPageSelected});
+  MenuNavigationScreen({
+    this.index, 
+    this.onPageSelected,
+    this.onUpdateSubscriptionStatus,
+    this.hasSubscription = true,
+  });
 
   @override
   _MenuNavigationScreenState createState() => _MenuNavigationScreenState();
@@ -64,11 +71,18 @@ class _MenuNavigationScreenState extends State<MenuNavigationScreen> {
                             );
                           }
                         ),
-                        _menuOption(
-                          title: 'WARDROBE',
-                          iconData: FontAwesomeIcons.tshirt,
-                          selected: widget.index == 2,
-                          onPressed: () => widget.onPageSelected(2)
+                        StreamBuilder<bool>(
+                          stream: _userBloc.currentUser.map((user) => user.hasNewUpload),
+                          initialData: false,
+                          builder: (context, hasNewUploadSnap) {
+                            return _menuOption(
+                              title: 'WARDROBE',
+                              iconData: FontAwesomeIcons.tshirt,
+                              selected: widget.index == 2,
+                              onPressed: () => widget.onPageSelected(2),
+                              showNotificationBubble: hasNewUploadSnap.data == true
+                            );
+                          }
                         ),
                         _menuOption(
                           title: 'LOOKBOOKS',
@@ -78,9 +92,13 @@ class _MenuNavigationScreenState extends State<MenuNavigationScreen> {
                         ),
                         _menuOption(
                           title: 'FIREFIT+',
+                          customIcon: Image.asset('assets/flame_gold_plus_4.png'),
                           iconData: FontAwesomeIcons.fireAlt,
                           color: Color.fromRGBO(225, 173, 0, 1.0),
-                          onPressed: () => CustomNavigator.goToSubscriptionDetailsScreen(context)
+                          onPressed: () => CustomNavigator.goToSubscriptionDetailsScreen(context,
+                            hasSubscription: widget.hasSubscription,
+                            onUpdateSubscriptionStatus: widget.onUpdateSubscriptionStatus,
+                          )
                         ),
                         _menuOption(
                           title: 'SETTINGS',
@@ -110,41 +128,57 @@ class _MenuNavigationScreenState extends State<MenuNavigationScreen> {
     return Container(
       width: double.infinity,
       height: 100,
+      decoration: BoxDecoration(
+        color: widget.hasSubscription ? null : Colors.grey[300],
+        gradient: !widget.hasSubscription ? null : LinearGradient(
+          colors: [
+            Colors.yellowAccent[100],
+            Color.fromRGBO(225, 173, 0, 1.0),
+          ],
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+        )
+      ),
       child: user == null ? loadingIndicator : Material(
-        color: Colors.grey[300],
+        color: Colors.transparent,
         child:InkWell(
           onTap: () => _openUserProfile(user.userId),
-          child: Row(
+          child: Stack(
             children: <Widget>[
-              Container(
-                padding: EdgeInsets.symmetric(vertical: 8),
-                child: ProfilePicWithShadow(
-                  url: user.profilePicUrl,
-                  userId: user.userId,
-                  size: 64,
-                  margin: EdgeInsets.all(8.0),
-                ),
-              ),
-              Flexible(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Text(
-                      user.name,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.headline,
+              Row(
+                children: <Widget>[
+                  Container(
+                    padding: EdgeInsets.symmetric(vertical: 8),
+                    child: ProfilePicWithShadow(
+                      url: user.profilePicUrl,
+                      userId: user.userId,
+                      size: 64,
+                      margin: EdgeInsets.all(8.0),
                     ),
-                    Text(
-                      '@${user.username}',
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.caption,
-                    )
-                  ],
-                ),
-              )
+                  ),
+                  Flexible(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Text(
+                          user.name,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(context).textTheme.headline,
+                        ),
+                        Text(
+                          '@${user.username}',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(context).textTheme.caption,
+                        ),
+                      ],
+                    ),
+                  )
+                ],
+              ),
+              widget.hasSubscription ? _subscriptionSticker() : Container()
             ],
           ),
         ),
@@ -152,25 +186,50 @@ class _MenuNavigationScreenState extends State<MenuNavigationScreen> {
     );
   }
 
+  Widget _subscriptionSticker() {
+    return Positioned(
+      left: 80,
+      child: Row(
+        children: <Widget>[
+          Padding(
+            padding: EdgeInsets.only(right: 4),
+            child: Image.asset(
+              'assets/flame_gold_plus_4.png',
+              width: 16,
+              height: 16,
+            ),
+          ),
+          Text(
+            'FireFit+ active',
+            style: Theme.of(context).textTheme.subhead.copyWith(
+              fontWeight: FontWeight.bold
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _menuOption({
     String title,
     IconData iconData,
+    Widget customIcon,
     Color color,
     bool selected = false,
     VoidCallback onPressed,
     bool showNotificationBubble = false,
   }){
     Color selectedColor = Colors.blue;
-    Color unselectedColor = Colors.grey[700];
+    Color unselectedColor = Colors.black;//grey[700];
     Color displayedColor = color != null ? color : (selected ? selectedColor :unselectedColor);
     Widget icon = SizedBox(
       width: 32.0,
       height: 32.0,
-      child: NotificationIcon(
+      child: customIcon==null? NotificationIcon(
         iconData: iconData,
         showBubble: showNotificationBubble,
         color: displayedColor,
-      )
+      ) : customIcon,
     );
     return Material(
       color: Colors.white,

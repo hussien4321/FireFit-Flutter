@@ -46,7 +46,9 @@ class YesNoDialog extends StatelessWidget {
                       if(onNo != null){
                         onNo();
                       }
-                      onDone();
+                      if(onDone != null){
+                        onDone();
+                      }
                     }
                   ),
                   Padding( padding: EdgeInsets.all(8.0)),
@@ -55,7 +57,9 @@ class YesNoDialog extends StatelessWidget {
                     text: yesText,
                     onTap: () {
                       onYes();
-                      onDone();
+                      if(onDone != null){
+                        onDone();
+                      }
                     }
                   ),
                 ],

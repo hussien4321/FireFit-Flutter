@@ -64,14 +64,17 @@ class OutfitBloc{
   final _rateOutfitController = PublishSubject<OutfitRating>();
   Sink<OutfitRating> get rateOutfit => _rateOutfitController;
 
+  final _showAdController = PublishSubject<void>();
+  Observable<void> get showAd => _showAdController.stream;
+
   final _isBackgroundLoadingController = PublishSubject<bool>();
   Observable<bool> get isBackgroundLoading => _isBackgroundLoadingController.stream;
 
   final _noOutfitFoundController = PublishSubject<bool>();
   Observable<bool> get noOutfitFound => _noOutfitFoundController.stream;
 
-  final _loadingController = PublishSubject<bool>();
-  Observable<bool> get isLoading => _loadingController.stream;
+  final _loadingController = BehaviorSubject<bool>(seedValue: false);
+  BehaviorSubject<bool> get isLoading => _loadingController.stream;
   final _successController = PublishSubject<bool>();
   Observable<bool> get isSuccessful => _successController.stream;
   final _successMessageController = PublishSubject<String>();
@@ -79,7 +82,7 @@ class OutfitBloc{
   final _errorController = PublishSubject<String>();
   Observable<String> get hasError => _errorController.stream;
   
-  OutfitBloc(this.repository, this._userRepository, this._preferences) {
+  OutfitBloc(this.repository, this._userRepository, this._preferences) {    
     _exploredOutfitsController.addStream(repository.getOutfits(SearchModes.EXPLORE));
     _myOutfitsController.addStream(repository.getOutfits(SearchModes.MINE));
     _lookbookOutfitsController.addStream(repository.getOutfits(SearchModes.SAVED));
@@ -152,6 +155,7 @@ class OutfitBloc{
   _uploadOutfit(UploadOutfit uploadOutfit) async {
     _successController.add(true);
     _isBackgroundLoadingController.add(true);
+    Future.delayed(Duration(milliseconds: 1500), () => _showAdController.add(null));
     final success = await repository.uploadOutfit(uploadOutfit);
     _isBackgroundLoadingController.add(false);
     if(success){
@@ -173,9 +177,7 @@ class OutfitBloc{
   }
 
   _deleteOutfit(Outfit outfit) async {
-    _loadingController.add(true);
     final success = await repository.deleteOutfit(outfit);
-    _loadingController.add(false);
     _successController.add(success);
     if(success){
       _successMessageController.add("Delete successful!");
@@ -295,6 +297,7 @@ class OutfitBloc{
     _loadLookbookOutfitsController.close();
     _loadLookbooksController.close();
     _lookbooksController.close();
+    _showAdController.close();
     _uploadOutfitsController.close();
     _editOutfitController.close();
     _deleteOutfitController.close();

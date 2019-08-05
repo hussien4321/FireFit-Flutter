@@ -6,8 +6,15 @@ import 'package:front_end/providers.dart';
 import 'package:helpers/helpers.dart';
 import 'package:middleware/middleware.dart';
 import 'package:helpers/helpers.dart';
+import 'package:firebase_remote_config/firebase_remote_config.dart';
 
 class LookbooksScreen extends StatefulWidget {
+
+  final bool hasSubscription;
+  final ValueChanged<bool> onUpdateSubscriptionStatus;
+
+  LookbooksScreen({this.hasSubscription, this.onUpdateSubscriptionStatus});
+
   @override
   _LookbooksScreenState createState() => _LookbooksScreenState();
 }
@@ -20,6 +27,8 @@ class _LookbooksScreenState extends State<LookbooksScreen> {
   String userId;
   User user;
 
+  int maxNumLookbooks = RemoteConfigHelpers.defaults[RemoteConfigHelpers.LOOKBOOKS_LIMIT];
+  int maxOutfitStorage = RemoteConfigHelpers.defaults[RemoteConfigHelpers.LOOKBOOKS_OUTFITS_LIMIT];
 
   bool isSortBySize = false;
   Preferences preferences =Preferences();
@@ -32,6 +41,10 @@ class _LookbooksScreenState extends State<LookbooksScreen> {
 
   _loadPreferences() async {
     isSortBySize = await preferences.getPreference(Preferences.LOOKBOOKS_SORT_BY_SIZE);
+    RemoteConfig.instance.then((remoteConfig) {
+      maxOutfitStorage = remoteConfig.getInt(RemoteConfigHelpers.LOOKBOOKS_OUTFITS_LIMIT);
+      maxNumLookbooks = remoteConfig.getInt(RemoteConfigHelpers.LOOKBOOKS_LIMIT);
+    });
   }
   
   @override
@@ -80,40 +93,67 @@ class _LookbooksScreenState extends State<LookbooksScreen> {
       return Container();
     }
     return Container(
-      padding: EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+      padding: EdgeInsets.only(top: 4, left: 8, right: 8, bottom: 8),
       width: double.infinity,
-      child: RichText(
-        textAlign: TextAlign.center,
-        text: TextSpan(
-          style: Theme.of(context).textTheme.title.copyWith(
-            fontWeight: FontWeight.normal
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: <Widget>[
+          Row(
+            children: <Widget>[
+              Expanded(
+                child: Text(
+                  "Current size:",
+                  style: Theme.of(context).textTheme.subhead.copyWith(
+                    color: Colors.black54
+                  ),
+                  textAlign: TextAlign.start,
+                ),
+              ),
+              RichText(
+                textAlign: TextAlign.center,
+                text: TextSpan(
+                  style: Theme.of(context).textTheme.subhead.copyWith(
+                    fontWeight: FontWeight.normal
+                  ),
+                  children: [
+                    TextSpan(
+                      text: user.numberOfLookbooks.toString(),
+                      style: TextStyle(
+                        inherit: true,
+                        fontWeight: FontWeight.bold
+                      )
+                    ),
+                    TextSpan(
+                      text: " Lookbook${user.numberOfLookbooks==1?'':'s'}"
+                    ),
+                  ]
+                ),
+              ),
+            ],
           ),
-          children: [
-            TextSpan(
-              text: "You have "
-            ),
-            TextSpan(
-              text: user.numberOfLookbooks.toString(),
-              style: TextStyle(
-                inherit: true,
-                fontWeight: FontWeight.bold
-              )
-            ),
-            TextSpan(
-              text: " lookbook${user.numberOfLookbooks==1?'':'s'} with "
-            ),
-            TextSpan(
-              text: user.numberOfLookbookOutfits.toString(),
-              style: TextStyle(
-                inherit: true,
-                fontWeight: FontWeight.bold
-              )
-            ),
-            TextSpan(
-              text: " outfit${user.numberOfLookbookOutfits==1?'':'s'}"
-            ),
-          ]
-        ),
+          Row(
+            children: <Widget>[
+              Expanded(
+                child: Text(
+                  "Total outfits:",
+                  style: Theme.of(context).textTheme.subhead.copyWith(
+                    color: Colors.black54
+                  ),
+                  textAlign: TextAlign.start,
+                ),
+              ),
+              LimitedFeatureSticker(
+                title: "Unlimited storage?",
+                message: "${user.numberOfLookbookOutfits}/$maxOutfitStorage Outfits",
+                isFull: user.numberOfLookbookOutfits >= maxOutfitStorage,
+                benefit: 'have unlimited outfits in your lookbooks',
+                hasSubscription: widget.hasSubscription,
+                onUpdateSubscriptionStatus: widget.onUpdateSubscriptionStatus,
+                initialPage: 2,
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -129,7 +169,7 @@ class _LookbooksScreenState extends State<LookbooksScreen> {
   }
 
   Widget _newLookbookButton(int currentSize) {
-    bool isFull = currentSize == AppConfig.MAX_NUM_LOOKBOOKS;
+    bool isFull = currentSize == maxNumLookbooks;
     Color color = isFull ? Colors.grey : Colors.blue;
     return FlatButton(
       child: Row(

@@ -5,6 +5,8 @@ class UploadOutfit {
   String title;
   String description;
   String style;
+  DateTime lastUploadDate;
+  bool isOnWardrobePage;
 
   UploadOutfit({
     this.posterUserId,
@@ -12,6 +14,8 @@ class UploadOutfit {
     this.title, 
     this.description, 
     this.style,
+    this.lastUploadDate,
+    this.isOnWardrobePage = false,
   }) {
     if(images == null){
       images = [];

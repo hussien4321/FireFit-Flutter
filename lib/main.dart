@@ -14,6 +14,8 @@ import 'package:streamqflite/streamqflite.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
+import 'package:firebase_admob/firebase_admob.dart';
+import 'package:front_end/providers.dart';
 
 void main() async {
   Crashlytics crashlytics = Crashlytics.instance;
@@ -22,7 +24,9 @@ void main() async {
       crashlytics.recordFlutterError(details);
     }
   };
+  FirebaseAdMob.instance.initialize(appId: AdmobTools.appId);
 
+  await RemoteConfigHelpers.loadDefaults();
   Preferences preferences = new Preferences();
   CloudFunctions functions = CloudFunctions.instance;
   FirebaseStorage storage = FirebaseStorage.instance;

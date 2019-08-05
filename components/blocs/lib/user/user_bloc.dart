@@ -22,6 +22,8 @@ class UserBloc {
   final _searchUserController = PublishSubject<String>();
   Sink<String> get searchUser => _searchUserController; 
 
+  final _markWardrobeSeenController = PublishSubject<String>();
+  Sink<String> get markWardrobeSeen => _markWardrobeSeenController; 
 
   final _followersController = BehaviorSubject<List<User>>();
   Stream<List<User>> get followers => _followersController;
@@ -102,6 +104,7 @@ class UserBloc {
       _checkUsernameController.stream.debounce(Duration(milliseconds: 500)).listen(_refreshUsernameCheck),
       _refreshVerificationEmailController.stream.listen(_refreshVerifiedCheck),
       _resendEmailController.stream.listen(_repository.resendVerificationEmail),
+      _markWardrobeSeenController.listen(_repository.markWardrobeSeen),
       _selectUserController.listen(_loadSelectedUser),
       _searchUserController.distinct().listen(_loadSearchUser),
       _loadCurrentUserController.listen(_loadCurrentUser),
@@ -145,11 +148,13 @@ class UserBloc {
   _logInUser(LogInForm logInForm) async {
     _loadingController.add(true);
     bool success = await _repository.logIn(logInForm);
-    _loadingController.add(false);
     if(success){
       await _resetCurrentUserStatus();
       await _loadFirstTimeStreams();
       await _loadStartupStreams();
+    }
+    _loadingController.add(false);
+    if(success){
       _successController.add(true);
     }else{
       _errorController.add("Failed to log in");
@@ -367,6 +372,7 @@ class UserBloc {
     _checkUsernameController.close();
     _refreshVerificationEmailController.close();
     _resendEmailController.close();
+    _markWardrobeSeenController.close();
     _loadingController.close();
     _logInController.close();
     _logOutController.close();

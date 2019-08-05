@@ -36,7 +36,7 @@ class NotificationBloc {
     _subscriptions = <StreamSubscription<dynamic>>[
       _registerNotificationTokenController.listen(_registerNotificationToken),
       _updateNotificationTokenController.listen(_updateNotificationToken),
-      _loadStaticNotificationsController.listen(_loadStaticNotifications),
+      _loadStaticNotificationsController.distinct().listen(_loadStaticNotifications),
       _loadLiveNotificationsController.listen(_loadLiveNotifications),
       _markNotificationsSeenController.listen(_markNotificationsSeen)
     ];
@@ -76,7 +76,7 @@ class NotificationBloc {
   _markNotificationsSeen(MarkNotificationsSeen markSeen) async {
     bool success = await repository.markNotificationsSeen(markSeen);
     if(success && markSeen.isMarkingAll){
-      _successMessageController.add("Done!");
+      _successMessageController.add("Marked all as done!");
     }
   }
 

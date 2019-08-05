@@ -72,7 +72,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
           String userId = await _userBloc.existingAuthId.first;
           events.setUserId(userId);
         }
-        Navigator.pushReplacementNamed(context, RouteConverters.getFromAccountStatus(accountStatus));
+        CustomNavigator.goToPageAtRoot(context, RouteConverters.getFromAccountStatus(accountStatus));
       }
     });
   }

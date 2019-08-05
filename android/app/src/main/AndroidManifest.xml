@@ -22,6 +22,9 @@
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_icon"
             android:resource="@drawable/ic_stat_logo_shirt_in_flame_outline" />
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-3787115292798141~8475161366"/>
         <activity
             android:name=".MainActivity"
             android:launchMode="singleTop"

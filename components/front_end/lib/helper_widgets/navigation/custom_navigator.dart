@@ -143,9 +143,13 @@ class CustomNavigator {
     ));
   }
   
-  static Future<T> goToUploadOutfitScreen<T extends Object>(BuildContext context) {
+  static Future<T> goToUploadOutfitScreen<T extends Object>(BuildContext context, {bool hasSubscription, ValueChanged<bool> onUpdateSubscriptionStatus, bool isOnWardrobePage}) {
     return Navigator.push(context, MaterialPageRoute(
-      builder: (context) => UploadOutfitScreen(),
+      builder: (context) => UploadOutfitScreen(
+        hasSubscription: hasSubscription,
+        onUpdateSubscriptionStatus: onUpdateSubscriptionStatus,
+        isOnWardrobePage: isOnWardrobePage,
+      ),
       settings: RouteSettings(
         name: '/upload-outfit'
       )
@@ -192,9 +196,13 @@ class CustomNavigator {
     ));
   }
 
-  static Future<T> goToSubscriptionDetailsScreen<T extends Object>(BuildContext context) {
+  static Future<T> goToSubscriptionDetailsScreen<T extends Object>(BuildContext context, {int initialPage = 0, bool hasSubscription, ValueChanged<bool> onUpdateSubscriptionStatus}) {
     return Navigator.push(context, MaterialPageRoute(
-      builder: (context) => SubscriptionDetailsScreen(),
+      builder: (context) => SubscriptionDetailsScreen(
+        initialPage: initialPage,
+        hasSubscription: hasSubscription,
+        onUpdateSubscriptionStatus: onUpdateSubscriptionStatus,
+      ),
       settings: RouteSettings(
         name: '/subscription'
       )
@@ -246,6 +254,14 @@ class CustomNavigator {
       )
     ));
   }
+
+  
+  static Future<T> goToPageAtRoot<T extends Object>(BuildContext context, String name) {
+    return Navigator.pushNamedAndRemoveUntil(context,
+      name,
+      (route) => false
+    );
+  } 
 }
 
 class SlideRightRoute extends PageRouteBuilder {

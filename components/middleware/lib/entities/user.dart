@@ -14,10 +14,13 @@ class User {
   int boosts;
   DateTime subscriptionEndDate;
   bool hasNewFeedOutfits;
+  bool hasNewUpload;
   DateTime createdAt;
   int numberOfFollowers, numberOfFollowing, numberOfOutfits, numberOfFlames, numberOfNewNotifications;
   int numberOfLookbooks, numberOfLookbookOutfits;
   bool isFollowing;
+  int postsOnDay;
+  DateTime lastUploadDate;
   DateTime followCreatedAt;
   SearchUser searchUser;
 
@@ -32,6 +35,7 @@ class User {
     this.boosts,
     this.subscriptionEndDate,
     this.createdAt,
+    this.hasNewUpload,
   });
 
   bool get hasFullData => numberOfFollowers != null;
@@ -61,6 +65,9 @@ class User {
     numberOfLookbookOutfits =  map['number_of_lookbook_outfits'] == null ? 0 : map['number_of_lookbook_outfits'];
     isFollowing = map['is_following'] == 1;
     followCreatedAt = map['follow_created_at'] == null ? null : DateTime.parse(map['follow_created_at']);
+    postsOnDay = map['posts_on_day'] == null ? 0 : map['posts_on_day'];
+    lastUploadDate = map['last_upload_date'] == null ? null : DateTime.parse(map['last_upload_date']);
+    hasNewUpload = map['has_new_upload'] == 1;
     searchUser = SearchUser.fromMap(map);
   } 
 
@@ -86,6 +93,9 @@ class User {
     'number_of_lookbooks' : numberOfLookbooks,
     'number_of_lookbook_outfits' : numberOfLookbookOutfits,
     'follow_created_at' : followCreatedAt?.toIso8601String(),
+    'posts_on_day' : postsOnDay,
+    'last_upload_date' : lastUploadDate?.toIso8601String(),
+    'has_new_upload' : hasNewUpload ? 1 : 0,
     'is_following' : isFollowing ? 1 : 0,
   };
 

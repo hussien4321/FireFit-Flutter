@@ -289,6 +289,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         children: <Widget>[
           _profilePic(user),
           _userInfo(user),
+          _activityStatus(user),
         ],
       ),
     );
@@ -344,6 +345,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
+  Widget _activityStatus(User user){
+    Color color = Colors.grey;
+    if(user.lastUploadDate != null){
+      final recentDuration = DateTime.now().difference(user.lastUploadDate);
+      if(recentDuration.inDays<7){
+        color = Colors.green;
+      }else if(recentDuration.inDays < 14){
+        color = Colors.orange[700];
+      }
+    }
+    return Padding(
+      padding: EdgeInsets.only(top : 4.0),
+      child: Text(
+        'Last upload: ${user.lastUploadDate == null ? 'Never' : DateFormatter.dateToRecentOnlyFormat(user.lastUploadDate)}',
+        style: Theme.of(context).textTheme.caption.copyWith(
+          color: color
+        ),
+      ),
+    );
+  }
 
   Widget _overallStatistics(User user){
     return Row(

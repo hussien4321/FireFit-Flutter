@@ -12,8 +12,16 @@ import 'package:flutter/services.dart';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:overlay_support/overlay_support.dart';
+import 'package:firebase_remote_config/firebase_remote_config.dart';
 
 class UploadOutfitScreen extends StatefulWidget {
+
+  final bool isOnWardrobePage;
+  final bool hasSubscription;
+  final ValueChanged<bool> onUpdateSubscriptionStatus;
+
+  UploadOutfitScreen({this.hasSubscription, this.onUpdateSubscriptionStatus, this.isOnWardrobePage});
+
   @override
   _UploadOutfitScreenState createState() => _UploadOutfitScreenState();
 }
@@ -37,10 +45,22 @@ class _UploadOutfitScreenState extends State<UploadOutfitScreen> with LoadingAnd
 
   String dirPath;
 
+  int dailyUploadLimit = RemoteConfigHelpers.defaults[RemoteConfigHelpers.UPLOAD_DAILY_LIMIT];
+  int todaysUploadCount = 0;
+
+  bool hasSubscription;
+
+  bool get hasReachedMaxLimit => !hasSubscription && todaysUploadCount >= dailyUploadLimit;
+
   @override
   void initState() {
     super.initState();
+    hasSubscription = widget.hasSubscription;
+    RemoteConfig.instance.then((remoteConfig) {
+      dailyUploadLimit = remoteConfig.getInt(RemoteConfigHelpers.UPLOAD_DAILY_LIMIT);
+    });
     uploadOutfit = UploadOutfit();
+    uploadOutfit.isOnWardrobePage = widget.isOnWardrobePage;
     uploadOutfit.title = "OOTD (${DateFormatter.dateToDMYFormat(DateTime.now())})";
     titleTextEdit = TextEditingController(text: uploadOutfit.title);
     descriptionTextEdit = TextEditingController(text: uploadOutfit.description);
@@ -79,9 +99,12 @@ class _UploadOutfitScreenState extends State<UploadOutfitScreen> with LoadingAnd
       actions: <Widget>[
         IconButton(
           icon: Icon(Icons.send),
-          color: uploadOutfit.canBeUploaded ? Colors.green : Colors.orange,
+          color: hasReachedMaxLimit ? Colors.red : uploadOutfit.canBeUploaded ? Colors.green : Colors.orange,
           onPressed: () {
-            if(uploadOutfit.canBeUploaded){
+            if(hasReachedMaxLimit) {
+              toast("Daily limit reached");
+            }
+            else if(uploadOutfit.canBeUploaded){
               _uploadOutfit();
             }else{
               toast("Finish steps 1-3 first!");
@@ -97,6 +120,19 @@ class _UploadOutfitScreenState extends State<UploadOutfitScreen> with LoadingAnd
     if(_outfitBloc==null){
       _outfitBloc = OutfitBlocProvider.of(context);
       _userBloc = UserBlocProvider.of(context);
+      _userBloc.currentUser.first.then((user) => setState(() {
+        DateTime today = DateTime.now();
+        DateTime lastUploadDate = user.lastUploadDate;
+        int todaysCount = 0;
+        if(lastUploadDate!=null){
+          bool lastUploadTakenToday = today.year == lastUploadDate.year && today.month == lastUploadDate.month && today.day == lastUploadDate.day;
+          if(lastUploadTakenToday){
+            todaysCount = user.postsOnDay;
+          }
+          uploadOutfit.lastUploadDate = user.lastUploadDate;
+        }
+        setState(() => todaysUploadCount = todaysCount);
+      }));
       String userId = await _userBloc.existingAuthId.first;
       uploadOutfit.posterUserId = userId;
       _subscriptions = <StreamSubscription<dynamic>>[
@@ -136,9 +172,7 @@ class _UploadOutfitScreenState extends State<UploadOutfitScreen> with LoadingAnd
     });
   }
 
-  
   _uploadOutfit() => _outfitBloc.uploadOutfit.add(uploadOutfit);
-  
   
   Widget _buildBody(){
     return Container(
@@ -176,17 +210,30 @@ class _UploadOutfitScreenState extends State<UploadOutfitScreen> with LoadingAnd
   
   Widget _buildSummaryHeader() {
     return Container(
-      padding: EdgeInsets.only(top: 16.0),
-      child: Center(
-        child: Text(
-          'Upload a new outfit in 4 quick steps!',
-          style: TextStyle(
-            fontSize: 20.0,
-            color: Colors.grey,
-            fontStyle: FontStyle.italic
+      padding: EdgeInsets.only(top: 8.0, left: 32, right: 32, bottom: 8),
+      child: Row(
+        children: <Widget>[
+          Expanded(
+            child: Text(
+              "Daily allowance:",
+              style: Theme.of(context).textTheme.subhead.copyWith(
+                color: Colors.black54
+              ),
+              textAlign: TextAlign.start,
+            ),
           ),
-          textAlign: TextAlign.center,
-        ),
+          LimitedFeatureSticker(
+            title: "Unlimited uploads?",
+            message: "$todaysUploadCount/$dailyUploadLimit Uploads",
+            isFull: todaysUploadCount >= dailyUploadLimit,
+            hasSubscription: hasSubscription,
+            benefit: 'have unlimited daily uploads',
+            onUpdateSubscriptionStatus: (newStatus) {
+              widget.onUpdateSubscriptionStatus(newStatus);
+              setState(() => hasSubscription = newStatus); 
+            },
+          ),
+        ],
       ),
     );
   }

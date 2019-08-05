@@ -51,8 +51,9 @@ class _IntroScreenState extends State<IntroScreen> {
   
   StreamSubscription _logInStatusListener(){
     return _userBloc.accountStatus.listen((accountStatus) async {
+      print('got status = $accountStatus');
       if(accountStatus!=null && accountStatus !=UserAccountStatus.LOGGED_OUT) {
-        print('got status = $accountStatus');
+        print('started!');
         final events = AnalyticsEvents(context);
         String userId = await _userBloc.existingAuthId.first;
         events.setUserId(userId);
@@ -61,10 +62,10 @@ class _IntroScreenState extends State<IntroScreen> {
         }else{
           events.signUp();
         }
-        Navigator.pushReplacementNamed(context, RouteConverters.getFromAccountStatus(accountStatus));
+        CustomNavigator.goToPageAtRoot(context, RouteConverters.getFromAccountStatus(accountStatus));
       }
     });
-  }
+}
 
 
   _brightenStatusBar(){
