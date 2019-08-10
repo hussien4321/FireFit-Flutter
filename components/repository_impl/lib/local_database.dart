@@ -39,7 +39,7 @@ class LocalDatabase {
 
   void _onUpgrade(Database db, int versionFrom, int versionTo) async {
     int startVersion = versionFrom + 1;
-    startVersion = skipUnnecessaryVersions(versionFrom);
+    startVersion = skipUnnecessaryVersions(versionFrom) - 1;
     for(int i = startVersion; i <= versionTo; i++){
       int nextVersion = i + 1;
       await _applyMigration(db, nextVersion);
@@ -119,14 +119,7 @@ class LocalDatabase {
   }
   void _onDowngrade(Database db, int versionFrom, int versionTo) async {
     if(versionTo == 1){
-      await db.execute("DROP TABLE IF EXISTS outfit");
-      await db.execute("DROP TABLE IF EXISTS user");
-      await db.execute("DROP TABLE IF EXISTS outfit_search");
-      await db.execute("DROP TABLE IF EXISTS user_search");
-      await db.execute("DROP TABLE IF EXISTS comment");
-      await db.execute("DROP TABLE IF EXISTS notification");
-      await db.execute("DROP TABLE IF EXISTS lookbook");
-      await db.execute("DROP TABLE IF EXISTS save");
+      await _deleteAll(db);
       await _applyMigration(db, versionTo);
     }
   }

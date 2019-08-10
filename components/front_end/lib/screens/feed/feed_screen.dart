@@ -29,7 +29,7 @@ class _FeedScreenState extends State<FeedScreen> {
     return Container(
       color: Colors.grey[300],
       child: StreamBuilder<bool>(
-        stream: _outfitBloc.isLoading,
+        stream: _outfitBloc.isLoadingItems,
         initialData: false,
         builder: (ctx, isLoadingSnap) {
           return StreamBuilder<List<Outfit>>(

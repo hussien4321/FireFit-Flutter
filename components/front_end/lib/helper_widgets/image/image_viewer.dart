@@ -91,13 +91,6 @@ class _ImageViewer extends StatelessWidget {
             ),
           ),
         )
-        // PhotoView(
-        //   minScale: PhotoViewComputedScale.contained,
-        //   imageProvider: CachedNetworkImageProvider(
-        //     imageUrl,
-        //   ),
-        //   heroTag: heroTag,
-        // ),
       ),
     );
   }

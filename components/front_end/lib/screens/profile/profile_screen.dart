@@ -74,6 +74,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget build(BuildContext context) {
     _initBlocs();
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: StreamBuilder<bool>(
         stream: _userBloc.noUserFound,
         initialData: false,
@@ -81,7 +82,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           stream: _userBloc.isLoading,
           initialData: false,
           builder: (ctx, loadingSnap) => StreamBuilder<bool>(
-            stream: _outfitBloc.isLoading,
+            stream: _outfitBloc.isLoadingItems,
             initialData: false,
             builder: (ctx, loadingOutfitsSnap) => StreamBuilder<User>(
               stream: _userBloc.selectedUser,
@@ -90,7 +91,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   return _userNotFound();
                 }
                 if(loadingSnap.data || !snap.hasData || snap.data == null){
-                  return Center(child: CircularProgressIndicator(),);
+                  return CustomScaffold(
+                    leading: _closeButton(),
+                    title: 'Loading Profile',
+                    body: Center(child: CircularProgressIndicator(),)
+                  );
                 }
                 if(followUser.followed == null){
                   AnalyticsEvents(context).profileViewed(snap.data);
@@ -158,6 +163,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Widget _profileScaffold(User user, bool isLoadingOutfits){
     return CustomScaffold(
+      resizeToAvoidBottomPadding: false,
       leading: _closeButton(),
       title: isCurrentUser ? "My Profile" :
         "${user.name}'s Profile",
@@ -244,6 +250,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _editUser(user);
         break;
       case UserOption.REPORT:
+        _reportUser(user);
         break;
       default:
         return null;
@@ -255,6 +262,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
     CustomNavigator.goToEditUserScreen(context, user:user);
   }
 
+  _reportUser(User user) {
+    ReportDialog.launch(context,
+      reportedUserId: user.userId,
+    );
+  }
 
   Widget _spaceSeparator(){
     return Padding(
@@ -459,7 +471,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           _sectionHeader("User Bio"),
           Text(
             user.bio,
-            style: Theme.of(context).textTheme.subhead.copyWith(color: Colors.orange[900]),
+            style: Theme.of(context).textTheme.subhead.copyWith(color: Colors.blue[900]),
           ),
         ],
       ),

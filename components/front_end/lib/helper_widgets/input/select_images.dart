@@ -63,7 +63,7 @@ class SelectImages {
   static Future<String> _saveImage(String dirPath, Asset result, List<Asset> selectedAssets) async {
     if(!selectedAssets.any((Asset image) => result.identifier==image.identifier)){
       selectedAssets.add(result);
-      Offset coords = _getNewCoords(result, 800);
+      Offset coords = _getNewCoords(result, 1208);
       ByteData imageData = await result.requestThumbnail(coords.dx.toInt(),coords.dy.toInt());
       print('size: ${imageData.lengthInBytes}');
       if(imageData != null){
@@ -83,7 +83,7 @@ class SelectImages {
     print('originalHeight:${result.originalHeight}, originalWidth:${result.originalWidth}');
     double newHeight =newSize*(height/maxSide);
     double newWidth =newSize*(width/maxSide);
-    print('newHeight:${newHeight}, newWidth:${newWidth}');
+    print('newHeight:$newHeight, newWidth:$newWidth');
     return Offset(newWidth, newHeight);
   }
 }

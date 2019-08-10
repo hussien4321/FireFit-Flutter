@@ -82,7 +82,7 @@ class _IntroScreenState extends State<IntroScreen> {
           color: Colors.black38
         ),
         child: Image.asset(
-          'assets/splash/splash_1.jpg',
+          'assets/splash/splash_screen.jpg',
           fit: BoxFit.cover,
         ),
       ),

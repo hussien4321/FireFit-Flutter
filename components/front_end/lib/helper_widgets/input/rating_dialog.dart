@@ -55,6 +55,7 @@ class _RatingDialogState extends State<RatingDialog> {
           onPressed: hasRating ? _submitRating : null,
         )
       ],
+      backgroundColor: Colors.transparent,
      content: Column(
        crossAxisAlignment: CrossAxisAlignment.center,
        mainAxisSize: MainAxisSize.min,
@@ -93,9 +94,9 @@ class _RatingDialogState extends State<RatingDialog> {
   String get _rateText {
     switch (rating) {
       case 5:
-        return "SUPA HOT FIRE!!!";
+        return "That's a Fire Fit!";
       case 4:
-        return "Looking dope!";
+        return "Great";
       case 3:
         return "Alright";
       case 2:

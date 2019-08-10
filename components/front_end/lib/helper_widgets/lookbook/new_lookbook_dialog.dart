@@ -129,12 +129,14 @@ class _NewLookbookDialogState extends State<NewLookbookDialog> {
   }
 
   Widget _content() {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: <Widget>[
-        _nameField(),
-        _descriptionField(),
-      ],
+    return SingleChildScrollView(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          _nameField(),
+          _descriptionField(),
+        ],
+      ),
     );
   }
 

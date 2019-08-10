@@ -76,7 +76,7 @@ class _AddToLookbookDialogState extends State<AddToLookbookDialog> {
 
   Widget _content() {
     return LookbooksStream(
-      loadingStream: _outfitBloc.isLoading,
+      loadingStream: _outfitBloc.isLoadingItems,
       lookbooksStream: _outfitBloc.lookbooks,
       builder: (isLoading, lookbooks){
         lookbooks.sort((a, b) => a.name.compareTo(b.name));

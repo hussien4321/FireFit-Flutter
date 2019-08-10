@@ -147,7 +147,7 @@ class _WardrobeScreenState extends State<WardrobeScreen> {
       loadingStream: _userBloc.isLoading,
       userStream: _userBloc.currentUser,
       builder: (isLoadingUser, streamUser) => StreamBuilder<bool>(
-        stream: _outfitBloc.isLoading,
+        stream: _outfitBloc.isLoadingItems,
         initialData: false,
         builder: (ctx, isLoadingSnap) {
           return StreamBuilder<List<Outfit>>(

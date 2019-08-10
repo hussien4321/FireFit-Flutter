@@ -54,7 +54,7 @@ class _LookbooksScreenState extends State<LookbooksScreen> {
       loadingStream: _userBloc.isLoading,
       userStream: _userBloc.currentUser,
       builder: (isLoadingUser, streamUser) => LookbooksStream(
-        loadingStream: _outfitBloc.isLoading,
+        loadingStream: _outfitBloc.isLoadingItems,
         lookbooksStream: _outfitBloc.lookbooks,
         builder: (isLoadingLookbooks, lookbooks) {
           bool isLoading = isLoadingUser || isLoadingLookbooks;

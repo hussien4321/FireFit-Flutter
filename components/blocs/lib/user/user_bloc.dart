@@ -17,6 +17,8 @@ class UserBloc {
 
   final _selectedUserController = BehaviorSubject<User>();
   Stream<User> get selectedUser => _selectedUserController;
+  final _searchedUserController = BehaviorSubject<User>();
+  Stream<User> get searchedUser => _searchedUserController;
   final _selectUserController = PublishSubject<String>();
   Sink<String> get selectUser => _selectUserController; 
   final _searchUserController = PublishSubject<String>();
@@ -53,6 +55,9 @@ class UserBloc {
 
   final _sendFeedbackController = PublishSubject<FeedbackRequest>();
   Sink<FeedbackRequest> get sendFeedback => _sendFeedbackController;
+
+  final _reportUserController = PublishSubject<ReportForm>();
+  Sink<ReportForm> get reportUser => _reportUserController;
   
   final _onboardController = PublishSubject<OnboardUser>();
   Sink<OnboardUser> get onboard => _onboardController;
@@ -112,8 +117,10 @@ class UserBloc {
       _loadFollowersController.listen(_loadFollowers),
       _loadFollowingController.listen(_loadFollowing),
       _sendFeedbackController.listen(_sendFeedback),
+      _reportUserController.listen(_reportUser),
     ];
     _selectedUserController.addStream(_repository.getUser(SearchModes.SELECTED));
+    _searchedUserController.addStream(_repository.getUser(SearchModes.TEMP));
     _currentUserController.addStream(_repository.getUser(SearchModes.MINE));
     _followersController.addStream(_repository.getUsers(SearchModes.FOLLOWERS));
     _followingController.addStream(_repository.getUsers(SearchModes.FOLLOWING));
@@ -355,6 +362,15 @@ class UserBloc {
     }
   }
 
+  _reportUser(ReportForm reportForm) async {
+    bool success = await _repository.reportUser(reportForm);
+    if(success){
+      _successMessageController.add("Thanks for letting us know!");
+    }else{
+      _errorController.add("Failed to send feedback");
+    }
+  }
+
   void dispose() {
     _currentUserController.close();
     _existingAuthController.close();
@@ -364,10 +380,12 @@ class UserBloc {
     _loadFollowingController.close();
     _loadCurrentUserController.close();
     _selectedUserController.close();
+    _searchedUserController.close();
     _followUserController.close();
     _selectUserController.close();
     _searchUserController.close();
     _sendFeedbackController.close();
+    _reportUserController.close();
     _noUserFoundController.close();
     _checkUsernameController.close();
     _refreshVerificationEmailController.close();

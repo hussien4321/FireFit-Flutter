@@ -24,7 +24,10 @@ class _SettingsScreenState extends State<SettingsScreen> with LoadingAndErrorDia
   String version = 'Loading...';
 
   String username;
-  String _twitterURL = "https://www.twitter.com/nfrealmusic";
+  String _twitterURL = "https://twitter.com/firefit_app";
+  String _privacyPolicyURL = "https://www.firefitapp.com/privacy-policy.html";
+  String _termsAndConditionsURL = "https://www.firefitapp.com/terms-and-conditions.html";
+  String _copyrightsURL = "https://www.firefitapp.com/copyrights.html";
 
   @override
   void initState() {
@@ -88,8 +91,8 @@ class _SettingsScreenState extends State<SettingsScreen> with LoadingAndErrorDia
               ),
               SettingsOption(
                 icon:  FontAwesomeIcons.twitter,
-                name: 'Follow us @firefitappteam',
-                onTap: _openTwitter,
+                name: 'Follow us @firefit_app',
+                onTap: () => _openURL(_twitterURL),
               ),
               SettingsHeader('About'),
               SettingsOption(
@@ -103,14 +106,17 @@ class _SettingsScreenState extends State<SettingsScreen> with LoadingAndErrorDia
               SettingsOption(
                 icon:  FontAwesomeIcons.lock,
                 name: 'Privacy policy',
+                onTap: () => _openURL(_privacyPolicyURL),
               ),
               SettingsOption(
                 icon:  FontAwesomeIcons.envelopeOpenText,
-                name: 'Terms of service',
+                name: 'Terms & Conditions',
+                onTap: () => _openURL(_termsAndConditionsURL),
               ),
               SettingsOption(
                 icon:  FontAwesomeIcons.copyright,
                 name: 'Copyrights',
+                onTap: () => _openURL(_copyrightsURL),
               ),
               SettingsHeader('Account'),
               SettingsOption(
@@ -166,11 +172,11 @@ class _SettingsScreenState extends State<SettingsScreen> with LoadingAndErrorDia
     );
   }
   
-  _shareApp() => Share.share('I thought you might be interested in this fashion app for sharing and discussing your daily looks: https://firefitapp.com \n\nYou can find my profile by searching for @$username in the app!');
+  _shareApp() => Share.share('I thought you might be interested in this fashion app for sharing and discussing your daily outfits: https://firefitapp.com \n\nYou can find my profile by searching for @$username in the app!');
   
-  _openTwitter() async {
-    if (await canLaunch(_twitterURL)) {
-      await launch(_twitterURL);
+  _openURL(String url) async {
+    if (await canLaunch(url)) {
+      await launch(url);
     } else {
       toast("Failed to open browser");
     }

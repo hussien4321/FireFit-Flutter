@@ -80,7 +80,7 @@ class _CommentsScreenState extends State<CommentsScreen> {
       title: "Comments",
       body: Container(
         child: StreamBuilder<bool>(
-          stream: _outfitBloc.isLoading,
+          stream: _outfitBloc.isLoadingItems,
           initialData: false,
           builder: (context, loadingSnap) => StreamBuilder<Outfit>(
             stream: _outfitBloc.selectedOutfit,

@@ -75,6 +75,8 @@ class OutfitBloc{
 
   final _loadingController = BehaviorSubject<bool>(seedValue: false);
   BehaviorSubject<bool> get isLoading => _loadingController.stream;
+  final _loadingItemsController = BehaviorSubject<bool>(seedValue: false);
+  BehaviorSubject<bool> get isLoadingItems => _loadingItemsController.stream;
   final _successController = PublishSubject<bool>();
   Observable<bool> get isSuccessful => _successController.stream;
   final _successMessageController = PublishSubject<String>();
@@ -133,9 +135,9 @@ class OutfitBloc{
   }
 
   _loadOutfits(LoadOutfits loadOutfits) async {
-    _loadingController.add(true);
+    _loadingItemsController.add(true);
     final success = loadOutfits.startAfterOutfit==null ? await repository.loadOutfits(loadOutfits) : await repository.loadMoreOutfits(loadOutfits);
-    _loadingController.add(false);
+    _loadingItemsController.add(false);
     _successController.add(success);
     if(!success){
       _errorController.add("Failed to load outfits");
@@ -143,9 +145,9 @@ class OutfitBloc{
   }
 
   _loadLookbooks(LoadLookbooks loadLookbooks) async {
-    _loadingController.add(true);
+    _loadingItemsController.add(true);
     final success = await repository.loadLookbooks(loadLookbooks);
-    _loadingController.add(false);
+    _loadingItemsController.add(false);
     _successController.add(success);
     if(!success){
       _errorController.add("Failed to load lookbooks");
@@ -311,6 +313,7 @@ class OutfitBloc{
     _deleteSaveController.close();
     _rateOutfitController.close();
     _loadingController.close();
+    _loadingItemsController.close();
     _isBackgroundLoadingController.close();
     _successController.close();
     _successMessageController.close();

@@ -137,7 +137,7 @@ class _LookbookScreenState extends State<LookbookScreen> {
 
   Widget _body() {
     return OutfitsStream(
-      loadingStream: _outfitBloc.isLoading,
+      loadingStream: _outfitBloc.isLoadingItems,
       outfitsStream: _outfitBloc.lookbookOutfits,
       builder: (isLoading, outfits) {
         return StreamBuilder<List<Lookbook>>(

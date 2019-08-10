@@ -82,7 +82,7 @@ class _ExploreScreenState extends State<ExploreScreen> with SingleTickerProvider
               _searchDetailsBar(),
               Expanded(
                 child: StreamBuilder<bool>(
-                  stream: _outfitBloc.isLoading,
+                  stream: _outfitBloc.isLoadingItems,
                   initialData: false,
                   builder: (ctx, isLoadingSnap) => StreamBuilder<List<Outfit>>(
                     stream: _outfitBloc.exploredOutfits,

@@ -70,7 +70,7 @@ class _ExploreScreenOriginalState extends State<ExploreScreenOriginal> {
   }
   Widget _buildOutfitLiveStream() {
     return StreamBuilder<bool>(
-      stream: _outfitBloc.isLoading,
+      stream: _outfitBloc.isLoadingItems,
       initialData: true,
       builder: (ctx, loadingSnap) {
         return StreamBuilder<List<Outfit>>(

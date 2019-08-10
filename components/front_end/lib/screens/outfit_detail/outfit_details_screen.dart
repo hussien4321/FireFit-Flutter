@@ -112,6 +112,7 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
   }
   Widget _overlayScaffold({Widget body}){
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: Container(
         color: Colors.white,
         child: SafeArea(
@@ -197,6 +198,7 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
         _editOutfit();
         break;
       case OutfitOption.REPORT:
+        _reportUser();
         break;
       case OutfitOption.DELETE:
         _confirmDelete();
@@ -207,6 +209,13 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
   }
 
   _editOutfit() => CustomNavigator.goToEditOutfitScreen(context, outfit: outfit);
+
+  _reportUser() {
+    ReportDialog.launch(context,
+      reportedUserId: outfit.poster.userId,
+      reportedOutfitId: outfit.outfitId,
+    );
+  }
 
   _confirmDelete(){
     return showDialog(

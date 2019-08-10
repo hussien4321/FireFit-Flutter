@@ -130,7 +130,7 @@ class _FindUsersScreenState extends State<FindUsersScreen> {
     return isLoading || !hasSearched ?
       Container() :
       StreamBuilder<User>(
-        stream: _userBloc.selectedUser,
+        stream: _userBloc.searchedUser,
         initialData: null,
         builder: (ctx, snap) {
           return snap.data == null ? _notFoundMessage() : _foundUser(snap.data);

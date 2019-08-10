@@ -27,6 +27,7 @@ abstract class UserRepository {
   Future<bool> loadMoreFollowers(LoadUsers loadUsers);
   
   Future<bool> sendFeedback(FeedbackRequest feedbackRequest);
+  Future<bool> reportUser(ReportForm reportForm);
   
   Future<bool> hasEmailVerified();
   Future<void> resendVerificationEmail([_]);

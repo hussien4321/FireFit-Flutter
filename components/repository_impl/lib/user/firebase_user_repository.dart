@@ -229,8 +229,11 @@ class FirebaseUserRepository implements UserRepository {
   }
 
   Future<bool> hasEmailVerified() async {
-    (await auth.currentUser()).reload();
     final user = await auth.currentUser();
+    if(user == null){
+      return false;
+    }
+    user.reload();
     bool hasEmailCreds = user.providerData.map((provider) => provider.providerId=='password').contains(true);
     return !hasEmailCreds || user.isEmailVerified; 
   }
@@ -298,6 +301,14 @@ class FirebaseUserRepository implements UserRepository {
 
   Future<bool> sendFeedback(FeedbackRequest feedbackRequest) {
     return cloudFunctions.getHttpsCallable(functionName: 'sendFeedback').call(feedbackRequest.toJson())
+    .then((res) {
+      return res.data['res'].toString() == 'true';
+    })
+    .catchError((exception) => catchExceptionWithBool(exception, analytics));
+  }
+
+  Future<bool> reportUser(ReportForm reportForm) {
+    return cloudFunctions.getHttpsCallable(functionName: 'reportUser').call(reportForm.toJson())
     .then((res) {
       return res.data['res'].toString() == 'true';
     })

@@ -21,6 +21,8 @@ export 'submission_data/outfit/outfit_filters.dart';
 export 'submission_data/outfit/outfit_rating.dart';
 export 'submission_data/outfit/upload_outfit.dart';
 
+export 'submission_data/report/report_form.dart';
+
 export 'submission_data/save/delete_save.dart';
 export 'submission_data/save/outfit_save.dart';
 
