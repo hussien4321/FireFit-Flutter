@@ -9,7 +9,7 @@ class AdmobTools {
 
   static final MobileAdTargetingInfo targetingInfo = new MobileAdTargetingInfo(
     childDirected: false,
-    testDevices: <String>['B2AA47A5B61A62208DFAF5C4CD83EB0A', '24CD58DF8BA0C7A9F379047A6BF0D17E'],
+    testDevices: <String>['B2AA47A5B61A62208DFAF5C4CD83EB0A', '24CD58DF8BA0C7A9F379047A6BF0D17E', 'c775044d6b247fd9935c6544eee3edbc'],
     keywords: <String>['fashion', 'beauty', 'outfits', 'streetwear', 'clothing'],
   );
 

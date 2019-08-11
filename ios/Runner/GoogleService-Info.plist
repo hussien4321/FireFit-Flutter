@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>845404937435-iu252ncej2qnmrsmm5qgvgf52dupvtaq.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.845404937435-iu252ncej2qnmrsmm5qgvgf52dupvtaq</string>
+	<key>API_KEY</key>
+	<string>AIzaSyC-AgHC3iSsEqv881tWD8pQZcFVn7z6LrE</string>
+	<key>GCM_SENDER_ID</key>
+	<string>845404937435</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.progrs.software.miramira</string>
+	<key>PROJECT_ID</key>
+	<string>skilful-tape-240120</string>
+	<key>STORAGE_BUCKET</key>
+	<string>skilful-tape-240120.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:845404937435:ios:69901ba62becef0d</string>
+	<key>DATABASE_URL</key>
+	<string>https://skilful-tape-240120.firebaseio.com</string>
+	<key>ADMOB_APP_ID</key>
+	<string>ca-app-pub-3787115292798141~5206780440</string>
+</dict>
+</plist>
