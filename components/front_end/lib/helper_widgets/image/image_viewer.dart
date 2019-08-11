@@ -14,7 +14,7 @@ class ImagePreview extends StatelessWidget {
       onTap: () => _openImageViewer(context),
       child: Container(
           decoration: BoxDecoration(
-          image: DecorationImage(
+          image: imageUrl==null ?  null : DecorationImage(
             image: CachedNetworkImageProvider(imageUrl),
             fit: BoxFit.cover,
           ),

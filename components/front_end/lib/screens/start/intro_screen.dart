@@ -53,7 +53,6 @@ class _IntroScreenState extends State<IntroScreen> {
     return _userBloc.accountStatus.listen((accountStatus) async {
       print('got status = $accountStatus');
       if(accountStatus!=null && accountStatus !=UserAccountStatus.LOGGED_OUT) {
-        print('started!');
         final events = AnalyticsEvents(context);
         String userId = await _userBloc.existingAuthId.first;
         events.setUserId(userId);
@@ -99,7 +98,7 @@ class _IntroScreenState extends State<IntroScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: Center(
                 child: Text(
-                  'Feel more confident in your\nunique style',
+                  'Feel more confident in your own style',
                   style: Theme.of(context).textTheme.headline.copyWith(
                     color: Colors.white, 
                     fontWeight: FontWeight.w300, 

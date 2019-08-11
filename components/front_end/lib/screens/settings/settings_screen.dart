@@ -24,10 +24,6 @@ class _SettingsScreenState extends State<SettingsScreen> with LoadingAndErrorDia
   String version = 'Loading...';
 
   String username;
-  String _twitterURL = "https://twitter.com/firefit_app";
-  String _privacyPolicyURL = "https://www.firefitapp.com/privacy-policy.html";
-  String _termsAndConditionsURL = "https://www.firefitapp.com/terms-and-conditions.html";
-  String _copyrightsURL = "https://www.firefitapp.com/copyrights.html";
 
   @override
   void initState() {
@@ -92,7 +88,7 @@ class _SettingsScreenState extends State<SettingsScreen> with LoadingAndErrorDia
               SettingsOption(
                 icon:  FontAwesomeIcons.twitter,
                 name: 'Follow us @firefit_app',
-                onTap: () => _openURL(_twitterURL),
+                onTap: () => _openURL(AppConfig.TWITTER_URL),
               ),
               SettingsHeader('About'),
               SettingsOption(
@@ -106,17 +102,17 @@ class _SettingsScreenState extends State<SettingsScreen> with LoadingAndErrorDia
               SettingsOption(
                 icon:  FontAwesomeIcons.lock,
                 name: 'Privacy policy',
-                onTap: () => _openURL(_privacyPolicyURL),
+                onTap: () => _openURL(AppConfig.PRIVACY_POLICY_URL),
               ),
               SettingsOption(
                 icon:  FontAwesomeIcons.envelopeOpenText,
                 name: 'Terms & Conditions',
-                onTap: () => _openURL(_termsAndConditionsURL),
+                onTap: () => _openURL(AppConfig.TERMS_AND_CONDITIONS_URL),
               ),
               SettingsOption(
                 icon:  FontAwesomeIcons.copyright,
                 name: 'Copyrights',
-                onTap: () => _openURL(_copyrightsURL),
+                onTap: () => _openURL(AppConfig.COPYRIGHTS_URL),
               ),
               SettingsHeader('Account'),
               SettingsOption(

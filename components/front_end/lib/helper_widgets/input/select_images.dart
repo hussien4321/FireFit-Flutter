@@ -1,5 +1,7 @@
+import 'package:flutter/material.dart';
 import 'package:multi_image_picker/multi_image_picker.dart';
 import 'dart:async';
+import 'package:front_end/helper_widgets.dart';
 import 'package:flutter/services.dart';
 import 'dart:io';
 import 'dart:math';
@@ -7,12 +9,13 @@ import 'dart:ui';
 
 class SelectImages {
 
-  static Future<List<String>> addImages({int count, String dirPath, List<Asset> selectedAssets, List<String> currentImages, bool Function() isStillOpen, String title = 'Select outfit'}) async {
+  static Future<List<String>> addImages(BuildContext context, {int count, String dirPath, List<Asset> selectedAssets, List<String> currentImages, bool Function() isStillOpen, String title = 'Select outfit'}) async {
     List<Asset> resultList = List<Asset>();
     try {
       resultList = await _pickImages(count, selectedAssets, title);
     } on PlatformException catch (e) {
       print('FAILED: ${e.message}');
+      PermissionDialog.launch(context);
     }
     _removeDeselectedImages(resultList, selectedAssets, currentImages);
 
@@ -63,8 +66,9 @@ class SelectImages {
   static Future<String> _saveImage(String dirPath, Asset result, List<Asset> selectedAssets) async {
     if(!selectedAssets.any((Asset image) => result.identifier==image.identifier)){
       selectedAssets.add(result);
-      Offset coords = _getNewCoords(result, 1208);
+      Offset coords = _getNewCoords(result, 1208*2);
       ByteData imageData = await result.requestThumbnail(coords.dx.toInt(),coords.dy.toInt());
+      // ByteData imageData = await result.requestOriginal();
       print('size: ${imageData.lengthInBytes}');
       if(imageData != null){
         String filename = '$dirPath/$timestamp.jpg';
@@ -80,10 +84,14 @@ class SelectImages {
     int height = result.originalHeight;
     int width = result.originalWidth;
     int maxSide = max(height, width);
-    print('originalHeight:${result.originalHeight}, originalWidth:${result.originalWidth}');
-    double newHeight =newSize*(height/maxSide);
-    double newWidth =newSize*(width/maxSide);
-    print('newHeight:$newHeight, newWidth:$newWidth');
-    return Offset(newWidth, newHeight);
+    if(maxSide > newSize){
+      print('originalHeight:${result.originalHeight}, originalWidth:${result.originalWidth}');
+      double newHeight =newSize*(height/maxSide);
+      double newWidth =newSize*(width/maxSide);
+      print('newHeight:$newHeight, newWidth:$newWidth');
+      return Offset(newWidth, newHeight);
+    }else{
+      return Offset(width.toDouble(), height.toDouble());
+    }
   }
 }

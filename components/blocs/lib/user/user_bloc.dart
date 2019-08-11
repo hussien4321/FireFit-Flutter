@@ -164,7 +164,7 @@ class UserBloc {
     if(success){
       _successController.add(true);
     }else{
-      _errorController.add("Failed to log in");
+      _errorController.add("Failed to log in, account details are incorrect");
     }
   } 
 
@@ -274,6 +274,9 @@ class UserBloc {
   _refreshVerifiedCheck([_]) async {
     bool isEmailVerified = await _repository.hasEmailVerified();
     String email = await _repository.getVerificationEmail();
+    if(email==''){
+      email = await _repository.getVerificationEmail();
+    }
     _isEmailVerifiedController.add(isEmailVerified);
     _verificationEmailController.add(email);
   }

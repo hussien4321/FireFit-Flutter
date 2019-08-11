@@ -240,6 +240,9 @@ class FirebaseUserRepository implements UserRepository {
 
   Future<String> getVerificationEmail() async {
     final user = await auth.currentUser();
+    if(user==null){
+      return '';
+    }
     bool hasEmailCreds = user.providerData.map((provider) => provider.providerId=='password').contains(true);
     if(!hasEmailCreds){
       return '';

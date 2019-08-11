@@ -30,14 +30,6 @@ class VerificationDialog extends StatefulWidget {
       context: context,
       pageBuilder: (context, animation1, animation2) {}
     );
-
-    return showDialog(
-      context: context,
-      builder: (ctx) => VerificationDialog(
-        actionName: actionName,
-        emailAddress: emailAddress,
-      )
-    );
   }
 
   final String actionName;
@@ -53,7 +45,6 @@ class _VerificationDialogState extends State<VerificationDialog> {
 
   bool isVerified = false;
 
-  bool isRefreshing = false;
   bool isSendingEmail = false;
   bool emailCooldown = false;
   
@@ -62,7 +53,10 @@ class _VerificationDialogState extends State<VerificationDialog> {
   @override
   void initState() {
     super.initState();
+    _refresh();
   }
+
+
   @override
   Widget build(BuildContext context) {
     _initBlocs();
@@ -158,14 +152,11 @@ class _VerificationDialogState extends State<VerificationDialog> {
             )
           ),
           _button(
-            text: emailCooldown ? 'Disabled temporarily' : isSendingEmail ? 'Sending...' : 'Send verification email',
+            text: emailCooldown ? 'Email sent!' : isSendingEmail ? 'Sending...' : 'Send verification email',
             onPressed: isSendingEmail || emailCooldown ? null : _sendVerificatonEmail
           ),
           _verificationStatus(),
-          _button(
-            text: isRefreshing ? 'Refreshing...' : 'Refresh status',
-            onPressed: isRefreshing ? null : _refresh,
-          ),
+          isVerified ? Container() : _backgroundLoading(),
         ],
       ),
     );
@@ -218,6 +209,48 @@ class _VerificationDialogState extends State<VerificationDialog> {
     );
   }
 
+  Widget _backgroundLoading() {
+    return Column(
+      children: <Widget>[
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            Flexible(
+              child: Text(
+                'Checking for updates...',
+                style: Theme.of(context).textTheme.button.copyWith(
+                  color: Colors.black54,
+                )
+              ),
+            ),
+            Theme(
+              data: ThemeData(
+                accentColor: Colors.black54
+              ),
+              child: Padding(
+                padding: EdgeInsets.only(left: 4),
+                child: Container(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+        Padding(
+          padding: EdgeInsets.only(top: 8.0),
+          child: Text(
+            'Could take ~30 Seconds',
+            style: Theme.of(context).textTheme.caption.copyWith(color: Colors.black38),
+          ),
+        ),
+      ],
+    );
+  }
+
   _sendVerificatonEmail() async {
     setState(() {
      isSendingEmail=true; 
@@ -233,19 +266,21 @@ class _VerificationDialogState extends State<VerificationDialog> {
   }
 
   _refresh() async {
-    setState(() {
-     isRefreshing=true; 
-    });
-    await Future.delayed(Duration(seconds: 2));
-    _userBloc.refreshVerificationEmail.add(null);
-    bool newIsVerified = await _userBloc.isEmailVerified.first;
+    bool newIsVerified = false;
+    while(!newIsVerified){
+      if(!mounted){
+        print('closign');
+        return;
+      }
+      print('refreshing');
+      await Future.delayed(Duration(seconds: 3));
+      _userBloc.refreshVerificationEmail.add(null);
+      newIsVerified = await _userBloc.isEmailVerified.first;
+    }
     if(newIsVerified){
       setState(() {
         isVerified = newIsVerified; 
       });
     }
-    setState(() {
-      isRefreshing=false; 
-    });
   }
 }

@@ -195,6 +195,7 @@ class _ProfilePicPageState extends State<ProfilePicPage> {
       selectedAssets.add(widget.selectedAsset);
     }
     List<String> takenImages = await SelectImages.addImages(
+      context,
       count: 1,
       dirPath: widget.dirPath,
       isStillOpen: () => mounted,

@@ -274,6 +274,7 @@ class _EditUserScreenState extends State<EditUserScreen> with LoadingAndErrorDia
       selectedAssets.add(selectedAsset);
     }
     List<String> takenImages = await SelectImages.addImages(
+      context,
       count: 1,
       dirPath: dirPath,
       isStillOpen: () => mounted,

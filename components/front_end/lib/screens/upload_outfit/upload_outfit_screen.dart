@@ -452,6 +452,7 @@ class _UploadOutfitScreenState extends State<UploadOutfitScreen> with LoadingAnd
   Future<void> _addImages() async {
     setState(() => loadingImages = true);
     List<String> takenImages = await SelectImages.addImages(
+      context,
       count: 3,
       dirPath: dirPath,
       isStillOpen: () => mounted,

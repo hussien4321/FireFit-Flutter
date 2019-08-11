@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:rxdart/rxdart.dart';
 import 'package:middleware/middleware.dart';
 import 'package:blocs/blocs.dart';
+import 'dart:math';
 
 class OutfitBloc{
 
@@ -238,12 +239,40 @@ class OutfitBloc{
   _rateOutfit(OutfitRating outfitRating) async {
     final success = await repository.rateOutfit(outfitRating);
     if(success){
-      _successMessageController.add("Rating submitted!");
+      String message = _generateRandomMessage(outfitRating);
+      _successMessageController.add(message);
     }else{
       _errorController.add("Failed to react to outfit");
     }
   }
 
+  String _generateRandomMessage(OutfitRating outfitRating){
+    Random random =Random();
+    List<String> badRatings = [
+      "Leave a suggestion?",
+      "Share why you don't like it?",
+      "Maybe offer some advice?",
+    ];
+    List<String> mediumRatings = [
+      "Thanks for rating!",
+      "They will appreciate your feedback!",
+      "Thanks alot!",
+      "Nice one!"
+    ];
+    List<String> goodRatings = [
+      "You just made someone's day!",
+      "WOOHOO!",
+      "Save this style if you want to remember it!"
+    ];
+    switch (outfitRating.ratingValue) {
+      case 1:
+        return badRatings[random.nextInt(badRatings.length)];
+      case 5:
+        return goodRatings[random.nextInt(goodRatings.length)];
+      default:
+        return mediumRatings[random.nextInt(mediumRatings.length)];
+    }
+  }
   _saveOutfit(OutfitSave saveData) async {
     final resId = await repository.saveOutfit(saveData);
     final success = resId != -1;

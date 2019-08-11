@@ -3,6 +3,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:transformer_page_view/transformer_page_view.dart';
 import 'onboard_pages/onboard_pages.dart';
 import 'package:blocs/blocs.dart';
+import 'package:flutter/gestures.dart';
 import 'dart:async';
 import 'package:middleware/middleware.dart';
 import 'package:front_end/helper_widgets.dart';
@@ -10,6 +11,9 @@ import 'package:front_end/providers.dart';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:multi_image_picker/multi_image_picker.dart';
+import 'package:helpers/helpers.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:overlay_support/overlay_support.dart';
 
 class OnboardScreen extends StatefulWidget {
   @override
@@ -326,22 +330,84 @@ class _OnboardScreenState extends State<OnboardScreen> with SnackbarMessages, Lo
         selectedAsset: selectedAsset,
         onUpdateAsset: (asset) => selectedAsset=asset,
       ),
-      OnboardDetails(
-        icon: FontAwesomeIcons.check,
-        title: "Start ur fashion journey💃",
-        children: <Widget>[
-          Container(
-            width: double.infinity,
-            padding: EdgeInsets.all(10.0),
-            child: Text(
-              "Press the submit to finish creating your account!",
-              style: Theme.of(context).textTheme.subhead,
-              textAlign: TextAlign.center,
-            ),
+      _finalConfirmationPage(),
+  ]);
+
+  Widget _finalConfirmationPage() {
+    return 
+    OnboardDetails(
+      icon: FontAwesomeIcons.check,
+      title: "Start ur fashion journey💃",
+      children: <Widget>[
+        Container(
+          width: double.infinity,
+          padding: EdgeInsets.all(10.0),
+          child: Column(
+            children: <Widget>[
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: <Widget>[
+                  Flexible(
+                    child: RichText(
+                      text: TextSpan(
+                        style: Theme.of(context).textTheme.subhead,
+                        children: [
+                          TextSpan(
+                            text: 'I hereby confirm that I have read and understood the '
+                          ),
+                          TextSpan(
+                            text: 'Privacy Policy',
+                            style: TextStyle(
+                              inherit: true,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.blue,
+                              decoration: TextDecoration.underline,
+                            ),
+                            recognizer: TapGestureRecognizer()..onTap = () => _openURL(AppConfig.PRIVACY_POLICY_URL),
+                          ),
+                          TextSpan(
+                            text: ' & '
+                          ),
+                          TextSpan(
+                            text: 'Terms & Conditions',
+                            style: TextStyle(
+                              inherit: true,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.blue,
+                              decoration: TextDecoration.underline,
+                            ),
+                            recognizer: TapGestureRecognizer()..onTap = () => _openURL(AppConfig.TERMS_AND_CONDITIONS_URL),
+                          ),
+                        ]
+                      ),
+                    )
+                  ),
+                  Checkbox(
+                    value: onboardUser.hasReadDocuments,
+                    onChanged: (newVal) {
+                      onboardUser.hasReadDocuments = newVal;
+                      _onSave(onboardUser);
+                    },
+                    activeColor: Colors.blue,
+                  )
+                ]
+              ),
+            ],
           ),
-        ],
-      ),
-    ]);
+        ),
+      ],
+    );
+  }
+
+  _openURL(String url) async {
+    if (await canLaunch(url)) {
+      await launch(url);
+    } else {
+      toast("Failed to open! - please visit FireFit.com to view documents");
+    }
+  }
+
 
   _onSave(OnboardUser newOnboardUser) async {
     Future.delayed(Duration.zero, () => setState(() { onboardUser = newOnboardUser; }));
@@ -353,13 +419,16 @@ class _OnboardScreenState extends State<OnboardScreen> with SnackbarMessages, Lo
       canGoToNextPage = true;
     } 
     else if(index == 1){
-      canGoToNextPage = onboardUser.isUsernameTaken != null && !onboardUser.isUsernameTaken && onboardUser.name != null && onboardUser.username != null && onboardUser.name.isNotEmpty && onboardUser.username.isNotEmpty;
+      canGoToNextPage = onboardUser.isUsernameTaken != null && !onboardUser.isUsernameTaken && onboardUser.name != null && onboardUser.username != null && onboardUser.name.isNotEmpty && onboardUser.username.isNotEmpty && onboardUser.isUsernameLongEnough;
     }
     else if(index == 2){
-      canGoToNextPage = onboardUser.genderIsMale != null && onboardUser.dateOfBirth != null && onboardUser.countryCode != null;
+      canGoToNextPage = onboardUser.genderIsMale != null && onboardUser.dateOfBirth != null && onboardUser.countryCode != null && onboardUser.hasConfirmedAge;
     }
     else if(index == 3){
       canGoToNextPage = onboardUser.profilePicUrl != null && onboardUser.profilePicUrl.isNotEmpty;
+    }
+    else if(index == 4){
+      canGoToNextPage = onboardUser.hasReadDocuments;
     }
 
     Future.delayed(Duration.zero, () => setState(() { canGoToNextPage = canGoToNextPage; }));

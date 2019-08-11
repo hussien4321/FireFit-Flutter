@@ -100,10 +100,10 @@ class User {
   };
 
   String get ageRange {
-    final factor = 10;
+    final factor = 6;
     
     int roundedDownAge = (_age / factor).floor() * factor;
-    return "${roundedDownAge}-${roundedDownAge+factor}";
+    return "${roundedDownAge}-${roundedDownAge+factor-1}";
   }
 
   int get _age {

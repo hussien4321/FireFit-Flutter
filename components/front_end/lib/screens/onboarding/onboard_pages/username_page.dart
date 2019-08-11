@@ -29,6 +29,8 @@ class _UsernamePageState extends State<UsernamePage> with SnackbarMessages {
   TextEditingController displayNameController = new TextEditingController();
   TextEditingController usernameController = new TextEditingController();
   
+  final int MINIMUM_USERNAME_LENGTH = 3; 
+
   FocusNode usernameFocus =FocusNode();
   
   @override
@@ -87,7 +89,7 @@ class _UsernamePageState extends State<UsernamePage> with SnackbarMessages {
                           controller: usernameController,
                           onChanged: _parseNewUsername,
                           textCapitalization: TextCapitalization.none,
-                          textColor: widget.onboardUser.isUsernameTaken == null ? Colors.black : (widget.onboardUser.isUsernameTaken ? Colors.red : Colors.blue),
+                          textColor: widget.onboardUser.isUsernameTaken == null || !widget.onboardUser.isUsernameLongEnough ? Colors.black : (widget.onboardUser.isUsernameTaken ? Colors.red : Colors.blue),
                           title: 'Username',
                           hintText: 'unique_name',
                           maxLength: 30,
@@ -109,8 +111,8 @@ class _UsernamePageState extends State<UsernamePage> with SnackbarMessages {
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: <Widget>[
                       Text(
-                        usernameController.value.text.isEmpty ? '' : (widget.onboardUser.isUsernameTaken == null  ? 'Checking username...' : widget.onboardUser.isUsernameTaken ? 'Username exists' : 'Available!'),
-                        style: Theme.of(context).textTheme.caption.apply(color: widget.onboardUser.isUsernameTaken == null ? Theme.of(context).disabledColor : widget.onboardUser.isUsernameTaken ? Theme.of(context).errorColor : Colors.blue),
+                        usernameController.value.text.isEmpty ? '' : (!widget.onboardUser.isUsernameLongEnough ? 'Not long enough' : (widget.onboardUser.isUsernameTaken == null  ? 'Checking username...' : widget.onboardUser.isUsernameTaken ? 'Username exists' : 'Available!')),
+                        style: Theme.of(context).textTheme.caption.apply(color: widget.onboardUser.isUsernameTaken == null || !widget.onboardUser.isUsernameLongEnough ? Theme.of(context).disabledColor : widget.onboardUser.isUsernameTaken ? Theme.of(context).errorColor : Colors.blue),
                       )
                     ],
                   ),
@@ -130,9 +132,13 @@ class _UsernamePageState extends State<UsernamePage> with SnackbarMessages {
       usernameController.text = formattedUsername;
       usernameFocus.unfocus();
     }
-    widget.onboardUser.username = usernameController.text;
-    widget.onboardUser.isUsernameTaken = null;
-    widget.checkUsername(usernameController.text);
+    widget.onboardUser.isUsernameLongEnough = formattedUsername.length >= MINIMUM_USERNAME_LENGTH;
+
+    if(widget.onboardUser.isUsernameLongEnough){
+      widget.onboardUser.username = usernameController.text;
+      widget.onboardUser.isUsernameTaken = null;
+      widget.checkUsername(usernameController.text);
+    }
     widget.onSave(widget.onboardUser);
   }
 

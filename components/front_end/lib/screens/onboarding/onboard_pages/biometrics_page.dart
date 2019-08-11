@@ -33,28 +33,57 @@ class BiometricsPage extends StatelessWidget {
 
   Widget dateOfBirthSelector(BuildContext context) {
     return Container(
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        crossAxisAlignment: CrossAxisAlignment.center,
+      child: Column(
         children: <Widget>[
-          Container(
-            padding: EdgeInsets.all(10.0),
-            child: Text(
-              'Date of birth',
-              style: Theme.of(context).textTheme.subtitle,
-            ),
-          ),
-          Container(
-            padding: EdgeInsets.all(10.0),
-            child: GestureDetector(
-              child: Text(
-                !hasDob ? 'Please select' : DateFormatter.dateToLongFormat(dob),//'${dob.day}/${dob.month}/${dob.year}',
-                style: Theme.of(context).textTheme.subhead.apply(color: !hasDob ? Theme.of(context).disabledColor : Theme.of(context).accentColor),
-                textAlign: TextAlign.end,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: <Widget>[
+              Container(
+                padding: EdgeInsets.all(10.0),
+                child: Text(
+                  'Date of birth',
+                  style: Theme.of(context).textTheme.subtitle,
+                ),
               ),
-              onTap: () {
-                _selectDate(context);
-              },
+              Container(
+                padding: EdgeInsets.all(10.0),
+                child: GestureDetector(
+                  child: Text(
+                    !hasDob ? 'Please select' : DateFormatter.dateToLongFormat(dob),//'${dob.day}/${dob.month}/${dob.year}',
+                    style: Theme.of(context).textTheme.subhead.apply(color: !hasDob ? Theme.of(context).disabledColor : Theme.of(context).accentColor),
+                    textAlign: TextAlign.end,
+                  ),
+                  onTap: () {
+                    _selectDate(context);
+                  },
+                ),
+              ),
+            ],
+          ),
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: <Widget>[
+                Flexible(
+                  child: Text(
+                    'I hereby confirm that I am\n over 13 years of age',
+                    style: Theme.of(context).textTheme.body2.copyWith(
+                      color: Colors.grey
+                    ),
+                  ),
+                ),
+                Checkbox(
+                  value: onboardUser.hasConfirmedAge,
+                  onChanged: (newVal) {
+                    onboardUser.hasConfirmedAge = newVal;
+                    onSave(onboardUser);
+                  },
+                  activeColor: Colors.blue,
+                )
+              ]
             ),
           ),
         ],
@@ -71,7 +100,7 @@ class BiometricsPage extends StatelessWidget {
     DatePicker.showDatePicker(
       context,
       minDateTime: DateTime(1900, 1),
-      maxDateTime: new DateTime.now(),
+      maxDateTime: new DateTime.now().subtract(Duration(days: (365.25*13).ceil())),
       initialDateTime: hasDob ? dob : DateTime(1995),
       pickerMode: DateTimePickerMode.date,
       locale: DateTimePickerLocale.en_us,
@@ -81,7 +110,6 @@ class BiometricsPage extends StatelessWidget {
   }
 
   _updateDate(DateTime newDateTime) {
-    print('selected date: $newDateTime');
     onboardUser.dateOfBirth = newDateTime;
     onSave(onboardUser);
   }
@@ -150,21 +178,19 @@ class BiometricsPage extends StatelessWidget {
               style: Theme.of(context).textTheme.subtitle,
             ),
           ),
-          GestureDetector(
-            onTap: () => print('override'),
-            child: CountryCodePicker(
-              onChanged: (cc) {
-                onboardUser.countryCode=cc.code;
-                onSave(onboardUser);
-              },
-              showOnlyCountryWhenClosed: true,
-              showCountryOnly: true,
-              alignLeft: false,
-              initialSelection: onboardUser.countryCode,
-              textStyle: TextStyle(
-                inherit: true,
-                color: Colors.blue
-              ),
+          CountryCodePicker(
+            onChanged: (cc) {
+              onboardUser.countryCode=cc.code;
+              onSave(onboardUser);
+            },
+            showOnlyCountryWhenClosed: true,
+            showCountryOnly: true,
+            alignLeft: false,
+            favorite:  ["US", "CA", "GB",],
+            initialSelection: onboardUser.countryCode,
+            textStyle: TextStyle(
+              inherit: true,
+              color: Colors.blue
             ),
           ),
         ],

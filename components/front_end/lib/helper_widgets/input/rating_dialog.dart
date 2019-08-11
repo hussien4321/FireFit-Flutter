@@ -38,24 +38,25 @@ class _RatingDialogState extends State<RatingDialog> {
           child: Text(
             'Cancel',
             style: Theme.of(context).textTheme.subtitle.copyWith(
-              color: Colors.grey,
+              color: Colors.black54,
               fontWeight: FontWeight.bold
             ),
           ),
           onPressed: Navigator.of(context).pop,
         ),
-        FlatButton(
+        RaisedButton(
+          color: hasRating ? Colors.deepOrangeAccent : Colors.black54,
           child: Text(
             widget.isUpdate ? 'Update' : 'Submit',
             style: Theme.of(context).textTheme.subtitle.copyWith(
-              color: hasRating ? Colors.deepOrangeAccent : Colors.black54,
+              color: Colors.white,
               fontWeight: FontWeight.bold
             ),
           ),
           onPressed: hasRating ? _submitRating : null,
         )
       ],
-      backgroundColor: Colors.transparent,
+    backgroundColor: Colors.white70,
      content: Column(
        crossAxisAlignment: CrossAxisAlignment.center,
        mainAxisSize: MainAxisSize.min,
@@ -85,7 +86,7 @@ class _RatingDialogState extends State<RatingDialog> {
     return Text(
       _rateText,
       style: Theme.of(context).textTheme.title.copyWith(
-        color: rating != null ? Colors.deepOrangeAccent : Colors.transparent,
+        color: rating != null ? Colors.deepOrangeAccent[700] : Colors.transparent,
         fontWeight: FontWeight.bold
       ),
     );
