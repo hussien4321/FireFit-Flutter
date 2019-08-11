@@ -230,7 +230,7 @@ class UserBloc {
       _existingAuthController.add(null);
       await _repository.logOut();
       _preferences.resetPreferences();
-      _successMessageController.add("Sign out successful!");
+      _successMessageController.add("You have been logged out");
   }
 
   _deleteUser([_]) async {

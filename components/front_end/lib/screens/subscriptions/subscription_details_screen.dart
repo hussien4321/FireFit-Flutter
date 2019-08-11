@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:front_end/helper_widgets.dart';
 import 'package:blocs/blocs.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:flutter_inapp_purchase/flutter_inapp_purchase.dart';
+import 'package:front_end/providers.dart';
 
 class SubscriptionDetailsScreen extends StatefulWidget {
 
@@ -19,11 +21,37 @@ class _SubscriptionDetailsScreenState extends State<SubscriptionDetailsScreen> {
 
   Preferences _preferences = Preferences();
   bool hasSubscription;
-  
+  IAPItem subscriptionItem;
+  bool isSubscribed = false;
+
   @override
   void initState() {
     super.initState();
     hasSubscription = widget.hasSubscription;
+    asyncInitState();
+  }
+  void asyncInitState() async {
+    await FlutterInappPurchase.initConnection.then((res) => print('connection inited: $res'));
+    isSubscribed = await _preferences.getPreference(Preferences.HAS_SUBSCRIPTION_ACTIVE);
+    getItems();
+  }
+  void getItems () async {
+    List<IAPItem> items = await FlutterInappPurchase.getSubscriptions(AdmobTools.subscriptionId);
+    print('list of res :${items.length}');
+    if(items.isNotEmpty){
+      subscriptionItem = items.first;
+      isSubscribed = await FlutterInappPurchase.checkSubscribed(sku: subscriptionItem.productId);
+      setState(() {
+        isSubscribed =isSubscribed;
+        subscriptionItem =subscriptionItem;
+      });
+    }
+  }
+
+  @override
+  void dispose() async{
+    super.dispose();
+    await FlutterInappPurchase.endConnection;
   }
 
   @override
@@ -121,7 +149,7 @@ class _SubscriptionDetailsScreenState extends State<SubscriptionDetailsScreen> {
                 ),
               ),
               Text(
-                  hasSubscription ? 'Active 🙌' : '\$6.99 USD',
+                  hasSubscription ? 'Active 🙌' : '${subscriptionItem?.localizedPrice} (${subscriptionItem?.currency})',
                   style: Theme.of(context).textTheme.headline.copyWith(
                     fontWeight: FontWeight.bold
                   ),
@@ -151,12 +179,23 @@ class _SubscriptionDetailsScreenState extends State<SubscriptionDetailsScreen> {
     );
   }
 
-  _unlockSubscription(){
-    bool newStatus = !hasSubscription;
+  _unlockSubscription() async {
+    if(hasSubscription){
+      _switchSubscription(false);
+    }
+    try {
+      PurchasedItem purchased= await FlutterInappPurchase.buyProduct(subscriptionItem.productId);
+      print('purchased - ${purchased.toString()}');
+      _switchSubscription(true);
+      } catch (error) {
+      print('$error');
+    }
+  }
+  _switchSubscription(bool isActive){
     setState(() {
-      hasSubscription = newStatus;
+      hasSubscription = isActive;
     });
-    _preferences.updatePreference(Preferences.HAS_SUBSCRIPTION_ACTIVE, newStatus);
-    widget.onUpdateSubscriptionStatus(newStatus);
+    _preferences.updatePreference(Preferences.HAS_SUBSCRIPTION_ACTIVE, isActive);
+    widget.onUpdateSubscriptionStatus(isActive);
   }
 }

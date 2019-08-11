@@ -1,6 +1,6 @@
 import 'package:middleware/entities.dart';
 
-enum NotificationType { OUTFIT_RATING, NEW_COMMENT, COMMENT_REPLY, COMMENT_LIKE, NEW_FOLLOW, NEW_OUTFIT }
+enum NotificationType { OUTFIT_RATING, NEW_COMMENT, COMMENT_REPLY, REPLY_THREAD, COMMENT_LIKE, NEW_FOLLOW, NEW_OUTFIT }
 
 class OutfitNotification {
   int notificationId;
@@ -23,6 +23,8 @@ class OutfitNotification {
         return NotificationType.NEW_COMMENT;
       case 'new-comment-reply':
         return NotificationType.COMMENT_REPLY;
+      case 'new-reply-thread':
+        return NotificationType.REPLY_THREAD;
       case 'new-comment-like':
         return NotificationType.COMMENT_LIKE;
       case 'new-outfit-rating':
@@ -42,6 +44,8 @@ class OutfitNotification {
         return 'new-comment';
       case NotificationType.COMMENT_REPLY:
         return 'new-comment-reply';
+      case NotificationType.REPLY_THREAD:
+        return 'new-reply-thread';
       case NotificationType.COMMENT_LIKE:
         return 'new-comment-like';
       case NotificationType.OUTFIT_RATING:
@@ -88,6 +92,8 @@ class OutfitNotification {
         return 'New comment';
       case NotificationType.COMMENT_REPLY:
         return 'New reply';
+      case NotificationType.REPLY_THREAD:
+        return 'New reply';
       case NotificationType.COMMENT_LIKE:
         return 'Comment liked';
       case NotificationType.OUTFIT_RATING:
@@ -107,6 +113,8 @@ class OutfitNotification {
         return 'has commented on your outfit';
       case NotificationType.COMMENT_REPLY:
         return 'has replied to your comment';
+      case NotificationType.REPLY_THREAD:
+        return 'has replied to your thread in';
       case NotificationType.COMMENT_LIKE:
         return 'has liked your comment on the outfit';
       case NotificationType.OUTFIT_RATING:

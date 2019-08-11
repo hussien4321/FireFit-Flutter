@@ -159,7 +159,7 @@ class _MainAppBarState extends State<MainAppBar> {
       _commentBloc =CommentBlocProvider.of(context);
       _dismissOpenNotifications();
       widget.messaging.configure(
-        onMessage: (res) => _loadNewNotifications(),
+        onMessage: (payload) => _handleNotification(payload),
       );
       _subscriptions = <StreamSubscription<dynamic>>[
         _tokenRefreshListener(),
@@ -183,6 +183,22 @@ class _MainAppBarState extends State<MainAppBar> {
   _dismissOpenNotifications(){
     FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = new FlutterLocalNotificationsPlugin();
     flutterLocalNotificationsPlugin.cancelAll();
+  }
+
+  _handleNotification(Map<String, dynamic> payload) {
+    final data = payload['data'];
+    bool isDataMessage = !data.isEmpty;
+    print('isDataMessage:$isDataMessage');
+    if(isDataMessage){
+      print(data);
+      String type = data['type'];
+      print('type:$type');
+      if(type == "new-device"){
+        _userBloc.logOut.add(null);
+      }
+    }else{
+      _loadNewNotifications();
+    }
   }
 
   _loadNewNotifications() {
