@@ -186,6 +186,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 );
               },
               child: ListView(
+                physics: ClampingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
                 controller: _controller,
                 children: <Widget>[
                   _biometricInfo(user),

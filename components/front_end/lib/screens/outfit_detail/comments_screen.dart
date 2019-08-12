@@ -123,6 +123,7 @@ class _CommentsScreenState extends State<CommentsScreen> {
                                 showingRepliesForId = null;
                               },
                               child: ListView(
+                                physics: ClampingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
                                 padding: EdgeInsets.all(0),
                                 controller: _controller,
                                 children: [_outfitOverview(outfit)]..addAll(comments.map((comment) => _buildCommentField(comment, loadingReplySnap.data, comments)).toList()..add(

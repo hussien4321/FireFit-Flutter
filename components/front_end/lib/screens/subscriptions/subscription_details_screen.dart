@@ -23,6 +23,8 @@ class _SubscriptionDetailsScreenState extends State<SubscriptionDetailsScreen> {
   bool hasSubscription;
   IAPItem subscriptionItem;
   bool isSubscribed = false;
+  
+  bool isLoading = true;
 
   @override
   void initState() {
@@ -40,11 +42,7 @@ class _SubscriptionDetailsScreenState extends State<SubscriptionDetailsScreen> {
     print('list of res :${items.length}');
     if(items.isNotEmpty){
       subscriptionItem = items.first;
-      isSubscribed = await FlutterInappPurchase.checkSubscribed(sku: subscriptionItem.productId);
-      setState(() {
-        isSubscribed =isSubscribed;
-        subscriptionItem =subscriptionItem;
-      });
+      _restorePurchases();
     }
   }
 
@@ -57,16 +55,26 @@ class _SubscriptionDetailsScreenState extends State<SubscriptionDetailsScreen> {
   @override
   Widget build(BuildContext context) {
     return CustomScaffold(
+      resizeToAvoidBottomPadding: false,
       title: 'FireFit+',
       actions: <Widget>[
-        IconButton(
-          icon: Icon(Icons.restore),
-          onPressed: null,
-          tooltip: "Restore Purchases",
+        FlatButton(
+          child: Text("Restore"),
+          onPressed: isLoading|| hasSubscription ? null : _restorePurchases,
         )
       ],
       body: _pageBody(),
     );
+  }
+
+  _restorePurchases() async {
+    setState(() => isLoading = true);
+
+    isSubscribed = await FlutterInappPurchase.checkSubscribed(sku: subscriptionItem.productId);
+    print('isSubscribed:$isSubscribed');
+    setState(() {
+      isLoading=false;
+    });
   }
 
   Widget _pageBody() {
@@ -149,7 +157,7 @@ class _SubscriptionDetailsScreenState extends State<SubscriptionDetailsScreen> {
                 ),
               ),
               Text(
-                  hasSubscription ? 'Active 🙌' : '${subscriptionItem?.localizedPrice} (${subscriptionItem?.currency})',
+                  hasSubscription ? 'Active 🙌' : isLoading ? 'Loading...':'${subscriptionItem?.localizedPrice} (${subscriptionItem?.currency})',
                   style: Theme.of(context).textTheme.headline.copyWith(
                     fontWeight: FontWeight.bold
                   ),
@@ -160,7 +168,7 @@ class _SubscriptionDetailsScreenState extends State<SubscriptionDetailsScreen> {
           GestureDetector(
             onTap: _unlockSubscription,
             child: RaisedButton(
-              onPressed: hasSubscription ? null : _unlockSubscription,
+              onPressed: hasSubscription || isLoading ? null : _unlockSubscription,
               color: Colors.blue,
               padding: EdgeInsets.all(16),
               child: Text(
@@ -184,7 +192,7 @@ class _SubscriptionDetailsScreenState extends State<SubscriptionDetailsScreen> {
       _switchSubscription(false);
     }
     try {
-      PurchasedItem purchased= await FlutterInappPurchase.buyProduct(subscriptionItem.productId);
+      PurchasedItem purchased= await FlutterInappPurchase.buySubscription(subscriptionItem.productId);
       print('purchased - ${purchased.toString()}');
       _switchSubscription(true);
       } catch (error) {

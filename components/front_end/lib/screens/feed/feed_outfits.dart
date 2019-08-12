@@ -59,6 +59,7 @@ class _FeedOutfitsState extends State<FeedOutfits> {
       matchSize: false,
       onRefresh: widget.onRefresh, 
       child: ListView.builder(
+        physics: ClampingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
         controller: _controller,
         itemCount: widget.outfits.length+1,
         itemBuilder: (ctx,i) => i==widget.outfits.length ? _endOfListNotice(ctx) : _buildOutfitCard(i, widget.outfits[i], ctx, i==0),
@@ -90,14 +91,6 @@ class _FeedOutfitsState extends State<FeedOutfits> {
               color: Colors.black54
             ),
           ),
-          TextSpan(
-            text: "\n\nTap to Refresh",
-            style: Theme.of(context).textTheme.subtitle.copyWith(
-              decoration: TextDecoration.underline,
-              color: Colors.blue,
-            ),
-            recognizer: TapGestureRecognizer()..onTap = () => widget.onRefresh(),
-          )
         ]
       ),
       textAlign: TextAlign.center,      

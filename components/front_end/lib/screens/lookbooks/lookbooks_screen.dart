@@ -61,6 +61,7 @@ class _LookbooksScreenState extends State<LookbooksScreen> {
           user = streamUser;
           lookbooks = _sortList(lookbooks);
           return ListView(
+            physics: ClampingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
             children: <Widget>[
               _lookbooksOverview(isLoading),
               _lookbooksManagementOptions(lookbooks.length),

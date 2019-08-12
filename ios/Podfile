@@ -39,8 +39,6 @@ target 'Runner' do
 
   pod 'Firebase/Core'
   pod 'Firebase/Analytics'
-  pod "BSImagePicker", "~> 2.8"
-  pod "BSGridCollectionViewLayout", "~> 1.2.3"
   
   # Prepare symlinks folder. We use symlinks to avoid having Podfile.lock
   # referring to absolute paths on developers' machines.

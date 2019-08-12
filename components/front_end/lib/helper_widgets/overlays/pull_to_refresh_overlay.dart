@@ -42,7 +42,6 @@ class _PullToRefreshOverlayState extends State<PullToRefreshOverlay> {
     return LayoutBuilder(
       key: containerKey,
       builder: (ctx, constraints)=> Container(
-        height: double.infinity,
         child:_matchingChildWidget(constraints)
       ),
     );
@@ -50,6 +49,7 @@ class _PullToRefreshOverlayState extends State<PullToRefreshOverlay> {
   Widget _matchingChildWidget(BoxConstraints constraints) {
     final height = constraints.maxHeight;
     return ListView(
+      physics: ClampingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
       children: [
         SizedBox(
           height: height,

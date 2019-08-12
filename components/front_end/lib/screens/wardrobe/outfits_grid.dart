@@ -64,6 +64,7 @@ class _OutfitsGridState extends State<OutfitsGrid> {
   Widget _buildScrollableGrid(BuildContext ctx) {
     bool hasRefresh = widget.onRefresh != null;
     Widget content = ListView(
+      physics: ClampingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
       shrinkWrap: true,
       controller: _controller,
       children: <Widget>[

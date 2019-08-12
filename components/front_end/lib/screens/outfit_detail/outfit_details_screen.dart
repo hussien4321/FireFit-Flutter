@@ -261,6 +261,7 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
                 ));
               },
               child: ListView(
+                physics: ClampingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
                 children: <Widget>[
                   _outfitMainDetails(),
                   _outfitFurtherDetails(),

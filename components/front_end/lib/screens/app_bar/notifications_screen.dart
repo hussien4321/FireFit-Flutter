@@ -84,6 +84,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                   ));
                 },
                 child: ListView(
+                  physics: ClampingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
                   controller: _controller,
                   children: _buildNotifications(snap.data)..add(
                     _buildEndTag(isLoadingSnap.data, snap.data.isEmpty)

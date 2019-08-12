@@ -16,6 +16,8 @@ class SelectImages {
     } on PlatformException catch (e) {
       print('FAILED: ${e.message}');
       PermissionDialog.launch(context);
+    } on NoImagesSelectedException catch (e) {
+      print('Nothing selected');
     }
     _removeDeselectedImages(resultList, selectedAssets, currentImages);
 
