@@ -13,7 +13,7 @@ class SelectImages {
   static Future<List<String>> addImages(BuildContext context, {int count, String dirPath, List<Asset> selectedAssets, List<String> currentImages, bool Function() isStillOpen, String title = 'Select Fit Pics '}) async {
     List<Asset> resultList = List<Asset>();
     try {
-      await PermissionsChecker.checkPermissions([PermissionName.Camera, PermissionName.Storage]);
+      await PermissionsChecker.checkPhotoPermissions();
       resultList = await _pickImages(count, selectedAssets, title);
     } on PlatformException catch (e) {
       print('FAILED: ${e.message}');
