@@ -29,6 +29,7 @@ class _IntroScreenState extends State<IntroScreen> {
     _initBlocs();
     _brightenStatusBar();
     return Scaffold(      
+      resizeToAvoidBottomInset: false,
       body: Stack(
         children: <Widget>[
           _splashImage(),
@@ -37,8 +38,6 @@ class _IntroScreenState extends State<IntroScreen> {
       ),
     );
   }
-
-  
 
   _initBlocs() {
     if(_userBloc == null){
@@ -64,8 +63,7 @@ class _IntroScreenState extends State<IntroScreen> {
         CustomNavigator.goToPageAtRoot(context, RouteConverters.getFromAccountStatus(accountStatus));
       }
     });
-}
-
+  }
 
   _brightenStatusBar(){
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
@@ -77,6 +75,7 @@ class _IntroScreenState extends State<IntroScreen> {
   Widget _splashImage() {
     return SizedBox.expand(
       child: Container(
+        color:Colors.black,
         foregroundDecoration: BoxDecoration(
           color: Colors.black38
         ),

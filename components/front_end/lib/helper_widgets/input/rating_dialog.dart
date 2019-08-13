@@ -66,7 +66,7 @@ class _RatingDialogState extends State<RatingDialog> {
            child: _rateTranslation(),
          ),
          RatingBar(
-          size: 36,
+          size: 40,
           value: rating?.toDouble(),
           onUpdateRating: (newRating) => setState(() => rating=newRating),
            ),

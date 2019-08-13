@@ -23,6 +23,7 @@ class _SubscriptionDetailsScreenState extends State<SubscriptionDetailsScreen> {
   bool hasSubscription;
   IAPItem subscriptionItem;
   bool isSubscribed = false;
+  String errorMsg;
   
   bool isLoading = true;
 
@@ -42,6 +43,7 @@ class _SubscriptionDetailsScreenState extends State<SubscriptionDetailsScreen> {
     print('list of res :${items.length}');
     if(items.isNotEmpty){
       subscriptionItem = items.first;
+      // isSubscribed
       _restorePurchases();
     }
   }
@@ -144,7 +146,7 @@ class _SubscriptionDetailsScreenState extends State<SubscriptionDetailsScreen> {
       width: double.infinity,
       color: Colors.white,
       padding: EdgeInsets.only(left:16, right: 16, top: 16, bottom: 32),
-      child: Column( 
+      child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           Column(
@@ -156,12 +158,29 @@ class _SubscriptionDetailsScreenState extends State<SubscriptionDetailsScreen> {
                   fontWeight: FontWeight.w200
                 ),
               ),
-              Text(
-                  hasSubscription ? 'Active 🙌' : isLoading ? 'Loading...':'${subscriptionItem?.localizedPrice} (${subscriptionItem?.currency})',
-                  style: Theme.of(context).textTheme.headline.copyWith(
-                    fontWeight: FontWeight.bold
-                  ),
+              Padding(
+                padding: EdgeInsets.symmetric(vertical: 4.0),
+                child: Column(
+                  children: <Widget>[
+                    Text(
+                      'isSubscribed: ${isSubscribed}',
+                      style: Theme.of(context).textTheme.caption,
+                      textAlign: TextAlign.center,
+                    ),
+                    errorMsg==null?Container() : Text(
+                      errorMsg,
+                      style: Theme.of(context).textTheme.caption.copyWith(color: Colors.red),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
                 ),
+              ),
+              Text(
+                hasSubscription ? 'Active 🙌' : isLoading ? 'Loading...':'${subscriptionItem?.localizedPrice} (${subscriptionItem?.currency})',
+                style: Theme.of(context).textTheme.headline.copyWith(
+                  fontWeight: FontWeight.bold
+                ),
+              ),
             ],
           ),
           //TODO: REMOVE THIS DETECTOR!
@@ -192,11 +211,15 @@ class _SubscriptionDetailsScreenState extends State<SubscriptionDetailsScreen> {
       _switchSubscription(false);
     }
     try {
+      print('buying purchase for ${subscriptionItem.productId}');
       PurchasedItem purchased= await FlutterInappPurchase.buySubscription(subscriptionItem.productId);
       print('purchased - ${purchased.toString()}');
       _switchSubscription(true);
-      } catch (error) {
+    } catch (error) {
       print('$error');
+      setState(() {
+        errorMsg = error.toString();      
+      });
     }
   }
   _switchSubscription(bool isActive){

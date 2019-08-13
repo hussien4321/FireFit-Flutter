@@ -16,6 +16,7 @@ import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:firebase_admob/firebase_admob.dart';
 import 'package:front_end/providers.dart';
+import 'package:flutter/services.dart';
 
 void main() async {
   Crashlytics crashlytics = Crashlytics.instance;
@@ -59,7 +60,9 @@ void main() async {
     analytics: analytics,
   );
   
-
+  SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp,
+  ]);
   app.main(
     outfitRepository: outfitRepository,
     userRepository: userRepository,

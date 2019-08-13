@@ -4,7 +4,7 @@ import 'dart:io' show Platform;
 class AdmobTools {
 
   static final List<String> subscriptionId = Platform.isAndroid
-    ? ['firefit.plus.subscriptions.monthly', 'android.test.purchased']
+    ? ['firefit.plus.subscriptions.monthly']
     : ['firefit.plus.monthly.subscription'];
 
   static final MobileAdTargetingInfo targetingInfo = new MobileAdTargetingInfo(
