@@ -80,6 +80,7 @@ class _MainAppBarState extends State<MainAppBar> {
       }
     });
     RemoteConfigHelpers.fetchValues();
+    _checkNotificationsPermission();
   }
 
   _loadDefaultPageIndex() async {
@@ -125,6 +126,14 @@ class _MainAppBarState extends State<MainAppBar> {
     }
   }
 
+  _checkNotificationsPermission() async {
+    try{
+      await PermissionsChecker.checkNotificationsPermission();
+    } on PlatformException {
+      PermissionDialog.launch(context, permissionType: PermissionType.NOTIFICATIONS);
+    }
+  }
+  
   @override
   void dispose() {
     super.dispose();

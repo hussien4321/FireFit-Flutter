@@ -6,30 +6,26 @@ import 'package:flutter/services.dart';
 import 'dart:io';
 import 'dart:math';
 import 'dart:ui';
-import 'package:simple_permissions/simple_permissions.dart';
+import 'package:permission/permission.dart';
 
 class SelectImages {
 
-  static Future<List<String>> addImages(BuildContext context, {int count, String dirPath, List<Asset> selectedAssets, List<String> currentImages, bool Function() isStillOpen, String title = 'Select outfit'}) async {
+  static Future<List<String>> addImages(BuildContext context, {int count, String dirPath, List<Asset> selectedAssets, List<String> currentImages, bool Function() isStillOpen, String title = 'Select Fit Pics '}) async {
     List<Asset> resultList = List<Asset>();
     try {
-      print('b1');
-      
-      bool hasPhotoLibraryPermission = await SimplePermissions.checkPermission(Permission.PhotoLibrary);
-      bool cameraPermission = await SimplePermissions.checkPermission(Permission.Camera);
-      print('hasPhotoLibraryPermission:$hasPhotoLibraryPermission cameraPermission:$cameraPermission');
-      if(!hasPhotoLibraryPermission){
-        throw PlatformException(code: 'test', message: 'no permission');
-      }
+      await PermissionsChecker.checkPermissions([PermissionName.Camera, PermissionName.Storage]);
       resultList = await _pickImages(count, selectedAssets, title);
     } on PlatformException catch (e) {
       print('FAILED: ${e.message}');
-      PermissionDialog.launch(context);
-    } on NoImagesSelectedException catch (e) {
-      print('Nothing selected');
-    } catch (e) {
-      print('other $e');
+      PermissionDialog.launch(context, permissionType: PermissionType.IMAGES);
+    }catch (e) {
+      if(e.runtimeType.toString() == 'PermissionPermanentlyDeniedExeption'){
+        PermissionDialog.launch(context, permissionType: PermissionType.IMAGES);
+      }
+      //Cancelling selection
+      print('Other error detected when selecting image: ${e.runtimeType}');
     }
+    
     _removeDeselectedImages(resultList, selectedAssets, currentImages);
 
     if (!isStillOpen()) return null;
@@ -38,7 +34,6 @@ class SelectImages {
     return currentImages..addAll(newImages);
   }
   
-
   static Future<List<Asset>> _pickImages(int count, List<Asset> selectedAssets, String title) => MultiImagePicker.pickImages(
     maxImages: count,
     enableCamera: false,

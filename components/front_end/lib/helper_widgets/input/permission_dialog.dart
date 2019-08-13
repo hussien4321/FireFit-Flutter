@@ -1,14 +1,25 @@
 import 'package:flutter/material.dart';
-import 'package:app_settings/app_settings.dart';
+import 'package:permission/permission.dart';
+import 'dart:async';
 
+enum PermissionType {
+  IMAGES,
+  NOTIFICATIONS
+} 
 class PermissionDialog extends StatelessWidget {
-  
-  static Future<void> launch(BuildContext context) {
+
+  static Future<void> launch(BuildContext context, {PermissionType permissionType}) {
     return showDialog(
       context: context,
-      builder: (ctx) => PermissionDialog(),
+      builder: (ctx) => PermissionDialog(
+        permissionType: permissionType
+      ),
     );
   }
+
+  final PermissionType permissionType;
+
+  PermissionDialog({this.permissionType});
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +44,7 @@ class PermissionDialog extends StatelessWidget {
           Container(
             width: double.infinity,
             child: Text(
-              'This app has been denied access to obtain images. We need this permission in order to upload outfit and profile pictures.\n\nPlease go to the app settings to enable this permission and start uploading!',
+              'FireFit has been denied access to $permissionObject.\n\nPlease go to the app settings (below) to enable this permission$footer',
               style: Theme.of(context).textTheme.subhead,
             ),
           ),
@@ -55,7 +66,7 @@ class PermissionDialog extends StatelessWidget {
           child: Text(
             'Settings',
             style: Theme.of(context).textTheme.subtitle.copyWith(
-              color: Colors.grey,
+              color: Colors.blue,
               fontWeight: FontWeight.bold
             ),
           ),
@@ -65,8 +76,30 @@ class PermissionDialog extends StatelessWidget {
     );
   }
 
+  String get permissionObject { 
+    switch (permissionType) {
+      case PermissionType.IMAGES:
+        return 'the image folder';
+      case PermissionType.NOTIFICATIONS:
+        return 'receive notifications';
+      default:
+        return 'unknown';
+    }
+  }
+  String get footer { 
+    switch (permissionType) {
+      case PermissionType.IMAGES:
+        return ' and start uploading!';
+      case PermissionType.NOTIFICATIONS:
+        return '!\n\nWARNING: Not doing so will result in unexpected behaviour';
+      default:
+        return 'unknown';
+    }
+  }
+  
+
   _goToSettings(BuildContext context) {
-    AppSettings.openAppSettings();
+    Permission.openSettings();
     Navigator.pop(context);
   }
 }

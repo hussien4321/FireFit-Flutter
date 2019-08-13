@@ -10,6 +10,7 @@ export 'helper_widgets/animated/fade_in_and_slide_page_transformer.dart';
 
 export 'helper_widgets/comment/comment_field.dart';
 
+export 'helper_widgets/functions/permissions_checker.dart';
 export 'helper_widgets/functions/route_converters.dart';
 export 'helper_widgets/functions/sort_outfits.dart';
 
