@@ -6,18 +6,29 @@ import 'package:flutter/services.dart';
 import 'dart:io';
 import 'dart:math';
 import 'dart:ui';
+import 'package:simple_permissions/simple_permissions.dart';
 
 class SelectImages {
 
   static Future<List<String>> addImages(BuildContext context, {int count, String dirPath, List<Asset> selectedAssets, List<String> currentImages, bool Function() isStillOpen, String title = 'Select outfit'}) async {
     List<Asset> resultList = List<Asset>();
     try {
+      print('b1');
+      
+      bool hasPhotoLibraryPermission = await SimplePermissions.checkPermission(Permission.PhotoLibrary);
+      bool cameraPermission = await SimplePermissions.checkPermission(Permission.Camera);
+      print('hasPhotoLibraryPermission:$hasPhotoLibraryPermission cameraPermission:$cameraPermission');
+      if(!hasPhotoLibraryPermission){
+        throw PlatformException(code: 'test', message: 'no permission');
+      }
       resultList = await _pickImages(count, selectedAssets, title);
     } on PlatformException catch (e) {
       print('FAILED: ${e.message}');
       PermissionDialog.launch(context);
     } on NoImagesSelectedException catch (e) {
       print('Nothing selected');
+    } catch (e) {
+      print('other $e');
     }
     _removeDeselectedImages(resultList, selectedAssets, currentImages);
 
