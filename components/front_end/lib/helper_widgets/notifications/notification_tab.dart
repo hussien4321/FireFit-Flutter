@@ -27,7 +27,8 @@ class _NotificationTabState extends State<NotificationTab> {
   User get refUser => widget.notification.referencedUser;
   Outfit get refOutfit => widget.notification.referencedOutfit;
   bool get hasRefOutfit => refOutfit != null;
-
+  Comment get refComment => widget.notification.referencedComment;
+  
   @override
   Widget build(BuildContext context) {
     initBlocs();
@@ -107,8 +108,8 @@ class _NotificationTabState extends State<NotificationTab> {
                                     style: Theme.of(context).textTheme.body1
                                   ),
                                   TextSpan(
-                                    text: refOutfit?.title,
-                                    style: Theme.of(context).textTheme.body2
+                                    text: isCommentNotification ? refComment?.text : refOutfit?.title,
+                                    style: Theme.of(context).textTheme.body2.copyWith(color: Colors.deepOrange)
                                   ),
                                 ]
                               ),
@@ -165,7 +166,7 @@ class _NotificationTabState extends State<NotificationTab> {
         loadOutfit: true
       );
     }
-    if(widget.notification.type == NotificationType.NEW_COMMENT || widget.notification.type == NotificationType.COMMENT_LIKE || widget.notification.type == NotificationType.COMMENT_REPLY || widget.notification.type == NotificationType.REPLY_THREAD){
+    if(isCommentNotification){
       CustomNavigator.goToCommentsScreen(
         context,
         outfitId: refOutfit.outfitId,
@@ -179,4 +180,5 @@ class _NotificationTabState extends State<NotificationTab> {
     }
   }
 
+  bool get isCommentNotification => widget.notification.type == NotificationType.NEW_COMMENT || widget.notification.type == NotificationType.COMMENT_LIKE || widget.notification.type == NotificationType.COMMENT_REPLY || widget.notification.type == NotificationType.REPLY_THREAD;
 }

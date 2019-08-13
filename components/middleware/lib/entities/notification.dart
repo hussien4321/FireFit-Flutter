@@ -110,19 +110,19 @@ class OutfitNotification {
   String get getNotificationDescription {
     switch(type){
       case NotificationType.NEW_COMMENT:
-        return 'has commented on your outfit';
+        return 'has commented';
       case NotificationType.COMMENT_REPLY:
         return 'has replied to your comment';
       case NotificationType.REPLY_THREAD:
-        return 'has replied to your thread in';
+        return 'has replied to the thread';
       case NotificationType.COMMENT_LIKE:
-        return 'has liked your comment on the outfit';
+        return 'has liked your comment';
       case NotificationType.OUTFIT_RATING:
         return 'has rated your outfit';
       case NotificationType.NEW_FOLLOW:
         return 'has started following you';
       case NotificationType.NEW_OUTFIT:
-        return 'has uploaded a new outfit:';
+        return 'has uploaded a new outfit';
       default:
         return null;
     }

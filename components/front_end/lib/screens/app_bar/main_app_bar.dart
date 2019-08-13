@@ -76,6 +76,7 @@ class _MainAppBarState extends State<MainAppBar> {
     SystemChannels.lifecycle.setMessageHandler((msg){
       if(msg==AppLifecycleState.resumed.toString()) {
         _dismissOpenNotifications();
+        _loadNewNotifications();
         return null;
       }
     });

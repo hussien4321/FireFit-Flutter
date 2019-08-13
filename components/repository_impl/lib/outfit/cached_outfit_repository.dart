@@ -341,8 +341,7 @@ class CachedOutfitRepository {
       await addOutfit(notification.referencedOutfit, SearchModes.NOTIFICATIONS);
     }
     if(notification.referencedComment != null){
-      //TODO: ADD A COMMENT SEARCH AS WELL
-      // await _addComment(notification.referencedComment.toJson());
+      await _addComment(notification.referencedComment.toJson());
     }
     return streamDatabase.insert(
       'notification',
