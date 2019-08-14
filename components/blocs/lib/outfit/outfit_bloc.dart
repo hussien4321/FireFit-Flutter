@@ -77,7 +77,7 @@ class OutfitBloc{
   final _loadingController = BehaviorSubject<bool>(seedValue: false);
   BehaviorSubject<bool> get isLoading => _loadingController.stream;
   final _loadingItemsController = BehaviorSubject<bool>(seedValue: false);
-  BehaviorSubject<bool> get isLoadingItems => _loadingItemsController.stream;
+  BehaviorSubject<bool> get isLoadingItems => _loadingItemsController;
   final _successController = PublishSubject<bool>();
   Observable<bool> get isSuccessful => _successController.stream;
   final _successMessageController = PublishSubject<String>();

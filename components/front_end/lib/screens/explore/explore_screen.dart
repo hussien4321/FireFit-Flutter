@@ -376,14 +376,12 @@ class _ExploreScreenState extends State<ExploreScreen> with SingleTickerProvider
           ),
           _actionButton(
             icon: Image.asset(
-              'assets/flame_full.png',
+              hasRating ? 'assets/flame_full.png' : 'assets/flame_empty.png',
               width: 32,
               height: 32,
             ),
             hasData: hasOutfit,
             selected: hasRating,
-            unselectedColor: Colors.blue,
-            hideBorder: true,
             iconPadding: 8,
             onPressed: () => _giveRating(currentOutfit),
           ),
@@ -420,21 +418,21 @@ class _ExploreScreenState extends State<ExploreScreen> with SingleTickerProvider
   }
 
 
-  _actionButton({Widget icon, bool hasData = false, bool selected = false, double iconPadding = 4.0, Color unselectedColor = Colors.white, bool hideBorder = false, VoidCallback onPressed}){
+  _actionButton({Widget icon, bool hasData = false, bool selected = false, double iconPadding = 4.0, VoidCallback onPressed}){
     return RawMaterialButton(
-      fillColor: !hasData ? Colors.grey : selected ? Colors.red : unselectedColor,
-      elevation: hasData ? 2 : 0,
+      fillColor: hasData ? Colors.white : Colors.grey,
+      elevation: hasData?1:0,
       shape: CircleBorder(
         side: BorderSide(
-          color: Colors.grey.withOpacity(hideBorder ? 0.0 : 0.5),
+          color: Colors.grey.withOpacity(0.5),
           width: 0.5
         )
       ),
       onPressed: hasData ? onPressed : null,
       child: Padding(
-        padding: EdgeInsets.all(iconPadding),
-        child: icon,
-      )
+      padding: EdgeInsets.all(iconPadding),
+      child: icon,
+        )
     );
   } 
 
