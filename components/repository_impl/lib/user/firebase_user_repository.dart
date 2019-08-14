@@ -59,9 +59,7 @@ class FirebaseUserRepository implements UserRepository {
     AuthInstance specificAuthInstance = _getSpecificAuthInstance(logInData.method);
     return specificAuthInstance.signIn(fields: logInData.fields) 
       .then((user) async {
-        print('found user!');
         return true;
-        // return _loadCurrentUser(user);
       })
       .catchError((exception) => catchExceptionWithBool(exception, analytics));
   }
@@ -286,6 +284,13 @@ class FirebaseUserRepository implements UserRepository {
     auth.signOut();
   }
 
+  Future<bool> resetPassword(String email) {
+    return auth.sendPasswordResetEmail(email: email).then((res) {
+      return true;
+    }).catchError((error) {
+      return false;
+    });
+  }
   Future<bool> deleteUser(String userId) async {
     return cloudFunctions.getHttpsCallable(functionName: 'deleteUser').call({
       'user_id' : userId,
@@ -295,7 +300,10 @@ class FirebaseUserRepository implements UserRepository {
       if(success){
         messaging.deleteInstanceID();
         userCache.clearEverything();
-        auth.signOut();
+        auth.currentUser().then((user) {
+          user.delete();
+          auth.signOut();
+        }).catchError((error) {});
       }
       return success;
     })
@@ -349,7 +357,7 @@ class FirebaseUserRepository implements UserRepository {
         }
       });
       if(loadNotifications.isLive){
-        userCache.incrementUserNewNotifications(notifications.length);
+        userCache.incrementUserNewNotifications(notifications);
       }
       return true;
     })

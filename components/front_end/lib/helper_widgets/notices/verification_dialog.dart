@@ -269,7 +269,6 @@ class _VerificationDialogState extends State<VerificationDialog> {
     bool newIsVerified = false;
     while(!newIsVerified){
       if(!mounted){
-        print('closign');
         return;
       }
       print('refreshing');

@@ -88,6 +88,9 @@ class UserBloc {
   final _verificationEmailController = BehaviorSubject<String>();
   Observable<String> get verificationEmail => _verificationEmailController;
 
+  final _resetPasswordController = PublishSubject<String>();
+  Sink<String> get resetPassword => _resetPasswordController;
+
   final _checkUsernameController = PublishSubject<String>();
   Sink<String> get checkUsername => _checkUsernameController;
   final _isUsernameTakenController = PublishSubject<bool>();
@@ -110,6 +113,7 @@ class UserBloc {
       _refreshVerificationEmailController.stream.listen(_refreshVerifiedCheck),
       _resendEmailController.stream.listen(_repository.resendVerificationEmail),
       _markWardrobeSeenController.listen(_repository.markWardrobeSeen),
+      _resetPasswordController.listen(_resetPassword),
       _selectUserController.listen(_loadSelectedUser),
       _searchUserController.distinct().listen(_loadSearchUser),
       _loadCurrentUserController.listen(_loadCurrentUser),
@@ -225,6 +229,16 @@ class UserBloc {
       _errorController.add('Failed to register, this is probably because the account already exists.');
     }
   } 
+
+  _resetPassword(String email) async {
+    bool success = await _repository.resetPassword(email);
+    if(success){
+      _successMessageController.add("Password reset email sent! Please check your mail service");
+    }else{
+      _errorController.add('Failed to send the password reset email, this is probably due to an incorrect address');
+    }
+    
+  }
   
   _logOutUser([_]) async {
       _existingAuthController.add(null);
@@ -404,6 +418,7 @@ class UserBloc {
     _isBackgroundLoadingController.close();
     _isLoadingFollowsController.close();
     _successMessageController.close();
+    _resetPasswordController.close();
     _subscriptions.forEach((subscription) => subscription.cancel());
   }
 }

@@ -257,12 +257,14 @@ class OutfitBloc{
       "Thanks for rating!",
       "They will appreciate your feedback!",
       "Thanks alot!",
-      "Nice one!"
+      "Nice one!",
+      "We love seeing you share your opinion!"
     ];
     List<String> goodRatings = [
-      "You just made someone's day!",
+      "You might have just made someone's day!",
       "WOOHOO!",
-      "Save this style if you want to remember it!"
+      "Good vibes all around",
+      "Maybe add it to your lookbook to remember it?"
     ];
     switch (outfitRating.ratingValue) {
       case 1:

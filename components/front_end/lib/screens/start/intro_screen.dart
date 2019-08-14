@@ -5,6 +5,7 @@ import 'package:front_end/providers.dart';
 import 'package:blocs/blocs.dart';
 import 'dart:async';
 import 'package:middleware/middleware.dart';
+import 'package:overlay_support/overlay_support.dart';
 import 'package:front_end/helper_widgets.dart';
 
 class IntroScreen extends StatefulWidget {
@@ -28,7 +29,7 @@ class _IntroScreenState extends State<IntroScreen> {
   Widget build(BuildContext context) {
     _initBlocs();
     _brightenStatusBar();
-    return Scaffold(      
+    return Scaffold(
       resizeToAvoidBottomInset: false,
       body: Stack(
         children: <Widget>[
@@ -43,14 +44,22 @@ class _IntroScreenState extends State<IntroScreen> {
     if(_userBloc == null){
       _userBloc = UserBlocProvider.of(context);
       _subscriptions = <StreamSubscription<dynamic>>[
-        _logInStatusListener()
+        _logInStatusListener(),
+        _userBloc.successMessage.listen((message) => toast(message)),
+        _userBloc.hasError.listen((message) => _errorDialog(message)),
       ];
     }
   }
-  
+
+  _errorDialog(String message){
+    ErrorDialog.launch(
+      context,
+      message: message,
+    );
+  }
+
   StreamSubscription _logInStatusListener(){
     return _userBloc.accountStatus.listen((accountStatus) async {
-      print('got status = $accountStatus');
       if(accountStatus!=null && accountStatus !=UserAccountStatus.LOGGED_OUT) {
         final events = AnalyticsEvents(context);
         String userId = await _userBloc.existingAuthId.first;

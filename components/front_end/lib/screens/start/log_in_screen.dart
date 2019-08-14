@@ -69,7 +69,7 @@ class _LogInScreenState extends State<LogInScreen> with LoadingAndErrorDialogs {
             Padding(padding:EdgeInsets.only(bottom: 8.0),),
             _emailField(),
             _passwordField(),
-            widget.isRegistering ? _passwordField(isConfirmation: true) : Container(),
+            widget.isRegistering ? _passwordField(isConfirmation: true) : _forgotPasswordPrompt(),
           ],
         ),
       ),
@@ -82,7 +82,6 @@ class _LogInScreenState extends State<LogInScreen> with LoadingAndErrorDialogs {
       _subscriptions = <StreamSubscription<dynamic>>[
         _loadingListener(),
         _successListener(),
-        _errorListener(),
       ];
     }
   }
@@ -106,12 +105,6 @@ class _LogInScreenState extends State<LogInScreen> with LoadingAndErrorDialogs {
       if(successStatus){
         Navigator.pop(context);
       }
-    });
-  }
-
-  StreamSubscription _errorListener(){
-    return _userBloc.hasError.listen((errorMessage) {
-      displayError(errorMessage, context);
     });
   }
 
@@ -202,6 +195,35 @@ class _LogInScreenState extends State<LogInScreen> with LoadingAndErrorDialogs {
           return null;
         },
       ),
+    );
+  }
+
+  Widget _forgotPasswordPrompt() {
+    return Padding(
+      padding: EdgeInsets.only(top: 8),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: <Widget>[
+          InkWell(
+            onTap: _openResetPasswordDialog,
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Text(
+                'Forgot Password?',
+                style: Theme.of(context).textTheme.button.copyWith(
+                  color: Colors.deepOrange,
+                ),
+              ),
+            ),
+          )
+        ],
+      ),
+    );
+  }
+  _openResetPasswordDialog() {
+    ForgotPasswordDialog.launch(context,
+      email: emailController.text,
+      onSubmitEmail: (email) => _userBloc.resetPassword.add(email),
     );
   }
 }

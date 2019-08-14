@@ -34,6 +34,8 @@ abstract class UserRepository {
   Future<String> getVerificationEmail();
   Future<bool> checkUsernameExists(String username);
 
+  Future<bool> resetPassword(String email);
+
   Future<void> logOut();
   Future<bool> deleteUser(String userId);
 

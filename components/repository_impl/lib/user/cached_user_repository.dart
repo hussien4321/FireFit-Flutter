@@ -90,10 +90,34 @@ class CachedUserRepository {
   incrementFlamesCount(String userId, int userRating, {bool decrement = false}) => streamDatabase.executeAndTrigger(['user'],"UPDATE user SET number_of_flames=number_of_flames${decrement?'-':'+'}? WHERE user_id=?", [ userRating, userId]);
 
 
-  Future<void> incrementUserNewNotifications(int newNotificationsCount) async {
+  Future<void> incrementUserNewNotifications(List<OutfitNotification> newNotifications) async {
+    //special string is needed to parse the IN query correctly
+    String notificationIdsParseString = "";
+    for(int i = 0; i < newNotifications.length;i++){
+      notificationIdsParseString += newNotifications[i].notificationId.toString();
+      if(i!=newNotifications.length-1){
+        notificationIdsParseString+=", ";
+      }
+    }
+    return streamDatabase.query(
+      'notification', 
+      columns: ["COUNT(*) AS 'existing_notifications'"], 
+      where: 'notification_is_seen=0 AND notification_id IN ($notificationIdsParseString)', 
+    ).then((res) {
+      int existingNewNotifications = res[0]['existing_notifications'];
+      int newNotificationsCount = newNotifications.length - existingNewNotifications;
+      if(newNotificationsCount>0){
+        return incrementUserNewNotificationsCount(newNotificationsCount);
+      }
+      return null;
+    });
+  }
+
+  Future<void> incrementUserNewNotificationsCount(int newNotificationsCount) {
     String searchModeString = searchModeToString(SearchModes.MINE);
     return streamDatabase.executeAndTrigger(['user'], "UPDATE user SET number_of_new_notifications=number_of_new_notifications+? WHERE user_id=(SELECT search_user_id FROM user_search WHERE search_user_mode=? LIMIT 1)", [newNotificationsCount, searchModeString]);
   }
+
   Future<void> updateUserHasNewFeed() async {
     String searchModeString = searchModeToString(SearchModes.MINE);
     return streamDatabase.executeAndTrigger(['user'], "UPDATE user SET has_new_feed_outfits=1 WHERE user_id=(SELECT search_user_id FROM user_search WHERE search_user_mode=? LIMIT 1)", [searchModeString]);
@@ -128,7 +152,7 @@ class CachedUserRepository {
     return streamDatabase.query('notification', columns: ["COUNT(*) AS 'count'"], where: 'notification_is_seen=0 AND notification_type=?', whereArgs: [notificationType]).then(
       (res) {
         int count = res[0]['count'];
-        incrementUserNewNotifications(-count);
+        incrementUserNewNotificationsCount(-count);
         return streamDatabase.executeAndTrigger(['notification'], "UPDATE notification SET notification_is_seen=1 WHERE notification_type=?", [notificationType]);
       }
     );

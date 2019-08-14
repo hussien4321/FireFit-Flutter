@@ -81,7 +81,7 @@ class CommentBloc {
   _addComment(AddComment comment) async {
     final success = await repository.addComment(comment);
     if(success){
-      _successMessageController.add("Comment added!");
+      _successMessageController.add("Thanks for commenting!");
     } else {
       _errorController.add("Failed to comment on outfit");
     }
