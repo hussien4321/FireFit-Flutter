@@ -197,6 +197,9 @@
 						DevelopmentTeam = 5B6CZCRSWX;
 						LastSwiftMigration = 1030;
 						SystemCapabilities = {
+							com.apple.BackgroundModes = {
+								enabled = 1;
+							};
 							com.apple.InAppPurchase = {
 								enabled = 1;
 							};
