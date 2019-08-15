@@ -10,6 +10,7 @@ import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:path/path.dart';
 import 'package:meta/meta.dart';
 import 'package:repository_impl/exception_handler.dart';
+import 'package:flutter/services.dart';
 
 class FirebaseUserRepository implements UserRepository {
   static const String dbPath = 'users';
@@ -36,7 +37,14 @@ class FirebaseUserRepository implements UserRepository {
 
   Future<String> existingAuthId() async {
     final user = await auth.currentUser();
-    final hasAuth = user!=null;
+    bool hasAuth = user!=null;
+    if(hasAuth){
+      try{ 
+        await user.reload();
+      } on PlatformException {
+        hasAuth = false;
+      }
+    }
     if(!hasAuth){
       await userCache.clearEverything();
       return null;

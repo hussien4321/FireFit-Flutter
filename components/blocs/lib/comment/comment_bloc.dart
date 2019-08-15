@@ -1,7 +1,8 @@
 import 'dart:async';
 import 'package:rxdart/rxdart.dart';
-import 'package:middleware/middleware.dart'
-;
+import 'package:middleware/middleware.dart';
+import 'dart:math';
+
 class CommentBloc {
 
   final OutfitRepository repository;
@@ -78,10 +79,21 @@ class CommentBloc {
 
   }
 
+  String get _generateRandomMessage {
+    Random random =Random();
+    List<String> messages = [
+      "Thanks for commenting!",
+      "We always love hearing your thoughts!",
+      "Great advice!",
+      "Keep on sharing!",
+    ];
+    return messages[random.nextInt(messages.length)];
+      
+  }
   _addComment(AddComment comment) async {
     final success = await repository.addComment(comment);
     if(success){
-      _successMessageController.add("Thanks for commenting!");
+      _successMessageController.add(_generateRandomMessage);
     } else {
       _errorController.add("Failed to comment on outfit");
     }
