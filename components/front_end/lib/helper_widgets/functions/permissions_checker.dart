@@ -26,7 +26,6 @@ class PermissionsChecker {
   static bool _isDenied(PermissionStatus permissionStatus) => permissionStatus==PermissionStatus.deny || permissionStatus==PermissionStatus.notAgain;
 
   static checkNotificationsPermission() async {
-    await notif.NotificationPermissions.requestNotificationPermissions();
     var permissionStatus = await notif.NotificationPermissions.getNotificationPermissionStatus();
     print('permissionStatus:$permissionStatus');
     if(permissionStatus == notif.PermissionStatus.denied){

@@ -205,7 +205,7 @@ class _LogInScreenState extends State<LogInScreen> with LoadingAndErrorDialogs {
         obscureText: true,
         focusNode: isConfirmation ? confirmationFocus : passwordFocus,
         controller: isConfirmation ? confirmationController : passwordController,
-        keyboardType: TextInputType.visiblePassword,
+        keyboardType: TextInputType.text,
         textCapitalization: TextCapitalization.none,
         decoration: InputDecoration(
           border: InputBorder.none,

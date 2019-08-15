@@ -2,8 +2,8 @@ import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import './auth_instances.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';	
 import 'package:repository_impl/repository_impl.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:middleware/middleware.dart';
 import 'package:helpers/helpers.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
@@ -19,9 +19,9 @@ class FirebaseUserRepository implements UserRepository {
   final FirebaseAuth auth;
   final CloudFunctions cloudFunctions;
   final FirebaseImageUploader imageUploader;
+  final FirebaseMessaging messaging;	
   final CachedOutfitRepository outfitCache;
   final CachedUserRepository userCache;
-  final FirebaseMessaging messaging;
   final FirebaseAnalytics analytics;
 
 
@@ -273,16 +273,6 @@ class FirebaseUserRepository implements UserRepository {
     .catchError((exception) => catchExceptionWithBool(exception, analytics));
   }
 
-  Future<void> registerNotificationToken(String userId) async {
-    messaging.requestNotificationPermissions();
-    String notificationToken = await messaging.getToken();
-    return updateNotificationToken(UpdateToken(
-      userId: userId,
-      token: notificationToken,
-    ));
-  }
-  
-
   Future<void> updateNotificationToken(UpdateToken updateToken) async {
     await cloudFunctions.getHttpsCallable(functionName: 'registerNotificationToken').call(updateToken.toJson())
       .catchError((exception) => catchExceptionWithBool(exception, analytics));
@@ -361,14 +351,14 @@ class FirebaseUserRepository implements UserRepository {
         return OutfitNotification.fromMap(formattedDoc);
       }).toList());
       notifications.sort((a,b) => -a.createdAt.compareTo(b.createdAt));
+      if(loadNotifications.isLive){
+        await userCache.incrementUserNewNotifications(notifications);
+      }
       for(int i = 0; i < notifications.length; i++){
         await outfitCache.addNotification(notifications[i]);
         if(loadNotifications.isLive){
           await outfitCache.updateLiveNotification(notifications[i]);
         }
-      }
-      if(loadNotifications.isLive){
-        await userCache.incrementUserNewNotifications(notifications);
       }
       return true;
     })

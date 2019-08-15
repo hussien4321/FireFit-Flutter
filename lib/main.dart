@@ -19,15 +19,17 @@ import 'package:front_end/providers.dart';
 import 'package:flutter/services.dart';
 
 void main() async {
+  
   Crashlytics crashlytics = Crashlytics.instance;
   FlutterError.onError = (FlutterErrorDetails details) {
     if(details.stack!=null){
       crashlytics.recordFlutterError(details);
     }
   };
-  await RemoteConfigHelpers.loadDefaults();
-  Preferences preferences = new Preferences();
 
+  RemoteConfigHelpers.loadDefaults();
+
+  Preferences preferences = new Preferences();
   preferences.getPreference(Preferences.USE_SECONDARY_ADMOB_ID).then((useSecondaryAdmobId){
     FirebaseAdMob.instance.initialize(appId: AdmobTools.appId(useSecondaryAdmobId));
   });

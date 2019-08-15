@@ -6,6 +6,7 @@ import 'package:flutter_inner_drawer/inner_drawer.dart';
 import 'package:front_end/providers.dart';
 import 'package:blocs/blocs.dart';
 import 'dart:async';
+import 'dart:io';
 import 'package:middleware/middleware.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -73,7 +74,6 @@ class _MainAppBarState extends State<MainAppBar> {
       }
     });
     _loadRemoteConfig();
-    _checkNotificationsPermission();
   }
 
   _loadRemoteConfig() async {
@@ -233,32 +233,50 @@ class _MainAppBarState extends State<MainAppBar> {
       _userBloc.loadCurrentUser.add(null);
       _userBloc.refreshVerificationEmail.add(null);
       userId = await _userBloc.existingAuthId.first;
+      _registerNotificationToken();
       _notificationBloc.loadStaticNotifications.add(LoadNotifications(
         userId: userId
       ));
-      widget.messaging.requestNotificationPermissions();
       String token = await widget.messaging.getToken();
+      widget.messaging.requestNotificationPermissions();
       _notificationBloc.updateNotificationToken.add(UpdateToken(
         userId: userId,
         token: token,
       ));
       widget.messaging.configure(
-        onMessage: (payload) => _handleNotification(payload),
+        onMessage: (payload) async => _handleNotification(payload),
       );
+      _checkNotificationsPermission();
     }
+  }
+
+  _registerNotificationToken() async { 
+    String notificationToken = await widget.messaging.getToken();
+    print('notificationToken:$notificationToken');
+    return _notificationBloc.updateNotificationToken.add(UpdateToken(
+      userId: userId,
+      token: notificationToken,
+    ));
   }
 
   _logCurrentScreen() => AnalyticsEvents(context).logCustomScreen('/${AppConfig.MAIN_PAGES_PATHS[currentIndex]}');
 
-  _handleNotification(Map<String, dynamic> payload) {
-    final data = payload['data'];
-    bool isDataMessage = !data.isEmpty;
+  dynamic _handleNotification(Map<String, dynamic> payload) {
+    print('_handleNotification payload:$payload');
+    dynamic dataMessageType;
+    if(Platform.isAndroid){
+      dataMessageType = payload['data'];
+      if(dataMessageType != null){
+        dataMessageType = dataMessageType['type'];
+      }
+    } else {
+      dataMessageType = payload['type'];
+    }
+    print('_handleNotification! $dataMessageType');
+    bool isDataMessage = dataMessageType != null && !dataMessageType.isEmpty;
     print('isDataMessage:$isDataMessage');
     if(isDataMessage){
-      print(data);
-      String type = data['type'];
-      print('type:$type');
-      if(type == "new-device"){
+      if(dataMessageType == "new-device"){
         _userBloc.logOut.add(null);
       }
     }else{
@@ -628,5 +646,4 @@ class _MainAppBarState extends State<MainAppBar> {
       }
     );
   }
-
 }

@@ -1,7 +1,6 @@
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:middleware/middleware.dart';
 import 'package:repository_impl/repository_impl.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:meta/meta.dart';
 import 'package:helpers/helpers.dart';

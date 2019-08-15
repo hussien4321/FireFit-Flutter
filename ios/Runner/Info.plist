@@ -28,10 +28,18 @@
 	<string>ca-app-pub-3787115292798141~5206780440</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	
+	<key>NSContactsUsageDescription</key>
+	<string>Requesting access</string>
+	 <key>NSCalendarsUsageDescription</key>
+	<string>Selecting date ranges</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>Requesting access</string>
+
 	<key>NSCameraUsageDescription</key>
-	<string>Example usage description</string>
+	<string>Access device photos</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Example usage description</string>
+	<string>Access device photos</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>fetch</string>

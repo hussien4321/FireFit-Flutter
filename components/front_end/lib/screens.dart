@@ -13,8 +13,6 @@ export 'screens/find_users/find_users_screen.dart';
 export 'screens/lookbooks/lookbooks_screen.dart';
 export 'screens/lookbooks/lookbook_screen.dart';
 
-export 'screens/notification/new_notifications_overlay_screen.dart';
-
 export 'screens/onboarding/onboard_screen.dart';
 
 export 'screens/outfit_detail/comments_screen.dart';
