@@ -168,9 +168,6 @@ class _MainAppBarState extends State<MainAppBar> {
       _notificationBloc = NotificationBlocProvider.of(context);
       _commentBloc =CommentBlocProvider.of(context);
       _dismissOpenNotifications();
-      widget.messaging.configure(
-        onMessage: (payload) => _handleNotification(payload),
-      );
       _subscriptions = <StreamSubscription<dynamic>>[
         _tokenRefreshListener(),
         _logInStatusListener(),
@@ -181,10 +178,18 @@ class _MainAppBarState extends State<MainAppBar> {
       _userBloc.loadCurrentUser.add(null);
       _userBloc.refreshVerificationEmail.add(null);
       userId = await _userBloc.existingAuthId.first;
-      _notificationBloc.registerNotificationToken.add(userId);
       _notificationBloc.loadStaticNotifications.add(LoadNotifications(
         userId: userId
       ));
+      widget.messaging.requestNotificationPermissions();
+      String token = await widget.messaging.getToken();
+      _notificationBloc.updateNotificationToken.add(UpdateToken(
+        userId: userId,
+        token: token,
+      ));
+      widget.messaging.configure(
+        onMessage: (payload) => _handleNotification(payload),
+      );
     }
   }
 

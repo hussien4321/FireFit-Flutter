@@ -165,9 +165,8 @@ class UserBloc {
       await _loadStartupStreams();
     }
     _loadingController.add(false);
-    if(success){
-      _successController.add(true);
-    }else{
+    _successController.add(success);
+    if(!success){
       _errorController.add("Failed to log in, account details are incorrect");
     }
   } 
@@ -221,9 +220,11 @@ class UserBloc {
   _registerUser(LogInForm logInForm) async {
     _loadingController.add(true);
     bool success = await _repository.register(logInForm);
-    _loadingController.add(false);
     if(success){
       await _resetCurrentUserStatus();
+    }
+    _loadingController.add(false);
+    if(success){
       _successController.add(true);
     }else{
       _errorController.add('Failed to register, this is probably because the account already exists.');

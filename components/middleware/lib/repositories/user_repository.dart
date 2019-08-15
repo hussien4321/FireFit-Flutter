@@ -11,7 +11,6 @@ abstract class UserRepository {
   Future<bool> createAccount(OnboardUser onboardUser);
   Future<bool> editUser(EditUser editUser);
 
-  Future<void> registerNotificationToken(String userId);
   Future<void> updateNotificationToken(UpdateToken updateToken);
   Future<bool> loadNotifications(LoadNotifications loadNotifications);
   Future<bool> loadMoreNotifications(LoadNotifications loadNotifications);

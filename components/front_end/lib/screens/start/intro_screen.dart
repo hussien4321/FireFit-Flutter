@@ -44,7 +44,6 @@ class _IntroScreenState extends State<IntroScreen> {
     if(_userBloc == null){
       _userBloc = UserBlocProvider.of(context);
       _subscriptions = <StreamSubscription<dynamic>>[
-        _logInStatusListener(),
         _userBloc.successMessage.listen((message) => toast(message)),
         _userBloc.hasError.listen((message) => _errorDialog(message)),
       ];
@@ -56,22 +55,6 @@ class _IntroScreenState extends State<IntroScreen> {
       context,
       message: message,
     );
-  }
-
-  StreamSubscription _logInStatusListener(){
-    return _userBloc.accountStatus.listen((accountStatus) async {
-      if(accountStatus!=null && accountStatus !=UserAccountStatus.LOGGED_OUT) {
-        final events = AnalyticsEvents(context);
-        String userId = await _userBloc.existingAuthId.first;
-        events.setUserId(userId);
-        if(accountStatus == UserAccountStatus.LOGGED_IN){
-          events.logIn();
-        }else{
-          events.signUp();
-        }
-        CustomNavigator.goToPageAtRoot(context, RouteConverters.getFromAccountStatus(accountStatus));
-      }
-    });
   }
 
   _brightenStatusBar(){

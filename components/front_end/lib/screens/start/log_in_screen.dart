@@ -32,6 +32,7 @@ class _LogInScreenState extends State<LogInScreen> with LoadingAndErrorDialogs {
   List<StreamSubscription<dynamic>> _subscriptions;
 
   bool isOverlayShowing = false;
+  bool loggedIn = false;
 
   bool _giveDefaultLogIn = true;
 
@@ -80,30 +81,54 @@ class _LogInScreenState extends State<LogInScreen> with LoadingAndErrorDialogs {
     if(_userBloc == null){
       _userBloc = UserBlocProvider.of(context);
       _subscriptions = <StreamSubscription<dynamic>>[
+        _logInStatusListener(),
         _loadingListener(),
         _successListener(),
       ];
     }
   }
 
-  StreamSubscription _loadingListener(){
-    return _userBloc.isLoading.listen((loadingStatus) {
-      if(loadingStatus && !isOverlayShowing){
-        startLoading(widget.isRegistering ? "Creating account" : "Logging in", context);
-        isOverlayShowing = true;
-      }
-      if(!loadingStatus && isOverlayShowing){
-        isOverlayShowing = false;
-        stopLoading(context);
+  
+  StreamSubscription _logInStatusListener(){
+    return _userBloc.accountStatus.listen((accountStatus) async {
+      if(accountStatus!=null && accountStatus !=UserAccountStatus.LOGGED_OUT) {
+        final events = AnalyticsEvents(context);
+        String userId = await _userBloc.existingAuthId.first;
+        events.setUserId(userId);
+        if(accountStatus == UserAccountStatus.LOGGED_IN){
+          events.logIn();
+        }else{
+          events.signUp();
+        }
+        _closeLoadingDialog(isLoggedIn: true);
+        CustomNavigator.goToPageAtRoot(context, RouteConverters.getFromAccountStatus(accountStatus));
       }
     });
   }
 
 
+  StreamSubscription _loadingListener(){
+    return _userBloc.isLoading.listen((loadingStatus) {
+      if(loadingStatus && !isOverlayShowing && !loggedIn){
+        startLoading(widget.isRegistering ? "Creating account" : "Logging in", context);
+        isOverlayShowing = true;
+      }
+    });
+  }
+
+  _closeLoadingDialog({bool isLoggedIn = false}){
+    if(isOverlayShowing){
+      isOverlayShowing = false;
+      loggedIn = isLoggedIn;
+      stopLoading(context);
+    }
+  }
+
+
   StreamSubscription _successListener(){
     return _userBloc.isSuccessful.listen((successStatus) {
-      if(successStatus){
-        Navigator.pop(context);
+      if(!successStatus){
+        _closeLoadingDialog();
       }
     });
   }
