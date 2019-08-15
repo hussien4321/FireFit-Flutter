@@ -28,21 +28,19 @@ class LocalDatabase {
 
   Future<Database> initDb() async {
     String path = join(await getDatabasesPath(), "mira_mira.db");
-    print('initDb() ----- START!');
     Database theDB = await openDatabase(path, version: 8, onCreate: _onCreate, onUpgrade: _onUpgrade, onDowngrade: _onDowngrade);
-    print('initDb() ----- FINISH!');
     return theDB;
   }
 
 
-  void _onCreate(Database db, int version) async {
-    _onUpgrade(db, 0, version);
+  Future<void> _onCreate(Database db, int version) async {
+    await _onUpgrade(db, 0, version);
   }
 
 
-  void _onUpgrade(Database db, int versionFrom, int versionTo) async {
+  Future<void> _onUpgrade(Database db, int versionFrom, int versionTo) async {
     int startVersion = versionFrom + 1;
-    startVersion = skipUnnecessaryVersions(versionFrom) - 1;
+    startVersion = skipUnnecessaryVersions(startVersion) - 1;
     for(int i = startVersion; i <= versionTo; i++){
       int nextVersion = i + 1;
       await _applyMigration(db, nextVersion);
@@ -62,7 +60,6 @@ class LocalDatabase {
   }
 
   Future<void> _applyMigration(Database db, int version) async {
-    print("-------- applyMigration $version START!");
     if(version == 1){
       await db.execute("CREATE TABLE outfit (outfit_id INTEGER PRIMARY KEY, poster_user_id TEXT, image_url_1 TEXT, image_url_2 TEXT, image_url_3 TEXT, title TEXT, description TEXT, style TEXT, outfit_created_at DATETIME, ratings_count INTEGER DEFAULT 0, average_rating REAL DEFAULT 0, is_saved TINYINT, comments_count INTEGER, user_rating INTEGER DEFAULT 0)");
       await db.execute("CREATE TABLE user (user_id STRING PRIMARY KEY, name TEXT, username TEXT, bio TEXT, country_code TEXT, profile_pic_url TEXT, date_of_birth DATETIME, gender_is_male TINYINT, is_subscribed  TINYINT, boosts INTEGER, subscription_end_date DATETIME, user_created_at DATETIME, is_current_user TINYINT DEFAULT 0, number_of_followers INTEGER, number_of_following INTEGER, number_of_outfits INTEGER, number_of_flames INTEGER, number_of_new_notifications INTEGER, number_of_lookbooks INTEGER, number_of_lookbook_outfits INTEGER, is_following TINYINT DEFAULT 0, follow_created_at DATETIME, has_new_feed_outfits TINYINT DEFAULT 0)");
@@ -110,7 +107,6 @@ class LocalDatabase {
 
       }
     }
-    print("-------- applyMigration $version END!");
   }
   Future<void> _deleteAll(Database db) async {
     await db.execute("DROP TABLE IF EXISTS outfit");

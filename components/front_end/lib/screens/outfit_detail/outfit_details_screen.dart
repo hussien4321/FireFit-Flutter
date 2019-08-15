@@ -111,40 +111,21 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
     }
   }
   Widget _overlayScaffold({Widget body}){
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
+    return CustomScaffold(
+      resizeToAvoidBottomPadding: false,
+      elevation: 2,
+      leading: IconButton(
+        padding: EdgeInsets.all(0),
+        onPressed: Navigator.of(context).pop,
+        icon: Icon(Icons.arrow_back),
+      ),
+      actions: <Widget>[
+        outfit == null ? Container() : _loadOutfitOptions()
+      ],
+      title: outfit == null ? "Loading..." : outfit.title,
       body: Container(
         color: Colors.white,
-        child: SafeArea(
-          child: Stack(
-            children: <Widget>[
-              body,
-              _appBarButtons(),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _appBarButtons() {
-    return Positioned(
-      top: 0,
-      right: 0,
-      left: 0,
-      child: Container(
-        padding: EdgeInsets.all(4),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: <Widget>[
-            IconButton(
-              padding: EdgeInsets.all(0),
-              onPressed: Navigator.of(context).pop,
-              icon: Icon(Icons.arrow_back),
-            ),
-            outfit == null ? Container() : _loadOutfitOptions()
-          ],
-        ),
+        child: body,
       ),
     );
   }
@@ -302,7 +283,6 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
           Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
-              _outfitTitle(),    
               _buildOutfitImage(),
               _buildRatingsSummary(),
               _commentsPreview(),

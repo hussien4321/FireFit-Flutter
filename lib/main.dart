@@ -36,9 +36,10 @@ void main() async {
   );
   FirebaseMessaging messaging =FirebaseMessaging();
   FirebaseAuth auth = FirebaseAuth.instance;
+
   Database db = await LocalDatabase().db;
-  db.getVersion().then((version) => print('------ FINAL DATABASE VERSION IS $version'));
   StreamDatabase streamDatabase = StreamDatabase(db);
+
   CachedUserRepository userCache = CachedUserRepository(streamDatabase: streamDatabase);
   CachedOutfitRepository outfitCache = CachedOutfitRepository(
     streamDatabase: streamDatabase,
