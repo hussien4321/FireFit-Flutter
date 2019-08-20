@@ -198,9 +198,8 @@ class CustomNavigator {
   }
 
   static Future<T> goToSettingsScreen<T extends Object>(BuildContext context) {
-    return Navigator.push(context, PageRouteBuilder(
-      pageBuilder: (ctx, _, __) => SettingsScreen(),
-      transitionsBuilder: _transitionsBuilder,
+    return Navigator.push(context, MaterialPageRoute(
+      builder: (ctx) => SettingsScreen(),
       settings: RouteSettings(
         name: '/settings'
       )
@@ -218,13 +217,12 @@ class CustomNavigator {
   }
 
   static Future<T> goToSubscriptionDetailsScreen<T extends Object>(BuildContext context, {int initialPage = 0, bool hasSubscription, ValueChanged<bool> onUpdateSubscriptionStatus}) {
-    return Navigator.push(context, PageRouteBuilder(
-      pageBuilder: (ctx, _, __) => SubscriptionDetailsScreen(
+    return Navigator.push(context, MaterialPageRoute(
+      builder: (ctx) => SubscriptionDetailsScreen(
         initialPage: initialPage,
         hasSubscription: hasSubscription,
         onUpdateSubscriptionStatus: onUpdateSubscriptionStatus,
       ),
-      transitionsBuilder: _transitionsBuilder,
       settings: RouteSettings(
         name: '/subscription'
       )
@@ -232,9 +230,8 @@ class CustomNavigator {
   }
 
   static Future<T> goToFindUsersScreen<T extends Object>(BuildContext context) {
-    return Navigator.push(context, PageRouteBuilder(
-      pageBuilder: (ctx, _, __) => FindUsersScreen(),
-      transitionsBuilder: _transitionsBuilder,
+    return Navigator.push(context, MaterialPageRoute(
+      builder: (ctx) => FindUsersScreen(),
       settings: RouteSettings(
         name: '/find-users'
       )

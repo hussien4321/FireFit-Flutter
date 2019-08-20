@@ -13,7 +13,6 @@ class CustomScaffold extends StatelessWidget {
   final Widget bottomNavigationBar;
   final FloatingActionButton floatingActionButton;
   final FloatingActionButtonLocation floatingActionButtonLocation;
-  final bool hideAppBar;
   final bool allCaps;
   final bool resizeToAvoidBottomPadding;
   
@@ -27,7 +26,6 @@ class CustomScaffold extends StatelessWidget {
     this.elevation = 1,
     this.leading,
     this.actions,
-    this.hideAppBar,
     this.appbarColor= Colors.white,
     this.backgroundColor,
     this.allCaps = false,
@@ -36,38 +34,27 @@ class CustomScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    AppBar appBar = AppBar(
-      elevation: elevation,
-      leading: leading,
-      title: customTitle!=null ? customTitle :Text(
-        allCaps ? title.toUpperCase() : title,
-        style: TextStyle(
-          inherit: true,
-          fontWeight: FontWeight.w300,
-          fontStyle: FontStyle.italic,
-          letterSpacing: 1.2,
-        ),
-      ),
-      actions: actions,
-      centerTitle: true,
-      backgroundColor: appbarColor,
-    );
-    // double height = appBar.preferredSize.height;
-
-    // Widget customAppBar;
-    // if(hideAppBar!=null){
-    //   customAppBar = AnimatedContainer(
-    //     duration: Duration(milliseconds: 100),
-    //     height: hideAppBar ? height : 0,
-    //     child: appBar,
-    //   );
-    // }
     return Scaffold(
       resizeToAvoidBottomPadding: resizeToAvoidBottomPadding,
       backgroundColor: backgroundColor,
       floatingActionButton: floatingActionButton,
       floatingActionButtonLocation: floatingActionButtonLocation,
-      appBar: appBar, 
+      appBar: AppBar(
+        elevation: elevation,
+        leading: leading,
+        title: customTitle!=null ? customTitle :Text(
+          allCaps ? title.toUpperCase() : title,
+          style: TextStyle(
+            inherit: true,
+            fontWeight: FontWeight.w300,
+            fontStyle: FontStyle.italic,
+            letterSpacing: 1.2,
+          ),
+        ),
+        actions: actions,
+        centerTitle: true,
+        backgroundColor: appbarColor,
+      ), 
       bottomNavigationBar: bottomNavigationBar,
       body: body
     );

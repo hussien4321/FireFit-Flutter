@@ -380,7 +380,6 @@ class _MainAppBarState extends State<MainAppBar> {
                     _buildUploadButton(),
                     _buildNotificationsButton(),
                   ],
-                  hideAppBar: hideBars,
                   elevation: 2.0,
                   appbarColor: Colors.grey[200],
                   body: body,
@@ -496,14 +495,13 @@ class _MainAppBarState extends State<MainAppBar> {
 
   Widget _buildMenuButton() {
     return StreamBuilder<bool>(
-      stream: _userBloc.currentUser.map((user) => user.hasNewFeedOutfits || user.hasNewUpload),
+      stream: _isSliderOpenController,
       initialData: false,
-      builder: (context, hasDataSnap) {
+      builder: (context, isOpen) {
         return IconButton(
-          icon: NotificationIcon(
-              iconData: Icons.menu,
-              showBubble: hasDataSnap.data == true,
-            ),
+          icon: Icon(
+            isOpen.data ? Icons.arrow_back : Icons.menu,
+          ),
           onPressed: () => _menuDrawerKey.currentState.open(),
         );
       }
