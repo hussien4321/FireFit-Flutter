@@ -5,16 +5,24 @@ class CustomScaffold extends StatelessWidget {
   
   final Widget body;
   final String title;
+  final Widget customTitle;
   final Widget leading;
   final List<Widget> actions;
   final double elevation;
   final Color backgroundColor, appbarColor;
+  final Widget bottomNavigationBar;
+  final FloatingActionButton floatingActionButton;
+  final FloatingActionButtonLocation floatingActionButtonLocation;
   final bool allCaps;
   final bool resizeToAvoidBottomPadding;
   
   CustomScaffold({
     @required this.body,
     @required this.title,
+    this.customTitle,
+    this.bottomNavigationBar,
+    this.floatingActionButton,
+    this.floatingActionButtonLocation,
     this.elevation = 1,
     this.leading,
     this.actions,
@@ -29,10 +37,12 @@ class CustomScaffold extends StatelessWidget {
     return Scaffold(
       resizeToAvoidBottomPadding: resizeToAvoidBottomPadding,
       backgroundColor: backgroundColor,
+      floatingActionButton: floatingActionButton,
+      floatingActionButtonLocation: floatingActionButtonLocation,
       appBar: AppBar(
         elevation: elevation,
         leading: leading,
-        title: Text(
+        title: customTitle!=null ? customTitle :Text(
           allCaps ? title.toUpperCase() : title,
           style: TextStyle(
             inherit: true,
@@ -45,6 +55,7 @@ class CustomScaffold extends StatelessWidget {
         centerTitle: true,
         backgroundColor: appbarColor,
       ),
+      bottomNavigationBar: bottomNavigationBar,
       body: body
     );
   }

@@ -13,15 +13,13 @@ class UserPreviewCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // print('building card with pagesSinceOutfitScreen:$pagesSinceOutfitScreen pagesSinceProfileScreen:$pagesSinceProfileScreen');
-    String hero = 'Outfit-details-poster-${user.profilePicUrl}';
     return Container(
       margin: EdgeInsets.only(bottom: 16),
       child: Material(
         elevation: 3,
         color: Colors.grey[200],
         child: InkWell(
-          onTap: () => _navigateToProfileScreen(context, hero),
+          onTap: () => _navigateToProfileScreen(context),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             child: Row(
@@ -68,10 +66,9 @@ class UserPreviewCard extends StatelessWidget {
     );
   }
 
-  _navigateToProfileScreen(BuildContext context, String hero) {
+  _navigateToProfileScreen(BuildContext context) {
     CustomNavigator.goToProfileScreen(context,
       userId: user.userId,
-      heroTag: hero,
       pagesSinceOutfitScreen: pagesSinceOutfitScreen,
       pagesSinceProfileScreen: pagesSinceProfileScreen,
     );

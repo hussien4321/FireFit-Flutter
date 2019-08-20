@@ -5,20 +5,28 @@ class NotificationIcon extends StatelessWidget {
   final Widget child;
   final IconData iconData;
   final int messages;
+  final double size;
   final Color color;
   final Color iconColor;
   final bool showBubble;
 
-  NotificationIcon({this.child, this.iconData, this.showBubble = false, this.color, this.iconColor, this.messages = 0});
+  NotificationIcon({this.child, this.iconData, this.size, this.showBubble = false, this.color, this.iconColor, this.messages = 0});
 
   @override
   Widget build(BuildContext context) {
-    
+    double padding = 8;
+    double customDimensions;
+    if(size!=null){
+      customDimensions = size + padding;
+    }
     return Container(
+      width: customDimensions,
+      height: size,
       child: Stack(
         children: <Widget>[
-           Center(child: child != null? child: Icon(
+           Center(child: child != null? child : Icon(
             iconData,
+            size: size,
             color: color,
           )),
           showBubble || messages > 0 ? Positioned(

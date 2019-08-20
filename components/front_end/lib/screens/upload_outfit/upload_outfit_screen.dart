@@ -136,7 +136,7 @@ class _UploadOutfitScreenState extends State<UploadOutfitScreen> with LoadingAnd
       String userId = await _userBloc.existingAuthId.first;
       uploadOutfit.posterUserId = userId;
       _subscriptions = <StreamSubscription<dynamic>>[
-        // _loadingListener(),
+        _loadingListener(),
         _successListener(),
         _errorListener(),
       ];
@@ -155,7 +155,6 @@ class _UploadOutfitScreenState extends State<UploadOutfitScreen> with LoadingAnd
       }
     });
   }
-
 
   StreamSubscription _successListener(){
     return _outfitBloc.isSuccessful.listen((successStatus) {
@@ -215,7 +214,7 @@ class _UploadOutfitScreenState extends State<UploadOutfitScreen> with LoadingAnd
         children: <Widget>[
           Expanded(
             child: Text(
-              "Daily allowance:",
+              "Today's activity:",
               style: Theme.of(context).textTheme.subhead.copyWith(
                 color: Colors.black54
               ),
@@ -225,6 +224,7 @@ class _UploadOutfitScreenState extends State<UploadOutfitScreen> with LoadingAnd
           LimitedFeatureSticker(
             title: "Unlimited uploads?",
             message: "$todaysUploadCount/$dailyUploadLimit Uploads",
+            unlimitedMessage: "$todaysUploadCount Uploads",
             isFull: todaysUploadCount >= dailyUploadLimit,
             hasSubscription: hasSubscription,
             benefit: 'have unlimited daily uploads',
@@ -459,11 +459,12 @@ class _UploadOutfitScreenState extends State<UploadOutfitScreen> with LoadingAnd
       selectedAssets: images,
       currentImages: uploadOutfit.images,
     );
-    
-    setState(() {
-      uploadOutfit.images = takenImages;
-      loadingImages = false;
-    });
+    if(mounted){
+      setState(() {
+        uploadOutfit.images = takenImages;
+        loadingImages = false;
+      });
+    }
   }
 }
 

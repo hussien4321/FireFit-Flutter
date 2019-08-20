@@ -12,13 +12,11 @@ enum UserOption { EDIT, REPORT }
 
 class ProfileScreen extends StatefulWidget {
   final String userId;
-  final String heroTag;
   final int pagesSinceOutfitScreen;
   final int pagesSinceProfileScreen;
 
   ProfileScreen({
     this.userId, 
-    this.heroTag,
     this.pagesSinceOutfitScreen = 0,
     this.pagesSinceProfileScreen = 0,
 });
@@ -82,7 +80,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           stream: _userBloc.isLoading,
           initialData: false,
           builder: (ctx, loadingSnap) => StreamBuilder<bool>(
-            stream: _outfitBloc.isLoadingItems,
+            stream: _outfitBloc.isLoadingSelected,
             initialData: false,
             builder: (ctx, loadingOutfitsSnap) => StreamBuilder<User>(
               stream: _userBloc.selectedUser,
@@ -309,21 +307,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Widget _profilePic(User user){
-    String heroTag = widget.heroTag == null ? 'null' : widget.heroTag;
     return Center(
-      child: Hero(
-        tag: widget.heroTag == null ? 'null' : widget.heroTag,
-        child: Container(
-            margin: EdgeInsets.all(8.0),
-            width: profilePicSize,
-            height: profilePicSize,
-            child: ImagePreview(
-              title: 'Profile Picture',
-              imageUrl: user.profilePicUrl,
-              heroTag: heroTag,
-            ),
+      child: Container(
+          margin: EdgeInsets.all(8.0),
+          width: profilePicSize,
+          height: profilePicSize,
+          child: ImagePreview(
+            title: 'Profile Picture',
+            imageUrl: user.profilePicUrl,
+            heroTag: user.profilePicUrl,
           ),
-      ), 
+        ), 
     );
   }
 
@@ -558,9 +552,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       stream: _outfitBloc.selectedOutfits,
       initialData: [],
       builder: (ctx, outfitsSnap) {
-        if(!isLoading) {
-          outfits =outfitsSnap.data;
-        }
+        outfits =outfitsSnap.data;
         if(outfits.isNotEmpty){
           outfits = sortOutfits(outfits, isSortingByTop);
         }
@@ -569,6 +561,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           isLoading: isLoading,
           outfits: outfits,
           hasFixedHeight: true,
+          physics: NeverScrollableScrollPhysics(),
           pagesSinceProfileScreen: widget.pagesSinceProfileScreen+1,
           pagesSinceOutfitScreen: widget.pagesSinceOutfitScreen,
         );

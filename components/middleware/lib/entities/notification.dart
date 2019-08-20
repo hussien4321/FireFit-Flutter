@@ -38,7 +38,7 @@ class OutfitNotification {
     }
   }
   
-  static String _fromNotificationType(NotificationType type) {
+  static String fromNotificationType(NotificationType type) {
     switch(type){
       case NotificationType.NEW_COMMENT:
         return 'new-comment';
@@ -77,7 +77,7 @@ class OutfitNotification {
 
   Map<String, dynamic> toJson() => {
     'notification_id' :  notificationId, 
-    'notification_type': _fromNotificationType(type),
+    'notification_type': fromNotificationType(type),
     'notification_is_seen': isSeen ? 1 : 0,
     'notification_created_at': createdAt.toIso8601String(),
     'notification_ref_user_id':referencedUser?.userId,
@@ -110,9 +110,9 @@ class OutfitNotification {
   String get getNotificationDescription {
     switch(type){
       case NotificationType.NEW_COMMENT:
-        return 'has commented';
+        return 'commented';
       case NotificationType.COMMENT_REPLY:
-        return 'has replied to your comment';
+        return 'has replied';
       case NotificationType.REPLY_THREAD:
         return 'has replied to the thread';
       case NotificationType.COMMENT_LIKE:

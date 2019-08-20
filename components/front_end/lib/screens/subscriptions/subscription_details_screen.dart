@@ -4,6 +4,10 @@ import 'package:blocs/blocs.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter_inapp_purchase/flutter_inapp_purchase.dart';
 import 'package:front_end/providers.dart';
+import 'package:flutter/services.dart';
+import 'dart:io' show Platform;
+import 'package:helpers/helpers.dart';
+import 'package:flutter/gestures.dart';
 
 class SubscriptionDetailsScreen extends StatefulWidget {
 
@@ -24,8 +28,15 @@ class _SubscriptionDetailsScreenState extends State<SubscriptionDetailsScreen> {
   IAPItem subscriptionItem;
   bool isSubscribed = false;
   String errorMsg;
+  List<PurchasedItem> purchases = [];
   
+  bool hasConnection = true;
   bool isLoading = true;
+
+  //TODO: Debug only value
+  bool hideLogButton = true;
+
+  bool get hasPreviousPurchase => purchases.length > 0;
 
   @override
   void initState() {
@@ -34,17 +45,34 @@ class _SubscriptionDetailsScreenState extends State<SubscriptionDetailsScreen> {
     asyncInitState();
   }
   void asyncInitState() async {
-    await FlutterInappPurchase.initConnection.then((res) => print('connection inited: $res'));
-    isSubscribed = await _preferences.getPreference(Preferences.HAS_SUBSCRIPTION_ACTIVE);
-    getItems();
+    try {
+      await _checkConnection();
+      await FlutterInappPurchase.initConnection.then((res) => print('connection inited: $res'));
+      isSubscribed = await _preferences.getPreference(Preferences.HAS_SUBSCRIPTION_ACTIVE);
+      await _getItems();
+    } on PlatformException {
+      setState(() {
+       hasConnection = false; 
+      });
+    }
+    setState(() {
+      isLoading=false;
+    });
   }
-  void getItems () async {
+
+  _checkConnection() async {
+    bool isConnectedNow = await ConnectivityHelper.hasConnection();
+    if(!isConnectedNow){
+      throw PlatformException(
+        code: 'NO CONNECTION!'
+      );
+    }
+  }
+  _getItems() async {
     List<IAPItem> items = await FlutterInappPurchase.getSubscriptions(AdmobTools.subscriptionId);
-    print('list of res :${items.length}');
+    purchases = await FlutterInappPurchase.getPurchaseHistory();
     if(items.isNotEmpty){
       subscriptionItem = items.first;
-      // isSubscribed
-      _restorePurchases();
     }
   }
 
@@ -60,24 +88,47 @@ class _SubscriptionDetailsScreenState extends State<SubscriptionDetailsScreen> {
       resizeToAvoidBottomPadding: false,
       title: 'FireFit+',
       actions: <Widget>[
+        hideLogButton ? Container() :
         FlatButton(
-          child: Text("Restore"),
-          onPressed: isLoading|| hasSubscription ? null : _restorePurchases,
+          child: Text("Logs"),
+          onPressed: isLoading || !hasConnection ? null : _showLogs,
         )
       ],
       body: _pageBody(),
     );
   }
 
-  _restorePurchases() async {
-    setState(() => isLoading = true);
+  _showLogs() {
+    String variablesLog = 'Found ${purchases?.length} Purchases!\n\n';
+    variablesLog += 'isSubscribed: $isSubscribed\n\n';
+    variablesLog += 'hasPreviousPurchase: $hasPreviousPurchase\n\n';
+    String productLog = "";
+    subscriptionItem.toString().split(',').forEach((entry) => productLog+='$entry\n\n');
 
-    isSubscribed = await FlutterInappPurchase.checkSubscribed(sku: subscriptionItem.productId);
-    print('isSubscribed:$isSubscribed');
-    setState(() {
-      isLoading=false;
-    });
+    return CustomDialog.launch(context, 
+      title: "Subscription Logs",
+      content: Column(
+        children: <Widget>[
+          Text(
+            variablesLog,
+            style: Theme.of(context).textTheme.caption.copyWith(color: Colors.blue),
+            textAlign: TextAlign.center,
+          ),
+          Text(
+            productLog,
+            style: Theme.of(context).textTheme.caption,
+            textAlign: TextAlign.center,
+          ),
+          errorMsg==null?Container() : Text(
+            errorMsg,
+            style: Theme.of(context).textTheme.caption.copyWith(color: Colors.red),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ) 
+    );
   }
+
 
   Widget _pageBody() {
     return Container(
@@ -85,10 +136,11 @@ class _SubscriptionDetailsScreenState extends State<SubscriptionDetailsScreen> {
       child: Column(
         children: <Widget>[
           Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8.0),
+            padding: const EdgeInsets.only(top: 8.0, left: 4, right: 4),
             child: Text(
-              'For our biggest fans!',
+              'Get unlimited access, no ads & more!',
               style: Theme.of(context).textTheme.headline,
+              textAlign: TextAlign.center,
             ),
           ),
           Expanded(
@@ -145,75 +197,96 @@ class _SubscriptionDetailsScreenState extends State<SubscriptionDetailsScreen> {
     return Container(
       width: double.infinity,
       color: Colors.white,
-      padding: EdgeInsets.only(left:16, right: 16, top: 16, bottom: 32),
       child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        mainAxisAlignment: MainAxisAlignment.end,
         children: [
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              Text(
-                hasSubscription ? 'Status': 'Monthly',
-                style: Theme.of(context).textTheme.headline.copyWith(
-                  fontWeight: FontWeight.w200
-                ),
-              ),
-              Padding(
-                padding: EdgeInsets.symmetric(vertical: 4.0),
-                child: Column(
-                  children: <Widget>[
-                    Text(
-                      'isSubscribed: ${isSubscribed}',
-                      style: Theme.of(context).textTheme.caption,
-                      textAlign: TextAlign.center,
-                    ),
-                    errorMsg==null?Container() : Text(
-                      errorMsg,
-                      style: Theme.of(context).textTheme.caption.copyWith(color: Colors.red),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
-                ),
-              ),
-              Text(
-                hasSubscription ? 'Active 🙌' : isLoading ? 'Loading...':'${subscriptionItem?.localizedPrice} (${subscriptionItem?.currency})',
-                style: Theme.of(context).textTheme.headline.copyWith(
-                  fontWeight: FontWeight.bold
-                ),
-              ),
-            ],
+          isLoading || !hasConnection ? Container() :
+          (hasSubscription ?
+            _paidBanner() :
+            _itemPrice()
           ),
-          //TODO: REMOVE THIS DETECTOR!
-          GestureDetector(
-            onTap: _unlockSubscription,
-            child: RaisedButton(
-              onPressed: hasSubscription || isLoading ? null : _unlockSubscription,
-              color: Colors.blue,
-              padding: EdgeInsets.all(16),
-              child: Text(
-                hasSubscription ? 
-                'We appreciate your support! ❤️' :
-                'Take my style to the next level!' ,
-                style: Theme.of(context).textTheme.subhead.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w300
-                ),
-              ),
-            ),
-          )
+          _buyButton(),
+          _legalInfo(),
+          _restoreButton(),
         ]
       ),
     );
   }
 
-  _unlockSubscription() async {
-    if(hasSubscription){
-      _switchSubscription(false);
+  Widget _paidBanner() {
+    return Text(
+      'Active 🙌',
+      style: Theme.of(context).textTheme.headline.copyWith(
+        fontWeight: FontWeight.normal
+      ),
+    );
+  }
+
+  Widget _itemPrice() {
+    List<TextSpan> priceContent=[];
+    priceContent.add(
+      TextSpan(
+        text: '${subscriptionItem?.localizedPrice}',
+        style: TextStyle(
+          inherit: true,
+          color: Colors.blue,
+        )
+      ),
+    );
+    priceContent.add(
+      TextSpan(
+        text: '/month${hasPreviousPurchase?'':'\n'}',
+      )
+    );
+    if(!hasPreviousPurchase){
+      priceContent.add(
+        TextSpan(
+            text: '${subscriptionItem?.introductoryPrice} for the 1st month!',
+          style: TextStyle(
+            inherit: true,
+            color: Colors.green,
+            fontWeight: FontWeight.bold,
+          )
+        ),
+      );
     }
+
+    return RichText(
+      textAlign: TextAlign.center,
+      text: TextSpan(
+        style: Theme.of(context).textTheme.subhead.copyWith(
+          color: Colors.grey[700],
+          fontSize: 20,
+        ),
+        children: priceContent
+      ),
+    );
+  }
+
+  Widget _buyButton() {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(16),
+      child: RaisedButton(
+        onPressed: hasSubscription || isLoading || !hasConnection ? null : _unlockSubscription,
+        color: Colors.blue,
+        padding: EdgeInsets.all(16),
+        child: Text(
+          isLoading ? 'Connecting...' :
+          !hasConnection ? 'No connection' :
+          hasSubscription ? 
+          'We appreciate your support! ❤️' :
+          'Subscribe now!' ,
+          style: Theme.of(context).textTheme.subhead.copyWith(
+            color: Colors.white,
+          ),
+        ),
+      ),
+    );
+  }
+  _unlockSubscription() async {
     try {
-      print('buying purchase for ${subscriptionItem.productId}');
-      PurchasedItem purchased= await FlutterInappPurchase.buySubscription(subscriptionItem.productId);
-      print('purchased - ${purchased.toString()}');
+      await FlutterInappPurchase.buySubscription(subscriptionItem.productId);
       _switchSubscription(true);
     } catch (error) {
       print('$error');
@@ -228,5 +301,52 @@ class _SubscriptionDetailsScreenState extends State<SubscriptionDetailsScreen> {
     });
     _preferences.updatePreference(Preferences.HAS_SUBSCRIPTION_ACTIVE, isActive);
     widget.onUpdateSubscriptionStatus(isActive);
+  }
+
+  Widget _legalInfo(){
+    return RichText(
+      textAlign: TextAlign.center,
+      text: TextSpan(
+        style: Theme.of(context).textTheme.caption.copyWith(
+          color: Colors.blue,
+          decoration: TextDecoration.underline
+        ),
+        children: [
+          TextSpan(
+            text: 'Privacy policy',
+            recognizer: TapGestureRecognizer()..onTap = () => UrlLauncher.openURL(AppConfig.PRIVACY_POLICY_URL),
+          ),
+          TextSpan(
+            text: ' and ',
+            style: TextStyle(
+              inherit: true,
+              color: Colors.black,
+              decoration: TextDecoration.none
+            )
+          ),
+          TextSpan(
+            text: 'Terms & Conditions',
+            recognizer: TapGestureRecognizer()..onTap = () => UrlLauncher.openURL(AppConfig.TERMS_AND_CONDITIONS_URL),
+          ),
+        ]
+      ),
+    );
+  }
+
+  Widget _restoreButton(){
+    return FlatButton(
+      child: Text("Restore purchases"),
+      onPressed: isLoading || hasSubscription ?  null : _restorePurchases,
+    );
+  }
+
+  _restorePurchases() async {
+    setState(() => isLoading = true);
+    isSubscribed = await FlutterInappPurchase.checkSubscribed(sku: AdmobTools.subscriptionId.first);
+    await Future.delayed(Duration(seconds: 2));
+    _switchSubscription(isSubscribed);
+    setState(() {
+      isLoading=false;
+    });
   }
 }

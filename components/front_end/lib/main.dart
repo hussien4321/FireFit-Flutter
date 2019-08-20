@@ -18,11 +18,12 @@ void main({
   @required FirebaseAnalytics analytics,
   @required Preferences preferences,
 }) {
+  final outfitBloc = OutfitBloc(outfitRepository, userRepository, preferences);
   runApp(
     UserBlocProvider(
-      bloc:  UserBloc(userRepository, outfitRepository, preferences),
+      bloc:  UserBloc(userRepository, outfitRepository, preferences, outfitBloc),
       child: OutfitBlocProvider(
-        bloc:  OutfitBloc(outfitRepository, userRepository, preferences),
+        bloc:  outfitBloc,
         child: CommentBlocProvider(
           bloc: CommentBloc(outfitRepository),
           child: NotificationBlocProvider(

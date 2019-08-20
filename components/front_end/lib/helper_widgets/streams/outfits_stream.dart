@@ -16,6 +16,8 @@ class OutfitsStream extends StatelessWidget {
     @required this.outfitsStream,
   });
   
+  List<Outfit> outfits = [];
+
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<bool>(
@@ -26,10 +28,7 @@ class OutfitsStream extends StatelessWidget {
           stream: outfitsStream,
           initialData: [],
           builder: (ctx, outfitsSnap) {
-            List<Outfit> outfits = [];
-            if(!isLoadingSnap.data){
-              outfits =outfitsSnap.data;
-            }
+            outfits =outfitsSnap.data;
             return builder(isLoadingSnap.data, outfits);
           }
         );

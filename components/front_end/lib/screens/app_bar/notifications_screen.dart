@@ -20,6 +20,8 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   OutfitNotification lastNotification;
   ScrollController _controller;
 
+  List<OutfitNotification> notifications = [];
+
   @override
   void initState() {
     super.initState();
@@ -27,7 +29,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     _controller.addListener(_scrollListener);
   }
   _scrollListener() {
-    if (_controller.offset >= (_controller.position.maxScrollExtent - 100) && !_controller.position.outOfRange) {
+    if (_controller.offset >= (_controller.position.maxScrollExtent - 100) && !_controller.position.outOfRange && notifications.length > 10){
       _notificationBloc.loadStaticNotifications.add(LoadNotifications(
         userId: userId,
         startAfterNotification: lastNotification,
@@ -73,8 +75,9 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
             stream: _notificationBloc.notifications,
             initialData: [],
             builder: (ctx, snap) {
-              if(!isLoadingSnap.data && snap.data.length>0){
-                lastNotification = snap.data.last;
+              notifications = snap.data;
+              if(notifications.length>0){
+                lastNotification =notifications.last;
               }
               return PullToRefreshOverlay(
                 matchSize: false,
@@ -86,8 +89,8 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                 child: ListView(
                   physics: ClampingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
                   controller: _controller,
-                  children: _buildNotifications(snap.data)..add(
-                    _buildEndTag(isLoadingSnap.data, snap.data.isEmpty)
+                  children: _buildNotifications(notifications)..add(
+                    _buildEndTag(isLoadingSnap.data, notifications.isEmpty)
                   )
                 ),
               );
@@ -141,11 +144,11 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     return Container(
       width: double.infinity,
       padding: EdgeInsets.symmetric(vertical: 16.0),
-      child: isLoading? _loadingTag() : _noNotificationsTag(isEmpty)
+      child: isLoading? _loadingTag(isEmpty) : _noNotificationsTag(isEmpty)
     );
   }
 
-  Widget _loadingTag() {
+  Widget _loadingTag(bool isEmpty) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: <Widget>[
@@ -154,7 +157,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           child: CircularProgressIndicator(),
         ),
         Text(
-          'Loading previous',
+          'Loading ${isEmpty?'':'more '}notifications',
           style: Theme.of(context).textTheme.subtitle.copyWith(
             color: Colors.black54
           ),

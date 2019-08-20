@@ -190,23 +190,20 @@ class _OutfitFadingCardState extends State<OutfitFadingCard> with SingleTickerPr
   Widget _buildOutfitSplash() {
     return GestureDetector(
       onTap: widget.enabled && hasOutfit? _openDetailedOutfit : null,
-      child: Hero(
-        tag: widget.currentOutfit?.images?.first == null? 'NULL' : widget.currentOutfit?.images?.first,
-        child: Stack(
-          children: <Widget>[
-            _buildPicture(widget.previousOutfit),
-            _buildPicture(widget.currentOutfit),
-            _buildPicture(widget.nextOutfit),
-            SizedBox.expand(
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: _blurValue, sigmaY: _blurValue),
-                child: Container(
-                  color: Colors.grey.withOpacity(blurringTransitionController.value/4),
-                )
-              ),
+      child: Stack(
+        children: <Widget>[
+          _buildPicture(widget.previousOutfit),
+          _buildPicture(widget.currentOutfit),
+          _buildPicture(widget.nextOutfit),
+          SizedBox.expand(
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: _blurValue, sigmaY: _blurValue),
+              child: Container(
+                color: Colors.grey.withOpacity(blurringTransitionController.value/4),
+              )
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

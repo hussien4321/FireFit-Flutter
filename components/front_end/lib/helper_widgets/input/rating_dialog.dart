@@ -4,10 +4,10 @@ import 'package:front_end/helper_widgets.dart';
 class RatingDialog extends StatefulWidget {
 
   final int initialValue;
-  final bool isUpdate;
+  final bool isUpdate, isTransparent;
   final ValueChanged<int> onSubmit;
 
-  RatingDialog({this.initialValue, this.isUpdate, this.onSubmit});
+  RatingDialog({this.initialValue, this.isUpdate, this.onSubmit, this.isTransparent = true});
 
   @override
   _RatingDialogState createState() => _RatingDialogState();
@@ -56,7 +56,7 @@ class _RatingDialogState extends State<RatingDialog> {
           onPressed: hasRating ? _submitRating : null,
         )
       ],
-    backgroundColor: Colors.white70,
+    backgroundColor: widget.isTransparent ? Colors.white70 : Colors.white,
      content: Column(
        crossAxisAlignment: CrossAxisAlignment.center,
        mainAxisSize: MainAxisSize.min,

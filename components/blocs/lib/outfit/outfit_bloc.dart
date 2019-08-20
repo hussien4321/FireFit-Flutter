@@ -78,6 +78,14 @@ class OutfitBloc{
   BehaviorSubject<bool> get isLoading => _loadingController.stream;
   final _loadingItemsController = BehaviorSubject<bool>(seedValue: false);
   BehaviorSubject<bool> get isLoadingItems => _loadingItemsController;
+  final _isLoadingExploreController = BehaviorSubject<bool>(seedValue: false);
+  BehaviorSubject<bool> get isLoadingExplore => _isLoadingExploreController;
+  final _isLoadingMyOutfitsController = BehaviorSubject<bool>(seedValue: false);
+  BehaviorSubject<bool> get isLoadingMyOutfits => _isLoadingMyOutfitsController;
+  final _isLoadingFeedController = BehaviorSubject<bool>(seedValue: false);
+  BehaviorSubject<bool> get isLoadingFeed => _isLoadingFeedController;
+  final _isLoadingSelectedController = BehaviorSubject<bool>(seedValue: false);
+  BehaviorSubject<bool> get isLoadingSelected => _isLoadingSelectedController;
   final _successController = PublishSubject<bool>();
   Observable<bool> get isSuccessful => _successController.stream;
   final _successMessageController = PublishSubject<String>();
@@ -116,29 +124,45 @@ class OutfitBloc{
 
   _exploreOutfits(LoadOutfits loadOutfits) async {
     loadOutfits.searchMode = SearchModes.EXPLORE;
-    await _loadOutfits(loadOutfits);
+    await loadOutfitsInner(loadOutfits);
   }
   _loadMyOutfits(LoadOutfits loadOutfits) async {
     loadOutfits.searchMode = SearchModes.MINE;
-    await _loadOutfits(loadOutfits);
+    await loadOutfitsInner(loadOutfits);
   }
   _loadFeedOutfits(LoadOutfits loadOutfits) async {
     loadOutfits.searchMode = SearchModes.FEED;
-    await _loadOutfits(loadOutfits);
+    await loadOutfitsInner(loadOutfits);
   }
   _loadUserOutfits(LoadOutfits loadOutfits) async {
     loadOutfits.searchMode = SearchModes.SELECTED;
-    await _loadOutfits(loadOutfits);
+    await loadOutfitsInner(loadOutfits);
   }
   _loadLookbookOutfits(LoadOutfits loadOutfits) async {
     loadOutfits.searchMode = SearchModes.SAVED;
-    await _loadOutfits(loadOutfits);
+    await loadOutfitsInner(loadOutfits);
   }
 
-  _loadOutfits(LoadOutfits loadOutfits) async {
-    _loadingItemsController.add(true);
+  BehaviorSubject<bool> getLoadingController(searchMode){
+    switch (searchMode) {
+      case SearchModes.EXPLORE:
+        return _isLoadingExploreController;
+      case SearchModes.FEED:
+        return _isLoadingFeedController;
+      case SearchModes.MINE:
+        return _isLoadingMyOutfitsController;
+      case SearchModes.SELECTED:
+        return _isLoadingSelectedController;
+      default:
+        return _loadingItemsController;
+    }
+  }
+
+  loadOutfitsInner(LoadOutfits loadOutfits) async {
+    BehaviorSubject<bool> controller = getLoadingController(loadOutfits.searchMode);
+    controller.add(true);
     final success = loadOutfits.startAfterOutfit==null ? await repository.loadOutfits(loadOutfits) : await repository.loadMoreOutfits(loadOutfits);
-    _loadingItemsController.add(false);
+    controller.add(false);
     _successController.add(success);
     if(!success){
       _errorController.add("Failed to load outfits");
@@ -156,11 +180,11 @@ class OutfitBloc{
   }
 
   _uploadOutfit(UploadOutfit uploadOutfit) async {
-    _successController.add(true);
-    _isBackgroundLoadingController.add(true);
+    _loadingController.add(true);
     Future.delayed(Duration(milliseconds: 1500), () => _showAdController.add(null));
     final success = await repository.uploadOutfit(uploadOutfit);
-    _isBackgroundLoadingController.add(false);
+    _loadingController.add(false);
+    _successController.add(success);
     if(success){
       _successMessageController.add("Outfit uploaded!");
     }else{
@@ -173,7 +197,7 @@ class OutfitBloc{
     _loadingController.add(false);
     _successController.add(success);
     if(success){
-      _successMessageController.add("Edit successful!");
+      _successMessageController.add("Outfit Edited!");
     }else{
       _errorController.add("Failed to edit outfit");
     }
@@ -183,7 +207,7 @@ class OutfitBloc{
     final success = await repository.deleteOutfit(outfit);
     _successController.add(success);
     if(success){
-      _successMessageController.add("Delete successful!");
+      _successMessageController.add("Outfit Deleted!");
       
       String userId = outfit.poster.userId;
       
@@ -218,7 +242,7 @@ class OutfitBloc{
     final success = await repository.editLookbook(editLookbook);
     _successController.add(success);
     if(success){
-      _successMessageController.add("Edit successful!");
+      _successMessageController.add("Lookbook Edited!");
     }else{
       _errorController.add("Failed to edit lookbook");
     }
@@ -230,7 +254,7 @@ class OutfitBloc{
     _loadingController.add(false);
     _successController.add(success);
     if(success){
-      _successMessageController.add("Delete successful!");
+      _successMessageController.add("Lookbook Deleted!");
     }else{
       _errorController.add("Failed to delete lookbook");
     }
@@ -262,9 +286,8 @@ class OutfitBloc{
     ];
     List<String> goodRatings = [
       "You might have just made someone's day!",
-      "WOOHOO!",
       "Good vibes all around",
-      "Maybe add it to your lookbook to remember it?"
+      "Add it to your lookbook?"
     ];
     switch (outfitRating.ratingValue) {
       case 1:
@@ -345,6 +368,10 @@ class OutfitBloc{
     _rateOutfitController.close();
     _loadingController.close();
     _loadingItemsController.close();
+    _isLoadingExploreController.close();
+    _isLoadingFeedController.close();
+    _isLoadingMyOutfitsController.close();
+    _isLoadingSelectedController.close();
     _isBackgroundLoadingController.close();
     _successController.close();
     _successMessageController.close();

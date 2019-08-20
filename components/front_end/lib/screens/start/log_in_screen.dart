@@ -34,7 +34,7 @@ class _LogInScreenState extends State<LogInScreen> with LoadingAndErrorDialogs {
   bool isOverlayShowing = false;
   bool loggedIn = false;
 
-  bool _giveDefaultLogIn = true;
+  bool _giveDefaultLogIn = false;
 
   @override
   void initState() {

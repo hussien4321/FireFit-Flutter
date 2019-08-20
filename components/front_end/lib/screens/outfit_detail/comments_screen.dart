@@ -196,7 +196,7 @@ class _CommentsScreenState extends State<CommentsScreen> {
         userId: userId,
         outfitId: widget.outfitId,
       ));
-      Future.delayed(Duration(milliseconds: 500), () {
+      Future.delayed(Duration(milliseconds: 100), () {
         if(mounted){
           setState(() => isOpeningPage = false);
         }

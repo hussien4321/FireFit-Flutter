@@ -3,7 +3,7 @@ import 'package:front_end/helper_widgets.dart';
 
 class LimitedFeatureSticker extends StatelessWidget {
 
-  final String title, message;
+  final String title, message, unlimitedMessage;
   final bool isFull;
   final bool hasSubscription;
   final MainAxisAlignment mainAxisAlignment;
@@ -14,6 +14,7 @@ class LimitedFeatureSticker extends StatelessWidget {
   LimitedFeatureSticker({
     this.title,
     this.message,
+    this.unlimitedMessage = 'Unlimited',
     this.isFull,
     this.hasSubscription,
     this.benefit,
@@ -29,7 +30,7 @@ class LimitedFeatureSticker extends StatelessWidget {
 
   Widget _unlimitedSticker(BuildContext context){
     return Text(
-      'Unlimited',
+      unlimitedMessage,
       style: Theme.of(context).textTheme.subhead.copyWith(
         color: Color.fromRGBO(225, 173, 0, 1.0),
         fontWeight: FontWeight.bold

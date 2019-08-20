@@ -47,6 +47,11 @@ class FirebaseOutfitRepository implements OutfitRepository {
     return cloudFunctions.getHttpsCallable(functionName: 'getOutfits').call(loadOutfits.toJson())
     .then((res) async {
       List<Outfit> outfits = _resToOutfitList(res);
+      if(loadOutfits.searchMode ==SearchModes.SAVED){
+        outfits = sortLookbookOutfits(outfits, loadOutfits.sortByTop);
+      }else{
+        outfits = sortOutfits(outfits, loadOutfits.sortByTop);
+      }
       for(int i = 0; i < outfits.length; i++){
         await cache.addOutfit(outfits[i], loadOutfits.searchMode);
       }
@@ -55,6 +60,37 @@ class FirebaseOutfitRepository implements OutfitRepository {
     .catchError((exception) => catchExceptionWithBool(exception, analytics));
   }
 
+List<Outfit> sortOutfits(List<Outfit> outfits, bool isSortingByTop){
+  if(isSortingByTop){
+    outfits.sort((a, b) {
+      int firstValue = (a.hiddenRating == null || b.hiddenRating == null) ? 1 : -a.hiddenRating.compareTo(b.hiddenRating);
+      if(firstValue==0){
+        return a.outfitId.compareTo(b.outfitId);
+      }
+      return firstValue;
+    });
+  }else{
+    outfits.sort((a, b) => -a.createdAt.compareTo(b.createdAt));
+  }
+  return outfits;
+}
+
+
+List<Outfit> sortLookbookOutfits(List<Outfit> outfits, bool isSortingByTop){
+  if(isSortingByTop){
+    outfits.sort((a, b) {
+      int firstValue = (a.hiddenRating == null || b.hiddenRating == null) ? 1 : -a.hiddenRating.compareTo(b.hiddenRating);
+      if(firstValue==0){
+        return a.outfitId.compareTo(b.outfitId);
+      }
+      return firstValue;
+    });
+  }else{
+    outfits.sort((a, b) => a.save?.createdAt==null||b.save?.createdAt==null ? 1 : -a.save.createdAt.compareTo(b.save.createdAt));
+    
+  }
+  return outfits;
+}
 
   Future<bool> loadLookbooks(LoadLookbooks loadLookbooks) async {
     return cloudFunctions.getHttpsCallable(functionName: 'getLookbooks').call(loadLookbooks.toJson())

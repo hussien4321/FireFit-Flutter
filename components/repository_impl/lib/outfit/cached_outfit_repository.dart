@@ -168,9 +168,6 @@ class CachedOutfitRepository {
     if(searchMode==SearchModes.SAVED){
       await _clearSaves();
     }
-    if(searchMode==SearchModes.FEED){
-      await userCache.clearNewFeed();
-    }
     await _clearOutfitSearches(searchMode);
     await _clearOutfits(searchMode);
     if(searchMode!=SearchModes.MINE && searchMode!=SearchModes.SELECTED){
@@ -384,8 +381,7 @@ class CachedOutfitRepository {
     bool isToday = false;
     if(lastUploadDate != null){
       isToday = nowDate.year == lastUploadDate.year && nowDate.month == lastUploadDate.month && nowDate.day == lastUploadDate.day;
-    }
-    print('isToday : $isToday');
+    };
     return streamDatabase.executeAndTrigger(['user'], "UPDATE user SET number_of_outfits=number_of_outfits+1, ${isToday ? ' posts_on_day=posts_on_day+1' : ' posts_on_day=1'}, last_upload_date=?, has_new_upload=${isOnWardrobePage?'0':'1'} WHERE user_id=?", [DateTime.now().toIso8601String(), userId]);
   }
 

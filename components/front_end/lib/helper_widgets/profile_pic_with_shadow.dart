@@ -27,40 +27,35 @@ class ProfilePicWithShadow extends StatelessWidget {
   
   @override
   Widget build(BuildContext context) {
-    String hero = heroTag != null ? heroTag : 'PROFILE-PIC-URL-$url';
     return GestureDetector(
-      onTap: hasOnClick ? () => _navigateToProfileScreen(context, hero) : null,
-      child: Hero(
-        tag: hero,
-        child: Container(
-          margin: margin,
-          width: size,
-          height: size,
-          decoration: BoxDecoration(
-            image: url == null ? null : DecorationImage(
-              image: CachedNetworkImageProvider(url),
-              fit: BoxFit.cover,
-            ),
-            shape: BoxShape.circle,
-            color: Colors.grey,
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black38,
-                offset: Offset(0, 2),
-                blurRadius: 2,
-                spreadRadius: 1
-              )
-            ]
+      onTap: hasOnClick ? () => _navigateToProfileScreen(context) : null,
+      child: Container(
+        margin: margin,
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          image: url == null ? null : DecorationImage(
+            image: CachedNetworkImageProvider(url),
+            fit: BoxFit.cover,
           ),
+          shape: BoxShape.circle,
+          color: Colors.grey,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black38,
+              offset: Offset(0, 2),
+              blurRadius: 2,
+              spreadRadius: 1
+            )
+          ]
         ),
       ),
     );
   }
 
-  _navigateToProfileScreen(BuildContext context, String hero) {
+  _navigateToProfileScreen(BuildContext context) {
     CustomNavigator.goToProfileScreen(context,
       userId: userId,
-      heroTag: heroTag,
       pagesSinceOutfitScreen: pagesSinceOutfitScreen,
       pagesSinceProfileScreen: pagesSinceProfileScreen,
       isComingFromExploreScreen: isComingFromExploreScreen,

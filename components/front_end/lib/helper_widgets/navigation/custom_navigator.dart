@@ -13,7 +13,6 @@ class CustomNavigator {
 
   static Future<T> goToProfileScreen<T extends Object>(BuildContext context, {
     String userId, 
-    String heroTag,
     int pagesSinceOutfitScreen = 0, 
     int pagesSinceProfileScreen = 0,
     bool isComingFromExploreScreen = false, 
@@ -33,7 +32,6 @@ class CustomNavigator {
       MaterialPageRoute(
         builder: (ctx) => ProfileScreen(
           userId: userId,
-          heroTag: heroTag,
           pagesSinceOutfitScreen: pagesSinceOutfitScreen,
           pagesSinceProfileScreen: pagesSinceProfileScreen,
         ),

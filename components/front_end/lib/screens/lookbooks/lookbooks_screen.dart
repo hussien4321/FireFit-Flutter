@@ -7,13 +7,15 @@ import 'package:helpers/helpers.dart';
 import 'package:middleware/middleware.dart';
 import 'package:helpers/helpers.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
+import 'package:flutter/rendering.dart';
 
 class LookbooksScreen extends StatefulWidget {
 
   final bool hasSubscription;
   final ValueChanged<bool> onUpdateSubscriptionStatus;
+  final ValueChanged<bool> isScrollingDown;
 
-  LookbooksScreen({this.hasSubscription, this.onUpdateSubscriptionStatus});
+  LookbooksScreen({this.hasSubscription, this.onUpdateSubscriptionStatus, this.isScrollingDown});
 
   @override
   _LookbooksScreenState createState() => _LookbooksScreenState();
@@ -33,10 +35,18 @@ class _LookbooksScreenState extends State<LookbooksScreen> {
   bool isSortBySize = false;
   Preferences preferences =Preferences();
 
+
+  ScrollController _controller;
+
   @override
   void initState() {
     super.initState();
     _loadPreferences();
+    _controller = ScrollController();
+    _controller.addListener(_scrollListener);
+  }
+  _scrollListener() {
+    widget.isScrollingDown(_controller.position.userScrollDirection != ScrollDirection.forward);
   }
 
   _loadPreferences() async {
@@ -47,6 +57,12 @@ class _LookbooksScreenState extends State<LookbooksScreen> {
     });
   }
   
+  @override
+  void dispose() {
+    super.dispose();
+    _controller.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     _initBlocs();
@@ -61,6 +77,7 @@ class _LookbooksScreenState extends State<LookbooksScreen> {
           user = streamUser;
           lookbooks = _sortList(lookbooks);
           return ListView(
+            controller: _controller,
             physics: ClampingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
             children: <Widget>[
               _lookbooksOverview(isLoading),
@@ -94,7 +111,7 @@ class _LookbooksScreenState extends State<LookbooksScreen> {
       return Container();
     }
     return Container(
-      padding: EdgeInsets.only(top: 4, left: 8, right: 8, bottom: 8),
+      padding: EdgeInsets.only(top:8, left: 8, right: 8, bottom: 8),
       width: double.infinity,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -148,6 +165,7 @@ class _LookbooksScreenState extends State<LookbooksScreen> {
                 message: "${user.numberOfLookbookOutfits}/$maxOutfitStorage Outfits",
                 isFull: user.numberOfLookbookOutfits >= maxOutfitStorage,
                 benefit: 'have unlimited outfits in your lookbooks',
+                unlimitedMessage: "${user.numberOfLookbookOutfits} Outfits",
                 hasSubscription: widget.hasSubscription,
                 onUpdateSubscriptionStatus: widget.onUpdateSubscriptionStatus,
                 initialPage: 2,
@@ -232,13 +250,13 @@ class _LookbooksScreenState extends State<LookbooksScreen> {
               isSortBySize ? 'Size' : 'Last Created',
               style: TextStyle(
                 inherit: true,
-                color: Colors.grey,
+                color: Colors.blue,
               ),
             ),
           ),
           Icon(
             Icons.trending_up,
-            color: Colors.grey,
+            color: Colors.blue,
           ),
         ],
       ),

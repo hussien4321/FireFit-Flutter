@@ -60,6 +60,7 @@ class LocalDatabase {
   }
 
   Future<void> _applyMigration(Database db, int version) async {
+    print('_applyMigration ------ $version');
     if(version == 1){
       await db.execute("CREATE TABLE outfit (outfit_id INTEGER PRIMARY KEY, poster_user_id TEXT, image_url_1 TEXT, image_url_2 TEXT, image_url_3 TEXT, title TEXT, description TEXT, style TEXT, outfit_created_at DATETIME, ratings_count INTEGER DEFAULT 0, average_rating REAL DEFAULT 0, is_saved TINYINT, comments_count INTEGER, user_rating INTEGER DEFAULT 0)");
       await db.execute("CREATE TABLE user (user_id STRING PRIMARY KEY, name TEXT, username TEXT, bio TEXT, country_code TEXT, profile_pic_url TEXT, date_of_birth DATETIME, gender_is_male TINYINT, is_subscribed  TINYINT, boosts INTEGER, subscription_end_date DATETIME, user_created_at DATETIME, is_current_user TINYINT DEFAULT 0, number_of_followers INTEGER, number_of_following INTEGER, number_of_outfits INTEGER, number_of_flames INTEGER, number_of_new_notifications INTEGER, number_of_lookbooks INTEGER, number_of_lookbook_outfits INTEGER, is_following TINYINT DEFAULT 0, follow_created_at DATETIME, has_new_feed_outfits TINYINT DEFAULT 0)");
@@ -83,6 +84,7 @@ class LocalDatabase {
       await _deleteAll(db);
     }
     if(version == 6){
+      await _deleteAll(db);
       await db.execute("CREATE TABLE outfit (outfit_id INTEGER PRIMARY KEY, poster_user_id TEXT, image_url_1 TEXT, image_url_2 TEXT, image_url_3 TEXT, title TEXT, description TEXT, style TEXT, outfit_created_at DATETIME, ratings_count INTEGER DEFAULT 0, average_rating REAL DEFAULT 0, is_saved TINYINT, comments_count INTEGER, user_rating INTEGER DEFAULT 0, hidden_rating REAL DEFAULT 3)");
       await db.execute("CREATE TABLE user (user_id STRING PRIMARY KEY, name TEXT, username TEXT, bio TEXT, country_code TEXT, profile_pic_url TEXT, date_of_birth DATETIME, gender_is_male TINYINT, is_subscribed  TINYINT, boosts INTEGER, subscription_end_date DATETIME, user_created_at DATETIME, is_current_user TINYINT DEFAULT 0, number_of_followers INTEGER, number_of_following INTEGER, number_of_outfits INTEGER, number_of_flames INTEGER, number_of_new_notifications INTEGER, number_of_lookbooks INTEGER, number_of_lookbook_outfits INTEGER, is_following TINYINT DEFAULT 0, follow_created_at DATETIME, has_new_feed_outfits TINYINT DEFAULT 0)");
       await db.execute("CREATE TABLE outfit_search (search_outfit_id INTERGER, search_outfit_mode STRING, UNIQUE(search_outfit_id, search_outfit_mode) ON CONFLICT REPLACE)");

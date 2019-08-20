@@ -67,7 +67,7 @@ class _IntroScreenState extends State<IntroScreen> {
   Widget _splashImage() {
     return SizedBox.expand(
       child: Container(
-        color:Colors.black,
+        color:Colors.orange,
         foregroundDecoration: BoxDecoration(
           color: Colors.black38
         ),

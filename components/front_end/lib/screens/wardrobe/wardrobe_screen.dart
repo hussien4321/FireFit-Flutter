@@ -9,6 +9,10 @@ import 'package:front_end/helper_widgets.dart';
 import 'dart:math';
 class WardrobeScreen extends StatefulWidget {
 
+  final ValueChanged<bool> isScrollingDown;
+
+  WardrobeScreen({this.isScrollingDown});
+
   @override
   _WardrobeScreenState createState() => _WardrobeScreenState();
 }
@@ -47,11 +51,6 @@ class _WardrobeScreenState extends State<WardrobeScreen> {
       _userBloc = UserBlocProvider.of(context);
       userId = await _userBloc.existingAuthId.first;
       await _loadFiltersFromPreferences();
-      _userBloc.markWardrobeSeen.add(userId);
-      // _outfitBloc.loadMyOutfits.add(LoadOutfits(
-      //   userId: userId,
-      //   sortByTop: isSortingByTop
-      // ));
     }
   }
 
@@ -66,20 +65,15 @@ class _WardrobeScreenState extends State<WardrobeScreen> {
     return Container(
       width: double.infinity,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8.0),
+        padding: const EdgeInsets.only(left: 8.0, right: 8, top: 8),
         child: Container(
-          padding: EdgeInsets.only(bottom: 4),
-          decoration: BoxDecoration(
-            border: BorderDirectional(
-              bottom: BorderSide(
-                width: 0.5,
-                color: Colors.black54,
-              )
-            )
-          ),
           child: Text( 
             motivationalMessage,
-            style: Theme.of(context).textTheme.subhead.apply(color: Colors.black54),
+            style: Theme.of(context).textTheme.subhead.copyWith(
+              color: Colors.deepOrange,
+              fontStyle: FontStyle.italic
+              // fontWeight: FontWeight.w300,
+            ),
             textAlign: TextAlign.center,
           ),
         ),
@@ -147,7 +141,7 @@ class _WardrobeScreenState extends State<WardrobeScreen> {
       loadingStream: _userBloc.isLoading,
       userStream: _userBloc.currentUser,
       builder: (isLoadingUser, streamUser) => StreamBuilder<bool>(
-        stream: _outfitBloc.isLoadingItems,
+        stream: _outfitBloc.isLoadingMyOutfits,
         initialData: false,
         builder: (ctx, isLoadingSnap) {
           return StreamBuilder<List<Outfit>>(
@@ -160,6 +154,7 @@ class _WardrobeScreenState extends State<WardrobeScreen> {
                 outfits = sortOutfits(outfits, isSortingByTop);
               }
               return OutfitsGrid(
+                isScrollingDown: widget.isScrollingDown,
                 leading: Column(
                   children: <Widget>[
                     _wardrobeMotivation(),

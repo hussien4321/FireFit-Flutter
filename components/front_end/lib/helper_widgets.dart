@@ -10,6 +10,7 @@ export 'helper_widgets/animated/fade_in_and_slide_page_transformer.dart';
 
 export 'helper_widgets/comment/comment_field.dart';
 
+export 'helper_widgets/functions/connectivity_helper.dart';
 export 'helper_widgets/functions/permissions_checker.dart';
 export 'helper_widgets/functions/route_converters.dart';
 export 'helper_widgets/functions/sort_outfits.dart';
@@ -28,6 +29,7 @@ export 'helper_widgets/input/permission_dialog.dart';
 export 'helper_widgets/input/rating_bar.dart';
 export 'helper_widgets/input/rating_dialog.dart';
 export 'helper_widgets/input/select_images.dart';
+export 'helper_widgets/input/url_launcher.dart';
 export 'helper_widgets/input/yes_no_dialog.dart';
 
 export 'helper_widgets/lookbook/add_to_lookbook_dialog.dart';
@@ -36,6 +38,7 @@ export 'helper_widgets/lookbook/lookbook_card.dart';
 
 export 'helper_widgets/notices/app_title.dart';
 export 'helper_widgets/notices/custom_banner.dart';
+export 'helper_widgets/notices/custom_dialog.dart';
 export 'helper_widgets/notices/item_not_found.dart';
 export 'helper_widgets/notices/under_construction_notice.dart';
 export 'helper_widgets/notices/verification_dialog.dart';

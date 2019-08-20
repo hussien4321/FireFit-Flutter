@@ -7,6 +7,7 @@ class UserBloc {
   final UserRepository _repository;
   final OutfitRepository _outfitRepository;
   final Preferences _preferences;
+  final OutfitBloc _outfitBloc;
 
   List<StreamSubscription<dynamic>> _subscriptions;
 
@@ -24,8 +25,8 @@ class UserBloc {
   final _searchUserController = PublishSubject<String>();
   Sink<String> get searchUser => _searchUserController; 
 
-  final _markWardrobeSeenController = PublishSubject<String>();
-  Sink<String> get markWardrobeSeen => _markWardrobeSeenController; 
+  final _markWardrobeSeenController = PublishSubject<void>();
+  Sink<void> get markWardrobeSeen => _markWardrobeSeenController; 
 
   final _followersController = BehaviorSubject<List<User>>();
   Stream<List<User>> get followers => _followersController;
@@ -79,6 +80,9 @@ class UserBloc {
   final _successMessageController = PublishSubject<String>();
   Observable<String> get successMessage => _successMessageController.stream;
 
+  final _clearNewFeedController = PublishSubject<void>();
+  Sink<void> get clearNewFeed => _clearNewFeedController;
+
   final _resendEmailController = PublishSubject<void>();
   Sink<void> get resendVerificationEmail => _resendEmailController;
   final _refreshVerificationEmailController = PublishSubject<void>();
@@ -100,7 +104,7 @@ class UserBloc {
   Sink<FollowUser> get followUser => _followUserController;
 
 
-  UserBloc(this._repository, this._outfitRepository, this._preferences) {
+  UserBloc(this._repository, this._outfitRepository, this._preferences, this._outfitBloc) {
     _subscriptions = <StreamSubscription<dynamic>>[
       _logInController.listen(_logInUser),
       _registerController.listen(_registerUser),
@@ -112,12 +116,13 @@ class UserBloc {
       _checkUsernameController.stream.debounce(Duration(milliseconds: 500)).listen(_refreshUsernameCheck),
       _refreshVerificationEmailController.stream.listen(_refreshVerifiedCheck),
       _resendEmailController.stream.listen(_repository.resendVerificationEmail),
-      _markWardrobeSeenController.listen(_repository.markWardrobeSeen),
+      _markWardrobeSeenController.listen(([_]) => _repository.markWardrobeSeen(_currentUserId)),
       _resetPasswordController.listen(_resetPassword),
       _selectUserController.listen(_loadSelectedUser),
       _searchUserController.distinct().listen(_loadSearchUser),
       _loadCurrentUserController.listen(_loadCurrentUser),
       _followUserController.listen(_followUser),
+      _clearNewFeedController.listen(_clearNewFeed),
       _loadFollowersController.listen(_loadFollowers),
       _loadFollowingController.listen(_loadFollowing),
       _sendFeedbackController.listen(_sendFeedback),
@@ -172,16 +177,14 @@ class UserBloc {
   } 
 
   _loadFirstTimeStreams() async {
-    await _outfitRepository.clearLookbooks();
     bool sortBySize = await _preferences.getPreference(Preferences.LOOKBOOKS_SORT_BY_SIZE);
-    _outfitRepository.loadLookbooks(LoadLookbooks(
+    _outfitBloc.loadLookbooks.add(LoadLookbooks(
       userId: _currentUserId,
       sortBySize: sortBySize,
     ));
     searchModesToNOTClearEachTime.forEach((searchMode) async {
-      await _outfitRepository.clearOutfits(searchMode);
       bool sortByTop = await getSortByTop(searchMode);
-      _outfitRepository.loadOutfits(LoadOutfits(
+      _outfitBloc.loadOutfitsInner(LoadOutfits(
         userId: _currentUserId,
         searchMode: searchMode,
         sortByTop: sortByTop,
@@ -200,15 +203,17 @@ class UserBloc {
     }
   }
 
+  _clearNewFeed([_]) => _repository.clearNewFeed();
+  
+
   _loadStartupStreams() async {
     searchModesToClearOnStart.forEach((searchMode) async {
-      await _outfitRepository.clearOutfits(searchMode);
       bool sortByTop = await getSortByTop(searchMode);
       OutfitFilters filters =OutfitFilters();
       if(searchMode ==SearchModes.EXPLORE){
         filters = OutfitFilters.fromMap(await _preferences.getPreference(Preferences.EXPLORE_PAGE_FILTERS));
       }
-      _outfitRepository.loadOutfits(LoadOutfits(
+      _outfitBloc.loadOutfitsInner(LoadOutfits(
         userId: _currentUserId,
         searchMode: searchMode,
         sortByTop: sortByTop,
@@ -413,6 +418,7 @@ class UserBloc {
     _logInController.close();
     _logOutController.close();
     _editUserController.close();
+    _clearNewFeedController.close();
     _deleteUserController.close();
     _registerController.close();
     _errorController.close();

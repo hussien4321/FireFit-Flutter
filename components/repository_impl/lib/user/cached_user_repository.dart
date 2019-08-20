@@ -139,7 +139,7 @@ class CachedUserRepository {
 
   Future<void> clearNewFeed() async {
     String searchModeString =searchModeToString(SearchModes.MINE);
-    String notificationType='new-outfit';
+    String notificationType= OutfitNotification.fromNotificationType(NotificationType.NEW_OUTFIT);
     await streamDatabase.executeAndTrigger(['user'], "UPDATE user SET has_new_feed_outfits=0 WHERE user_id=(SELECT search_user_id FROM user_search WHERE search_user_mode=? LIMIT 1)", [searchModeString]);
     return _markNotificationTypeAsSeen(notificationType);
   }

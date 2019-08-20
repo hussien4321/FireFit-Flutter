@@ -10,9 +10,10 @@ import 'package:middleware/middleware.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:overlay_support/overlay_support.dart';
+import 'package:flutter_inapp_purchase/flutter_inapp_purchase.dart';
 import 'package:overlay_support/src/notification/overlay_notification.dart';
 import 'package:helpers/helpers.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_admob/firebase_admob.dart';
 
@@ -53,19 +54,8 @@ class _MainAppBarState extends State<MainAppBar> {
 
   int currentIndex = 0;
 
-  List<Widget> get currentPages => [
-    ExploreScreen(
-      onShowAd: _showAd,
-      hasSubscription: hasSubscription,
-      onUpdateSubscriptionStatus: _onUpdateSubscriptionStatus,
-    ),
-    FeedScreen(),
-    WardrobeScreen(),
-    LookbooksScreen(
-      hasSubscription: hasSubscription,
-      onUpdateSubscriptionStatus: _onUpdateSubscriptionStatus,
-    ),
-  ];
+  int numberOfPages = 4;
+  
   List<String> pages = AppConfig.MAIN_PAGES;
 
   @override
@@ -75,7 +65,6 @@ class _MainAppBarState extends State<MainAppBar> {
     _loadSubscriptionStatus();
     SystemChannels.lifecycle.setMessageHandler((msg){
       if(msg==AppLifecycleState.resumed.toString()) {
-        _dismissOpenNotifications();
         _loadNewNotifications();
         return null;
       }
@@ -87,7 +76,7 @@ class _MainAppBarState extends State<MainAppBar> {
   _loadDefaultPageIndex() async {
     int newIndex = pages.indexOf(await _preferences.getPreference(Preferences.DEFAULT_START_PAGE));
     if(newIndex == -1){
-      newIndex = currentPages.length-1;
+      newIndex = numberOfPages-1;
     }
     setState(() {
      currentIndex = newIndex; 
@@ -99,14 +88,26 @@ class _MainAppBarState extends State<MainAppBar> {
     setState(() {
       hasSubscription = newHasSubscription;
     });
+    if(hasSubscription){
+      await _verifySubscriptionIsStillActive();
+    }
     if(!hasSubscription){
       myInterstitial = createInterstitialAd();
     }
   }
+  
+  _verifySubscriptionIsStillActive() async {
+    try{
+      bool newHasSubscription = await FlutterInappPurchase.checkSubscribed(sku: AdmobTools.subscriptionId.first);
+      setState(() {
+        hasSubscription = newHasSubscription;
+      });
+    } on PlatformException {}
+  }
 
   InterstitialAd createInterstitialAd() {
     return InterstitialAd(
-      adUnitId: AdmobTools.testAdUnitId,
+      adUnitId: AdmobTools.exploreAdUnitId,
       targetingInfo: AdmobTools.targetingInfo,
       listener: (MobileAdEvent event) {
         if(event == MobileAdEvent.closed){
@@ -121,7 +122,11 @@ class _MainAppBarState extends State<MainAppBar> {
     if(!hasSubscription){
       bool isLoaded = await myInterstitial.isLoaded();
       if(!isLoaded){
-        await myInterstitial.load();
+        try{
+          await myInterstitial.load();
+        } on PlatformException {
+          myInterstitial = createInterstitialAd();
+        }
       }
       myInterstitial.show();
     }
@@ -153,11 +158,40 @@ class _MainAppBarState extends State<MainAppBar> {
       body: SafeArea(
         child: _buildNotificationsScaffold(
           body: _buildMenuScaffold(
-            body: currentPages[currentIndex]
+            body: IndexedStack(
+              index: currentIndex,
+              sizing: StackFit.expand,
+              children: <Widget>[
+                ExploreScreen(
+                  onShowAd: _showAd,
+                  hasSubscription: hasSubscription,
+                  onUpdateSubscriptionStatus: _onUpdateSubscriptionStatus,
+                ),
+                FeedScreen(
+                  isScrollingDown: isScrollingDown,
+                ),
+                WardrobeScreen(
+                  isScrollingDown: isScrollingDown,
+                ),
+                LookbooksScreen(
+                  hasSubscription: hasSubscription,
+                  onUpdateSubscriptionStatus: _onUpdateSubscriptionStatus,
+                  isScrollingDown: isScrollingDown,
+                ),
+              ],
+            )
           )
         ),
       ),
     );
+  }
+
+  isScrollingDown(bool newIsScrollingDown){
+    if(newIsScrollingDown != hideBars){
+      setState(() {
+       hideBars = newIsScrollingDown; 
+      });
+    }
   }
 
   _initBlocs() async {
@@ -167,7 +201,6 @@ class _MainAppBarState extends State<MainAppBar> {
       _outfitBloc =OutfitBlocProvider.of(context);
       _notificationBloc = NotificationBlocProvider.of(context);
       _commentBloc =CommentBlocProvider.of(context);
-      _dismissOpenNotifications();
       _subscriptions = <StreamSubscription<dynamic>>[
         _tokenRefreshListener(),
         _logInStatusListener(),
@@ -194,11 +227,6 @@ class _MainAppBarState extends State<MainAppBar> {
   }
 
   _logCurrentScreen() => AnalyticsEvents(context).logCustomScreen('/${AppConfig.MAIN_PAGES_PATHS[currentIndex]}');
-
-  _dismissOpenNotifications(){
-    FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = new FlutterLocalNotificationsPlugin();
-    flutterLocalNotificationsPlugin.cancelAll();
-  }
 
   _handleNotification(Map<String, dynamic> payload) {
     final data = payload['data'];
@@ -331,22 +359,137 @@ class _MainAppBarState extends State<MainAppBar> {
   Widget _buildScaffold({Widget body}){
     return Stack(
       children: <Widget>[
-        CustomScaffold(
-          resizeToAvoidBottomPadding: false,
-          backgroundColor: Colors.white,
-          leading: _buildMenuButton(),
-          title: pages[currentIndex],
-          allCaps: true,
-          actions: <Widget>[
-            _buildUploadButton(),
-            _buildNotificationsButton(),
-          ],
-          elevation: 0.0,
-          appbarColor: Colors.transparent,
-          body: body
+        StreamBuilder<bool>(
+          stream: _userBloc.currentUser.map((user) => user.hasNewFeedOutfits),
+          initialData: false,
+          builder: (context, hasFeedSnap) =>
+            StreamBuilder<bool>(
+              stream: _userBloc.currentUser.map((user) => user.hasNewUpload),
+              initialData: false,
+              builder: (context, hasNewUploadSnap) {
+                bool hasNewFeed = hasFeedSnap.data == true;
+                bool hasNewUpload = hasNewUploadSnap.data == true;
+                return CustomScaffold(
+                  resizeToAvoidBottomPadding: false,
+                  backgroundColor: Colors.white,
+                  leading: _buildMenuButton(),
+                  title: 'FireFit',//pages[currentIndex],
+                  customTitle: _customTitle(),
+                  allCaps: false,
+                  actions: <Widget>[
+                    _buildUploadButton(),
+                    _buildNotificationsButton(),
+                  ],
+                  elevation: 2.0,
+                  appbarColor: Colors.grey[200],
+                  body: body,
+                  bottomNavigationBar: _buildBottomNavBar(hasNewFeed, hasNewUpload),
+                );
+              }
+            ),
         ),
         _buildShading(),
       ],
+    );
+  }
+  Widget _customTitle() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[
+        Image.asset(
+          'assets/flame_full.png',
+          width: 24,
+          height: 24,
+        ),
+        Padding(
+          padding: EdgeInsets.only(left: 4.0),
+          child: Text(
+            'FireFit',
+            style: TextStyle(
+              inherit: true,
+              fontSize: 20,
+              color: Colors.deepOrange[600]
+            ),
+          ),
+        )
+      ],
+    );
+  }
+
+  bool hideBars = false;
+  Widget _buildBottomNavBar(bool hasNewFeed, bool hasNewUpload) {
+    return AnimatedContainer(
+      duration: Duration(milliseconds: 100),
+      height: hideBars ? 0 : 52,
+      child: BottomNavigationBar(
+        showSelectedLabels: true,
+        showUnselectedLabels: true,
+        currentIndex: currentIndex,
+        selectedFontSize: 12,
+        unselectedFontSize: 12,
+        selectedItemColor: Colors.blue,
+        unselectedItemColor: Colors.grey[700],
+        unselectedLabelStyle: Theme.of(context).textTheme.caption.copyWith(color: Colors.black),
+        selectedLabelStyle: Theme.of(context).textTheme.caption.copyWith(color: Colors.blue),
+        type: BottomNavigationBarType.fixed,
+        onTap: _updatePageIndex,
+        backgroundColor: Colors.white,
+        elevation: 6,
+        items: [
+          _buildBottomNavBarItem(
+            icon: FontAwesomeIcons.globeAmericas,
+            title: 'Inspiration',
+          ),
+          _buildBottomNavBarItem(
+            icon: FontAwesomeIcons.users,
+            title: 'Fashion Circle',
+            showNotificationBubble: hasNewFeed,
+          ),
+          _buildBottomNavBarItem(
+            icon: FontAwesomeIcons.personBooth,
+            title: 'My Wardrobe',
+            showNotificationBubble: hasNewUpload,
+          ),
+          _buildBottomNavBarItem(
+            icon: FontAwesomeIcons.addressBook,
+            title: 'Lookbooks',
+          ),
+        ]
+      )
+    );
+  }
+
+  _updatePageIndex(int newIndex) {
+    if(newIndex == 1) {
+      _userBloc.clearNewFeed.add(null);
+    }else if(newIndex == 2) {
+      _userBloc.markWardrobeSeen.add(null);
+    }
+    setState(() => currentIndex = newIndex);
+  }
+
+  BottomNavigationBarItem _buildBottomNavBarItem({IconData icon, String title, bool showNotificationBubble = false}){
+    return BottomNavigationBarItem(
+      backgroundColor: Colors.white,
+      icon: Container(
+        child: NotificationIcon(
+          iconData: icon,
+          size: 22.0,
+          showBubble: showNotificationBubble,
+        ),
+      ),
+     title: Padding(
+      padding: EdgeInsets.only(top:4),
+      child: Text(
+          title,
+          softWrap: true,
+          style: TextStyle(
+            inherit: true,
+            fontSize: 12
+          ),
+          textAlign: TextAlign.center,
+        ),
+      ),
     );
   }
 

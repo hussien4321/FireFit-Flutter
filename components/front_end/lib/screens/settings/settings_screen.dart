@@ -88,7 +88,7 @@ class _SettingsScreenState extends State<SettingsScreen> with LoadingAndErrorDia
               SettingsOption(
                 icon:  FontAwesomeIcons.twitter,
                 name: 'Follow us @firefit_app',
-                onTap: () => _openURL(AppConfig.TWITTER_URL),
+                onTap: () => UrlLauncher.openURL(AppConfig.TWITTER_URL),
               ),
               SettingsHeader('About'),
               SettingsOption(
@@ -102,17 +102,17 @@ class _SettingsScreenState extends State<SettingsScreen> with LoadingAndErrorDia
               SettingsOption(
                 icon:  FontAwesomeIcons.lock,
                 name: 'Privacy policy',
-                onTap: () => _openURL(AppConfig.PRIVACY_POLICY_URL),
+                onTap: () => UrlLauncher.openURL(AppConfig.PRIVACY_POLICY_URL),
               ),
               SettingsOption(
                 icon:  FontAwesomeIcons.envelopeOpenText,
                 name: 'Terms & Conditions',
-                onTap: () => _openURL(AppConfig.TERMS_AND_CONDITIONS_URL),
+                onTap: () => UrlLauncher.openURL(AppConfig.TERMS_AND_CONDITIONS_URL),
               ),
               SettingsOption(
                 icon:  FontAwesomeIcons.copyright,
                 name: 'Copyrights',
-                onTap: () => _openURL(AppConfig.COPYRIGHTS_URL),
+                onTap: () => UrlLauncher.openURL(AppConfig.COPYRIGHTS_URL),
               ),
               SettingsHeader('Account'),
               SettingsOption(
@@ -169,15 +169,6 @@ class _SettingsScreenState extends State<SettingsScreen> with LoadingAndErrorDia
   }
   
   _shareApp() => Share.share('I thought you might be interested in this fashion app for sharing and discussing your daily outfits: https://firefitapp.com \n\nYou can find my profile by searching for @$username in the app!');
-  
-  _openURL(String url) async {
-    if (await canLaunch(url)) {
-      await launch(url);
-    } else {
-      toast("Failed to open browser");
-    }
-  }
-
 
   _confirmLogOut() {
     return showDialog(

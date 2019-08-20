@@ -35,15 +35,12 @@ class OutfitMainCard extends StatelessWidget {
   }
 
   Widget _outfitImage(Outfit outfit){
-    return Hero(
-      tag: outfit.images.first,
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.grey,
-          image: DecorationImage(
-            fit: BoxFit.cover,
-            image: CachedNetworkImageProvider(outfit.images.first)
-          ),
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.grey,
+        image: DecorationImage(
+          fit: BoxFit.cover,
+          image: CachedNetworkImageProvider(outfit.images.first)
         ),
       ),
     );

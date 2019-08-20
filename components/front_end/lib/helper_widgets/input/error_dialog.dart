@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
-import 'dart:io';
+import 'package:front_end/helper_widgets.dart';
 
 class ErrorDialog extends StatefulWidget {
 
@@ -73,14 +73,8 @@ class _ErrorDialogState extends State<ErrorDialog> {
   }
   
   _loadConnectionStatus() async {
-    try {
-      final result = await InternetAddress.lookup('google.com');
-      if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
-        setState(() => isConnected = true);
-      }
-    } on SocketException catch (_) {
-      setState(() => isConnected = false);
-    }
+    bool isConnectedNow = await ConnectivityHelper.hasConnection();
+    setState(() => isConnected = isConnectedNow);
   }
 
   Widget _noConnectionNotice(){

@@ -22,6 +22,7 @@ class LoadNotifications {
   
   bool operator ==(o) {
     return o is LoadNotifications &&
+    o.startAfterNotification != null && startAfterNotification != null &&
     o.userId == userId &&
     o.isLive == isLive &&
     o.lastNotificationCreatedAt == lastNotificationCreatedAt &&

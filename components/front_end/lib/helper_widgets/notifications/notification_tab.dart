@@ -48,25 +48,30 @@ class _NotificationTabState extends State<NotificationTab> {
           ),
           child: Row(
             children: <Widget>[
-              Container(
-                margin: EdgeInsets.only(right: 8.0),
-                width: 50.0,
-                height: 50.0,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  image: refUser == null ? null : DecorationImage(
-                    image: CachedNetworkImageProvider(refUser.profilePicUrl),
-                    fit: BoxFit.cover
+              GestureDetector(
+                onTap: () => CustomNavigator.goToProfileScreen(context,
+                  userId: refUser.userId,
+                ),
+                child: Container(
+                  margin: EdgeInsets.only(right: 8.0),
+                  width: 50.0,
+                  height: 50.0,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    image: refUser == null ? null : DecorationImage(
+                      image: CachedNetworkImageProvider(refUser.profilePicUrl),
+                      fit: BoxFit.cover
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black,
+                        blurRadius: 4,
+                        spreadRadius: -2,
+                        offset: Offset(0, 2)
+                      )
+                    ],
+                    color: Colors.grey
                   ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black,
-                      blurRadius: 4,
-                      spreadRadius: -2,
-                      offset: Offset(0, 2)
-                    )
-                  ],
-                  color: Colors.grey
                 ),
               ),
               Expanded(

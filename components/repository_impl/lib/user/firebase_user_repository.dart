@@ -179,6 +179,8 @@ class FirebaseUserRepository implements UserRepository {
     .catchError((exception) => null);
   }
 
+  Future<void> clearNewFeed() => userCache.clearNewFeed();
+
   Future<bool> editUser(EditUser editUser) {
     return cloudFunctions.getHttpsCallable(functionName: 'editUser').call(editUser.toJson())
     .then((res) async {
@@ -215,7 +217,7 @@ class FirebaseUserRepository implements UserRepository {
     }
     return false;
   }
-
+  
   Future<bool> _getUserNewProfilePic(LoadUser loadUser, String currentProfilePicUrl) async {
     return cloudFunctions.getHttpsCallable(functionName: 'getUser').call(loadUser.toJson())
     .then((res) async {
@@ -346,7 +348,7 @@ class FirebaseUserRepository implements UserRepository {
       DateTime latestNotificationTime = await outfitCache.getLatestNotificationTime();
       loadNotifications.lastNotificationCreatedAt = latestNotificationTime;
     }else{
-      outfitCache.clearNotifications();
+      await outfitCache.clearNotifications();
     }
     return loadMoreNotifications(loadNotifications);
   }
@@ -358,14 +360,15 @@ class FirebaseUserRepository implements UserRepository {
         Map<String, dynamic> formattedDoc = Map<String, dynamic>.from(data);
         return OutfitNotification.fromMap(formattedDoc);
       }).toList());
-      notifications.forEach((notification) {
-        outfitCache.addNotification(notification);
+      notifications.sort((a,b) => -a.createdAt.compareTo(b.createdAt));
+      for(int i = 0; i < notifications.length; i++){
+        await outfitCache.addNotification(notifications[i]);
         if(loadNotifications.isLive){
-          outfitCache.updateLiveNotification(notification);
+          await outfitCache.updateLiveNotification(notifications[i]);
         }
-      });
+      }
       if(loadNotifications.isLive){
-        userCache.incrementUserNewNotifications(notifications);
+        await userCache.incrementUserNewNotifications(notifications);
       }
       return true;
     })

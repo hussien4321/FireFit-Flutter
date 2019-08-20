@@ -327,27 +327,60 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
   }
 
   Widget _loadImage(int index){
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.grey.withOpacity(0.5),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black87,
-            blurRadius: 5,
-            offset: Offset(1.5, 1.5)
-          )
-        ]
-      ),
-      child: 
-      ImageGalleryPreview(
-        imageUrls: outfit.images,
-        currentIndex: index, 
-        title: 'Outfit Image',
-      ),
+    return Stack(
+      children: <Widget>[
+        _loadingImageSpinner(),
+        Center(
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.grey.withOpacity(0.5),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black87,
+                  blurRadius: 5,
+                  offset: Offset(1.5, 1.5)
+                )
+              ]
+            ),
+            child: ImageGalleryPreview(
+              imageUrls: outfit.images,
+              currentIndex: index, 
+              title: 'Outfit Image',
+            ),
+          ),
+        ),
+      ],
     );
   }
 
-
+  Widget _loadingImageSpinner(){
+    return Center(
+      child: SizedBox(
+        height: 50,
+        width: 50,
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.grey[700],
+            shape: BoxShape.circle,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black54,
+                blurRadius: 2,
+                offset: Offset(1, 1)
+              )
+            ]
+          ),
+          padding: EdgeInsets.all(8),
+          child: Theme(
+            data: ThemeData(
+              accentColor: Colors.white,
+            ),
+            child: CircularProgressIndicator()
+          ),
+        ),
+      ),
+    );
+  }
 
   Widget _buildRatingsSummary(){
     return Container(
@@ -509,16 +542,13 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
           ),
           _actionButton(
             icon: Image.asset(
-              'assets/flame_full.png',
+              outfit.hasRating ? 'assets/flame_full.png' : 'assets/flame_empty.png',
               width: 24,
               height: 24,
             ),
             text: 'Rate',
-            unselectedColor: Colors.blue,
-            unselectedBackgroundColor: Colors.blue,
             selected: outfit.hasRating,
             iconPadding: 8,
-            hideBorder: true,
             onPressed: () => _rateOutfit(),
           ),
           _actionButton(
@@ -550,6 +580,7 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
         return RatingDialog(
           initialValue: outfit.userRating,
           isUpdate: outfit.hasRating,
+          isTransparent: false,
           onSubmit: (newRating) {
             OutfitRating outfitRating = OutfitRating(
               outfit: outfit,
@@ -563,7 +594,7 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
     );
   }
 
-  Widget _actionButton({Widget icon, String text, Color unselectedColor = Colors.black, Color unselectedBackgroundColor = Colors.white,  double iconPadding = 4.0, bool selected = false, VoidCallback onPressed, bool isEnd = false, bool hideBorder = false}){
+  Widget _actionButton({Widget icon, String text, Color unselectedColor = Colors.black,  double iconPadding = 4.0, bool selected = false, VoidCallback onPressed, bool isEnd = false}){
     return Expanded(
       child: Material(
         color: Colors.white,
@@ -583,11 +614,11 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
                 RawMaterialButton(
-                  fillColor: selected ? Colors.red : unselectedBackgroundColor,
+                  fillColor: Colors.white,
                   elevation: 2,
                   shape: CircleBorder(
                     side: BorderSide(
-                      color: Colors.grey.withOpacity(hideBorder ? 0.0 : 0.5),
+                      color: Colors.grey.withOpacity(0.5),
                       width: 0.5
                     )
                   ),

@@ -3,6 +3,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:middleware/middleware.dart';
 import 'package:front_end/helper_widgets.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:flutter/rendering.dart';
 
 class OutfitsGrid extends StatefulWidget {
 
@@ -13,11 +14,14 @@ class OutfitsGrid extends StatefulWidget {
   final RefreshCallback onRefresh;
   final VoidCallback onReachEnd;
   final String emptyText;
+  final ScrollPhysics physics;
   final OutfitOverlay customOverlay;
   final int pagesSinceOutfitScreen;
   final int pagesSinceProfileScreen;
+  final ValueChanged<bool> isScrollingDown;
 
-  OutfitsGrid({this.leading, this.outfits, this.isLoading, this.onReachEnd, this.onRefresh, this.emptyText, this.customOverlay ,
+  OutfitsGrid({this.leading, this.outfits, this.isLoading, this.onReachEnd, this.onRefresh, this.emptyText, this.customOverlay, this.isScrollingDown,
+    this.physics = const ClampingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
     this.hasFixedHeight = false,
     this.pagesSinceOutfitScreen = 0,
     this.pagesSinceProfileScreen = 0,
@@ -39,6 +43,7 @@ class _OutfitsGridState extends State<OutfitsGrid> {
     _controller.addListener(_scrollListener);
   }
   _scrollListener() {
+    widget.isScrollingDown(_controller.position.userScrollDirection != ScrollDirection.forward);
     if (_controller.offset >= (_controller.position.maxScrollExtent-100) && !_controller.position.outOfRange) {
       if(widget.onReachEnd != null){
         widget.onReachEnd();
@@ -64,7 +69,7 @@ class _OutfitsGridState extends State<OutfitsGrid> {
   Widget _buildScrollableGrid(BuildContext ctx) {
     bool hasRefresh = widget.onRefresh != null;
     Widget content = ListView(
-      physics: ClampingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+      physics: widget.physics,
       shrinkWrap: true,
       controller: _controller,
       children: <Widget>[
@@ -120,12 +125,9 @@ class _OutfitsGridState extends State<OutfitsGrid> {
           child: Stack(
             children: <Widget>[
               SizedBox.expand(
-                child: Hero(
-                  tag: outfit.images.first,  
-                  child: CachedNetworkImage(
-                    imageUrl: outfit.images[0],
-                    fit: BoxFit.fitHeight,
-                  ),
+                child: CachedNetworkImage(
+                  imageUrl: outfit.images[0],
+                  fit: BoxFit.fitHeight,
                 ),
               ),
               _outfitData(outfit),

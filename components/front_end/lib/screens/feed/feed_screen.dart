@@ -7,8 +7,14 @@ import 'package:front_end/helper_widgets.dart';
 import 'package:helpers/helpers.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:overlay_support/overlay_support.dart';
+import 'package:flutter/rendering.dart';
 
 class FeedScreen extends StatefulWidget {
+
+  final ValueChanged<bool> isScrollingDown;
+
+  FeedScreen({this.isScrollingDown});
+  
   @override
   _FeedScreenState createState() => _FeedScreenState();
 }
@@ -47,6 +53,7 @@ class _FeedScreenState extends State<FeedScreen> {
         onReachEnd(outfits.last);
       }
     }
+    widget.isScrollingDown(_controller.position.userScrollDirection != ScrollDirection.forward);
   }
 
   @override
@@ -61,7 +68,7 @@ class _FeedScreenState extends State<FeedScreen> {
     return Container(
       color: Colors.grey[300],
       child: StreamBuilder<bool>(
-        stream: _outfitBloc.isLoadingItems,
+        stream: _outfitBloc.isLoadingFeed,
         initialData: false,
         builder: (ctx, isLoadingSnap) {
           return StreamBuilder<List<Outfit>>(
@@ -98,9 +105,6 @@ class _FeedScreenState extends State<FeedScreen> {
       _userBloc.currentUser.first.then((user) {
         setState(() => hasMaxLookbookOutfits = user.numberOfLookbookOutfits >= maxOutfitStorage);
       });
-      // _outfitBloc.loadFeedOutfits.add(LoadOutfits(
-      //   userId: userId
-      // ));
     }
   }
 
@@ -252,6 +256,7 @@ class _FeedScreenState extends State<FeedScreen> {
   Widget _outfitActions(Outfit outfit) {
     double iconSize = 20;
     return Container(
+      padding: EdgeInsets.only(top: 8),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.end,
         children: <Widget>[

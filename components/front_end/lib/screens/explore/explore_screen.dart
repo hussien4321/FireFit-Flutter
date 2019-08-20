@@ -47,6 +47,8 @@ class _ExploreScreenState extends State<ExploreScreen> with SingleTickerProvider
 
   bool hasMaxLookbookOutfits = false;
   
+  List<Outfit> outfits = [];
+
   @override
   void initState() {
     super.initState();
@@ -63,10 +65,10 @@ class _ExploreScreenState extends State<ExploreScreen> with SingleTickerProvider
       height: double.infinity,
       color: Colors.transparent,
       child: Container(
+        padding: EdgeInsets.only(top: 2),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.vertical(top: Radius.circular(10.0))
         ),
-        padding: EdgeInsets.only(top: 16.0),
         child: PullToRefreshOverlay(
           matchSize: true,
           onRefresh: () async {
@@ -82,17 +84,18 @@ class _ExploreScreenState extends State<ExploreScreen> with SingleTickerProvider
               _searchDetailsBar(),
               Expanded(
                 child: StreamBuilder<bool>(
-                  stream: _outfitBloc.isLoadingItems,
+                  stream: _outfitBloc.isLoadingExplore,
                   initialData: false,
                   builder: (ctx, isLoadingSnap) => StreamBuilder<List<Outfit>>(
                     stream: _outfitBloc.exploredOutfits,
                     initialData: [],
                     builder: (ctx, outfitsSnap) {
-                      List<Outfit> outfits = outfitsSnap.data;
-                        if(outfits.length>0){
-                          outfits = sortOutfits(outfits, isSortByTop);
-                        }
-                        return _outfitsCarousel(outfits, isLoadingSnap.data);
+                      bool isLoading = isLoadingSnap.data;
+                      outfits = outfitsSnap.data;
+                      if(outfits.length>0){
+                        outfits = sortOutfits(outfits, isSortByTop);
+                      }
+                      return _outfitsCarousel(outfits, isLoading);
                     }
                   )
                 )
@@ -135,7 +138,7 @@ class _ExploreScreenState extends State<ExploreScreen> with SingleTickerProvider
               children: <Widget>[
                 Text(
                   isSortByTop ? 'Hottest Fits' : 'Freshest Fits',
-                  style: Theme.of(context).textTheme.display1.copyWith(
+                  style: Theme.of(context).textTheme.title.copyWith(
                     color: Colors.black,
                     fontWeight: FontWeight.bold
                   ),
@@ -234,25 +237,30 @@ class _ExploreScreenState extends State<ExploreScreen> with SingleTickerProvider
       children: <Widget>[
         Expanded(
           child: Padding(
-            padding: EdgeInsets.symmetric(vertical: 8),
-            child: CarouselSlider(
-              height: double.infinity,
-              enlargeCenterPage: true,
-              onPageChanged: (i) {
-                _incrementAdCounter();
-                setState(() => index = i);
-                if(i+1>=outfits.length && outfits.length>0){
-                  _outfitBloc.exploreOutfits.add(LoadOutfits(
-                    userId: userId,
-                    startAfterOutfit: outfits.last,
-                    filters: outfitFilters,
-                    sortByTop: isSortByTop,
-                  ));
-                }
-              },
-              items: outfits.map((outfit) => _buildOutfitCard(outfit, index)).toList()..add(_endCard(isLoading, outfits.isEmpty)),
-              enableInfiniteScroll: false,
-              viewportFraction: 0.8,
+            padding: EdgeInsets.symmetric(vertical: 16),
+            child: LayoutBuilder(
+              builder: (ctx, constraints) {
+                double fraction = (constraints.maxWidth * 0.7) / constraints.maxHeight;
+                return CarouselSlider(
+                  height: constraints.maxHeight,
+                  enlargeCenterPage: true,
+                  onPageChanged: (i) {
+                    _incrementAdCounter();
+                    setState(() => index = i);
+                    if(i+1>=outfits.length && outfits.length>0){
+                      _outfitBloc.exploreOutfits.add(LoadOutfits(
+                        userId: userId,
+                        startAfterOutfit: outfits.last,
+                        filters: outfitFilters,
+                        sortByTop: isSortByTop,
+                      ));
+                    }
+                  },
+                  items: outfits.map((outfit) => _buildOutfitCard(outfit, index)).toList()..add(_endCard(isLoading, outfits.isEmpty)),
+                  enableInfiniteScroll: false,
+                  viewportFraction: fraction,
+                );
+              }
             ),
           )
         ),
@@ -287,7 +295,7 @@ class _ExploreScreenState extends State<ExploreScreen> with SingleTickerProvider
       );
     }
     return Container(
-      padding: EdgeInsets.all(4),
+      padding: EdgeInsets.all(2),
       child: Align(
         alignment: Alignment.center,
         child: AspectRatio(
@@ -344,7 +352,7 @@ class _ExploreScreenState extends State<ExploreScreen> with SingleTickerProvider
                 ),
                 textAlign: TextAlign.center,
               ),
-              Text(isLoading ? 'Please wait while we find you more fire fits!' : 'Try a different search filter or refresh the page to check for new fits!',
+              Text(isLoading ? 'Please wait while we find you ${isEmpty ? 'some':'more'} Fire Fits!' : 'Try a different search filter or refresh the page to check for new fits!',
                 style: Theme.of(context).textTheme.subtitle.copyWith(
                   color: Colors.white
                 ),
@@ -380,6 +388,7 @@ class _ExploreScreenState extends State<ExploreScreen> with SingleTickerProvider
               width: 32,
               height: 32,
             ),
+            outlineColor: Colors.deepOrange,
             hasData: hasOutfit,
             selected: hasRating,
             iconPadding: 8,
@@ -418,14 +427,14 @@ class _ExploreScreenState extends State<ExploreScreen> with SingleTickerProvider
   }
 
 
-  _actionButton({Widget icon, bool hasData = false, bool selected = false, double iconPadding = 4.0, VoidCallback onPressed}){
+  _actionButton({Widget icon, bool hasData = false, Color outlineColor = Colors.blue, bool selected = false, double iconPadding = 4.0, VoidCallback onPressed}){
     return RawMaterialButton(
       fillColor: hasData ? Colors.white : Colors.grey,
       elevation: hasData?1:0,
       shape: CircleBorder(
         side: BorderSide(
-          color: Colors.grey.withOpacity(0.5),
-          width: 0.5
+          color: outlineColor,
+          width:  hasData ? 1 : 0
         )
       ),
       onPressed: hasData ? onPressed : null,
