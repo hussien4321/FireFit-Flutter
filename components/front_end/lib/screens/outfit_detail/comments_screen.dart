@@ -355,7 +355,6 @@ class _CommentsScreenState extends State<CommentsScreen> {
             Padding(
               padding: const EdgeInsets.only(top: 8.0),
               child: ProfilePicWithShadow(
-                heroTag: '${outfit.outfitId}-'+outfit.poster.profilePicUrl,
                 userId: outfit.poster.userId,
                 url: outfit.poster.profilePicUrl,
                 pagesSinceOutfitScreen: widget.pagesSinceOutfitScreen,

@@ -78,7 +78,6 @@ class _CommentFieldState extends State<CommentField> {
                 Padding(
                   padding: const EdgeInsets.only(top: 16.0),
                   child: ProfilePicWithShadow(
-                    heroTag: '${comment.commentId}-'+comment.commenter.profilePicUrl,
                     userId: comment.commenter.userId,
                     url: comment.commenter.profilePicUrl,
                     pagesSinceOutfitScreen: widget.pagesSinceOutfitScreen,
@@ -306,7 +305,6 @@ class _CommentFieldState extends State<CommentField> {
                     Padding(
                       padding: const EdgeInsets.only(top: 16.0),
                       child: ProfilePicWithShadow(
-                        heroTag: '${reply.commentId}-'+reply.commenter.profilePicUrl,
                         userId: reply.commenter.userId,
                         url: reply.commenter.profilePicUrl,
                         pagesSinceOutfitScreen: widget.pagesSinceOutfitScreen,

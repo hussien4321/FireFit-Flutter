@@ -380,6 +380,7 @@ class _MainAppBarState extends State<MainAppBar> {
                     _buildUploadButton(),
                     _buildNotificationsButton(),
                   ],
+                  hideAppBar: hideBars,
                   elevation: 2.0,
                   appbarColor: Colors.grey[200],
                   body: body,

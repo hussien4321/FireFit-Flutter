@@ -215,7 +215,6 @@ class _FeedScreenState extends State<FeedScreen> {
         children: <Widget>[
           ProfilePicWithShadow(
             userId: outfit.poster.userId,
-            heroTag: 'PROFILE-PIC-URL-${outfit.poster.profilePicUrl}-$index',
             url: outfit.poster.profilePicUrl,
           ),
           Expanded(
@@ -235,7 +234,7 @@ class _FeedScreenState extends State<FeedScreen> {
             ),
           ),
           Text(
-            DateFormatter.dateToSimpleFormat(outfit.poster.createdAt),
+            DateFormatter.dateToSimpleFormat(outfit.createdAt),
             style: Theme.of(context).textTheme.caption,
           )
         ],

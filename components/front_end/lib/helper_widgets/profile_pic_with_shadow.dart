@@ -8,7 +8,6 @@ class ProfilePicWithShadow extends StatelessWidget {
   final double size;
   final EdgeInsets margin;
   final bool hasOnClick;
-  final heroTag;
   final int pagesSinceOutfitScreen;
   final int pagesSinceProfileScreen;
   final bool isComingFromExploreScreen;
@@ -19,7 +18,6 @@ class ProfilePicWithShadow extends StatelessWidget {
     this.margin = const EdgeInsets.only(right: 8.0),
     this.userId,
     this.hasOnClick = true,
-    this.heroTag,
     this.pagesSinceOutfitScreen = 0,
     this.pagesSinceProfileScreen = 0,
     this.isComingFromExploreScreen = false,

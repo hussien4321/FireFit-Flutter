@@ -237,10 +237,10 @@ class _ExploreScreenState extends State<ExploreScreen> with SingleTickerProvider
       children: <Widget>[
         Expanded(
           child: Padding(
-            padding: EdgeInsets.symmetric(vertical: 16),
+            padding: EdgeInsets.symmetric(vertical: 8),
             child: LayoutBuilder(
               builder: (ctx, constraints) {
-                double fraction = (constraints.maxWidth * 0.7) / constraints.maxHeight;
+                double fraction = (constraints.maxHeight * 0.65) / constraints.maxWidth;
                 return CarouselSlider(
                   height: constraints.maxHeight,
                   enlargeCenterPage: true,

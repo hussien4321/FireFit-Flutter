@@ -11,6 +11,16 @@ class CustomNavigator {
   //TODO: REMOVE ALL REFERENCES WHEN THAT IS IMPLEMENTED
   //CURRENT PROBLEM, INSTEAD OF REMOVING ALL PREVIOUS ROUTES, WE SHOULD COUNT THE NUMBER OF PAGES SINCE LAST OUTFIT/PROFILE AND THEN ONLY GO BACK THAT MANY
 
+  static RouteTransitionsBuilder get _transitionsBuilder => (_, Animation<double> animation, __, Widget child) {
+    return new SlideTransition(
+    child: child,
+      position: new Tween<Offset>(
+        begin: const Offset(1, 0),
+        end: Offset.zero,
+      ).animate(animation),
+    );
+  };
+  
   static Future<T> goToProfileScreen<T extends Object>(BuildContext context, {
     String userId, 
     int pagesSinceOutfitScreen = 0, 
@@ -29,22 +39,23 @@ class CustomNavigator {
     }
     // print('goToProfileScreen END pagesSinceProfileScreen:$pagesSinceProfileScreen pagesSinceOutfitScreen:$pagesSinceOutfitScreen');
     return Navigator.pushAndRemoveUntil(context, 
-      MaterialPageRoute(
-        builder: (ctx) => ProfileScreen(
+      PageRouteBuilder(
+        pageBuilder: (ctx, _, __) => ProfileScreen(
           userId: userId,
           pagesSinceOutfitScreen: pagesSinceOutfitScreen,
           pagesSinceProfileScreen: pagesSinceProfileScreen,
         ),
+        transitionsBuilder: _transitionsBuilder,
         settings: RouteSettings(
           name: '/profile'
-        )
+        ),
       ),
       (Route<dynamic> route) {
         bool removePrevious = numberOfPagesToRemove>0 || isComingFromExploreScreen;
         numberOfPagesToRemove--;
         bool isFirst = route.isFirst;
         return !removePrevious || isFirst; 
-      }
+      },
     );
   } 
 
@@ -67,13 +78,14 @@ class CustomNavigator {
     }
     // print('goToOutfitDetailsScreen END pagesSinceProfileScreen:$pagesSinceProfileScreen pagesSinceOutfitScreen:$pagesSinceOutfitScreen');
     return Navigator.pushAndRemoveUntil(context, 
-      MaterialPageRoute(
-        builder: (ctx) => OutfitDetailsScreen(
+      PageRouteBuilder(
+        pageBuilder: (ctx, _, __) => OutfitDetailsScreen(
           outfitId: outfitId,
           loadOutfit: loadOutfit,
           pagesSinceOutfitScreen: pagesSinceOutfitScreen,
           pagesSinceProfileScreen: pagesSinceProfileScreen,
         ),
+        transitionsBuilder: _transitionsBuilder,
         settings: RouteSettings(
           name: '/outfit'
         )
@@ -88,10 +100,12 @@ class CustomNavigator {
   } 
 
   static Future<T> goToLogInScreen<T extends Object>(BuildContext context, {bool isRegistering = false}) {
-   return Navigator.push(context, MaterialPageRoute(
-      builder: (ctx) => LogInScreen(
+   return Navigator.push(context, 
+    PageRouteBuilder(
+      pageBuilder: (ctx, _, __) => LogInScreen(
         isRegistering: isRegistering,
       ),
+      transitionsBuilder: _transitionsBuilder,
       settings: RouteSettings(
         name: '/login'
       )
@@ -99,21 +113,25 @@ class CustomNavigator {
   }
 
   static Future<Null> goToEditUserScreen<T extends Object>(BuildContext context, {User user}) {
-    return Navigator.push(context, MaterialPageRoute(
-      builder: (ctx) => EditUserScreen(
-        user: user,
-      ),
-      settings: RouteSettings(
-        name: '/edit-user'
+    return Navigator.push(context, 
+      PageRouteBuilder(
+        pageBuilder: (ctx, _, __) => EditUserScreen(
+          user: user,
+        ),
+        transitionsBuilder: _transitionsBuilder,
+        settings: RouteSettings(
+          name: '/edit-user'
+        )
       )
-    ));
+    );
   }
 
   static Future<Null> goToEditOutfitScreen<T extends Object>(BuildContext context, {Outfit outfit}) {
-    return Navigator.push(context, MaterialPageRoute(
-      builder: (ctx) => EditOutfitScreen(
+    return Navigator.push(context, PageRouteBuilder(
+      pageBuilder: (ctx, _, __) => EditOutfitScreen(
         outfit: outfit,
       ),
+      transitionsBuilder: _transitionsBuilder,
       settings: RouteSettings(
         name: '/edit-outfit'
       )
@@ -128,13 +146,14 @@ class CustomNavigator {
   }) {
     pagesSinceOutfitScreen += pagesSinceOutfitScreen>0 ? 1 :0;
     // print('goToFollowUsersScreen pagesSinceProfileScreen:$pagesSinceProfileScreen pagesSinceOutfitScreen:$pagesSinceOutfitScreen');
-    return Navigator.push(context, MaterialPageRoute(
-      builder: (context) => FollowUsersScreen(
+    return Navigator.push(context, PageRouteBuilder(
+      pageBuilder: (ctx, _, __) => FollowUsersScreen(
         selectedUserId: selectedUserId,
         isFollowers: isFollowers,
         pagesSinceOutfitScreen: pagesSinceOutfitScreen,
         pagesSinceProfileScreen: pagesSinceProfileScreen,
       ),
+      transitionsBuilder: _transitionsBuilder,
       settings: RouteSettings(
         name: '/follow-users'
       )
@@ -142,12 +161,13 @@ class CustomNavigator {
   }
   
   static Future<T> goToUploadOutfitScreen<T extends Object>(BuildContext context, {bool hasSubscription, ValueChanged<bool> onUpdateSubscriptionStatus, bool isOnWardrobePage}) {
-    return Navigator.push(context, MaterialPageRoute(
-      builder: (context) => UploadOutfitScreen(
+    return Navigator.push(context, PageRouteBuilder(
+      pageBuilder: (ctx, _, __) => UploadOutfitScreen(
         hasSubscription: hasSubscription,
         onUpdateSubscriptionStatus: onUpdateSubscriptionStatus,
         isOnWardrobePage: isOnWardrobePage,
       ),
+      transitionsBuilder: _transitionsBuilder,
       settings: RouteSettings(
         name: '/upload-outfit'
       )
@@ -161,8 +181,8 @@ class CustomNavigator {
   }) {
     pagesSinceProfileScreen += pagesSinceProfileScreen>0 ? 1 :0;
     // print('goToCommentsScreen pagesSinceProfileScreen:$pagesSinceProfileScreen pagesSinceOutfitScreen:$pagesSinceOutfitScreen');
-    return Navigator.push(context, MaterialPageRoute(
-      builder: (ctx) => CommentsScreen(
+    return Navigator.push(context, PageRouteBuilder(
+      pageBuilder: (ctx, _, __) => CommentsScreen(
         focusComment: focusComment,
         outfitId: outfitId,
         loadOutfit: loadOutfit,
@@ -170,6 +190,7 @@ class CustomNavigator {
         pagesSinceProfileScreen: pagesSinceProfileScreen,
         isComingFromExploreScreen: isComingFromExploreScreen,
       ),
+      transitionsBuilder: _transitionsBuilder,
       settings: RouteSettings(
         name: '/comments'
       )
@@ -177,8 +198,9 @@ class CustomNavigator {
   }
 
   static Future<T> goToSettingsScreen<T extends Object>(BuildContext context) {
-    return Navigator.push(context, MaterialPageRoute(
-      builder: (ctx) => SettingsScreen(),
+    return Navigator.push(context, PageRouteBuilder(
+      pageBuilder: (ctx, _, __) => SettingsScreen(),
+      transitionsBuilder: _transitionsBuilder,
       settings: RouteSettings(
         name: '/settings'
       )
@@ -186,8 +208,9 @@ class CustomNavigator {
   }
 
   static Future<T> goToStyleSelectorScreen<T extends Object>(BuildContext context) {
-    return Navigator.push(context, MaterialPageRoute(
-      builder: (context) => StyleSelectorScreen(),
+    return Navigator.push(context, PageRouteBuilder(
+      pageBuilder: (ctx, _, __) => StyleSelectorScreen(),
+      transitionsBuilder: _transitionsBuilder,
       settings: RouteSettings(
         name: '/style-selector'
       )
@@ -195,12 +218,13 @@ class CustomNavigator {
   }
 
   static Future<T> goToSubscriptionDetailsScreen<T extends Object>(BuildContext context, {int initialPage = 0, bool hasSubscription, ValueChanged<bool> onUpdateSubscriptionStatus}) {
-    return Navigator.push(context, MaterialPageRoute(
-      builder: (context) => SubscriptionDetailsScreen(
+    return Navigator.push(context, PageRouteBuilder(
+      pageBuilder: (ctx, _, __) => SubscriptionDetailsScreen(
         initialPage: initialPage,
         hasSubscription: hasSubscription,
         onUpdateSubscriptionStatus: onUpdateSubscriptionStatus,
       ),
+      transitionsBuilder: _transitionsBuilder,
       settings: RouteSettings(
         name: '/subscription'
       )
@@ -208,8 +232,9 @@ class CustomNavigator {
   }
 
   static Future<T> goToFindUsersScreen<T extends Object>(BuildContext context) {
-    return Navigator.push(context, MaterialPageRoute(
-      builder: (context) => FindUsersScreen(),
+    return Navigator.push(context, PageRouteBuilder(
+      pageBuilder: (ctx, _, __) => FindUsersScreen(),
+      transitionsBuilder: _transitionsBuilder,
       settings: RouteSettings(
         name: '/find-users'
       )
@@ -217,10 +242,11 @@ class CustomNavigator {
   }
 
   static Future<T> goToLookbookScreen<T extends Object>(BuildContext context, {Lookbook lookbook}) {
-    return Navigator.push(context, MaterialPageRoute(
-      builder: (context) => LookbookScreen(
+    return Navigator.push(context, PageRouteBuilder(
+      pageBuilder: (ctx, _, __) => LookbookScreen(
         lookbook: lookbook
       ),
+      transitionsBuilder: _transitionsBuilder,
       settings: RouteSettings(
         name: '/lookbook'
       )
@@ -228,8 +254,9 @@ class CustomNavigator {
   }
 
   static Future<T> goToFeedbackScreen<T extends Object>(BuildContext context) {
-    return Navigator.push(context, MaterialPageRoute(
-      builder: (context) => FeedbackScreen(),
+    return Navigator.push(context, PageRouteBuilder(
+      pageBuilder: (ctx, _, __) => FeedbackScreen(),
+      transitionsBuilder: _transitionsBuilder,
       settings: RouteSettings(
         name: '/feedback'
       )
@@ -237,16 +264,18 @@ class CustomNavigator {
   }
 
   static Future<T> goToFAQScreen<T extends Object>(BuildContext context) {
-    return Navigator.push(context, MaterialPageRoute(
-      builder: (context) => FAQScreen(),
+    return Navigator.push(context, PageRouteBuilder(
+      pageBuilder: (ctx, _, __) => FAQScreen(),
+      transitionsBuilder: _transitionsBuilder,
       settings: RouteSettings(
         name: '/faq'
       )
     ));
   }
   static Future<T> goToDeleteAccountScreen<T extends Object>(BuildContext context) {
-    return Navigator.push(context, MaterialPageRoute(
-      builder: (context) => DeleteAccountScreen(),
+    return Navigator.push(context, PageRouteBuilder(
+      pageBuilder: (ctx, _, __) => DeleteAccountScreen(),
+      transitionsBuilder: _transitionsBuilder,
       settings: RouteSettings(
         name: '/delete-account'
       )
