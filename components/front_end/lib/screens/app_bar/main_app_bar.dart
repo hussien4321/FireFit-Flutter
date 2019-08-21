@@ -459,7 +459,7 @@ class _MainAppBarState extends State<MainAppBar> {
             showNotificationBubble: hasNewUpload,
           ),
           _buildBottomNavBarItem(
-            icon: FontAwesomeIcons.addressBook,
+            icon: FontAwesomeIcons.bookReader,
             title: 'Lookbooks',
           ),
         ]

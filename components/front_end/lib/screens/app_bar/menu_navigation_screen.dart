@@ -86,7 +86,7 @@ class _MenuNavigationScreenState extends State<MenuNavigationScreen> {
                         // ),
                         // _menuOption(
                         //   title: 'LOOKBOOKS',
-                        //   iconData: FontAwesomeIcons.addressBook,
+                        //   iconData: FontAwesomeIcons.bookReader,
                         //   selected: widget.index == 3,
                         //   onPressed: () => widget.onPageSelected(3)
                         // ),

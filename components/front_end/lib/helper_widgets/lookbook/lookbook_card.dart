@@ -33,9 +33,9 @@ class LookbookCard extends StatelessWidget {
                   builder: (context, constraint) {
                     double maxSize = constraint.maxHeight > constraint.maxWidth ? constraint.maxWidth : constraint.maxHeight;
                     return Icon(
-                      FontAwesomeIcons.addressBook,
+                      FontAwesomeIcons.bookReader,
                       size: maxSize,
-                      color: Colors.black,
+                      color: Colors.deepOrange.withOpacity(0.5),
                     );
                   }
                 )
