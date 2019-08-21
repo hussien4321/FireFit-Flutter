@@ -433,8 +433,8 @@ class _ExploreScreenState extends State<ExploreScreen> with SingleTickerProvider
       elevation: hasData?1:0,
       shape: CircleBorder(
         side: BorderSide(
-          color: outlineColor,
-          width:  hasData ? 1 : 0
+          color: hasData ? outlineColor : Colors.transparent,
+          width:  1
         )
       ),
       onPressed: hasData ? onPressed : null,

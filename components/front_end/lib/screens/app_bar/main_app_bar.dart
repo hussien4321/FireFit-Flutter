@@ -360,7 +360,7 @@ class _MainAppBarState extends State<MainAppBar> {
 
   _updateMainScreenDimming(bool isOpen){
     setState(() {
-      _isSliderOpenController.add(isOpen);
+        _isSliderOpenController.add(isOpen);
     });
   }
 

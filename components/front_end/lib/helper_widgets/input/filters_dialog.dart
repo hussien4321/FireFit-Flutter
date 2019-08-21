@@ -202,10 +202,7 @@ class _FiltersDialogState extends State<FiltersDialog> {
                           hasSubscription: false,
                           initialPage: 4,
                           isFull: true,
-                          onUpdateSubscriptionStatus: (newStatus) {
-                            widget.onUpdateSubscriptionStatus(newStatus);
-                            setState(() => hasSubscription = newStatus);
-                          },
+                          onUpdateSubscriptionStatus: _onUpdateSubscriptionStatus,
                         )
                       ) :
                       Text(
@@ -240,6 +237,10 @@ class _FiltersDialogState extends State<FiltersDialog> {
         )
       ),
     );
+  }
+  _onUpdateSubscriptionStatus(bool newStatus) {
+    widget.onUpdateSubscriptionStatus(newStatus);
+    setState(() => hasSubscription = newStatus);
   }
 
   _updateDateRange(DateRanges newDateRange, BuildContext context) {
@@ -405,13 +406,14 @@ class _FiltersDialogState extends State<FiltersDialog> {
 
   Widget _featureLock() {
     return LimitedFeatureSticker(
-      title: "Fashion in Paris?",
+      title: "Fashion in france?",
       message: "Locked",
       hasSubscription: false,
       benefit: "filter outfits by country",
       initialPage: 3,
       isFull: true,
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      onUpdateSubscriptionStatus: _onUpdateSubscriptionStatus,
     );
   }
 }

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:country_code_picker/country_code_picker.dart';
-import 'package:country_code_picker/country_codes.dart';
+import 'package:helpers/helpers.dart';
 import 'package:country_code_picker/selection_dialog.dart';
 import 'package:meta/meta.dart';
 
@@ -38,12 +38,12 @@ class CountryPicker {
               flagUri: 'flags/${s['code'].toLowerCase()}.png',
             ))
         .toList();
-    List<String> targetCountryCodes = ["US", "CA", "GB",];
+    // List<String> targetCountryCodes = ["US", "CA", "GB",];
     return showDialog(
       context: context,
       builder: (_) => SelectionDialog(
         elements,
-        elements.where((country) => targetCountryCodes.contains(country.code)).toList(),
+        [],
         showCountryOnly: true,
         showFlag: true,
         searchStyle: TextStyle(
