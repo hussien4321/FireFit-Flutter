@@ -60,7 +60,7 @@ class _LookbookScreenState extends State<LookbookScreen> {
       _outfitBloc.loadLookbookOutfits.add(LoadOutfits(
         userId: userId,
         sortByTop: isSortingByTop,
-        lookbookId: lookbook.lookbookId,
+        lookbookId: lookbook?.lookbookId,
       ));
     }
   }
@@ -144,7 +144,7 @@ class _LookbookScreenState extends State<LookbookScreen> {
           stream: _outfitBloc.lookbooks,
           builder: (ctx, lookbooksSnap) {
             if(lookbooksSnap.hasData && lookbooksSnap.data != null){
-              lookbook = lookbooksSnap.data.firstWhere((lb) => lb.lookbookId==lookbook.lookbookId, orElse: null);
+              lookbook = lookbooksSnap.data.firstWhere((lb) => lb.lookbookId==lookbook?.lookbookId, orElse: () => null);
             }
             if(outfits.length>0){
               outfits = sortLookbookOutfits(outfits, isSortingByTop);
@@ -182,15 +182,15 @@ class _LookbookScreenState extends State<LookbookScreen> {
     return Padding(
       padding: const EdgeInsets.only(bottom: 4),
       child: Text(
-        lookbook.name,
+        lookbook?.name,
         style: Theme.of(context).textTheme.headline,
       ),
     );
   }
   Widget _outfitsDescription(){
-    bool hasDescription = lookbook.description!=null;
+    bool hasDescription = lookbook?.description!=null;
     return Text(
-      hasDescription ? lookbook.description : 'No description added',
+      hasDescription ? lookbook?.description : 'No description added',
       style: hasDescription ? Theme.of(context).textTheme.subhead.apply(color: Colors.grey[700]) : Theme.of(context).textTheme.caption,
     );
   }
@@ -268,7 +268,7 @@ class _LookbookScreenState extends State<LookbookScreen> {
     _outfitBloc.loadLookbookOutfits.add(LoadOutfits(
       userId: userId,
       sortByTop: isSortingByTop,
-      lookbookId: lookbook.lookbookId,
+      lookbookId: lookbook?.lookbookId,
     ));
   }
 
@@ -288,7 +288,7 @@ class _LookbookScreenState extends State<LookbookScreen> {
         _outfitBloc.loadMyOutfits.add(LoadOutfits(
           userId: userId,
           sortByTop: isSortingByTop,
-          lookbookId: lookbook.lookbookId,
+          lookbookId: lookbook?.lookbookId,
           forceLoad: true,
         ));
       },
@@ -296,8 +296,8 @@ class _LookbookScreenState extends State<LookbookScreen> {
         LoadOutfits(
           userId: userId,        
           sortByTop: isSortingByTop,
-          lookbookId: lookbook.lookbookId,
-          startAfterOutfit: outfits.last
+          lookbookId: lookbook?.lookbookId,
+          startAfterOutfit: outfits.length == 0 ? null : outfits.last
         )
       ),
     );

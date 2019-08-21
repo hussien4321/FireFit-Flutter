@@ -9,9 +9,9 @@ import 'package:front_end/helper_widgets.dart';
 import 'dart:math';
 class WardrobeScreen extends StatefulWidget {
 
-  final ValueChanged<bool> isScrollingDown;
+  final ValueChanged<ScrollController> onScrollChange;
 
-  WardrobeScreen({this.isScrollingDown});
+  WardrobeScreen({this.onScrollChange});
 
   @override
   _WardrobeScreenState createState() => _WardrobeScreenState();
@@ -154,7 +154,7 @@ class _WardrobeScreenState extends State<WardrobeScreen> {
                 outfits = sortOutfits(outfits, isSortingByTop);
               }
               return OutfitsGrid(
-                isScrollingDown: widget.isScrollingDown,
+                onScrollChange: widget.onScrollChange,
                 leading: Column(
                   children: <Widget>[
                     _wardrobeMotivation(),

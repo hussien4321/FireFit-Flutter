@@ -84,6 +84,7 @@ class _LogInScreenState extends State<LogInScreen> with LoadingAndErrorDialogs {
         _logInStatusListener(),
         _loadingListener(),
         _successListener(),
+        _errorListener(),
       ];
     }
   }
@@ -122,6 +123,21 @@ class _LogInScreenState extends State<LogInScreen> with LoadingAndErrorDialogs {
       loggedIn = isLoggedIn;
       stopLoading(context);
     }
+  }
+  
+
+  StreamSubscription _errorListener(){
+    return _userBloc.hasError.listen((message) {
+      _closeLoadingDialog();
+      _errorDialog(message);
+    });
+  }
+
+  _errorDialog(String message){
+    ErrorDialog.launch(
+      context,
+      message: message,
+    );
   }
 
 
@@ -189,7 +205,8 @@ class _LogInScreenState extends State<LogInScreen> with LoadingAndErrorDialogs {
         obscureText: true,
         focusNode: isConfirmation ? confirmationFocus : passwordFocus,
         controller: isConfirmation ? confirmationController : passwordController,
-        keyboardType: TextInputType.emailAddress,
+        keyboardType: TextInputType.visiblePassword,
+        textCapitalization: TextCapitalization.none,
         decoration: InputDecoration(
           border: InputBorder.none,
           labelText: "${isConfirmation ? 'Confirm ' :  '' }Password",

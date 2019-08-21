@@ -13,9 +13,9 @@ class LookbooksScreen extends StatefulWidget {
 
   final bool hasSubscription;
   final ValueChanged<bool> onUpdateSubscriptionStatus;
-  final ValueChanged<bool> isScrollingDown;
+  final ValueChanged<ScrollController> onScrollChange;
 
-  LookbooksScreen({this.hasSubscription, this.onUpdateSubscriptionStatus, this.isScrollingDown});
+  LookbooksScreen({this.hasSubscription, this.onUpdateSubscriptionStatus, this.onScrollChange});
 
   @override
   _LookbooksScreenState createState() => _LookbooksScreenState();
@@ -46,7 +46,7 @@ class _LookbooksScreenState extends State<LookbooksScreen> {
     _controller.addListener(_scrollListener);
   }
   _scrollListener() {
-    widget.isScrollingDown(_controller.position.userScrollDirection != ScrollDirection.forward);
+    widget.onScrollChange(_controller);
   }
 
   _loadPreferences() async {

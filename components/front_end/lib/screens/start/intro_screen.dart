@@ -45,18 +45,9 @@ class _IntroScreenState extends State<IntroScreen> {
       _userBloc = UserBlocProvider.of(context);
       _subscriptions = <StreamSubscription<dynamic>>[
         _userBloc.successMessage.listen((message) => toast(message)),
-        _userBloc.hasError.listen((message) => _errorDialog(message)),
       ];
     }
   }
-
-  _errorDialog(String message){
-    ErrorDialog.launch(
-      context,
-      message: message,
-    );
-  }
-
   _brightenStatusBar(){
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
       statusBarIconBrightness: Brightness.light,

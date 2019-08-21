@@ -11,9 +11,9 @@ import 'package:flutter/rendering.dart';
 
 class FeedScreen extends StatefulWidget {
 
-  final ValueChanged<bool> isScrollingDown;
+  final ValueChanged<ScrollController> onScrollChange;
 
-  FeedScreen({this.isScrollingDown});
+  FeedScreen({this.onScrollChange});
   
   @override
   _FeedScreenState createState() => _FeedScreenState();
@@ -53,7 +53,7 @@ class _FeedScreenState extends State<FeedScreen> {
         onReachEnd(outfits.last);
       }
     }
-    widget.isScrollingDown(_controller.position.userScrollDirection != ScrollDirection.forward);
+    widget.onScrollChange(_controller);
   }
 
   @override

@@ -405,7 +405,7 @@ class _FiltersDialogState extends State<FiltersDialog> {
 
   Widget _featureLock() {
     return LimitedFeatureSticker(
-      title: "Fashion in the UK?",
+      title: "Fashion in Paris?",
       message: "Locked",
       hasSubscription: false,
       benefit: "filter outfits by country",

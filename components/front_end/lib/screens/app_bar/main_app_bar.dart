@@ -16,6 +16,7 @@ import 'package:helpers/helpers.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_admob/firebase_admob.dart';
+import 'package:flutter/rendering.dart';
 
 class MainAppBar extends StatefulWidget {
 
@@ -168,15 +169,15 @@ class _MainAppBarState extends State<MainAppBar> {
                   onUpdateSubscriptionStatus: _onUpdateSubscriptionStatus,
                 ),
                 FeedScreen(
-                  isScrollingDown: isScrollingDown,
+                  onScrollChange: _onScrollChange,
                 ),
                 WardrobeScreen(
-                  isScrollingDown: isScrollingDown,
+                  onScrollChange: _onScrollChange,
                 ),
                 LookbooksScreen(
                   hasSubscription: hasSubscription,
                   onUpdateSubscriptionStatus: _onUpdateSubscriptionStatus,
-                  isScrollingDown: isScrollingDown,
+                  onScrollChange: _onScrollChange,
                 ),
               ],
             )
@@ -186,7 +187,14 @@ class _MainAppBarState extends State<MainAppBar> {
     );
   }
 
-  isScrollingDown(bool newIsScrollingDown){
+  _onScrollChange(ScrollController controller){
+    bool isAtStart = controller.offset == 0.0;
+    bool isScrollingDown = controller.position.userScrollDirection != ScrollDirection.forward;
+    
+    _isScrollingDown(isScrollingDown && !isAtStart);
+  }
+
+  _isScrollingDown(bool newIsScrollingDown){
     if(newIsScrollingDown != hideBars){
       setState(() {
        hideBars = newIsScrollingDown; 

@@ -28,7 +28,7 @@ class LocalDatabase {
 
   Future<Database> initDb() async {
     String path = join(await getDatabasesPath(), "mira_mira.db");
-    Database theDB = await openDatabase(path, version: 8, onCreate: _onCreate, onUpgrade: _onUpgrade, onDowngrade: _onDowngrade);
+    Database theDB = await openDatabase(path, version: 9, onCreate: _onCreate, onUpgrade: _onUpgrade, onDowngrade: _onDowngrade);
     return theDB;
   }
 
@@ -98,16 +98,17 @@ class LocalDatabase {
       try {
         await db.execute("ALTER TABLE user ADD COLUMN posts_on_day INTEGER DEFAULT 0");
         await db.execute("ALTER TABLE user ADD COLUMN last_upload_date DATETIME");
-      } on DatabaseException catch (_) {
-
-      }
+      } on DatabaseException catch (_) {}
     }
     if(version == 8) {
       try {
         await db.execute("ALTER TABLE user ADD COLUMN has_new_upload TINYINT DEFAULT 0");
-      } on DatabaseException catch (_) {
-
-      }
+      } on DatabaseException catch (_) {}
+    }
+    if(version == 9) {
+      try {
+        await db.execute("ALTER TABLE comment ADD COLUMN comment_outfit_id TINYINT DEFAULT 0");
+      } on DatabaseException catch (_) {}
     }
   }
   Future<void> _deleteAll(Database db) async {

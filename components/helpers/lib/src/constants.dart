@@ -11,7 +11,7 @@ class AppConfig {
   static final List<String> MAIN_PAGES = [
     "Inspiration",
     "Fashion Circle",
-    "Wardrobe",
+    "My Wardrobe",
     "Lookbooks",
   ];
   static final List<String> MAIN_PAGES_PATHS = [

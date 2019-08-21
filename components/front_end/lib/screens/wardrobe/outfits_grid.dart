@@ -18,9 +18,9 @@ class OutfitsGrid extends StatefulWidget {
   final OutfitOverlay customOverlay;
   final int pagesSinceOutfitScreen;
   final int pagesSinceProfileScreen;
-  final ValueChanged<bool> isScrollingDown;
+  final ValueChanged<ScrollController> onScrollChange;
 
-  OutfitsGrid({this.leading, this.outfits, this.isLoading, this.onReachEnd, this.onRefresh, this.emptyText, this.customOverlay, this.isScrollingDown,
+  OutfitsGrid({this.leading, this.outfits, this.isLoading, this.onReachEnd, this.onRefresh, this.emptyText, this.customOverlay,     this.onScrollChange,
     this.physics = const ClampingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
     this.hasFixedHeight = false,
     this.pagesSinceOutfitScreen = 0,
@@ -43,7 +43,7 @@ class _OutfitsGridState extends State<OutfitsGrid> {
     _controller.addListener(_scrollListener);
   }
   _scrollListener() {
-    widget.isScrollingDown(_controller.position.userScrollDirection != ScrollDirection.forward);
+    widget.onScrollChange(_controller);
     if (_controller.offset >= (_controller.position.maxScrollExtent-100) && !_controller.position.outOfRange) {
       if(widget.onReachEnd != null){
         widget.onReachEnd();

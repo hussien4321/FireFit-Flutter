@@ -108,6 +108,8 @@ class _CommentsScreenState extends State<CommentsScreen> {
                               comments = snap.data;
                             }
                           }
+                          //TODO: Implement a comment_ref_search to differentiate notification comments / outfit comments 
+                          comments = comments.where((comment) => comment.refOutfitId == widget.outfitId).toList();
                           if(snap.data.isEmpty){
                             comments = [];
                           }

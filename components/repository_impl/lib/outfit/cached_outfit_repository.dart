@@ -195,7 +195,7 @@ class CachedOutfitRepository {
   }
 
   Future<void> clearComments() async {
-    await streamDatabase.executeAndTrigger(['comment'], "DELETE FROM comment");
+    await streamDatabase.executeAndTrigger(['comment'], "DELETE FROM comment WHERE NOT EXISTS (SELECT * FROM notification WHERE comment_id=notification_ref_comment_id)");
     await userCache.clearUsers(SearchModes.TEMP);
   }
 
@@ -280,6 +280,7 @@ class CachedOutfitRepository {
   Future<int> addNewComment(AddComment addComment, int tempCommentId) async {
     Map<String, dynamic> newComment = {
       'comment_id' : tempCommentId, 
+      'comment_outfit_id': addComment.outfit.outfitId,
       'commenter_user_id': addComment.userId,
       'comment_body': addComment.commentText,
       'comment_likes_count': 0,

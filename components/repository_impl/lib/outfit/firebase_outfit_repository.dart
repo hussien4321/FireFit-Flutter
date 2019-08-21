@@ -327,7 +327,11 @@ List<Outfit> sortLookbookOutfits(List<Outfit> outfits, bool isSortingByTop){
   _saveCommentsList(dynamic response) async {
     List<Comment> comments = List<Comment>.from(response['res'].map((data){
       Map<String, dynamic> formattedDoc = Map<String, dynamic>.from(data);
-      return Comment.fromMap(formattedDoc);
+      Comment comment = Comment.fromMap(formattedDoc);
+      // formattedDoc.remove('profile_pic_url');
+      // print('got comment!');
+      // print(formattedDoc);
+      return comment;
     }).toList());
     for(int i = 0; i < comments.length; i++){
       await cache.addComment(comments[i]);

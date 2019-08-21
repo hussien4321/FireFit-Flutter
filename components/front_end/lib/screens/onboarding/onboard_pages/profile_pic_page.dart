@@ -120,7 +120,7 @@ class _ProfilePicPageState extends State<ProfilePicPage> {
           size: 48,
           color: Colors.white,
         ),
-        text: 'Take Pic',
+        text: 'Upload Pic',
       ) :
       _innerTagData(
         icon: Theme(
