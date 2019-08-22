@@ -243,7 +243,7 @@ class _VerificationDialogState extends State<VerificationDialog> {
         Padding(
           padding: EdgeInsets.only(top: 8.0),
           child: Text(
-            'Could take ~30 Seconds',
+            'Could take up to 30 seconds',
             style: Theme.of(context).textTheme.caption.copyWith(color: Colors.black38),
           ),
         ),

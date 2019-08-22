@@ -215,8 +215,8 @@ class _SubscriptionDetailsScreenState extends State<SubscriptionDetailsScreen> {
 
   Widget _paidBanner() {
     return Text(
-      'Active 🙌',
-      style: Theme.of(context).textTheme.headline.copyWith(
+      'Thanks for your support! ❤️',
+      style: Theme.of(context).textTheme.subhead.copyWith(
         fontWeight: FontWeight.normal
       ),
     );
@@ -275,7 +275,7 @@ class _SubscriptionDetailsScreenState extends State<SubscriptionDetailsScreen> {
           isLoading ? 'Connecting...' :
           !hasConnection ? 'No connection' :
           hasSubscription ? 
-          'We appreciate your support! ❤️' :
+          'Subscription active' :
           'Subscribe now!' ,
           style: Theme.of(context).textTheme.subhead.copyWith(
             color: Colors.white,
