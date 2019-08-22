@@ -74,10 +74,9 @@ class SelectImages {
   static Future<String> _saveImage(String dirPath, Asset result, List<Asset> selectedAssets) async {
     if(!selectedAssets.any((Asset image) => result.identifier==image.identifier)){
       selectedAssets.add(result);
-      Offset coords = _getNewCoords(result, 1208*2);
+      Offset coords = _getNewCoords(result, (1208*1.5).ceil());
       ByteData imageData = await result.requestThumbnail(coords.dx.toInt(),coords.dy.toInt());
-      // ByteData imageData = await result.requestOriginal();
-      print('size: ${imageData.lengthInBytes}');
+      // print('size: ${imageData.lengthInBytes}');
       if(imageData != null){
         String filename = '$dirPath/$timestamp.jpg';
         File filePath = File(filename);
@@ -93,10 +92,8 @@ class SelectImages {
     int width = result.originalWidth;
     int maxSide = max(height, width);
     if(maxSide > newSize){
-      print('originalHeight:${result.originalHeight}, originalWidth:${result.originalWidth}');
       double newHeight =newSize*(height/maxSide);
       double newWidth =newSize*(width/maxSide);
-      print('newHeight:$newHeight, newWidth:$newWidth');
       return Offset(newWidth, newHeight);
     }else{
       return Offset(width.toDouble(), height.toDouble());

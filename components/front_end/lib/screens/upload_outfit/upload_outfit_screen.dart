@@ -96,6 +96,10 @@ class _UploadOutfitScreenState extends State<UploadOutfitScreen> with LoadingAnd
     _initBlocs();
     return CustomScaffold(
       title: 'New Outfit',
+      leading: IconButton(
+        icon: Icon(Icons.arrow_back),
+        onPressed: _goBack,
+      ),
       actions: <Widget>[
         IconButton(
           icon: Icon(Icons.send),
@@ -114,6 +118,30 @@ class _UploadOutfitScreenState extends State<UploadOutfitScreen> with LoadingAnd
       ],
       body: _buildBody(),
     );
+  }
+
+  _goBack() {
+    if(uploadOutfit.imagesUploaded){
+      return showDialog(
+        context: context,
+        builder: (secondContext) {
+            return YesNoDialog(
+            title: 'Cancel Upload?',
+            description: 'Are you sure you want to go back?\n\nDoing so will lose the current data',
+            yesText: 'Yes',
+            noText: 'No',
+            onYes: () {
+              Navigator.pop(context);
+            },
+            onDone: () {
+              Navigator.pop(context);
+            },
+          );
+        }
+      ) ?? false;
+    }else{
+      Navigator.pop(context);
+    }
   }
 
   _initBlocs() async {
@@ -379,9 +407,11 @@ class _UploadOutfitScreenState extends State<UploadOutfitScreen> with LoadingAnd
             child: SizedBox.expand(
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(20.0),
-                child: Image.file(
-                  File(uploadOutfit.images[index]),
-                  fit: BoxFit.cover,
+                child: ImageGalleryPreview(
+                  title: 'Preview Fit',
+                  currentIndex: index,
+                  imageUrls: uploadOutfit.images,
+                  isLocal: true,
                 ),
               ),
             ),

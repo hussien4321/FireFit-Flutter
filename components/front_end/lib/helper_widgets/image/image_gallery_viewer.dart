@@ -7,15 +7,18 @@ class ImageGalleryPreview extends StatelessWidget {
   final List<String> imageUrls;
   final int currentIndex;
   final String title;
+  final bool isLocal;
 
-  ImageGalleryPreview({this.imageUrls, this.currentIndex, this.title});
-  
+  ImageGalleryPreview({this.imageUrls, this.currentIndex, this.title, this.isLocal = false,});
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () => _openImageViewer(context),
       child: Hero(
-        child: CachedNetworkImage(
+        child: isLocal ? Image.asset(
+          imageUrls[currentIndex],
+          fit: BoxFit.cover,
+        ) : CachedNetworkImage(
           imageUrl: imageUrls[currentIndex],
           fit: BoxFit.cover,
         ),
@@ -25,7 +28,7 @@ class ImageGalleryPreview extends StatelessWidget {
   }
 
   _openImageViewer(context){
-    Navigator.of(context).push(new MaterialPageRoute(builder: (BuildContext context) => _ImageGalleryViewer(imageUrls, currentIndex, title)));
+    Navigator.of(context).push(new MaterialPageRoute(builder: (BuildContext context) => _ImageGalleryViewer(imageUrls, currentIndex, title, isLocal)));
   }
 }
 
@@ -34,8 +37,9 @@ class _ImageGalleryViewer extends StatefulWidget {
   final List<String> imageUrls;
   final int currentIndex;
   final String title;
+  final bool isLocal;
 
-  _ImageGalleryViewer(this.imageUrls, this.currentIndex, this.title);
+  _ImageGalleryViewer(this.imageUrls, this.currentIndex, this.title, this.isLocal);
 
   @override
   __ImageGalleryViewerState createState() => __ImageGalleryViewerState();
@@ -100,40 +104,17 @@ class __ImageGalleryViewerState extends State<_ImageGalleryViewer> {
                 inPageView: false,
               ),
               fit: BoxFit.contain,
-              image: CachedNetworkImageProvider(
-                widget.imageUrls[i],
-              ),
+              image: widget.isLocal ? 
+                AssetImage(
+                  widget.imageUrls[i],
+                ) : 
+                CachedNetworkImageProvider(
+                  widget.imageUrls[i],
+                ),
             ),
           ),
         ),
       ),
-    );
-      // Container(
-        // child: PhotoViewGallery(
-        //   pageController: PageController(initialPage: widget.currentIndex),
-        //   onPageChanged: (newPage) {
-        //     setState(() {
-        //       currentPage = newPage + 1;
-        //     });
-        //   },
-        //   pageOptions: photoOptions,
-        // ),
-      // ),
-    
+    ); 
   }
-
-  // List<PhotoViewGalleryPageOptions> get photoOptions {
-  //   List<PhotoViewGalleryPageOptions> options = [];
-  //   for(int i = 0; i < widget.imageUrls.length; i++){    
-  //     options.add(
-  //       PhotoViewGalleryPageOptions(
-  //         imageProvider: CachedNetworkImageProvider(
-  //           widget.imageUrls[i],
-  //         ),
-  //         heroTag: widget.heroTags[i],
-  //       )
-  //     );
-  //   }
-  //   return options;
-  // }
 }

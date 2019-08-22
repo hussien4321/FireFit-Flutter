@@ -447,11 +447,9 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: <Widget>[
-          Text(
-            outfit.style,
-            style: Theme.of(context).textTheme.subtitle.copyWith(
-              color: Colors.black45
-            )
+          StyleSticker(
+            size: 12,
+            style: Style.fromStyleString(outfit.style),
           ),
           Text(
             DateFormatter.dateToSimpleFormat(outfit.createdAt),

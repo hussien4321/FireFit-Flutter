@@ -577,7 +577,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
             width: 0.5
           )
         ),
-        color: user.isFollowing ? Colors.purpleAccent : Colors.grey,
+        gradient: LinearGradient(
+          colors: user.isFollowing ? [
+            Colors.purpleAccent,
+            Colors.deepOrangeAccent,
+          ] : [
+            Colors.grey[600],
+            Colors.grey,
+          ],
+          begin: Alignment.bottomLeft,
+          end: Alignment.topRight,
+        ),
       ),
       width: double.infinity,
       child: FlatButton(

@@ -427,6 +427,15 @@ class _MainAppBarState extends State<MainAppBar> {
   bool hideBars = false;
   Widget _buildBottomNavBar(bool hasNewFeed, bool hasNewUpload) {
     return AnimatedContainer(
+      decoration: BoxDecoration(
+        boxShadow: [
+          BoxShadow(
+            blurRadius: 1,
+            color: Colors.black38,
+            offset: Offset(0, 0)
+          )
+        ]
+      ),
       duration: Duration(milliseconds: 100),
       height: hideBars ? 0 : 52,
       child: BottomNavigationBar(
@@ -441,7 +450,7 @@ class _MainAppBarState extends State<MainAppBar> {
         selectedLabelStyle: Theme.of(context).textTheme.caption.copyWith(color: Colors.blue),
         type: BottomNavigationBarType.fixed,
         onTap: _updatePageIndex,
-        backgroundColor: Colors.white,
+        backgroundColor: Colors.grey[200],
         elevation: 6,
         items: [
           _buildBottomNavBarItem(
