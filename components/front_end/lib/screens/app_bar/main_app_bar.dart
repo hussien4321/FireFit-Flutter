@@ -17,6 +17,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter/services.dart';
 import 'package:firebase_admob/firebase_admob.dart';
 import 'package:flutter/rendering.dart';
+import 'package:firebase_remote_config/firebase_remote_config.dart';
 
 class MainAppBar extends StatefulWidget {
 
@@ -58,6 +59,7 @@ class _MainAppBarState extends State<MainAppBar> {
   int numberOfPages = 4;
   
   List<String> pages = AppConfig.MAIN_PAGES;
+  bool useSecondaryAdmobId = RemoteConfigHelpers.defaults[RemoteConfigHelpers.USE_SECONDARY_ADMOB_ID_KEY];
 
   @override
   void initState() {
@@ -70,8 +72,19 @@ class _MainAppBarState extends State<MainAppBar> {
         return null;
       }
     });
-    RemoteConfigHelpers.fetchValues();
+    _loadRemoteConfig();
     _checkNotificationsPermission();
+  }
+
+  _loadRemoteConfig() async {
+    await RemoteConfigHelpers.fetchValues();
+    RemoteConfig.instance.then((remoteConfig) {      
+      bool newUseSecondaryAdmobId = remoteConfig.getBool(RemoteConfigHelpers.USE_SECONDARY_ADMOB_ID_KEY);
+      if(useSecondaryAdmobId != newUseSecondaryAdmobId){
+        _preferences.updatePreference(Preferences.USE_SECONDARY_ADMOB_ID, newUseSecondaryAdmobId);
+        useSecondaryAdmobId = newUseSecondaryAdmobId;
+      }
+    });
   }
 
   _loadDefaultPageIndex() async {
@@ -85,6 +98,7 @@ class _MainAppBarState extends State<MainAppBar> {
   }
 
   _loadSubscriptionStatus() async {
+    useSecondaryAdmobId = await _preferences.getPreference(Preferences.USE_SECONDARY_ADMOB_ID);
     bool newHasSubscription = await _preferences.getPreference(Preferences.HAS_SUBSCRIPTION_ACTIVE);
     setState(() {
       hasSubscription = newHasSubscription;
@@ -108,7 +122,7 @@ class _MainAppBarState extends State<MainAppBar> {
 
   InterstitialAd createInterstitialAd() {
     return InterstitialAd(
-      adUnitId: AdmobTools.exploreAdUnitId,
+      adUnitId: AdmobTools.adUnitId(useSecondaryAdmobId),
       targetingInfo: AdmobTools.targetingInfo,
       listener: (MobileAdEvent event) {
         if(event == MobileAdEvent.closed){

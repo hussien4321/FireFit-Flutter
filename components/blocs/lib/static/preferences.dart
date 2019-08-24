@@ -15,6 +15,7 @@ class Preferences {
   static final String LOOKBOOK_SORT_BY_TOP = 'LOOKBOOK_SORT_BY_TOP';
   static final String WARDROBE_SORT_BY_TOP = 'WARDROBE_SORT_BY_TOP';
   static final String SELECTED_USER_OUTFITS_SORT_BY_TOP = 'SELECTED_USER_OUTFITS_SORT_BY_TOP';
+  static final String USE_SECONDARY_ADMOB_ID = 'USE_SECONDARY_ADMOB_ID';
 
   //TODO: CLEAR THESE PREFERENCES EVERY TIME U LOG OUT (MAYBE DO SO FOR ALL?)
   static final String EXPLORE_PAGE_FILTERS = 'EXPLORE_PAGE_FILTERS';
@@ -22,7 +23,7 @@ class Preferences {
   
 
   final Map<String, dynamic> _initialPreferences = {
-    _VERSION: 6,
+    _VERSION: 7,
     HAS_SUBSCRIPTION_ACTIVE: false,
     CURRENT_CLOTHES_STYLE : 'casualwear',
     DEFAULT_START_PAGE: AppConfig.MAIN_PAGES.first,
@@ -32,6 +33,7 @@ class Preferences {
     LOOKBOOK_SORT_BY_TOP: false,
     WARDROBE_SORT_BY_TOP: false,
     SELECTED_USER_OUTFITS_SORT_BY_TOP: false,
+    USE_SECONDARY_ADMOB_ID: true,
   };
 
   Map<String, dynamic> _currentPreferences = {};

@@ -25,10 +25,13 @@ void main() async {
       crashlytics.recordFlutterError(details);
     }
   };
-  FirebaseAdMob.instance.initialize(appId: AdmobTools.appId);
-
   await RemoteConfigHelpers.loadDefaults();
   Preferences preferences = new Preferences();
+
+  preferences.getPreference(Preferences.USE_SECONDARY_ADMOB_ID).then((useSecondaryAdmobId){
+    FirebaseAdMob.instance.initialize(appId: AdmobTools.appId(useSecondaryAdmobId));
+  });
+
   CloudFunctions functions = CloudFunctions.instance;
   FirebaseStorage storage = FirebaseStorage.instance;
   FirebaseImageUploader imageUploader = FirebaseImageUploader(
