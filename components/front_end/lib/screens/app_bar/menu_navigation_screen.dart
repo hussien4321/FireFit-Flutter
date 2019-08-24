@@ -132,8 +132,8 @@ class _MenuNavigationScreenState extends State<MenuNavigationScreen> {
         color: widget.hasSubscription ? null : Colors.grey[300],
         gradient: !widget.hasSubscription ? null : LinearGradient(
           colors: [
+            Colors.yellow[800],
             Colors.yellow,
-            Colors.orange,
           ],
           begin: Alignment(-0.7, -1.0),
           end: Alignment(0.7, 1.0),

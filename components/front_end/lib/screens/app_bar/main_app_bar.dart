@@ -368,7 +368,7 @@ class _MainAppBarState extends State<MainAppBar> {
       position: InnerDrawerPosition.start,
       onTapClose: true,
       swipe: false,
-      offset: 0.7,
+      offset: 0.6,
       animationType: InnerDrawerAnimation.linear,
       child: MenuNavigationScreen(
         index: currentIndex,

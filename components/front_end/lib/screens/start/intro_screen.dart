@@ -58,11 +58,19 @@ class _IntroScreenState extends State<IntroScreen> {
   Widget _splashImage() {
     return SizedBox.expand(
       child: Container(
-        color:Colors.orange,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              Colors.orange,
+              Colors.redAccent
+            ],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter
+          )
+        ),
         foregroundDecoration: BoxDecoration(
           color: Colors.black38
-        ),
-        child: Image.asset(
+        ), child: Image.asset(
           'assets/splash/splash_screen.jpg',
           fit: BoxFit.cover,
         ),
