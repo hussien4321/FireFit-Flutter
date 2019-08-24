@@ -46,7 +46,7 @@ class FirebaseUserRepository implements UserRepository {
       }
     }
     if(!hasAuth){
-      await userCache.clearEverything();
+      logOut();
       return null;
     }
     return user.uid;

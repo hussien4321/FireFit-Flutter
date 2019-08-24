@@ -182,21 +182,18 @@ class _FeedScreenState extends State<FeedScreen> {
   Widget _buildOutfitCard(int index, Outfit outfit, BuildContext ctx, bool isFirst) {
     return Container(
       margin: EdgeInsets.only(top: isFirst ? 16 : 0 , bottom: 16.0, ),
-      child: GestureDetector(
-        onTap: () => _openDetailedOutfit(outfit, ctx),
-        child: Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-          ),
-          padding: EdgeInsets.all(8.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: <Widget>[
-              _postBasicData(index, outfit, ctx),
-              _outfitFullImageCard(outfit, ctx),
-              _outfitActions(outfit),
-            ],
-          ),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+        ),
+        padding: EdgeInsets.all(8.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: <Widget>[
+            _postBasicData(index, outfit, ctx),
+            _outfitFullImageCard(outfit, ctx),
+            _outfitActions(outfit),
+          ],
         ),
       ),
     );
@@ -247,7 +244,10 @@ class _FeedScreenState extends State<FeedScreen> {
         width: MediaQuery.of(context).size.width * 0.5,
         child: AspectRatio(
           aspectRatio: 2/3,
-          child: OutfitMainCard(outfit: outfit,)
+          child: GestureDetector(
+            onTap: () => _openDetailedOutfit(outfit, context),
+            child: OutfitMainCard(outfit: outfit,)
+          )
         ),
       );
   }
