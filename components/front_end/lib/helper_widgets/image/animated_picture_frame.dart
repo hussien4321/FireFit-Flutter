@@ -10,7 +10,7 @@ class AnimatedPictureFrame extends StatefulWidget {
     this.images,
     this.fit,
     this.transitionDuration = const Duration(seconds: 1),
-    this.displayDuration = const Duration(seconds: 3),
+    this.displayDuration = const Duration(seconds: 5),
   }) :assert(images != null && images.length >= 2, "Not enough images");
   
   @override

@@ -79,7 +79,11 @@ class _IntroScreenState extends State<IntroScreen> {
             'assets/splash/splash_screen4.jpg',            
             'assets/splash/splash_screen5.jpg',            
             'assets/splash/splash_screen6.jpg',            
-            'assets/splash/splash_screen7.jpg',             
+            'assets/splash/splash_screen7.jpg',            
+            'assets/splash/splash_screen8.jpg',            
+            'assets/splash/splash_screen9.jpg',            
+            'assets/splash/splash_screen10.jpg',            
+            'assets/splash/splash_screen11.jpg',             
           ],
           fit: BoxFit.cover,
         )
