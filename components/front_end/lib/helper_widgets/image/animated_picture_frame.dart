@@ -5,12 +5,10 @@ class AnimatedPictureFrame extends StatefulWidget {
   final BoxFit fit;
   final Duration transitionDuration;
   final Duration displayDuration;
-  final bool shuffleImages;
 
   AnimatedPictureFrame({
     this.images,
     this.fit,
-    this.shuffleImages = false,
     this.transitionDuration = const Duration(seconds: 1),
     this.displayDuration = const Duration(seconds: 3),
   }) :assert(images != null && images.length >= 2, "Not enough images");
@@ -33,10 +31,7 @@ class _AnimatedPictureFrameState extends State<AnimatedPictureFrame> with Single
     super.initState();
 
     _images= widget.images;
-
-    if(widget.shuffleImages){
-      _images.shuffle();
-    }
+    _images.shuffle();
 
     _currentImage = _images[0];
     _nextImage = _images[1];
