@@ -15,6 +15,7 @@ export 'helper_widgets/functions/permissions_checker.dart';
 export 'helper_widgets/functions/route_converters.dart';
 export 'helper_widgets/functions/sort_outfits.dart';
 
+export 'helper_widgets/image/animated_picture_frame.dart';
 export 'helper_widgets/image/image_gallery_viewer.dart';
 export 'helper_widgets/image/image_viewer.dart';
 

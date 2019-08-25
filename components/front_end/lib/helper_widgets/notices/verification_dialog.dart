@@ -271,7 +271,6 @@ class _VerificationDialogState extends State<VerificationDialog> {
       if(!mounted){
         return;
       }
-      print('refreshing');
       await Future.delayed(Duration(seconds: 3));
       _userBloc.refreshVerificationEmail.add(null);
       newIsVerified = await _userBloc.isEmailVerified.first;

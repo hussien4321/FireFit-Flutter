@@ -328,7 +328,6 @@ class OutfitBloc{
     try {
       success =  await repository.loadOutfit(loadOutfit);     
     } on NoItemFoundException catch (_) {
-      print('caught _noOutfitFoundController!');
       success = true;
       _noOutfitFoundController.add(true);
     }

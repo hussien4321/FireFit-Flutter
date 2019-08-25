@@ -11,7 +11,6 @@ class PermissionsChecker {
       List<PermissionName> permissionNames = [PermissionName.Camera, PermissionName.Storage];
       await Permission.requestPermissions(permissionNames);
       var permissions = await Permission.getPermissionsStatus(permissionNames);
-      permissions.forEach((permission) => print('Found permission ${permission.permissionName} with status ${permission.permissionStatus}'));
       isDenied = permissions.any((permission) => _isDenied(permission.permissionStatus));
     }else{
       await Permission.requestSinglePermission(PermissionName.Camera);
@@ -27,7 +26,6 @@ class PermissionsChecker {
 
   static checkNotificationsPermission() async {
     var permissionStatus = await notif.NotificationPermissions.getNotificationPermissionStatus();
-    print('permissionStatus:$permissionStatus');
     if(permissionStatus == notif.PermissionStatus.denied){
       throw PlatformException(code: 'Denied permission', message: 'Found a denied permission');
     }

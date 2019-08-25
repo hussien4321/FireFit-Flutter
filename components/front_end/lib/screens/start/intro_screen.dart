@@ -70,10 +70,19 @@ class _IntroScreenState extends State<IntroScreen> {
         ),
         foregroundDecoration: BoxDecoration(
           color: Colors.black38
-        ), child: Image.asset(
-          'assets/splash/splash_screen.jpg',
-          fit: BoxFit.cover,
         ),
+        child:AnimatedPictureFrame(
+          images: [
+            'assets/splash/splash_screen1.jpg',      
+            'assets/splash/splash_screen2.jpg',      
+            'assets/splash/splash_screen3.jpg',            
+            'assets/splash/splash_screen4.jpg',            
+            'assets/splash/splash_screen5.jpg',            
+            'assets/splash/splash_screen6.jpg',            
+            'assets/splash/splash_screen7.jpg',             
+          ],
+          fit: BoxFit.cover,
+        )
       ),
     );
   }

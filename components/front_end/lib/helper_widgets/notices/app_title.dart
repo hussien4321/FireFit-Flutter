@@ -32,8 +32,7 @@ class AppTitle extends StatelessWidget {
                   'FireFit',
                   style: Theme.of(context).textTheme.display1.copyWith(
                     color: Colors.black,
-                    letterSpacing: 1.2,
-                    fontWeight: FontWeight.w300,
+                    fontWeight: FontWeight.normal,
                   ),
                   textAlign: TextAlign.center,
                 ),

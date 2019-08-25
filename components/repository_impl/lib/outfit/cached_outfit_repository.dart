@@ -243,7 +243,6 @@ class CachedOutfitRepository {
     return streamDatabase.executeAndTrigger(['user'], "UPDATE user SET number_of_lookbooks=number_of_lookbooks+1 WHERE user_id=?", [lookbook.userId]);
   }
   Future<void> _decrementLookbookCount(Lookbook lookbook) async {
-    // print('userId:${lookbook.userId} numberOfOutfits:${lookbook.numberOfOutfits}');
     await streamDatabase.executeAndTrigger(['user'], "UPDATE user SET number_of_lookbooks=number_of_lookbooks-1 WHERE user_id=?", [lookbook.userId]);
     return streamDatabase.executeAndTrigger(['user'], "UPDATE user SET number_of_lookbook_outfits=number_of_lookbook_outfits-${lookbook.numberOfOutfits} WHERE user_id=?", [lookbook.userId]);
   }

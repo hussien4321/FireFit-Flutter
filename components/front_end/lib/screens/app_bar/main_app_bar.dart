@@ -252,7 +252,6 @@ class _MainAppBarState extends State<MainAppBar> {
 
   _registerNotificationToken() async { 
     String notificationToken = await widget.messaging.getToken();
-    print('notificationToken:$notificationToken');
     return _notificationBloc.updateNotificationToken.add(UpdateToken(
       userId: userId,
       token: notificationToken,
@@ -262,7 +261,6 @@ class _MainAppBarState extends State<MainAppBar> {
   _logCurrentScreen() => AnalyticsEvents(context).logCustomScreen('/${AppConfig.MAIN_PAGES_PATHS[currentIndex]}');
 
   dynamic _handleNotification(Map<String, dynamic> payload) {
-    print('_handleNotification payload:$payload');
     dynamic dataMessageType;
     if(Platform.isAndroid){
       dataMessageType = payload['data'];
@@ -272,9 +270,7 @@ class _MainAppBarState extends State<MainAppBar> {
     } else {
       dataMessageType = payload['type'];
     }
-    print('_handleNotification! $dataMessageType');
     bool isDataMessage = dataMessageType != null && !dataMessageType.isEmpty;
-    print('isDataMessage:$isDataMessage');
     if(isDataMessage){
       if(dataMessageType == "new-device"){
         _userBloc.logOut.add(null);
