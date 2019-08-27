@@ -159,6 +159,18 @@ class CustomNavigator {
       )
     ));
   }
+
+  static Future<T> goToBlockedUsersScreen<T extends Object>(BuildContext context, {
+    String selectedUserId,
+  }) {
+    return Navigator.push(context, PageRouteBuilder(
+      pageBuilder: (ctx, _, __) => BlockedUsersScreen(),
+      transitionsBuilder: _transitionsBuilder,
+      settings: RouteSettings(
+        name: '/blocked-users'
+      )
+    ));
+  }
   
   static Future<T> goToUploadOutfitScreen<T extends Object>(BuildContext context, {bool hasSubscription, ValueChanged<bool> onUpdateSubscriptionStatus, bool isOnWardrobePage}) {
     return Navigator.push(context, PageRouteBuilder(

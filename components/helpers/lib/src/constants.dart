@@ -2,6 +2,7 @@ class AppConfig {
   
   static final String TWITTER_URL = "https://twitter.com/firefit_app";
   static final String PRIVACY_POLICY_URL = "https://www.firefitapp.com/privacy-policy.html";
+  static final String EULA_URL = "https://www.firefitapp.com/eula.html";
   static final String TERMS_AND_CONDITIONS_URL = "https://www.firefitapp.com/terms-and-conditions.html";
   static final String COPYRIGHTS_URL = "https://www.firefitapp.com/copyrights.html";
 

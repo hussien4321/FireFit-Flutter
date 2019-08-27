@@ -112,10 +112,10 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     return showDialog(
       context: context,
       builder: (secondContext) {
-          MarkNotificationsSeen markSeen = MarkNotificationsSeen(
-            userId: userId,
-          );
-          return YesNoDialog(
+        MarkNotificationsSeen markSeen = MarkNotificationsSeen(
+          userId: userId,
+        );
+        return YesNoDialog(
           title: 'Mark as seen',
           description: 'Are you sure you want to mark all notifications as seen?',
           yesText: 'Yes',

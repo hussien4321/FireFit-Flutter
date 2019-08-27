@@ -38,14 +38,17 @@ export 'helper_widgets/lookbook/add_to_lookbook_dialog.dart';
 export 'helper_widgets/lookbook/new_lookbook_dialog.dart';
 export 'helper_widgets/lookbook/lookbook_card.dart';
 
+export 'helper_widgets/moderation/block_dialog.dart';
+export 'helper_widgets/moderation/report_dialog.dart';
+
+export 'helper_widgets/navigation/custom_navigator.dart';
+
 export 'helper_widgets/notices/app_title.dart';
 export 'helper_widgets/notices/custom_banner.dart';
 export 'helper_widgets/notices/custom_dialog.dart';
 export 'helper_widgets/notices/item_not_found.dart';
 export 'helper_widgets/notices/under_construction_notice.dart';
 export 'helper_widgets/notices/verification_dialog.dart';
-
-export 'helper_widgets/navigation/custom_navigator.dart';
 
 export 'helper_widgets/notifications/notification_tab.dart';
 
@@ -56,8 +59,6 @@ export 'helper_widgets/outfit/style_sticker.dart';
 
 export 'helper_widgets/overlays/custom_scaffold.dart';
 export 'helper_widgets/overlays/pull_to_refresh_overlay.dart';
-
-export 'helper_widgets/report/report_dialog.dart';
 
 export 'helper_widgets/settings/question_and_answer.dart';
 export 'helper_widgets/settings/settings_header.dart';

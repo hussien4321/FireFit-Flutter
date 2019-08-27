@@ -266,7 +266,7 @@ class OutfitBloc{
       String message = _generateRandomMessage(outfitRating);
       _successMessageController.add(message);
     }else{
-      _errorController.add("Failed to react to outfit");
+      _errorController.add("Failed to rate to outfit");
     }
   }
 

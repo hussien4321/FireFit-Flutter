@@ -208,16 +208,17 @@ class CachedOutfitRepository {
 
   Stream<List<Outfit>> getOutfits(SearchModes searchMode){
     QueryStream queryStream;
+    String blockQuery = "user_id NOT IN (SELECT blocked_user_id FROM block)";
     String searchModeString = searchModeToString(searchMode);
     switch (searchMode) {
       case SearchModes.EXPLORE:
       case SearchModes.MINE:
       case SearchModes.SELECTED:
       case SearchModes.FEED:
-        queryStream = streamDatabase.createRawQuery(['outfit'], 'SELECT * FROM outfit LEFT JOIN user ON user_id=poster_user_id LEFT JOIN outfit_search ON outfit_id=search_outfit_id WHERE search_outfit_mode=? ORDER BY outfit_created_at desc', [searchModeString]);
+        queryStream = streamDatabase.createRawQuery(['outfit', 'block'], 'SELECT * FROM outfit LEFT JOIN user ON user_id=poster_user_id LEFT JOIN outfit_search ON outfit_id=search_outfit_id WHERE search_outfit_mode=? AND $blockQuery ORDER BY outfit_created_at desc', [searchModeString]);
         break;
       case SearchModes.SAVED:
-        queryStream = streamDatabase.createRawQuery(['outfit', 'save'], 'SELECT * FROM outfit LEFT JOIN user ON poster_user_id=user_id LEFT JOIN outfit_search ON outfit_id=search_outfit_id LEFT JOIN save ON outfit_id=save_outfit_id WHERE search_outfit_mode=? ORDER BY save_created_at desc', [searchModeString]);
+        queryStream = streamDatabase.createRawQuery(['outfit', 'save', 'block'], 'SELECT * FROM outfit LEFT JOIN user ON poster_user_id=user_id LEFT JOIN outfit_search ON outfit_id=search_outfit_id AND $blockQuery LEFT JOIN save ON outfit_id=save_outfit_id WHERE search_outfit_mode=? ORDER BY save_created_at desc', [searchModeString]);
         break;
       default:
         break;

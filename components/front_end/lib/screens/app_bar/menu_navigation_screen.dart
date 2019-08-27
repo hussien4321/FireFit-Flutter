@@ -92,9 +92,9 @@ class _MenuNavigationScreenState extends State<MenuNavigationScreen> {
                         // ),
                         _menuOption(
                           title: 'FIREFIT+',
+                          backgroundColor: widget.hasSubscription ? Colors.white: Color.fromRGBO(225, 173, 0, 1.0),
                           customIcon: Image.asset('assets/flame_gold_plus_4.png'),
                           iconData: FontAwesomeIcons.fireAlt,
-                          color: Color.fromRGBO(225, 173, 0, 1.0),
                           onPressed: () => CustomNavigator.goToSubscriptionDetailsScreen(context,
                             hasSubscription: widget.hasSubscription,
                             onUpdateSubscriptionStatus: widget.onUpdateSubscriptionStatus,
@@ -217,6 +217,7 @@ class _MenuNavigationScreenState extends State<MenuNavigationScreen> {
     Color color,
     bool selected = false,
     VoidCallback onPressed,
+    Color backgroundColor = Colors.white,
     bool showNotificationBubble = false,
   }){
     Color selectedColor = Colors.blue;
@@ -232,7 +233,7 @@ class _MenuNavigationScreenState extends State<MenuNavigationScreen> {
       ) : customIcon,
     );
     return Material(
-      color: Colors.white,
+      color: backgroundColor,
       child: InkWell(
         onTap: (){
           Navigator.pop(context);

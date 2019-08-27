@@ -62,11 +62,16 @@ class _SettingsScreenState extends State<SettingsScreen> with LoadingAndErrorDia
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              SettingsHeader('Config'),
+              SettingsHeader('Account'),
               SettingsOption(
                 icon: FontAwesomeIcons.wrench,
                 name: 'Default start page',
                 action: _defaultStartPageDropdown(),
+              ),
+              SettingsOption(
+                icon: FontAwesomeIcons.userSlash,
+                name: 'Blocked users',
+                onTap: () => CustomNavigator.goToBlockedUsersScreen(context),
               ),
               SettingsHeader('Support'),
               SettingsOption(
@@ -108,6 +113,11 @@ class _SettingsScreenState extends State<SettingsScreen> with LoadingAndErrorDia
                 icon:  FontAwesomeIcons.envelopeOpenText,
                 name: 'Terms & Conditions',
                 onTap: () => UrlLauncher.openURL(AppConfig.TERMS_AND_CONDITIONS_URL),
+              ),
+              SettingsOption(
+                icon:  FontAwesomeIcons.fileContract,
+                name: 'End user license agreement',
+                onTap: () => UrlLauncher.openURL(AppConfig.EULA_URL),
               ),
               SettingsOption(
                 icon:  FontAwesomeIcons.copyright,

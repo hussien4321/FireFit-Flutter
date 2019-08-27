@@ -37,6 +37,11 @@ class UserBloc {
   final _loadFollowingController = PublishSubject<LoadUsers>();
   Sink<LoadUsers> get loadFollowing => _loadFollowingController; 
 
+  final _blockedUsersController = BehaviorSubject<List<User>>();
+  Stream<List<User>> get blockedUsers => _blockedUsersController; 
+  final _loadBlockedUsersController = PublishSubject<LoadUsers>();
+  Sink<LoadUsers> get loadBlockedUsers => _loadBlockedUsersController; 
+
   final _existingAuthController = BehaviorSubject<String>(seedValue: null);
   Stream<String> get existingAuthId => _existingAuthController.stream; 
 
@@ -59,6 +64,10 @@ class UserBloc {
 
   final _reportUserController = PublishSubject<ReportForm>();
   Sink<ReportForm> get reportUser => _reportUserController;
+  final _blockUserController = PublishSubject<UserBlock>();
+  Sink<UserBlock> get blockUser => _blockUserController;
+  final _unblockUserController = PublishSubject<UserBlock>();
+  Sink<UserBlock> get unblockUser => _unblockUserController;
   
   final _onboardController = PublishSubject<OnboardUser>();
   Sink<OnboardUser> get onboard => _onboardController;
@@ -125,14 +134,18 @@ class UserBloc {
       _clearNewFeedController.listen(_clearNewFeed),
       _loadFollowersController.listen(_loadFollowers),
       _loadFollowingController.listen(_loadFollowing),
+      _loadBlockedUsersController.listen(_loadBlockedUsers),
       _sendFeedbackController.listen(_sendFeedback),
       _reportUserController.listen(_reportUser),
+      _blockUserController.listen(_blockUser),
+      _unblockUserController.listen(_unblockUser),
     ];
     _selectedUserController.addStream(_repository.getUser(SearchModes.SELECTED));
     _searchedUserController.addStream(_repository.getUser(SearchModes.TEMP));
     _currentUserController.addStream(_repository.getUser(SearchModes.MINE));
     _followersController.addStream(_repository.getUsers(SearchModes.FOLLOWERS));
     _followingController.addStream(_repository.getUsers(SearchModes.FOLLOWING));
+    _blockedUsersController.addStream(_repository.getUsers(SearchModes.BLOCKED));
     _accountStatusController = Observable.combineLatest3<String, User, bool, UserAccountStatus>(existingAuthId, _currentUserController, _loadingController, _redirectPath).asBroadcastStream().debounce(Duration(milliseconds: 300));
     _resetCurrentUserStatus(isFirstTimeLoad: true);
   }
@@ -374,6 +387,12 @@ class UserBloc {
     loadUsers.startAfterUser == null ? await _repository.loadFollowing(loadUsers) : await _repository.loadMoreFollowing(loadUsers);
     _isLoadingFollowsController.add(false);
   }
+  _loadBlockedUsers(LoadUsers loadUsers) async {
+    loadUsers.searchMode = SearchModes.BLOCKED;
+    _isLoadingFollowsController.add(true);
+    loadUsers.startAfterUser == null ? await _repository.loadBlockedUsers(loadUsers) : await _repository.loadMoreBlockedUsers(loadUsers);
+    _isLoadingFollowsController.add(false);
+  }
 
   _sendFeedback(FeedbackRequest feedbackRequest) async {
     _loadingController.add(true);
@@ -391,6 +410,30 @@ class UserBloc {
       _successMessageController.add("Thanks for letting us know!");
     }else{
       _errorController.add("Failed to send feedback");
+    }
+  }
+
+  _blockUser(UserBlock userBlock) async {
+    final resId = await _repository.blockUser(userBlock);
+    final success = resId != -1;
+
+    if(success){
+      if(resId == 0){
+        _successMessageController.add("This user has already been blocked");
+      }else{
+        _successMessageController.add("We will no longer show you outfits from this user");
+      }
+    }else{
+      _errorController.add("Failed to block user");
+    }
+  }
+
+  _unblockUser(UserBlock userBlock) async {
+    bool success = await _repository.unblockUser(userBlock);
+    if(success){
+      _successMessageController.add("Unblocked!");
+    }else{
+      _errorController.add("Failed to unblock user");
     }
   }
 
@@ -412,6 +455,8 @@ class UserBloc {
     _noUserFoundController.close();
     _checkUsernameController.close();
     _refreshVerificationEmailController.close();
+    _blockedUsersController.close();
+    _loadBlockedUsersController.close();
     _resendEmailController.close();
     _markWardrobeSeenController.close();
     _loadingController.close();
@@ -422,6 +467,8 @@ class UserBloc {
     _deleteUserController.close();
     _registerController.close();
     _errorController.close();
+    _blockUserController.close();
+    _unblockUserController.close();
     _isBackgroundLoadingController.close();
     _isLoadingFollowsController.close();
     _successMessageController.close();

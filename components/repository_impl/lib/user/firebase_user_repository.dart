@@ -326,6 +326,34 @@ class FirebaseUserRepository implements UserRepository {
     .catchError((exception) => catchExceptionWithBool(exception, analytics));
   }
 
+  Future<int> blockUser(UserBlock userBlock) {
+    return cloudFunctions.getHttpsCallable(functionName: 'blockUser').call(userBlock.toJson())
+    .then((res) async {
+      int blockId = res.data['ref'];
+      bool isNewBlock = blockId > 0;
+      if(isNewBlock){
+        Block newBlock =Block(
+          blockId: blockId,
+          blockedUserId: userBlock.blockedUserId,
+          blockingUserId: userBlock.blockingUserId,
+          blockCreatedAt: new DateTime.now(),
+        );
+        await userCache.addBlock(newBlock);
+      }
+      return blockId;
+    })
+    .catchError((exception) => catchExceptionWithInt(exception, analytics));
+  }
+
+  Future<bool> unblockUser(UserBlock userBlock) async {
+    userCache.removeBlock(userBlock);
+    return cloudFunctions.getHttpsCallable(functionName: 'unblockUser').call(userBlock.toJson())
+    .then((res) {
+      return res.data['res'].toString() == 'true';
+    })
+    .catchError((exception) => catchExceptionWithBool(exception, analytics));
+  }
+
 
   Stream<User> getUser(SearchModes searchMode) => userCache.getUser(searchMode);
   
@@ -398,6 +426,22 @@ class FirebaseUserRepository implements UserRepository {
   
   Future<bool> _loadMoreFollowUsers(LoadUsers loadUsers, {String functionName}){  
     return cloudFunctions.getHttpsCallable(functionName: functionName).call(loadUsers.toJson())
+    .then((res) async {
+      List<User> users = _resToUserList(res);
+      for(int i = 0; i < users.length; i++){
+        await userCache.addUser(users[i], loadUsers.searchMode);
+      }
+      return true;
+    })
+    .catchError((exception) => catchExceptionWithBool(exception, analytics));
+  }
+  
+  Future<bool> loadBlockedUsers(LoadUsers loadUsers) async {
+    await userCache.clearUsers(loadUsers.searchMode);
+    return loadMoreBlockedUsers(loadUsers);
+  }
+  Future<bool> loadMoreBlockedUsers(LoadUsers loadUsers) {
+    return cloudFunctions.getHttpsCallable(functionName: 'getBlockedUsers').call(loadUsers.toJson())
     .then((res) async {
       List<User> users = _resToUserList(res);
       for(int i = 0; i < users.length; i++){

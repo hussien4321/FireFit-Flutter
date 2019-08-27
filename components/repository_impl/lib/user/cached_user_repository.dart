@@ -137,6 +137,22 @@ class CachedUserRepository {
     return streamDatabase.executeAndTrigger(['user'], "UPDATE user SET number_of_following=number_of_following+? WHERE user_id=?", [numberOfFollowsChange, followUser.followerUserId]);
   }
 
+  Future<void> addBlock(Block block) async {
+    return streamDatabase.insert(
+      'block',
+      block.toJson(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<void> removeBlock(UserBlock userBlock) async {
+    return streamDatabase.delete(
+      'block',
+      where: 'blocking_user_id=? AND blocked_user_id=?',
+      whereArgs: [userBlock.blockingUserId, userBlock.blockedUserId],
+    );
+  }
+
   Future<void> clearNewFeed() async {
     String searchModeString =searchModeToString(SearchModes.MINE);
     String notificationType= OutfitNotification.fromNotificationType(NotificationType.NEW_OUTFIT);

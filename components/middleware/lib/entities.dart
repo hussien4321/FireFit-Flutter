@@ -1,3 +1,4 @@
+export 'entities/block.dart';
 export 'entities/comment.dart';
 export 'entities/notification.dart';
 export 'entities/lookbook.dart';

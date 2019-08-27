@@ -8,6 +8,7 @@ class OnboardUser {
   String countryCode;
   DateTime dateOfBirth;
   bool hasConfirmedAge, hasReadDocuments;
+  bool hasAcceptedEULA;
   bool genderIsMale;
 
   OnboardUser({
@@ -21,12 +22,13 @@ class OnboardUser {
     this.genderIsMale = false,
     this.hasConfirmedAge = false,
     this.hasReadDocuments = false,
+    this.hasAcceptedEULA = false,
     this.countryCode = 'US',
   });
 
   bool isComplete() {
     return name != null && username != null && profilePicUrl != null && genderIsMale != null && dateOfBirth != null && email != null && countryCode != null
-    && countryCode.length > 0 && username.length > 0 && name.length > 0 && profilePicUrl.length > 0  && email.length > 0  && isUsernameTaken == false && isUsernameLongEnough && hasConfirmedAge && hasReadDocuments;
+    && countryCode.length > 0 && username.length > 0 && name.length > 0 && profilePicUrl.length > 0  && email.length > 0  && isUsernameTaken == false && isUsernameLongEnough && hasConfirmedAge && hasReadDocuments && hasAcceptedEULA;
   }
 
   Map<String, dynamic> toJson() => {

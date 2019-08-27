@@ -1,7 +1,7 @@
 import 'package:middleware/middleware.dart';
 
 enum SearchModes {
-  EXPLORE, MINE, SAVED, SELECTED, SELECTED_SINGLE, FEED, NOTIFICATIONS, FOLLOWERS, FOLLOWING, TEMP
+  EXPLORE, MINE, SAVED, SELECTED, SELECTED_SINGLE, FEED, NOTIFICATIONS, FOLLOWERS, FOLLOWING, TEMP, BLOCKED
 }
 
 List<SearchModes> searchModesToNOTClearEachTime = [
@@ -33,6 +33,8 @@ String searchModeToString(SearchModes searchMode){
       return 'followers';
     case SearchModes.FOLLOWING:
       return 'following';
+    case SearchModes.BLOCKED:
+      return 'blocked';
     case SearchModes.TEMP:
       return 'temp';
     default:

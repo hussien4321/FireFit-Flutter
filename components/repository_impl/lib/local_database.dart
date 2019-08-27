@@ -28,7 +28,7 @@ class LocalDatabase {
 
   Future<Database> initDb() async {
     String path = join(await getDatabasesPath(), "mira_mira.db");
-    Database theDB = await openDatabase(path, version: 9, onCreate: _onCreate, onUpgrade: _onUpgrade, onDowngrade: _onDowngrade);
+    Database theDB = await openDatabase(path, version: 12, onCreate: _onCreate, onUpgrade: _onUpgrade, onDowngrade: _onDowngrade);
     return theDB;
   }
 
@@ -41,7 +41,7 @@ class LocalDatabase {
   Future<void> _onUpgrade(Database db, int versionFrom, int versionTo) async {
     int startVersion = versionFrom + 1;
     startVersion = skipUnnecessaryVersions(startVersion) - 1;
-    for(int i = startVersion; i <= versionTo; i++){
+    for(int i = startVersion; i < versionTo; i++){
       int nextVersion = i + 1;
       await _applyMigration(db, nextVersion);
     }
@@ -110,6 +110,18 @@ class LocalDatabase {
         await db.execute("ALTER TABLE comment ADD COLUMN comment_outfit_id TINYINT DEFAULT 0");
       } on DatabaseException catch (_) {}
     }
+    if(version == 10){
+      await db.execute("CREATE TABLE block (block_id INTEGER PRIMARY KEY, blocking_user_id INTEGER, blocked_user_id INTEGER, block_created_at DATETIME)");
+    }
+    if(version == 11){
+      try {
+        await db.execute("ALTER TABLE user ADD COLUMN block_created_at DATETIME");
+      } on DatabaseException catch (_) {}
+    }
+    if(version == 12){
+      await db.execute("DROP TABLE IF EXISTS block");
+      await db.execute("CREATE TABLE block (block_id INTEGER PRIMARY KEY, blocking_user_id STRING, blocked_user_id STRING, block_created_at DATETIME)");
+    }
   }
   Future<void> _deleteAll(Database db) async {
     await db.execute("DROP TABLE IF EXISTS outfit");
@@ -120,6 +132,7 @@ class LocalDatabase {
     await db.execute("DROP TABLE IF EXISTS notification");
     await db.execute("DROP TABLE IF EXISTS lookbook");
     await db.execute("DROP TABLE IF EXISTS save");
+    await db.execute("DROP TABLE IF EXISTS block");
   }
   void _onDowngrade(Database db, int versionFrom, int versionTo) async {
     if(versionTo == 1){

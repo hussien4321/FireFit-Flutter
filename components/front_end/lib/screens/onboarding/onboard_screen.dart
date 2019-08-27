@@ -342,55 +342,9 @@ class _OnboardScreenState extends State<OnboardScreen> with SnackbarMessages, Lo
           padding: EdgeInsets.all(10.0),
           child: Column(
             children: <Widget>[
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: <Widget>[
-                  Flexible(
-                    child: RichText(
-                      text: TextSpan(
-                        style: Theme.of(context).textTheme.subhead,
-                        children: [
-                          TextSpan(
-                            text: 'I hereby confirm that I have read and understood the '
-                          ),
-                          TextSpan(
-                            text: 'Privacy Policy',
-                            style: TextStyle(
-                              inherit: true,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.blue,
-                              decoration: TextDecoration.underline,
-                            ),
-                            recognizer: TapGestureRecognizer()..onTap = () => _openURL(AppConfig.PRIVACY_POLICY_URL),
-                          ),
-                          TextSpan(
-                            text: ' & '
-                          ),
-                          TextSpan(
-                            text: 'Terms & Conditions',
-                            style: TextStyle(
-                              inherit: true,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.blue,
-                              decoration: TextDecoration.underline,
-                            ),
-                            recognizer: TapGestureRecognizer()..onTap = () => _openURL(AppConfig.TERMS_AND_CONDITIONS_URL),
-                          ),
-                        ]
-                      ),
-                    )
-                  ),
-                  Checkbox(
-                    value: onboardUser.hasReadDocuments,
-                    onChanged: (newVal) {
-                      onboardUser.hasReadDocuments = newVal;
-                      _onSave(onboardUser);
-                    },
-                    activeColor: Colors.blue,
-                  )
-                ]
-              ),
+              _legalCheckbox(),
+              Padding(padding: EdgeInsets.only(bottom: 16),),
+              _eulaCheckbox(),
             ],
           ),
         ),
@@ -404,6 +358,103 @@ class _OnboardScreenState extends State<OnboardScreen> with SnackbarMessages, Lo
     } else {
       toast("Failed to open! - please visit FireFit.com to view documents");
     }
+  }
+
+  Widget _legalCheckbox() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: <Widget>[
+        Flexible(
+          child: RichText(
+            text: TextSpan(
+              style: Theme.of(context).textTheme.subhead,
+              children: [
+                TextSpan(
+                  text: 'I hereby confirm that I have read and understood the '
+                ),
+                TextSpan(
+                  text: 'Privacy Policy',
+                  style: TextStyle(
+                    inherit: true,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.blue,
+                    decoration: TextDecoration.underline,
+                  ),
+                  recognizer: TapGestureRecognizer()..onTap = () => _openURL(AppConfig.PRIVACY_POLICY_URL),
+                ),
+                TextSpan(
+                  text: ' & '
+                ),
+                TextSpan(
+                  text: 'Terms & Conditions',
+                  style: TextStyle(
+                    inherit: true,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.blue,
+                    decoration: TextDecoration.underline,
+                  ),
+                  recognizer: TapGestureRecognizer()..onTap = () => _openURL(AppConfig.TERMS_AND_CONDITIONS_URL),
+                ),
+              ]
+            ),
+          )
+        ),
+        Checkbox(
+          value: onboardUser.hasReadDocuments,
+          onChanged: (newVal) {
+            onboardUser.hasReadDocuments = newVal;
+            _onSave(onboardUser);
+          },
+          activeColor: Colors.blue,
+        )
+      ]
+    );
+  }
+
+  Widget _eulaCheckbox() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: <Widget>[
+        Flexible(
+          child: RichText(
+            text: TextSpan(
+              style: Theme.of(context).textTheme.subhead,
+              children: [
+                TextSpan(
+                  text: 'I also confirm that I have read and understood the '
+                ),
+                TextSpan(
+                  text: 'End user license agreement (EULA)',
+                  style: TextStyle(
+                    inherit: true,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.blue,
+                    decoration: TextDecoration.underline,
+                  ),
+                  recognizer: TapGestureRecognizer()..onTap = () => _openURL(AppConfig.EULA_URL),
+                ),
+                TextSpan(
+                  text: "\nThis means I will not post any objectionable content or engage abusive behavior",
+                  style: Theme.of(context).textTheme.subtitle.copyWith(
+                    color: Colors.grey
+                  )
+                ),
+              ]
+            ),
+          )
+        ),
+        Checkbox(
+          value: onboardUser.hasAcceptedEULA,
+          onChanged: (newVal) {
+            onboardUser.hasAcceptedEULA = newVal;
+            _onSave(onboardUser);
+          },
+          activeColor: Colors.blue,
+        )
+      ]
+    );
   }
 
 
@@ -426,7 +477,7 @@ class _OnboardScreenState extends State<OnboardScreen> with SnackbarMessages, Lo
       canGoToNextPage = onboardUser.profilePicUrl != null && onboardUser.profilePicUrl.isNotEmpty;
     }
     else if(index == 4){
-      canGoToNextPage = onboardUser.hasReadDocuments;
+      canGoToNextPage = onboardUser.hasReadDocuments && onboardUser.hasAcceptedEULA;
     }
 
     Future.delayed(Duration.zero, () => setState(() { canGoToNextPage = canGoToNextPage; }));

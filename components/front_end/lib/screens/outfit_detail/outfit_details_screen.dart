@@ -12,7 +12,7 @@ import 'package:overlay_support/overlay_support.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
-enum OutfitOption { EDIT, REPORT, DELETE }
+enum OutfitOption { EDIT, REPORT, BLOCK, DELETE }
 
 class OutfitDetailsScreen extends StatefulWidget {
 
@@ -151,6 +151,8 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
         return 'Edit';
       case OutfitOption.REPORT:
         return 'Report';
+      case OutfitOption.BLOCK:
+        return 'Block';
       case OutfitOption.DELETE:
         return 'Delete';
       default:
@@ -163,6 +165,8 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
       case OutfitOption.EDIT:
         return isCurrentUser;
       case OutfitOption.REPORT:
+        return !isCurrentUser;
+      case OutfitOption.BLOCK:
         return !isCurrentUser;
       case OutfitOption.DELETE:
         return isCurrentUser;
@@ -181,6 +185,9 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
       case OutfitOption.REPORT:
         _reportUser();
         break;
+      case OutfitOption.BLOCK:
+        _blockUser();
+        break;
       case OutfitOption.DELETE:
         _confirmDelete();
         break;
@@ -195,6 +202,14 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
     ReportDialog.launch(context,
       reportedUserId: outfit.poster.userId,
       reportedOutfitId: outfit.outfitId,
+    );
+  }
+
+  _blockUser() {
+    BlockDialog.launch(context,
+      blockingUserId: userId,
+      blockedUserId: outfit.poster.userId,
+      name: outfit.poster.name,
     );
   }
 

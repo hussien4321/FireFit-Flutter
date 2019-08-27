@@ -86,7 +86,7 @@ class _ReportDialogState extends State<ReportDialog> {
               fontWeight: FontWeight.bold,
             ),
           ),
-          onPressed: _reportForm.canBeSent ? _createLookbook : null,
+          onPressed: _reportForm.canBeSent ? _reportUser : null,
         ),
       ],
     );
@@ -100,7 +100,7 @@ class _ReportDialogState extends State<ReportDialog> {
     }
   }
 
-  _createLookbook() {
+  _reportUser() {
     _userBloc.reportUser.add(_reportForm);
     Navigator.pop(context);
   }
@@ -113,6 +113,8 @@ class _ReportDialogState extends State<ReportDialog> {
           _typeSelection(),
           Padding(padding: EdgeInsets.only(bottom: 8),),
           _descriptionField(),
+          Padding(padding: EdgeInsets.only(bottom: 4),),
+          _disclaimer(),
         ],
       ),
     );
@@ -151,7 +153,8 @@ class _ReportDialogState extends State<ReportDialog> {
           },
         ),
       ],
-    );  }
+    );
+  }
 
   Widget _descriptionField() {
     return Column(
@@ -180,6 +183,14 @@ class _ReportDialogState extends State<ReportDialog> {
           color: Colors.black54,
         )
       ],
+    );
+  }
+  Widget _disclaimer(){
+    return Text(
+      'Our team will investigate all reports within 24 hours',
+      style: Theme.of(context).textTheme.caption.apply(
+        color: Colors.red,
+      ),
     );
   }
 }

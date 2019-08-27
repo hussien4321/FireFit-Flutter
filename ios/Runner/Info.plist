@@ -37,9 +37,9 @@
 	<string>Requesting access</string>
 
 	<key>NSCameraUsageDescription</key>
-	<string>Access device photos</string>
+	<string>Allow FireFit to access your photos so you can choose which pictures to add to your outfit</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Access device photos</string>
+	<string>Allow FireFit to access your photos so you can choose which pictures to add to your outfit</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>fetch</string>

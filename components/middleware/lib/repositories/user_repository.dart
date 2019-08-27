@@ -25,10 +25,14 @@ abstract class UserRepository {
   Future<bool> loadFollowing(LoadUsers loadUsers);
   Future<bool> loadMoreFollowing(LoadUsers loadUsers);
   Future<bool> loadMoreFollowers(LoadUsers loadUsers);
+  Future<bool> loadBlockedUsers(LoadUsers loadUsers);
+  Future<bool> loadMoreBlockedUsers(LoadUsers loadUsers);
   
   Future<bool> sendFeedback(FeedbackRequest feedbackRequest);
   Future<bool> reportUser(ReportForm reportForm);
-  
+  Future<int> blockUser(UserBlock userBlock);
+  Future<bool> unblockUser(UserBlock userBlock);
+
   Future<bool> hasEmailVerified();
   Future<void> resendVerificationEmail([_]);
   Future<String> getVerificationEmail();

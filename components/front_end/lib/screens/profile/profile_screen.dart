@@ -8,7 +8,7 @@ import 'package:front_end/screens.dart';
 import 'package:helpers/helpers.dart';
 
 
-enum UserOption { EDIT, REPORT }
+enum UserOption { EDIT, REPORT, BLOCK }
 
 class ProfileScreen extends StatefulWidget {
   final String userId;
@@ -227,6 +227,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
         return 'Edit';
       case UserOption.REPORT:
         return 'Report';
+      case UserOption.BLOCK:
+        return 'Block';
       default:
         return null;
     }
@@ -237,6 +239,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
       case UserOption.EDIT:
         return isCurrentUser;
       case UserOption.REPORT:
+        return !isCurrentUser;
+      case UserOption.BLOCK:
         return !isCurrentUser;
       default:
         return null;
@@ -251,6 +255,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
       case UserOption.REPORT:
         _reportUser(user);
         break;
+      case UserOption.BLOCK:
+        _blockUser(user);
+        break;
       default:
         return null;
     }
@@ -264,6 +271,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
   _reportUser(User user) {
     ReportDialog.launch(context,
       reportedUserId: user.userId,
+    );
+  }
+
+  _blockUser(User user) {
+    BlockDialog.launch(context,
+      blockingUserId: currentUserId,
+      blockedUserId: user.userId,
+      name: user.name,
     );
   }
 
