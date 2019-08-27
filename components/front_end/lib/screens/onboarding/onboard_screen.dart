@@ -436,7 +436,7 @@ class _OnboardScreenState extends State<OnboardScreen> with SnackbarMessages, Lo
                   recognizer: TapGestureRecognizer()..onTap = () => _openURL(AppConfig.EULA_URL),
                 ),
                 TextSpan(
-                  text: "\nThis means I will not post any objectionable content or engage abusive behavior",
+                  text: "\nThis means I will not post any objectionable content or engage in any abusive behavior",
                   style: Theme.of(context).textTheme.subtitle.copyWith(
                     color: Colors.grey
                   )
