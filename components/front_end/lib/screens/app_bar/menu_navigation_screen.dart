@@ -103,7 +103,9 @@ class _MenuNavigationScreenState extends State<MenuNavigationScreen> {
                         _menuOption(
                           title: 'SETTINGS',
                           iconData: Icons.settings,
-                          onPressed: () => CustomNavigator.goToSettingsScreen(context)
+                          onPressed: () => CustomNavigator.goToSettingsScreen(context,
+                            hasSubscription: widget.hasSubscription,
+                            onUpdateSubscriptionStatus: widget.onUpdateSubscriptionStatus,)
                         ),
                       ],
                     ),
