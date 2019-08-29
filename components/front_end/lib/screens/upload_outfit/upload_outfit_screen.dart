@@ -69,7 +69,7 @@ class _UploadOutfitScreenState extends State<UploadOutfitScreen> with LoadingAnd
   }
 
   _initTempGallery() async{ 
-    Directory extDir = await getApplicationDocumentsDirectory();
+    Directory extDir = Platform.isIOS ? await getApplicationSupportDirectory()  : await getExternalStorageDirectory();
     dirPath = '${extDir.path}/Pictures/temp';
     final dir = Directory(dirPath);
     if(dir.existsSync()){
@@ -489,6 +489,7 @@ class _UploadOutfitScreenState extends State<UploadOutfitScreen> with LoadingAnd
       selectedAssets: images,
       currentImages: uploadOutfit.images,
     );
+    print('mounted:$mounted');
     if(mounted){
       setState(() {
         uploadOutfit.images = takenImages;

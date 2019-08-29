@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:extended_image/extended_image.dart';
+import 'dart:io';
 
 class ImageGalleryPreview extends StatelessWidget {
   
@@ -15,8 +16,8 @@ class ImageGalleryPreview extends StatelessWidget {
     return GestureDetector(
       onTap: () => _openImageViewer(context),
       child: Hero(
-        child: isLocal ? Image.asset(
-          imageUrls[currentIndex],
+        child: isLocal ? Image.file(
+          File(imageUrls[currentIndex]),
           fit: BoxFit.cover,
         ) : CachedNetworkImage(
           imageUrl: imageUrls[currentIndex],
@@ -105,8 +106,8 @@ class __ImageGalleryViewerState extends State<_ImageGalleryViewer> {
               ),
               fit: BoxFit.contain,
               image: widget.isLocal ? 
-                AssetImage(
-                  widget.imageUrls[i],
+                FileImage(
+                  File(widget.imageUrls[i]),
                 ) : 
                 CachedNetworkImageProvider(
                   widget.imageUrls[i],

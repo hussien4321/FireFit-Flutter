@@ -60,7 +60,7 @@ class Preferences {
   }
 
   reInitiliaze() async {
-    Directory directory = await getApplicationDocumentsDirectory();
+    Directory directory = Platform.isIOS ? await getApplicationSupportDirectory()  : await getExternalStorageDirectory();
     Directory dir = directory;
     _jsonFile = new File(dir.path +  "/" + _fileName);
     bool fileExists = _jsonFile.existsSync();

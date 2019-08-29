@@ -50,7 +50,7 @@ class _OnboardScreenState extends State<OnboardScreen> with SnackbarMessages, Lo
   }
 
   _initTempGallery() async{ 
-    Directory extDir = await getApplicationDocumentsDirectory();
+    Directory extDir = Platform.isIOS ? await getApplicationSupportDirectory()  : await getExternalStorageDirectory();
     dirPath = '${extDir.path}/Pictures/temp';
     await Directory(dirPath).create(recursive: true);
   }
@@ -331,26 +331,6 @@ class _OnboardScreenState extends State<OnboardScreen> with SnackbarMessages, Lo
       _finalConfirmationPage(),
   ]);
 
-  Widget _finalConfirmationPage() {
-    return 
-    OnboardDetails(
-      icon: FontAwesomeIcons.check,
-      title: "Start ur fashion journey💃",
-      children: <Widget>[
-        Container(
-          width: double.infinity,
-          padding: EdgeInsets.all(10.0),
-          child: Column(
-            children: <Widget>[
-              _legalCheckbox(),
-              Padding(padding: EdgeInsets.only(bottom: 16),),
-              _eulaCheckbox(),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
 
   _openURL(String url) async {
     if (await canLaunch(url)) {
@@ -360,100 +340,22 @@ class _OnboardScreenState extends State<OnboardScreen> with SnackbarMessages, Lo
     }
   }
 
-  Widget _legalCheckbox() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      crossAxisAlignment: CrossAxisAlignment.center,
+  Widget _finalConfirmationPage() {
+    return 
+    OnboardDetails(
+      icon: FontAwesomeIcons.check,
+      title: "Start ur fashion journey💃",
       children: <Widget>[
-        Flexible(
-          child: RichText(
-            text: TextSpan(
-              style: Theme.of(context).textTheme.subhead,
-              children: [
-                TextSpan(
-                  text: 'I hereby confirm that I have read and understood the '
-                ),
-                TextSpan(
-                  text: 'Privacy Policy',
-                  style: TextStyle(
-                    inherit: true,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.blue,
-                    decoration: TextDecoration.underline,
-                  ),
-                  recognizer: TapGestureRecognizer()..onTap = () => _openURL(AppConfig.PRIVACY_POLICY_URL),
-                ),
-                TextSpan(
-                  text: ' & '
-                ),
-                TextSpan(
-                  text: 'Terms & Conditions',
-                  style: TextStyle(
-                    inherit: true,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.blue,
-                    decoration: TextDecoration.underline,
-                  ),
-                  recognizer: TapGestureRecognizer()..onTap = () => _openURL(AppConfig.TERMS_AND_CONDITIONS_URL),
-                ),
-              ]
-            ),
+        Container(
+          width: double.infinity,
+          padding: EdgeInsets.all(10.0),
+          child: Text(
+            'Press submit to finish creating your account!',
+            style: Theme.of(context).textTheme.subhead,
+            textAlign: TextAlign.center,
           )
         ),
-        Checkbox(
-          value: onboardUser.hasReadDocuments,
-          onChanged: (newVal) {
-            onboardUser.hasReadDocuments = newVal;
-            _onSave(onboardUser);
-          },
-          activeColor: Colors.blue,
-        )
-      ]
-    );
-  }
-
-  Widget _eulaCheckbox() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: <Widget>[
-        Flexible(
-          child: RichText(
-            text: TextSpan(
-              style: Theme.of(context).textTheme.subhead,
-              children: [
-                TextSpan(
-                  text: 'I also confirm that I have read and understood the '
-                ),
-                TextSpan(
-                  text: 'End user license agreement (EULA)',
-                  style: TextStyle(
-                    inherit: true,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.blue,
-                    decoration: TextDecoration.underline,
-                  ),
-                  recognizer: TapGestureRecognizer()..onTap = () => _openURL(AppConfig.EULA_URL),
-                ),
-                TextSpan(
-                  text: "\nThis means I will not post any objectionable content or engage in any abusive behavior",
-                  style: Theme.of(context).textTheme.subtitle.copyWith(
-                    color: Colors.grey
-                  )
-                ),
-              ]
-            ),
-          )
-        ),
-        Checkbox(
-          value: onboardUser.hasAcceptedEULA,
-          onChanged: (newVal) {
-            onboardUser.hasAcceptedEULA = newVal;
-            _onSave(onboardUser);
-          },
-          activeColor: Colors.blue,
-        )
-      ]
+      ],
     );
   }
 
@@ -475,9 +377,6 @@ class _OnboardScreenState extends State<OnboardScreen> with SnackbarMessages, Lo
     }
     else if(index == 3){
       canGoToNextPage = onboardUser.profilePicUrl != null && onboardUser.profilePicUrl.isNotEmpty;
-    }
-    else if(index == 4){
-      canGoToNextPage = onboardUser.hasReadDocuments && onboardUser.hasAcceptedEULA;
     }
 
     Future.delayed(Duration.zero, () => setState(() { canGoToNextPage = canGoToNextPage; }));

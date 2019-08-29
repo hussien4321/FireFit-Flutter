@@ -5,7 +5,11 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:blocs/blocs.dart';
 import 'package:front_end/providers.dart';
 import 'dart:async';
+import 'package:flutter/gestures.dart';
+import 'package:helpers/helpers.dart';
 import 'package:front_end/helper_widgets.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:overlay_support/overlay_support.dart';
 
 class LogInScreen extends StatefulWidget {
 
@@ -36,6 +40,8 @@ class _LogInScreenState extends State<LogInScreen> with LoadingAndErrorDialogs {
 
   bool _giveDefaultLogIn = false;
 
+  bool hasReadDocuments = false;
+
   @override
   void initState() {
     super.initState();
@@ -65,13 +71,16 @@ class _LogInScreenState extends State<LogInScreen> with LoadingAndErrorDialogs {
       ],
       body: Form(
         key: _formKey,
-        child: Column(
-          children: <Widget>[
-            Padding(padding:EdgeInsets.only(bottom: 8.0),),
-            _emailField(),
-            _passwordField(),
-            widget.isRegistering ? _passwordField(isConfirmation: true) : _forgotPasswordPrompt(),
-          ],
+        child: SingleChildScrollView(
+          child: Column(
+            children: <Widget>[
+              Padding(padding:EdgeInsets.only(bottom: 8.0),),
+              _emailField(),
+              _passwordField(),
+              widget.isRegistering ? _passwordField(isConfirmation: true) : _forgotPasswordPrompt(),
+              widget.isRegistering ? _finalConfirmationPage() : Container()
+            ],
+          ),
         ),
       ),
     );
@@ -160,7 +169,12 @@ class _LogInScreenState extends State<LogInScreen> with LoadingAndErrorDialogs {
         method: LogInMethod.email
       );
       if(widget.isRegistering){
-        _userBloc.register.add(logInForm);
+        if(hasReadDocuments){
+          _userBloc.register.add(logInForm);
+        }else{
+          toast("Please confirm you have read the documents below");
+          FocusScope.of(context).unfocus();
+        }
       }else{
         _userBloc.logIn.add(logInForm);
       }
@@ -267,5 +281,109 @@ class _LogInScreenState extends State<LogInScreen> with LoadingAndErrorDialogs {
       email: emailController.text,
       onSubmitEmail: (email) => _userBloc.resetPassword.add(email),
     );
+  }
+
+  
+  Widget _finalConfirmationPage() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      child: Column(
+        children: <Widget>[
+          Divider(
+            color: Colors.black54,
+          ),
+          _legalDocuments(),
+          Padding(padding: EdgeInsets.only(bottom: 16),),
+          _legalCheckbox(),
+        ],
+      ),
+    );
+  }
+
+  Widget _legalDocuments() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: <Widget>[
+        Flexible(
+          child: RichText(
+            text: TextSpan(
+              style: Theme.of(context).textTheme.subhead,
+              children: [
+                TextSpan(
+                  text: 'In order to use FireFit, you must read and agree to the following:\n\n'
+                ),
+                TextSpan(
+                  text: 'Privacy Policy\n\n',
+                  style: TextStyle(
+                    inherit: true,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.blue,
+                    decoration: TextDecoration.underline,
+                  ),
+                  recognizer: TapGestureRecognizer()..onTap = () => _openURL(AppConfig.PRIVACY_POLICY_URL),
+                ),
+                TextSpan(
+                  text: 'Terms & Conditions\n\n',
+                  style: TextStyle(
+                    inherit: true,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.blue,
+                    decoration: TextDecoration.underline,
+                  ),
+                  recognizer: TapGestureRecognizer()..onTap = () => _openURL(AppConfig.TERMS_AND_CONDITIONS_URL),
+                ),
+                TextSpan(
+                  text: 'End user license agreement (EULA)',
+                  style: TextStyle(
+                    inherit: true,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.blue,
+                    decoration: TextDecoration.underline,
+                  ),
+                  recognizer: TapGestureRecognizer()..onTap = () => _openURL(AppConfig.EULA_URL),
+                ),
+                TextSpan(
+                  text: "\nThis means I will not post any objectionable content or engage in any abusive behavior",
+                  style: Theme.of(context).textTheme.subtitle.copyWith(
+                    color: Colors.grey
+                  )
+                ),
+              ]
+            ),
+          )
+        ),
+      ]
+    );
+  }
+
+  _legalCheckbox() {
+    return Row(
+      children: <Widget>[
+        Expanded(
+          child: Text(
+            'Click the checkbox to confirm you have read and understood the above',
+            textAlign: TextAlign.center,
+          ),
+        ),
+        Checkbox(
+          value: hasReadDocuments,
+          onChanged: (newVal) {
+            setState(() => hasReadDocuments = newVal);
+          },
+          activeColor: Colors.blue,
+        ),
+      ],
+    );
+
+  }
+
+  
+  _openURL(String url) async {
+    if (await canLaunch(url)) {
+      await launch(url);
+    } else {
+      toast("Failed to open! - please visit FireFit.com to view documents");
+    }
   }
 }

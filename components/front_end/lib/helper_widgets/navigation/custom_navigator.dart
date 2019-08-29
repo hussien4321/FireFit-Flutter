@@ -209,9 +209,12 @@ class CustomNavigator {
     ));
   }
 
-  static Future<T> goToSettingsScreen<T extends Object>(BuildContext context) {
+  static Future<T> goToSettingsScreen<T extends Object>(BuildContext context, {bool hasSubscription, ValueChanged<bool> onUpdateSubscriptionStatus}) {
     return Navigator.push(context, MaterialPageRoute(
-      builder: (ctx) => SettingsScreen(),
+      builder: (ctx) => SettingsScreen(
+        hasSubscription: hasSubscription,
+        onUpdateSubscriptionStatus: onUpdateSubscriptionStatus,
+      ),
       settings: RouteSettings(
         name: '/settings'
       )

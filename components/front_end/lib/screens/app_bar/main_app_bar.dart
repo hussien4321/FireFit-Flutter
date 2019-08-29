@@ -122,7 +122,7 @@ class _MainAppBarState extends State<MainAppBar> {
 
   InterstitialAd createInterstitialAd() {
     return InterstitialAd(
-      adUnitId: AdmobTools.adUnitId(useSecondaryAdmobId),
+      adUnitId: AdmobTools.adUnitId,
       targetingInfo: AdmobTools.targetingInfo,
       listener: (MobileAdEvent event) {
         if(event == MobileAdEvent.closed){

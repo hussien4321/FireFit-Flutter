@@ -10,6 +10,15 @@ import 'package:overlay_support/overlay_support.dart';
 import 'package:share/share.dart';
 
 class SettingsScreen extends StatefulWidget {
+
+  final bool hasSubscription;
+  final ValueChanged<bool> onUpdateSubscriptionStatus;
+
+  SettingsScreen({
+    this.onUpdateSubscriptionStatus,
+    this.hasSubscription = true,
+  });
+
   @override
   _SettingsScreenState createState() => _SettingsScreenState();
 }
@@ -63,6 +72,14 @@ class _SettingsScreenState extends State<SettingsScreen> with LoadingAndErrorDia
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
               SettingsHeader('Account'),
+              SettingsOption(
+                icon: FontAwesomeIcons.coins,
+                name: 'View Subscription',
+                onTap: () => CustomNavigator.goToSubscriptionDetailsScreen(context,
+                  hasSubscription: widget.hasSubscription,
+                  onUpdateSubscriptionStatus: widget.onUpdateSubscriptionStatus,
+                ),
+              ),
               SettingsOption(
                 icon: FontAwesomeIcons.wrench,
                 name: 'Default start page',

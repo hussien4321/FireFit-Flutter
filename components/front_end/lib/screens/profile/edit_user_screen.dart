@@ -49,7 +49,7 @@ class _EditUserScreenState extends State<EditUserScreen> with LoadingAndErrorDia
   }
 
   _initTempGallery() async{ 
-    Directory extDir = await getApplicationDocumentsDirectory();
+    Directory extDir = Platform.isIOS ? await getApplicationSupportDirectory()  : await getExternalStorageDirectory();
     dirPath = '${extDir.path}/Pictures/temp';
     final dir = Directory(dirPath);
     if(dir.existsSync()){

@@ -30,10 +30,7 @@ void main() async {
   RemoteConfigHelpers.loadDefaults();
 
   Preferences preferences = new Preferences();
-  preferences.getPreference(Preferences.USE_SECONDARY_ADMOB_ID).then((useSecondaryAdmobId){
-    FirebaseAdMob.instance.initialize(appId: AdmobTools.appId(useSecondaryAdmobId));
-  });
-
+  FirebaseAdMob.instance.initialize(appId: AdmobTools.appId);
   CloudFunctions functions = CloudFunctions.instance;
   FirebaseStorage storage = FirebaseStorage.instance;
   FirebaseImageUploader imageUploader = FirebaseImageUploader(
