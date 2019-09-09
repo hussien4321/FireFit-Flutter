@@ -35,86 +35,88 @@ class _MenuNavigationScreenState extends State<MenuNavigationScreen> {
     return Scaffold(
       resizeToAvoidBottomPadding: false,
       backgroundColor: Colors.grey[300],
-      body: StreamBuilder<User>(
-        stream:_userBloc.currentUser,
-        builder: (ctx, snap) {
-          return Container(
-            color: Colors.white,
-            child: Column(
-              children: <Widget>[
-                _profileOverview(snap.data),
-                Expanded(
-                  child: SingleChildScrollView(
-                    child: Column(
-                      children: <Widget>[
-                        // _menuOption(
-                        //   title: 'INSPIRATION',
-                        //   iconData: FontAwesomeIcons.globeAmericas,
-                        //   selected: widget.index == 0,
-                        //   onPressed: () => widget.onPageSelected(0)
-                        // ),
-                        _menuOption(
-                          title: 'FIND USER',
-                          iconData: FontAwesomeIcons.search,
-                          onPressed: () => CustomNavigator.goToFindUsersScreen(context)
-                        ),
-                        // StreamBuilder<bool>(
-                        //   stream: _userBloc.currentUser.map((user) => user.hasNewFeedOutfits),
-                        //   initialData: false,
-                        //   builder: (context, hasFeedSnap) {
-                        //     return _menuOption(
-                        //       title: 'FASHION CIRCLE',
-                        //       iconData: Icons.people,
-                        //       selected: widget.index == 1,
-                        //       onPressed: () => widget.onPageSelected(1),
-                        //       showNotificationBubble: hasFeedSnap.data == true
-                        //     );
-                        //   }
-                        // ),
-                        // StreamBuilder<bool>(
-                        //   stream: _userBloc.currentUser.map((user) => user.hasNewUpload),
-                        //   initialData: false,
-                        //   builder: (context, hasNewUploadSnap) {
-                        //     return _menuOption(
-                        //       title: 'WARDROBE',
-                        //       iconData: FontAwesomeIcons.tshirt,
-                        //       selected: widget.index == 2,
-                        //       onPressed: () => widget.onPageSelected(2),
-                        //       showNotificationBubble: hasNewUploadSnap.data == true
-                        //     );
-                        //   }
-                        // ),
-                        // _menuOption(
-                        //   title: 'LOOKBOOKS',
-                        //   iconData: FontAwesomeIcons.bookReader,
-                        //   selected: widget.index == 3,
-                        //   onPressed: () => widget.onPageSelected(3)
-                        // ),
-                        _menuOption(
-                          title: 'FIREFIT+',
-                          backgroundColor: widget.hasSubscription ? Colors.white: Color.fromRGBO(225, 173, 0, 1.0),
-                          customIcon: Image.asset('assets/flame_gold_plus_4.png'),
-                          iconData: FontAwesomeIcons.fireAlt,
-                          onPressed: () => CustomNavigator.goToSubscriptionDetailsScreen(context,
-                            hasSubscription: widget.hasSubscription,
-                            onUpdateSubscriptionStatus: widget.onUpdateSubscriptionStatus,
-                          )
-                        ),
-                        _menuOption(
-                          title: 'SETTINGS',
-                          iconData: Icons.settings,
-                          onPressed: () => CustomNavigator.goToSettingsScreen(context,
-                            hasSubscription: widget.hasSubscription,
-                            onUpdateSubscriptionStatus: widget.onUpdateSubscriptionStatus,)
-                        ),
-                      ],
+      body: SafeArea(
+        child: StreamBuilder<User>(
+          stream:_userBloc.currentUser,
+          builder: (ctx, snap) {
+            return Container(
+              color: Colors.white,
+              child: Column(
+                children: <Widget>[
+                  _profileOverview(snap.data),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      child: Column(
+                        children: <Widget>[
+                          // _menuOption(
+                          //   title: 'INSPIRATION',
+                          //   iconData: FontAwesomeIcons.globeAmericas,
+                          //   selected: widget.index == 0,
+                          //   onPressed: () => widget.onPageSelected(0)
+                          // ),
+                          _menuOption(
+                            title: 'FIND USER',
+                            iconData: FontAwesomeIcons.search,
+                            onPressed: () => CustomNavigator.goToFindUsersScreen(context)
+                          ),
+                          // StreamBuilder<bool>(
+                          //   stream: _userBloc.currentUser.map((user) => user.hasNewFeedOutfits),
+                          //   initialData: false,
+                          //   builder: (context, hasFeedSnap) {
+                          //     return _menuOption(
+                          //       title: 'FASHION CIRCLE',
+                          //       iconData: Icons.people,
+                          //       selected: widget.index == 1,
+                          //       onPressed: () => widget.onPageSelected(1),
+                          //       showNotificationBubble: hasFeedSnap.data == true
+                          //     );
+                          //   }
+                          // ),
+                          // StreamBuilder<bool>(
+                          //   stream: _userBloc.currentUser.map((user) => user.hasNewUpload),
+                          //   initialData: false,
+                          //   builder: (context, hasNewUploadSnap) {
+                          //     return _menuOption(
+                          //       title: 'WARDROBE',
+                          //       iconData: FontAwesomeIcons.tshirt,
+                          //       selected: widget.index == 2,
+                          //       onPressed: () => widget.onPageSelected(2),
+                          //       showNotificationBubble: hasNewUploadSnap.data == true
+                          //     );
+                          //   }
+                          // ),
+                          // _menuOption(
+                          //   title: 'LOOKBOOKS',
+                          //   iconData: FontAwesomeIcons.bookReader,
+                          //   selected: widget.index == 3,
+                          //   onPressed: () => widget.onPageSelected(3)
+                          // ),
+                          _menuOption(
+                            title: 'FIREFIT+',
+                            backgroundColor: widget.hasSubscription ? Colors.white: Color.fromRGBO(225, 173, 0, 1.0),
+                            customIcon: Image.asset('assets/flame_gold_plus_4.png'),
+                            iconData: FontAwesomeIcons.fireAlt,
+                            onPressed: () => CustomNavigator.goToSubscriptionDetailsScreen(context,
+                              hasSubscription: widget.hasSubscription,
+                              onUpdateSubscriptionStatus: widget.onUpdateSubscriptionStatus,
+                            )
+                          ),
+                          _menuOption(
+                            title: 'SETTINGS',
+                            iconData: Icons.settings,
+                            onPressed: () => CustomNavigator.goToSettingsScreen(context,
+                              hasSubscription: widget.hasSubscription,
+                              onUpdateSubscriptionStatus: widget.onUpdateSubscriptionStatus,)
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-              ],
-            ),
-          );
-        }
+                ],
+              ),
+            );
+          }
+        ),
       ),
     );
   }

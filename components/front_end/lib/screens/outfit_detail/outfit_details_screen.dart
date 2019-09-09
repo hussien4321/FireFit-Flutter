@@ -609,46 +609,43 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
 
   Widget _actionButton({Widget icon, String text, Color unselectedColor = Colors.black,  double iconPadding = 4.0, bool selected = false, VoidCallback onPressed, bool isEnd = false}){
     return Expanded(
-      child: Material(
-        color: Colors.white,
-        child: InkWell(
-          onTap: onPressed,
-          child: Container(
-            padding: EdgeInsets.symmetric(vertical: 4),
-            decoration: isEnd ? null :BoxDecoration(
-              border: BorderDirectional(
-                end: BorderSide(
-                  color: Colors.grey.withOpacity(0.5),
-                  width: 0.5
-                ),
+      child: Padding(
+        padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
+        child: Material(
+          color: Colors.white,
+          child: InkWell(
+            onTap: onPressed,
+            child: Container(
+              padding: EdgeInsets.symmetric(vertical: 4),
+              decoration: BoxDecoration(
               ),
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                RawMaterialButton(
-                  fillColor: Colors.white,
-                  elevation: 2,
-                  shape: CircleBorder(
-                    side: BorderSide(
-                      color: Colors.grey.withOpacity(0.5),
-                      width: 0.5
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  RawMaterialButton(
+                    fillColor: Colors.white,
+                    elevation: 2,
+                    shape: CircleBorder(
+                      side: BorderSide(
+                        color: Colors.grey.withOpacity(0.5),
+                        width: 0.5
+                      )
+                    ),
+                    onPressed: onPressed,
+                    child: Padding(
+                      padding: EdgeInsets.all(iconPadding),
+                      child: icon,
                     )
                   ),
-                  onPressed: onPressed,
-                  child: Padding(
-                    padding: EdgeInsets.all(iconPadding),
-                    child: icon,
-                  )
-                ),
-                Text(
-                  '$text${selected? 'd':''}', 
-                  style: Theme.of(context).textTheme.caption.copyWith(
-                    color: selected? Colors.red : unselectedColor
+                  Text(
+                    '$text${selected? 'd':''}', 
+                    style: Theme.of(context).textTheme.caption.copyWith(
+                      color: selected? Colors.red : unselectedColor
+                    ),
+                    textAlign: TextAlign.center,
                   ),
-                  textAlign: TextAlign.center,
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
@@ -657,7 +654,7 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
   }
 
   Widget _commentsPreview(){
-    String text = '0 Comments';
+    String text = 'View 0 Comments';
     if(outfit.commentsCount==1){
       text = 'View 1 Comment';
     }

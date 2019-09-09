@@ -170,33 +170,31 @@ class _MainAppBarState extends State<MainAppBar> {
     _initBlocs();
     return Scaffold(
       resizeToAvoidBottomPadding: false,
-      body: SafeArea(
-        child: _buildNotificationsScaffold(
-          body: _buildMenuScaffold(
-            body: IndexedStack(
-              index: currentIndex,
-              sizing: StackFit.expand,
-              children: <Widget>[
-                ExploreScreen(
-                  onShowAd: _showAd,
-                  hasSubscription: hasSubscription,
-                  onUpdateSubscriptionStatus: _onUpdateSubscriptionStatus,
-                ),
-                FeedScreen(
-                  onScrollChange: _onScrollChange,
-                ),
-                WardrobeScreen(
-                  onScrollChange: _onScrollChange,
-                ),
-                LookbooksScreen(
-                  hasSubscription: hasSubscription,
-                  onUpdateSubscriptionStatus: _onUpdateSubscriptionStatus,
-                  onScrollChange: _onScrollChange,
-                ),
-              ],
-            )
+      body: _buildNotificationsScaffold(
+        body: _buildMenuScaffold(
+          body: IndexedStack(
+            index: currentIndex,
+            sizing: StackFit.expand,
+            children: <Widget>[
+              ExploreScreen(
+                onShowAd: _showAd,
+                hasSubscription: hasSubscription,
+                onUpdateSubscriptionStatus: _onUpdateSubscriptionStatus,
+              ),
+              FeedScreen(
+                onScrollChange: _onScrollChange,
+              ),
+              WardrobeScreen(
+                onScrollChange: _onScrollChange,
+              ),
+              LookbooksScreen(
+                hasSubscription: hasSubscription,
+                onUpdateSubscriptionStatus: _onUpdateSubscriptionStatus,
+                onScrollChange: _onScrollChange,
+              ),
+            ],
           )
-        ),
+        )
       ),
     );
   }
@@ -238,7 +236,6 @@ class _MainAppBarState extends State<MainAppBar> {
         userId: userId
       ));
       String token = await widget.messaging.getToken();
-      widget.messaging.requestNotificationPermissions();
       _notificationBloc.updateNotificationToken.add(UpdateToken(
         userId: userId,
         token: token,
@@ -465,7 +462,7 @@ class _MainAppBarState extends State<MainAppBar> {
         ]
       ),
       duration: Duration(milliseconds: 100),
-      height: hideBars ? 0 : 52,
+      height: hideBars ? 0 : 52+MediaQuery.of(context).padding.bottom,
       child: BottomNavigationBar(
         showSelectedLabels: true,
         showUnselectedLabels: true,

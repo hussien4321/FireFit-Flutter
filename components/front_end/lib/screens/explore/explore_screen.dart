@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'dart:ui';
+import 'dart:math';
 import 'package:blocs/blocs.dart';
 import 'package:middleware/middleware.dart';
 import 'package:front_end/providers.dart';
@@ -240,9 +241,10 @@ class _ExploreScreenState extends State<ExploreScreen> with SingleTickerProvider
             padding: EdgeInsets.symmetric(vertical: 8),
             child: LayoutBuilder(
               builder: (ctx, constraints) {
-                double fraction = (constraints.maxHeight * 0.65) / constraints.maxWidth;
+                double heightMaxSize = min(constraints.maxWidth, constraints.maxHeight);
+                double fraction = (heightMaxSize * 0.65) / constraints.maxWidth;
                 return CarouselSlider(
-                  height: constraints.maxHeight,
+                  height: heightMaxSize,
                   enlargeCenterPage: true,
                   onPageChanged: (i) {
                     _incrementAdCounter();

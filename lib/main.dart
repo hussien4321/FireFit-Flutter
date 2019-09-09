@@ -67,6 +67,9 @@ void main() async {
   SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
   ]);
+  
+  messaging.requestNotificationPermissions();
+
   app.main(
     outfitRepository: outfitRepository,
     userRepository: userRepository,

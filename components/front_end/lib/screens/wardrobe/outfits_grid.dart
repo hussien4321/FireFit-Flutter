@@ -43,7 +43,9 @@ class _OutfitsGridState extends State<OutfitsGrid> {
     _controller.addListener(_scrollListener);
   }
   _scrollListener() {
-    widget.onScrollChange(_controller);
+    if(widget.onScrollChange != null){
+      widget.onScrollChange(_controller);
+    }
     if (_controller.offset >= (_controller.position.maxScrollExtent-100) && !_controller.position.outOfRange) {
       if(widget.onReachEnd != null){
         widget.onReachEnd();

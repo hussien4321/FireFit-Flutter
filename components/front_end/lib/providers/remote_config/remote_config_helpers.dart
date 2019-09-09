@@ -23,8 +23,10 @@ class RemoteConfigHelpers {
 
   static fetchValues() {
     RemoteConfig.instance.then((remoteConfig) async {
-      await remoteConfig.fetch(expiration: const Duration(hours: 24));
-      await remoteConfig.activateFetched();
+      try{
+        await remoteConfig.fetch(expiration: const Duration(hours: 24));
+        await remoteConfig.activateFetched();
+      } catch (e) {}
     });
   }
 }

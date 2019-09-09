@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:front_end/helper_widgets.dart';
 import 'package:middleware/middleware.dart';
-import 'package:helpers/helpers.dart';
 import 'package:front_end/providers.dart';
 import 'package:blocs/blocs.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
 class CommentsScreen extends StatefulWidget {
@@ -328,21 +326,25 @@ class _CommentsScreenState extends State<CommentsScreen> {
     );
   }
   _sendComment(Outfit outfit) {
-    AddComment addComment = new AddComment(
-      commentText: commentTextController.text,
-      outfit: outfit,
-      userId: userId,
-      replyingToComment: replyingToComment,
-    );
-    setState(() {
-     canSendComment = false; 
-    });
-    commentFocus.unfocus();
-    _commentBloc.addComment.add(addComment);
-    commentTextController.clear();
-    setState(() {
-     replyingToComment = null; 
-    });
+    if(commentTextController.text == null || commentTextController.text.isEmpty){
+      FocusScope.of(context).unfocus();
+    }else{
+      AddComment addComment = new AddComment(
+        commentText: commentTextController.text,
+        outfit: outfit,
+        userId: userId,
+        replyingToComment: replyingToComment,
+      );
+      setState(() {
+      canSendComment = false; 
+      });
+      commentFocus.unfocus();
+      _commentBloc.addComment.add(addComment);
+      commentTextController.clear();
+      setState(() {
+      replyingToComment = null; 
+      });
+    }
   }
 
   Widget _buildOutfitText(Outfit outfit) {
