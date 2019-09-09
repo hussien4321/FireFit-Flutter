@@ -65,7 +65,6 @@ class _MainAppBarState extends State<MainAppBar> {
   @override
   void initState() {
     super.initState();
-    _loadDefaultPageIndex();
     _loadSubscriptionStatus();
     SystemChannels.lifecycle.setMessageHandler((msg){
       if(msg==AppLifecycleState.resumed.toString()) {
@@ -84,16 +83,6 @@ class _MainAppBarState extends State<MainAppBar> {
         _preferences.updatePreference(Preferences.USE_SECONDARY_ADMOB_ID, newUseSecondaryAdmobId);
         useSecondaryAdmobId = newUseSecondaryAdmobId;
       }
-    });
-  }
-
-  _loadDefaultPageIndex() async {
-    int newIndex = pages.indexOf(await _preferences.getPreference(Preferences.DEFAULT_START_PAGE));
-    if(newIndex == -1){
-      newIndex = numberOfPages-1;
-    }
-    setState(() {
-     currentIndex = newIndex; 
     });
   }
 

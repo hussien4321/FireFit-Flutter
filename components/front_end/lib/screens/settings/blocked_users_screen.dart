@@ -60,11 +60,18 @@ class _BlockedUsersScreenState extends State<BlockedUsersScreen> {
                 List<User> users = snap.data;
                 if(users.length > 0){
                   lastUser = users.last;
+                  return ListView(
+                    controller: _controller,
+                    children: users.map((user) => _blockedUserTab(user)).toList()..add(_userLoadTab(loadingSnap.data, users.isEmpty)),
+                  );
+                }else{
+                  return Center(
+                    child: Text(
+                      'No blocked users found',
+                      style: Theme.of(context).textTheme.caption,
+                    )
+                  );
                 }
-                return ListView(
-                  controller: _controller,
-                  children: users.map((user) => _followUserTab(user)).toList()..add(_userLoadTab(loadingSnap.data, users.isEmpty)),
-                );
               },
             );
           }
@@ -104,7 +111,7 @@ class _BlockedUsersScreenState extends State<BlockedUsersScreen> {
     );
   }
 
-  Widget _followUserTab(User user){
+  Widget _blockedUserTab(User user){
     return Material(
       child: InkWell(
         onTap: () => _openProfile(user),

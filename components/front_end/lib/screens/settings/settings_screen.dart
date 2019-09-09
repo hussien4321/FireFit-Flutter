@@ -28,7 +28,6 @@ class _SettingsScreenState extends State<SettingsScreen> with LoadingAndErrorDia
   UserBloc _userBloc;
   
   Preferences preferences = Preferences();
-  String currentDefaultPage;
 
   String version = 'Loading...';
 
@@ -37,17 +36,9 @@ class _SettingsScreenState extends State<SettingsScreen> with LoadingAndErrorDia
   @override
   void initState() {
     super.initState();
-    _loadPreferencesData();
     _loadVersion();
   }
 
-  _loadPreferencesData() async {
-    preferences.updatePreference(Preferences.DEFAULT_START_PAGE, AppConfig.MAIN_PAGES.first);
-    String defaultPage = await preferences.getPreference(Preferences.DEFAULT_START_PAGE);
-    setState(() {
-     currentDefaultPage = defaultPage; 
-    });
-  }
 
   _loadVersion() {
     PackageInfo.fromPlatform().then((PackageInfo packageInfo) {
@@ -81,11 +72,6 @@ class _SettingsScreenState extends State<SettingsScreen> with LoadingAndErrorDia
                 ),
               ),
               SettingsOption(
-                icon: FontAwesomeIcons.wrench,
-                name: 'Default start page',
-                action: _defaultStartPageDropdown(),
-              ),
-              SettingsOption(
                 icon: FontAwesomeIcons.userSlash,
                 name: 'Blocked users',
                 onTap: () => CustomNavigator.goToBlockedUsersScreen(context),
@@ -114,7 +100,7 @@ class _SettingsScreenState extends State<SettingsScreen> with LoadingAndErrorDia
               ),
               SettingsHeader('About'),
               SettingsOption(
-                icon:  FontAwesomeIcons.phone,
+                icon:  FontAwesomeIcons.infoCircle,
                 name: 'Version',
                 action: Text(
                   version,
@@ -170,31 +156,6 @@ class _SettingsScreenState extends State<SettingsScreen> with LoadingAndErrorDia
     }
   }
 
-  Widget _defaultStartPageDropdown() {
-    List<String> pages = AppConfig.MAIN_PAGES;
-    return DropdownButton(
-      value: currentDefaultPage,
-      items: pages.map((page) {
-        return DropdownMenuItem(
-          child: Text(
-            page,
-            style: TextStyle(
-              inherit: true,
-              color: page ==currentDefaultPage ? Colors.blue: Colors.grey
-            ),
-          ),
-          value: page,
-        );
-      }).toList(),
-      onChanged: (newPage) {
-        preferences.updatePreference(Preferences.DEFAULT_START_PAGE, newPage);
-        setState(() {
-          currentDefaultPage = newPage; 
-        });
-      },
-    );
-  }
-  
   _shareApp() => Share.share('I thought you might be interested in this fashion app for sharing and discussing your daily outfits: https://firefitapp.com \n\nYou can find my profile by searching for @$username in the app!');
 
   _confirmLogOut() {
