@@ -80,10 +80,9 @@ class _AddToLookbookDialogState extends State<AddToLookbookDialog> {
       lookbooksStream: _outfitBloc.lookbooks,
       builder: (isLoading, lookbooks){
         lookbooks.sort((a, b) => a.name.compareTo(b.name));
-        return lookbooks.isEmpty ? _noLookbooksPrompt() : ListView.builder(
-          shrinkWrap: true,
-          itemCount: lookbooks.length,
-          itemBuilder: (ctx, i) => _lookbookTag(lookbooks[i] ,i==0),
+        return lookbooks.isEmpty ? _noLookbooksPrompt() : Column(
+          mainAxisSize: MainAxisSize.min,
+          children: lookbooks.map((lookbook) => _lookbookTag(lookbook ,lookbooks.indexWhere((l)=>l.lookbookId==lookbook.lookbookId)==0)).toList(),
         );
       },
     );

@@ -609,7 +609,8 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
 
   Widget _actionButton({Widget icon, String text, Color unselectedColor = Colors.black,  double iconPadding = 4.0, bool selected = false, VoidCallback onPressed, bool isEnd = false}){
     return Expanded(
-      child: Padding(
+      child: Container(
+        color: Colors.white,
         padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
         child: Material(
           color: Colors.white,
