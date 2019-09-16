@@ -102,7 +102,6 @@ class _OutfitDetailsScreenState extends State<OutfitDetailsScreen> {
       _userBloc.currentUser.first.then((user) {
         setState(() => hasMaxLookbookOutfits = user.numberOfLookbookOutfits >= maxOutfitStorage);
       });
-
       _outfitBloc.selectOutfit.add(LoadOutfit(
         outfitId: widget.outfitId,
         userId: userId,

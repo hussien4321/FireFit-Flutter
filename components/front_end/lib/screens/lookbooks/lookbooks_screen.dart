@@ -247,7 +247,7 @@ class _LookbooksScreenState extends State<LookbooksScreen> {
           Padding(
             padding: const EdgeInsets.only(right: 4),
             child: Text(
-              isSortBySize ? 'Size' : 'Last Created',
+              isSortBySize ? 'Size' : 'Last Modified',
               style: TextStyle(
                 inherit: true,
                 color: Colors.blue,

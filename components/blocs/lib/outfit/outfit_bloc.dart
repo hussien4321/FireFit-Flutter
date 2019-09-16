@@ -180,11 +180,11 @@ class OutfitBloc{
   }
 
   _uploadOutfit(UploadOutfit uploadOutfit) async {
-    _loadingController.add(true);
+    _successController.add(true);
+    _isBackgroundLoadingController.add(true);
     Future.delayed(Duration(milliseconds: 1500), () => _showAdController.add(null));
     final success = await repository.uploadOutfit(uploadOutfit);
-    _loadingController.add(false);
-    _successController.add(success);
+    _isBackgroundLoadingController.add(false);
     if(success){
       _successMessageController.add("Outfit uploaded!");
     }else{

@@ -96,6 +96,9 @@ class OutfitFilters {
         default:
           break;
       }
+    }else if(dateRange==null){
+      startDate = null;
+      endDate = null;
     }
     return {
       'start_date': startDate?.toIso8601String(),

@@ -40,7 +40,7 @@ class _LoadingScreenState extends State<LoadingScreen> {
                     child: CircularProgressIndicator(),
                   ),
                   Text(
-                    'Setting up...',
+                    'Warming up...',
                     style: Theme.of(context).textTheme.caption,
                   ),
                 ],

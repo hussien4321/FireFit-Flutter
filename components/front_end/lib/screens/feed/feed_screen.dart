@@ -148,7 +148,7 @@ class _FeedScreenState extends State<FeedScreen> {
             ),
           ),
           TextSpan(
-            text: 'Follow more users widen your fashion circle!',
+            text: 'Follow more users to widen your fashion circle!',
             style: Theme.of(ctx).textTheme.caption.copyWith(
               color: Colors.black54
             ),

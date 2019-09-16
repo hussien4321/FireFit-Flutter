@@ -164,9 +164,9 @@ class _UploadOutfitScreenState extends State<UploadOutfitScreen> with LoadingAnd
       String userId = await _userBloc.existingAuthId.first;
       uploadOutfit.posterUserId = userId;
       _subscriptions = <StreamSubscription<dynamic>>[
-        _loadingListener(),
+        // _loadingListener(),
         _successListener(),
-        _errorListener(),
+        // _errorListener(),
       ];
     }
   }

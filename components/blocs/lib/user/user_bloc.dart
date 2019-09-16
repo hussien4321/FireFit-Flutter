@@ -170,6 +170,7 @@ class UserBloc {
       _existingAuthController.add(userId);
       await _loadCurrentUser();
       if(isFirstTimeLoad && userId!=null){
+        await _loadFirstTimeStreams();
         await _loadStartupStreams();
       }
   }

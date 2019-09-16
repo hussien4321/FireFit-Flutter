@@ -186,8 +186,10 @@ class _ExploreScreenState extends State<ExploreScreen> with SingleTickerProvider
       tagline +=" ${outfitFilters.style}";
     }
     tagline += " outfits";
-    if(isSortByTop){
+    if(isSortByTop && outfitFilters.dateRange == null){
       tagline+=" of all time";
+    }else if(isSortByTop && outfitFilters.dateRange !=DateRanges.CUSTOM){
+      tagline+=" from the ${dateRangeToString(outfitFilters.dateRange).toLowerCase()}";
     }
     tagline+="!";
     return tagline;

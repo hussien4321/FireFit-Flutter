@@ -250,7 +250,8 @@ class CachedOutfitRepository {
 
   Future<void> _incrementLookbookOutfitsCount(int lookbookId, String userId) async {
     await streamDatabase.executeAndTrigger(['user'], "UPDATE user SET number_of_lookbook_outfits=number_of_lookbook_outfits+1 WHERE user_id=?", [userId]);
-    return streamDatabase.executeAndTrigger(['lookbook'], "UPDATE lookbook SET number_of_outfits=number_of_outfits+1 WHERE lookbook_id=?", [lookbookId]);
+    await streamDatabase.executeAndTrigger(['lookbook'], "UPDATE lookbook SET number_of_outfits=number_of_outfits+1 WHERE lookbook_id=?", [lookbookId]);
+    return streamDatabase.executeAndTrigger(['lookbook'], "UPDATE lookbook SET lookbook_created_at=? WHERE lookbook_id=?", [DateTime.now().toIso8601String(), lookbookId]);
   }
   Future<void> _decrementLookbookOutfitsCount(int lookbookId, String userId) async {
     await streamDatabase.executeAndTrigger(['user', ], "UPDATE user SET number_of_lookbook_outfits=number_of_lookbook_outfits-1 WHERE user_id=?", [userId]);
