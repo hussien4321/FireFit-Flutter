@@ -93,7 +93,7 @@ class __ImageGalleryViewerState extends State<_ImageGalleryViewer> {
             slideType: SlideType.onlyImage,
             child: ExtendedImage(
               enableSlideOutPage: true,
-              mode: ExtendedImageMode.Gesture,
+              mode: ExtendedImageMode.gesture,
               initGestureConfigHandler: (state) => GestureConfig(
                 minScale: 1.0,
                 animationMinScale: 0.8,

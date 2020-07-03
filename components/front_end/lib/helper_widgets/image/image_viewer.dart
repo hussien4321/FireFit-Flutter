@@ -73,7 +73,7 @@ class _ImageViewer extends StatelessWidget {
             slideType: SlideType.onlyImage,
             child: ExtendedImage(
               enableSlideOutPage: true,
-              mode: ExtendedImageMode.Gesture,
+              mode: ExtendedImageMode.gesture,
               initGestureConfigHandler: (state) => GestureConfig(
                 minScale: 1.0,
                 animationMinScale: 0.8,
