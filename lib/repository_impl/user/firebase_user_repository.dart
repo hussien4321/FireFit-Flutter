@@ -1,0 +1,453 @@
+import 'dart:async';
+import 'package:firebase_auth/firebase_auth.dart' as Auth;
+import 'package:cloud_functions/cloud_functions.dart';
+import './auth_instances.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';	
+import '../../../repository_impl/repository_impl.dart';
+import '../../../middleware/middleware.dart';
+import '../../../helpers/helpers.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:path/path.dart';
+import 'package:meta/meta.dart';
+import '../../../repository_impl/exception_handler.dart';
+import 'package:flutter/services.dart';
+
+class FirebaseUserRepository implements UserRepository {
+  static const String dbPath = 'users';
+  static const String findUserByIdQueryPath = 'user_data.user_id';
+  
+  final Auth.FirebaseAuth auth;
+  final FirebaseFunctions cloudFunctions;
+  final FirebaseImageUploader imageUploader;
+  final FirebaseMessaging messaging;	
+  final CachedOutfitRepository outfitCache;
+  final CachedUserRepository userCache;
+  final FirebaseAnalytics analytics;
+
+
+  FirebaseUserRepository({
+    @required this.auth, 
+    @required this.cloudFunctions,
+    @required this.imageUploader,
+    @required this.outfitCache,
+    @required this.userCache,
+    @required this.messaging,
+    @required this.analytics,
+  });
+
+  Future<String> existingAuthId() async {
+    final user = auth.currentUser;
+    bool hasAuth = user!=null;
+    if(hasAuth){
+      try{ 
+        await user.reload();
+      } on PlatformException {
+        hasAuth = false;
+      }
+    }
+    if(!hasAuth){
+      logOut();
+      return null;
+    }
+    return user.uid;
+  }
+
+  
+  Future<bool> register(LogInForm logInData) async {
+    AuthInstance specificAuthInstance = _getSpecificAuthInstance(logInData.method);
+    if(logInData.fields.password != logInData.fields.passwordConfirmation){
+      return false;
+    }
+    return specificAuthInstance.register(fields: logInData.fields) 
+      .then((user) => true)
+      .catchError((exception) => catchExceptionWithBool(exception, analytics));
+  }
+  
+  Future<bool> logIn(LogInForm logInData) {
+    AuthInstance specificAuthInstance = _getSpecificAuthInstance(logInData.method);
+    return specificAuthInstance.signIn(fields: logInData.fields) 
+      .then((user) async {
+        return true;
+      })
+      .catchError((exception) => catchExceptionWithBool(exception, analytics));
+  }
+
+  AuthInstance _getSpecificAuthInstance(LogInMethod method) {
+    switch (method) {
+      case LogInMethod.email:
+        return EmailAuthInstance(auth: auth);
+      case LogInMethod.google:
+        return GoogleAuthInstance(auth: auth);
+      case LogInMethod.twitter:
+        return TwitterAuthInstance(auth: auth);
+      case LogInMethod.facebook:
+        return FacebookAuthInstance(auth: auth);
+      default:
+        return null;
+    }
+  }
+
+  Future<bool> createAccount(OnboardUser onboardUser) async {
+  return cloudFunctions.httpsCallable('createUser').call(onboardUser.toJson())
+  .then((res) async {
+      final user = auth.currentUser;
+      String userId = user.uid;
+      String fileName = _generateFileName(onboardUser.profilePicUrl, userId);
+      await imageUploader.uploadImage(onboardUser.profilePicUrl, fileName);
+
+      return _checkImageUploaded(userId);
+    })
+    .catchError((exception) => catchExceptionWithBool(exception, analytics));
+  }
+
+  _generateFileName(String imagePath, String userId){
+    final String uuid = Uuid().generateV4();
+    return 'temp/profile:$userId:${uuid.toString()}${extension(imagePath)}';
+  }
+  List<User> _resToUserList(HttpsCallableResult res){
+    return List<User>.from(res.data['res'].map((data){
+      Map<String, dynamic> formattedDoc = Map<String, dynamic>.from(data);
+      return User.fromMap(formattedDoc);
+    }).toList());
+  }
+  
+  Future<bool> _checkImageUploaded(String userId) async {
+    LoadUser loadUser = LoadUser(
+      userId: userId,
+      currentUserId: userId,
+      searchMode: SearchModes.MINE,
+    );
+    for(int i = 0; i < AppConfig.NUMBER_OF_POLL_ATTEMPTS; i++){
+      print('polling for profile pic attempt: $i time=${DateTime.now()}');
+      bool success = await _getExistingUser(loadUser);
+      if(success){
+        return true;
+      }
+      await Future.delayed(Duration(milliseconds: AppConfig.DURATION_PER_POLL_ATTEMPT));
+    }
+    return false;
+  }
+
+  Future<bool> _getExistingUser(LoadUser loadUser) async {
+    return cloudFunctions.httpsCallable('getUser').call(loadUser.toJson())
+    .then((res) async {
+      List<User> userList = _resToUserList(res);
+      if(userList.isEmpty){
+        return false;
+      }
+      User user = userList.first;
+      await userCache.addUser(user, loadUser.searchMode);
+      return true;
+    })
+    .catchError((exception) => catchExceptionWithBool(exception, analytics));
+  }
+
+  Future<bool> _loadCurrentUser(Auth.UserCredential user) {
+    return loadUserDetails(
+      LoadUser(
+        userId: user.user.uid,
+        currentUserId: user.user.uid,
+      ),
+      SearchModes.MINE,
+    );
+  }
+
+  Future<bool> loadUserDetails(LoadUser loadUser, SearchModes searchMode) async {
+    await userCache.clearUsers(searchMode);
+    User user = await _getUserAccountIfExisting(loadUser);
+    if(user !=null){
+      await userCache.addUser(user, searchMode);
+      return true;
+    }else{
+      if(searchMode==SearchModes.SELECTED){
+        throw NoItemFoundException();
+      }
+    }
+    return false;
+  }
+
+
+  Future<User> _getUserAccountIfExisting(LoadUser loadUser) {
+    return cloudFunctions.httpsCallable('getUser').call(loadUser.toJson())
+    .then((res) {
+      List<User> userList = _resToUserList(res);
+      if(userList.isEmpty){
+        return null;
+      }
+      return userList.first;
+    })
+    .catchError((exception) => null);
+  }
+
+  Future<void> clearNewFeed() => userCache.clearNewFeed();
+
+  Future<bool> editUser(EditUser editUser) {
+    return cloudFunctions.httpsCallable('editUser').call(editUser.toJson())
+    .then((res) async {
+      bool success = res.data['res'];
+      if(!success){
+        return false;
+      }
+      if(editUser.hasNewProfilePic){
+        String fileName = _generateFileName(editUser.profilePicUrl, editUser.userId);
+        await imageUploader.uploadImage(editUser.profilePicUrl, fileName);
+        return _checkImageUpdated(editUser.userId, editUser.initialProfilePicUrl);
+      }else{
+        userCache.updateUserBiometrics(editUser);
+        return true;
+      }
+    })
+    .catchError((exception) => catchExceptionWithBool(exception, analytics));
+  }
+
+
+  Future<bool> _checkImageUpdated(String userId, String currentProfilePic) async {
+    LoadUser loadUser = LoadUser(
+      userId: userId,
+      currentUserId: userId,
+      searchMode: SearchModes.MINE,
+    );
+    for(int i = 0; i < AppConfig.NUMBER_OF_POLL_ATTEMPTS; i++){
+      print('polling for profile pic attempt: $i time=${DateTime.now()}');
+      bool success = await _getUserNewProfilePic(loadUser, currentProfilePic);
+      if(success){
+        return true;
+      }
+      await Future.delayed(Duration(milliseconds: AppConfig.DURATION_PER_POLL_ATTEMPT));
+    }
+    return false;
+  }
+  
+  Future<bool> _getUserNewProfilePic(LoadUser loadUser, String currentProfilePicUrl) async {
+    return cloudFunctions.httpsCallable('getUser').call(loadUser.toJson())
+    .then((res) async {
+      List<User> userList = _resToUserList(res);
+      if(userList.isEmpty){
+        return false;
+      }
+      User user = userList.first;
+      if(user.profilePicUrl != currentProfilePicUrl){
+        await userCache.addUser(user, loadUser.searchMode);
+        return true;
+      }else{
+        return false;
+      }
+    })
+    .catchError((exception) => catchExceptionWithBool(exception, analytics));
+  }
+
+  Future<bool> hasEmailVerified() async {
+    final user = auth.currentUser;
+    if(user == null){
+      return false;
+    }
+    user.reload();
+    bool hasEmailCreds = user.providerData.map((provider) => provider.providerId=='password').contains(true);
+    return !hasEmailCreds || user.emailVerified;
+  }
+
+  Future<String> getVerificationEmail() async {
+    final user = auth.currentUser;
+    if(user==null){
+      return '';
+    }
+    bool hasEmailCreds = user.providerData.map((provider) => provider.providerId=='password').contains(true);
+    if(!hasEmailCreds){
+      return '';
+    }
+    return user.providerData.where((provider) => provider.providerId == 'password').toList()[0].email;
+  }
+
+  Future<void> resendVerificationEmail([_]) async {
+    final user = auth.currentUser;
+    await user.sendEmailVerification();
+  }
+
+  Future<bool> checkUsernameExists(String username) async {
+    return cloudFunctions.httpsCallable('checkUsernameExists').call({
+      'username' : username
+    })
+    .then((res) {
+      return res.data['res'].toString() == 'true';
+    })
+    .catchError((exception) => catchExceptionWithBool(exception, analytics));
+  }
+
+  Future<void> updateNotificationToken(UpdateToken updateToken) async {
+    await cloudFunctions.httpsCallable('registerNotificationToken').call(updateToken.toJson())
+      .catchError((exception) => catchExceptionWithBool(exception, analytics));
+  }
+
+  Future<void> logOut() async {
+    messaging.deleteToken();
+    userCache.clearEverything();
+    auth.signOut();
+  }
+
+  Future<bool> resetPassword(String email) {
+    return auth.sendPasswordResetEmail(email: email).then((res) {
+      return true;
+    }).catchError((error) {
+      return false;
+    });
+  }
+  Future<bool> deleteUser(String userId) async {
+    return cloudFunctions.httpsCallable('deleteUser').call({
+      'user_id' : userId,
+    })
+    .then((res) {
+      bool success = res.data['res'] == true;
+      if(success){
+        messaging.deleteToken();
+        userCache.clearEverything();
+        auth.currentUser.delete();
+        auth.signOut();
+      }
+      return success;
+    })
+    .catchError((exception) => catchExceptionWithBool(exception, analytics));
+  }
+
+  Future<bool> sendFeedback(FeedbackRequest feedbackRequest) {
+    return cloudFunctions.httpsCallable('sendFeedback').call(feedbackRequest.toJson())
+    .then((res) {
+      return res.data['res'].toString() == 'true';
+    })
+    .catchError((exception) => catchExceptionWithBool(exception, analytics));
+  }
+
+  Future<bool> reportUser(ReportForm reportForm) {
+    return cloudFunctions.httpsCallable('reportUser').call(reportForm.toJson())
+    .then((res) {
+      return res.data['res'].toString() == 'true';
+    })
+    .catchError((exception) => catchExceptionWithBool(exception, analytics));
+  }
+
+  Future<int> blockUser(UserBlock userBlock) {
+    return cloudFunctions.httpsCallable('blockUser').call(userBlock.toJson())
+    .then((res) async {
+      int blockId = res.data['ref'];
+      bool isNewBlock = blockId > 0;
+      if(isNewBlock){
+        Block newBlock =Block(
+          blockId: blockId,
+          blockedUserId: userBlock.blockedUserId,
+          blockingUserId: userBlock.blockingUserId,
+          blockCreatedAt: new DateTime.now(),
+        );
+        await userCache.addBlock(newBlock);
+      }
+      return blockId;
+    })
+    .catchError((exception) => catchExceptionWithInt(exception, analytics));
+  }
+
+  Future<bool> unblockUser(UserBlock userBlock) async {
+    userCache.removeBlock(userBlock);
+    return cloudFunctions.httpsCallable('unblockUser').call(userBlock.toJson())
+    .then((res) {
+      return res.data['res'].toString() == 'true';
+    })
+    .catchError((exception) => catchExceptionWithBool(exception, analytics));
+  }
+
+
+  Stream<User> getUser(SearchModes searchMode) => userCache.getUser(searchMode);
+  
+  Stream<List<User>> getUsers(SearchModes searchMode) => userCache.getUsers(searchMode);
+
+  Stream<List<OutfitNotification>> getNotifications() => outfitCache.getNotifications();
+
+  Future<bool> loadNotifications(LoadNotifications loadNotifications) async {
+    if(loadNotifications.isLive){
+      DateTime latestNotificationTime = await outfitCache.getLatestNotificationTime();
+      loadNotifications.lastNotificationCreatedAt = latestNotificationTime;
+    }else{
+      await outfitCache.clearNotifications();
+    }
+    return loadMoreNotifications(loadNotifications);
+  }
+  
+  Future<bool> loadMoreNotifications(LoadNotifications loadNotifications) async {
+    return cloudFunctions.httpsCallable('getNotifications').call(loadNotifications.toJson())
+    .then((res) async {
+      List<OutfitNotification> notifications = List<OutfitNotification>.from(res.data['res'].map((data){
+        Map<String, dynamic> formattedDoc = Map<String, dynamic>.from(data);
+        return OutfitNotification.fromMap(formattedDoc);
+      }).toList());
+      notifications.sort((a,b) => -a.createdAt.compareTo(b.createdAt));
+      if(loadNotifications.isLive){
+        await userCache.incrementUserNewNotifications(notifications);
+      }
+      for(int i = 0; i < notifications.length; i++){
+        await outfitCache.addNotification(notifications[i]);
+        if(loadNotifications.isLive){
+          await outfitCache.updateLiveNotification(notifications[i]);
+        }
+      }
+      return true;
+    })
+    .catchError((exception) => catchExceptionWithBool(exception, analytics));
+  }
+
+  Future<bool> markWardrobeSeen(String userId) async {
+    await userCache.markWardrobeSeen(userId);
+  }
+
+  Future<bool> markNotificationsSeen(MarkNotificationsSeen markSeen) async {
+    await userCache.markNotificationsSeen(markSeen);
+    return cloudFunctions.httpsCallable('markNotificationsSeen').call(markSeen.toJson())
+    .then((res) {
+      return true;
+    })
+    .catchError((exception) => catchExceptionWithBool(exception, analytics));
+  }
+
+  Future<bool> followUser(FollowUser followUser) async {
+    await userCache.followUser(followUser);
+    return cloudFunctions.httpsCallable('followUser').call(followUser.toJson())
+    .then((res) => res.data['res'] == true)
+    .catchError((exception) => catchExceptionWithBool(exception, analytics));
+  }
+  
+  Future<bool> loadFollowing(LoadUsers loadUsers) => _loadFollowUsers(loadUsers, functionName: 'getFollowing');
+  Future<bool> loadFollowers(LoadUsers loadUsers) => _loadFollowUsers(loadUsers, functionName: 'getFollowers');
+  
+  Future<bool> _loadFollowUsers(LoadUsers loadUsers, {String functionName}) async {
+    await userCache.clearUsers(loadUsers.searchMode);
+    return _loadMoreFollowUsers(loadUsers, functionName:functionName);
+  }
+
+  Future<bool> loadMoreFollowing(LoadUsers loadUsers) => _loadMoreFollowUsers(loadUsers, functionName: 'getFollowing');
+  Future<bool> loadMoreFollowers(LoadUsers loadUsers) => _loadMoreFollowUsers(loadUsers, functionName: 'getFollowers');
+  
+  Future<bool> _loadMoreFollowUsers(LoadUsers loadUsers, {String functionName}){  
+    return cloudFunctions.httpsCallable(functionName).call(loadUsers.toJson())
+    .then((res) async {
+      List<User> users = _resToUserList(res);
+      for(int i = 0; i < users.length; i++){
+        await userCache.addUser(users[i], loadUsers.searchMode);
+      }
+      return true;
+    })
+    .catchError((exception) => catchExceptionWithBool(exception, analytics));
+  }
+  
+  Future<bool> loadBlockedUsers(LoadUsers loadUsers) async {
+    await userCache.clearUsers(loadUsers.searchMode);
+    return loadMoreBlockedUsers(loadUsers);
+  }
+  Future<bool> loadMoreBlockedUsers(LoadUsers loadUsers) {
+    return cloudFunctions.httpsCallable('getBlockedUsers').call(loadUsers.toJson())
+    .then((res) async {
+      List<User> users = _resToUserList(res);
+      for(int i = 0; i < users.length; i++){
+        await userCache.addUser(users[i], loadUsers.searchMode);
+      }
+      return true;
+    })
+    .catchError((exception) => catchExceptionWithBool(exception, analytics));
+  }
+}
+
