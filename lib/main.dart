@@ -2,27 +2,30 @@
 // Use of this source code is governed by the MIT license that can be found
 // in the LICENSE file.
 
-import 'package:front_end/main.dart' as app;
+import 'front_end/main.dart' as app;
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:blocs/blocs.dart';
+import 'blocs/blocs.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:repository_impl/repository_impl.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'repository_impl/repository_impl.dart';
 import 'package:sqflite/sqflite.dart';
-import 'package:streamqflite/streamqflite.dart';
+import 'package:sqlbrite/sqlbrite.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:firebase_admob/firebase_admob.dart';
-import 'package:front_end/providers.dart';
+import 'front_end/providers.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/material.dart';
 
 void main() async {
-  
-  Crashlytics crashlytics = Crashlytics.instance;
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+  FirebaseCrashlytics crashlytics = FirebaseCrashlytics.instance;
   FlutterError.onError = (FlutterErrorDetails details) {
-    if(details.stack!=null){
+    if (details.stack != null) {
       crashlytics.recordFlutterError(details);
     }
   };
@@ -30,31 +33,31 @@ void main() async {
   RemoteConfigHelpers.loadDefaults();
 
   Preferences preferences = new Preferences();
+
   FirebaseAdMob.instance.initialize(appId: AdmobTools.appId);
-  CloudFunctions functions = CloudFunctions.instance;
+  FirebaseFunctions functions = FirebaseFunctions.instance;
   FirebaseStorage storage = FirebaseStorage.instance;
-  FirebaseImageUploader imageUploader = FirebaseImageUploader(
-    storage: storage
-  );
-  FirebaseMessaging messaging =FirebaseMessaging();
+  FirebaseImageUploader imageUploader = FirebaseImageUploader(storage: storage);
+  FirebaseMessaging messaging = FirebaseMessaging.instance;
   FirebaseAuth auth = FirebaseAuth.instance;
 
   Database db = await LocalDatabase().db;
-  StreamDatabase streamDatabase = StreamDatabase(db);
+  BriteDatabase streamDatabase = BriteDatabase(db);
 
-  CachedUserRepository userCache = CachedUserRepository(streamDatabase: streamDatabase);
+  CachedUserRepository userCache =
+      CachedUserRepository(streamDatabase: streamDatabase);
   CachedOutfitRepository outfitCache = CachedOutfitRepository(
     streamDatabase: streamDatabase,
     userCache: userCache,
   );
-  FirebaseAnalytics analytics = FirebaseAnalytics();
+  FirebaseAnalytics analytics = FirebaseAnalytics.instance;
   FirebaseOutfitRepository outfitRepository = FirebaseOutfitRepository(
     cloudFunctions: functions,
     imageUploader: imageUploader,
     cache: outfitCache,
     analytics: analytics,
   );
-  FirebaseUserRepository userRepository= FirebaseUserRepository(
+  FirebaseUserRepository userRepository = FirebaseUserRepository(
     auth: auth,
     outfitCache: outfitCache,
     userCache: userCache,
@@ -63,12 +66,12 @@ void main() async {
     messaging: messaging,
     analytics: analytics,
   );
-  
+
   SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitUp,
   ]);
-  
-  messaging.requestNotificationPermissions();
+
+  messaging.requestPermission();
 
   app.main(
     outfitRepository: outfitRepository,
