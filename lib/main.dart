@@ -21,12 +21,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter/material.dart';
 
 void main() async {
-
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  Crashlytics crashlytics = Crashlytics.instance;
+  FirebaseCrashlytics crashlytics = FirebaseCrashlytics.instance;
   FlutterError.onError = (FlutterErrorDetails details) {
-    if(details.stack!=null){
+    if (details.stack != null) {
       crashlytics.recordFlutterError(details);
     }
   };
@@ -35,32 +34,30 @@ void main() async {
 
   Preferences preferences = new Preferences();
 
-
   FirebaseAdMob.instance.initialize(appId: AdmobTools.appId);
   FirebaseFunctions functions = FirebaseFunctions.instance;
   FirebaseStorage storage = FirebaseStorage.instance;
-  FirebaseImageUploader imageUploader = FirebaseImageUploader(
-    storage: storage
-  );
+  FirebaseImageUploader imageUploader = FirebaseImageUploader(storage: storage);
   FirebaseMessaging messaging = FirebaseMessaging.instance;
   FirebaseAuth auth = FirebaseAuth.instance;
 
   Database db = await LocalDatabase().db;
   BriteDatabase streamDatabase = BriteDatabase(db);
 
-  CachedUserRepository userCache = CachedUserRepository(streamDatabase: streamDatabase);
+  CachedUserRepository userCache =
+      CachedUserRepository(streamDatabase: streamDatabase);
   CachedOutfitRepository outfitCache = CachedOutfitRepository(
     streamDatabase: streamDatabase,
     userCache: userCache,
   );
-  FirebaseAnalytics analytics = FirebaseAnalytics();
+  FirebaseAnalytics analytics = FirebaseAnalytics.instance;
   FirebaseOutfitRepository outfitRepository = FirebaseOutfitRepository(
     cloudFunctions: functions,
     imageUploader: imageUploader,
     cache: outfitCache,
     analytics: analytics,
   );
-  FirebaseUserRepository userRepository= FirebaseUserRepository(
+  FirebaseUserRepository userRepository = FirebaseUserRepository(
     auth: auth,
     outfitCache: outfitCache,
     userCache: userCache,
@@ -69,11 +66,11 @@ void main() async {
     messaging: messaging,
     analytics: analytics,
   );
-  
+
   SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitUp,
   ]);
-  
+
   messaging.requestPermission();
 
   app.main(

@@ -4,50 +4,57 @@ import 'package:extended_image/extended_image.dart';
 import 'dart:io';
 
 class ImageGalleryPreview extends StatelessWidget {
-  
   final List<String> imageUrls;
   final int currentIndex;
   final String title;
   final bool isLocal;
 
-  ImageGalleryPreview({this.imageUrls, this.currentIndex, this.title, this.isLocal = false,});
+  ImageGalleryPreview({
+    this.imageUrls,
+    this.currentIndex,
+    this.title,
+    this.isLocal = false,
+  });
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () => _openImageViewer(context),
       child: Hero(
-        child: isLocal ? Image.file(
-          File(imageUrls[currentIndex]),
-          fit: BoxFit.cover,
-        ) : CachedNetworkImage(
-          imageUrl: imageUrls[currentIndex],
-          fit: BoxFit.cover,
-        ),
+        child: isLocal
+            ? Image.file(
+                File(imageUrls[currentIndex]),
+                fit: BoxFit.cover,
+              )
+            : CachedNetworkImage(
+                imageUrl: imageUrls[currentIndex],
+                fit: BoxFit.cover,
+              ),
         tag: imageUrls[currentIndex],
       ),
     );
   }
 
-  _openImageViewer(context){
-    Navigator.of(context).push(new MaterialPageRoute(builder: (BuildContext context) => _ImageGalleryViewer(imageUrls, currentIndex, title, isLocal)));
+  _openImageViewer(context) {
+    Navigator.of(context).push(new MaterialPageRoute(
+        builder: (BuildContext context) =>
+            _ImageGalleryViewer(imageUrls, currentIndex, title, isLocal)));
   }
 }
 
 class _ImageGalleryViewer extends StatefulWidget {
-
   final List<String> imageUrls;
   final int currentIndex;
   final String title;
   final bool isLocal;
 
-  _ImageGalleryViewer(this.imageUrls, this.currentIndex, this.title, this.isLocal);
+  _ImageGalleryViewer(
+      this.imageUrls, this.currentIndex, this.title, this.isLocal);
 
   @override
   __ImageGalleryViewerState createState() => __ImageGalleryViewerState();
 }
 
 class __ImageGalleryViewerState extends State<_ImageGalleryViewer> {
-  
   int currentPage = 0;
   @override
   void initState() {
@@ -77,12 +84,10 @@ class __ImageGalleryViewerState extends State<_ImageGalleryViewer> {
         centerTitle: true,
       ),
       body: ExtendedImageGesturePageView.builder(
-        controller: PageController(
-          initialPage: widget.currentIndex
-        ),
+        controller: ExtendedPageController(initialPage: widget.currentIndex),
         onPageChanged: (newIndex) {
           setState(() {
-           currentPage = newIndex + 1; 
+            currentPage = newIndex + 1;
           });
         },
         itemCount: widget.imageUrls.length,
@@ -105,17 +110,17 @@ class __ImageGalleryViewerState extends State<_ImageGalleryViewer> {
                 inPageView: false,
               ),
               fit: BoxFit.contain,
-              image: widget.isLocal ? 
-                FileImage(
-                  File(widget.imageUrls[i]),
-                ) : 
-                CachedNetworkImageProvider(
-                  widget.imageUrls[i],
-                ),
+              image: widget.isLocal
+                  ? FileImage(
+                      File(widget.imageUrls[i]),
+                    )
+                  : CachedNetworkImageProvider(
+                      widget.imageUrls[i],
+                    ),
             ),
           ),
         ),
       ),
-    ); 
+    );
   }
 }
