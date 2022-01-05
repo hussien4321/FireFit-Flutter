@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '../../../../front_end/helper_widgets.dart';
 
 class LimitedFeatureSticker extends StatelessWidget {
-
   final String title, message, unlimitedMessage;
   final bool isFull;
   final bool hasSubscription;
@@ -21,56 +20,56 @@ class LimitedFeatureSticker extends StatelessWidget {
     this.mainAxisAlignment = MainAxisAlignment.start,
     this.initialPage = 0,
     this.onUpdateSubscriptionStatus,
-  }); 
+  });
 
   @override
   Widget build(BuildContext context) {
-    return hasSubscription ? _unlimitedSticker(context): _limitSticker(context);
+    return hasSubscription
+        ? _unlimitedSticker(context)
+        : _limitSticker(context);
   }
 
-  Widget _unlimitedSticker(BuildContext context){
+  Widget _unlimitedSticker(BuildContext context) {
     return Text(
       unlimitedMessage,
-      style: Theme.of(context).textTheme.headline5.copyWith(
-        color: Color.fromRGBO(225, 173, 0, 1.0),
-        fontWeight: FontWeight.bold
-      ),
+      style: Theme.of(context).textTheme.subtitle1.copyWith(
+          color: Color.fromRGBO(225, 173, 0, 1.0), fontWeight: FontWeight.bold),
     );
   }
 
   Widget _limitSticker(BuildContext context) {
     return InkWell(
-      onTap: () => SubscriptionDialog.launch(context,
+      onTap: () => SubscriptionDialog.launch(
+        context,
         title: title,
         benefit: benefit,
         initialPage: initialPage,
         onUpdateSubscriptionStatus: onUpdateSubscriptionStatus,
       ),
       child: Padding(
-        padding: EdgeInsets.all(4),
-        child: Row(
-          mainAxisAlignment: mainAxisAlignment,
-          mainAxisSize: MainAxisSize.min,
-          children: <Widget>[
-            Text(
-              message,
-              style: Theme.of(context).textTheme.headline5.copyWith(
-                color: isFull ? Colors.red : Colors.blue,
-                fontWeight: isFull ? FontWeight.bold : FontWeight.normal,
+          padding: EdgeInsets.all(4),
+          child: Row(
+            mainAxisAlignment: mainAxisAlignment,
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Text(
+                message,
+                style: Theme.of(context).textTheme.subtitle1.copyWith(
+                      color: isFull ? Colors.red : Colors.blue,
+                      fontWeight: isFull ? FontWeight.bold : FontWeight.normal,
+                    ),
+                textAlign: TextAlign.center,
               ),
-              textAlign: TextAlign.center,
-            ),
-            Padding(
-              padding: EdgeInsets.only(left: 4.0),
-              child: Image.asset(
-                'assets/flame_gold_plus_4.png',
-                width: 20,
-                height: 20,
+              Padding(
+                padding: EdgeInsets.only(left: 4.0),
+                child: Image.asset(
+                  'assets/flame_gold_plus_4.png',
+                  width: 20,
+                  height: 20,
+                ),
               ),
-            ),
-          ],
-        )
-      ),
+            ],
+          )),
     );
   }
 }

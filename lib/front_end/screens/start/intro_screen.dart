@@ -14,8 +14,6 @@ class IntroScreen extends StatefulWidget {
 }
 
 class _IntroScreenState extends State<IntroScreen> {
-
-  
   UserBloc _userBloc;
   List<StreamSubscription<dynamic>> _subscriptions;
 
@@ -41,14 +39,15 @@ class _IntroScreenState extends State<IntroScreen> {
   }
 
   _initBlocs() {
-    if(_userBloc == null){
+    if (_userBloc == null) {
       _userBloc = UserBlocProvider.of(context);
       _subscriptions = <StreamSubscription<dynamic>>[
         _userBloc.successMessage.listen((message) => toast(message)),
       ];
     }
   }
-  _brightenStatusBar(){
+
+  _brightenStatusBar() {
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
       statusBarIconBrightness: Brightness.light,
       statusBarColor: Colors.transparent,
@@ -58,40 +57,32 @@ class _IntroScreenState extends State<IntroScreen> {
   Widget _splashImage() {
     return SizedBox.expand(
       child: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              Colors.orange,
-              Colors.redAccent
+          decoration: BoxDecoration(
+              gradient: LinearGradient(
+                  colors: [Colors.orange, Colors.redAccent],
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter)),
+          foregroundDecoration: BoxDecoration(color: Colors.black38),
+          child: AnimatedPictureFrame(
+            images: [
+              'assets/splash/splash_screen1.jpg',
+              'assets/splash/splash_screen2.jpg',
+              'assets/splash/splash_screen3.jpg',
+              'assets/splash/splash_screen4.jpg',
+              'assets/splash/splash_screen5.jpg',
+              'assets/splash/splash_screen6.jpg',
+              'assets/splash/splash_screen7.jpg',
+              'assets/splash/splash_screen8.jpg',
+              'assets/splash/splash_screen9.jpg',
+              'assets/splash/splash_screen10.jpg',
+              'assets/splash/splash_screen11.jpg',
             ],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter
-          )
-        ),
-        foregroundDecoration: BoxDecoration(
-          color: Colors.black38
-        ),
-        child:AnimatedPictureFrame(
-          images: [
-            'assets/splash/splash_screen1.jpg',      
-            'assets/splash/splash_screen2.jpg',      
-            'assets/splash/splash_screen3.jpg',            
-            'assets/splash/splash_screen4.jpg',            
-            'assets/splash/splash_screen5.jpg',            
-            'assets/splash/splash_screen6.jpg',            
-            'assets/splash/splash_screen7.jpg',            
-            'assets/splash/splash_screen8.jpg',            
-            'assets/splash/splash_screen9.jpg',            
-            'assets/splash/splash_screen10.jpg',            
-            'assets/splash/splash_screen11.jpg',             
-          ],
-          fit: BoxFit.cover,
-        )
-      ),
+            fit: BoxFit.cover,
+          )),
     );
   }
 
-  Widget _introWidgets(BuildContext context){
+  Widget _introWidgets(BuildContext context) {
     return SafeArea(
       child: Column(
         children: <Widget>[
@@ -102,11 +93,11 @@ class _IntroScreenState extends State<IntroScreen> {
               child: Center(
                 child: Text(
                   'Feel more confident in your own style',
-                  style: Theme.of(context).textTheme.headline6.copyWith(
-                    color: Colors.white, 
-                    fontWeight: FontWeight.w300, 
-                    fontStyle: FontStyle.italic,
-                  ),
+                  style: Theme.of(context).textTheme.headline5.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w300,
+                        fontStyle: FontStyle.italic,
+                      ),
                   textAlign: TextAlign.center,
                 ),
               ),
@@ -125,8 +116,11 @@ class _IntroScreenState extends State<IntroScreen> {
             child: FlatButton(
               child: Text(
                 'Already have an account? Log in',
-                style: Theme.of(context).textTheme.button.apply(color: Colors.white),
-              ),  
+                style: Theme.of(context)
+                    .textTheme
+                    .button
+                    .apply(color: Colors.white),
+              ),
               onPressed: () => _logInUser(context),
             ),
           )
@@ -134,6 +128,7 @@ class _IntroScreenState extends State<IntroScreen> {
       ),
     );
   }
+
   _registerUser(BuildContext context) async {
     await CustomNavigator.goToLogInScreen(context, isRegistering: true);
     _brightenStatusBar();

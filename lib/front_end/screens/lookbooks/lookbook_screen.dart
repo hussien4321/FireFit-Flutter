@@ -11,7 +11,6 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 enum LookbookOption { EDIT, DELETE }
 
 class LookbookScreen extends StatefulWidget {
-
   final Lookbook lookbook;
 
   LookbookScreen({this.lookbook});
@@ -20,9 +19,7 @@ class LookbookScreen extends StatefulWidget {
   _LookbookScreenState createState() => _LookbookScreenState();
 }
 
-
 class _LookbookScreenState extends State<LookbookScreen> {
-
   OutfitBloc _outfitBloc;
   String userId;
 
@@ -45,15 +42,13 @@ class _LookbookScreenState extends State<LookbookScreen> {
     return CustomScaffold(
       resizeToAvoidBottomPadding: false,
       title: 'Your lookbook',
-      actions: <Widget>[
-        _lookbookOptions()
-      ],
+      actions: <Widget>[_lookbookOptions()],
       body: _body(),
     );
   }
-  
+
   _initBlocs() async {
-    if(_outfitBloc==null){
+    if (_outfitBloc == null) {
       _outfitBloc = OutfitBlocProvider.of(context);
       userId = await UserBlocProvider.of(context).existingAuthId.first;
       await _loadFiltersFromPreferences();
@@ -64,31 +59,33 @@ class _LookbookScreenState extends State<LookbookScreen> {
       ));
     }
   }
+
   _loadFiltersFromPreferences() async {
-    final newSortByTop = await preferences.getPreference(Preferences.LOOKBOOK_SORT_BY_TOP);
+    final newSortByTop =
+        await preferences.getPreference(Preferences.LOOKBOOK_SORT_BY_TOP);
     setState(() {
       isSortingByTop = newSortByTop;
     });
   }
 
-
-
-  Widget _lookbookOptions(){
+  Widget _lookbookOptions() {
     List<LookbookOption> availableOptions = LookbookOption.values;
-    return availableOptions.isEmpty ? Container() : PopupMenuButton<LookbookOption>(
-      onSelected: (option) => _optionAction(option),
-      itemBuilder: (BuildContext context) {
-        return availableOptions.map((LookbookOption option) {
-          return PopupMenuItem<LookbookOption>(
-            value: option,
-            child: Text(_optionToString(option)),
+    return availableOptions.isEmpty
+        ? Container()
+        : PopupMenuButton<LookbookOption>(
+            onSelected: (option) => _optionAction(option),
+            itemBuilder: (BuildContext context) {
+              return availableOptions.map((LookbookOption option) {
+                return PopupMenuItem<LookbookOption>(
+                  value: option,
+                  child: Text(_optionToString(option)),
+                );
+              }).toList();
+            },
           );
-        }).toList();
-      },
-    );
   }
 
-  String _optionToString(LookbookOption option){
+  String _optionToString(LookbookOption option) {
     switch (option) {
       case LookbookOption.EDIT:
         return 'Edit';
@@ -99,7 +96,7 @@ class _LookbookScreenState extends State<LookbookScreen> {
     }
   }
 
-  _optionAction(LookbookOption option){
+  _optionAction(LookbookOption option) {
     switch (option) {
       case LookbookOption.EDIT:
         _editOutfit();
@@ -113,47 +110,47 @@ class _LookbookScreenState extends State<LookbookScreen> {
   }
 
   _editOutfit() => NewLookbookDialog.launch(context, lookbookToEdit: lookbook);
-  
-  _confirmDelete(){
+
+  _confirmDelete() {
     return showDialog(
-      context: context,
-      builder: (secondContext) {
-        return YesNoDialog(
-          title: 'Delete Lookbook',
-          description: 'Are you sure you want to delete this lookbook?',
-          yesText: 'Yes',
-          noText: 'Cancel',
-          onYes: () {
-            _outfitBloc.deleteLookbook.add(lookbook);
-            Navigator.pop(context);
-          },
-          onDone: () {
-            Navigator.pop(context);
-          },
-        );
-      }
-    ) ?? false;
+            context: context,
+            builder: (secondContext) {
+              return YesNoDialog(
+                title: 'Delete Lookbook',
+                description: 'Are you sure you want to delete this lookbook?',
+                yesText: 'Yes',
+                noText: 'Cancel',
+                onYes: () {
+                  _outfitBloc.deleteLookbook.add(lookbook);
+                  Navigator.pop(context);
+                },
+                onDone: () {
+                  Navigator.pop(context);
+                },
+              );
+            }) ??
+        false;
   }
 
   Widget _body() {
     return OutfitsStream(
-      loadingStream: _outfitBloc.isLoadingItems,
-      outfitsStream: _outfitBloc.lookbookOutfits,
-      builder: (isLoading, outfits) {
-        return StreamBuilder<List<Lookbook>>(
-          stream: _outfitBloc.lookbooks,
-          builder: (ctx, lookbooksSnap) {
-            if(lookbooksSnap.hasData && lookbooksSnap.data != null){
-              lookbook = lookbooksSnap.data.firstWhere((lb) => lb.lookbookId==lookbook?.lookbookId, orElse: () => null);
-            }
-            if(outfits.length>0){
-              outfits = sortLookbookOutfits(outfits, isSortingByTop);
-            }
-            return _outfitsGrid(isLoading, outfits);
-          }
-        );
-      }
-    );
+        loadingStream: _outfitBloc.isLoadingItems,
+        outfitsStream: _outfitBloc.lookbookOutfits,
+        builder: (isLoading, outfits) {
+          return StreamBuilder<List<Lookbook>>(
+              stream: _outfitBloc.lookbooks,
+              builder: (ctx, lookbooksSnap) {
+                if (lookbooksSnap.hasData && lookbooksSnap.data != null) {
+                  lookbook = lookbooksSnap.data.firstWhere(
+                      (lb) => lb.lookbookId == lookbook?.lookbookId,
+                      orElse: () => null);
+                }
+                if (outfits.length > 0) {
+                  outfits = sortLookbookOutfits(outfits, isSortingByTop);
+                }
+                return _outfitsGrid(isLoading, outfits);
+              });
+        });
   }
 
   Widget _lookbookDetails() {
@@ -162,13 +159,8 @@ class _LookbookScreenState extends State<LookbookScreen> {
       padding: EdgeInsets.symmetric(vertical: 4),
       margin: EdgeInsets.symmetric(vertical: 4, horizontal: 8),
       decoration: BoxDecoration(
-        border: BorderDirectional(
-          bottom: BorderSide(
-            color: Colors.black54,
-            width: 0.5
-          )
-        )
-      ),
+          border: BorderDirectional(
+              bottom: BorderSide(color: Colors.black54, width: 0.5))),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
@@ -178,24 +170,28 @@ class _LookbookScreenState extends State<LookbookScreen> {
       ),
     );
   }
-  Widget _outfitsTitle(){
+
+  Widget _outfitsTitle() {
     return Padding(
       padding: const EdgeInsets.only(bottom: 4),
       child: Text(
         lookbook?.name,
-        style: Theme.of(context).textTheme.overline,
+        style: Theme.of(context).textTheme.headline5,
       ),
     );
   }
-  Widget _outfitsDescription(){
-    bool hasDescription = lookbook?.description!=null;
+
+  Widget _outfitsDescription() {
+    bool hasDescription = lookbook?.description != null;
     return Text(
       hasDescription ? lookbook?.description : 'No description added',
-      style: hasDescription ? Theme.of(context).textTheme.headline5.apply(color: Colors.grey[700]) : Theme.of(context).textTheme.caption,
+      style: hasDescription
+          ? Theme.of(context).textTheme.subtitle1.apply(color: Colors.grey[700])
+          : Theme.of(context).textTheme.caption,
     );
   }
 
-  Widget _lookbookOutfitsManagementOptions(List<Outfit> outfits){
+  Widget _lookbookOutfitsManagementOptions(List<Outfit> outfits) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: <Widget>[
@@ -207,31 +203,30 @@ class _LookbookScreenState extends State<LookbookScreen> {
 
   Widget _removeFitButton() {
     return FlatButton(
-      child: Row(
-        children: <Widget>[
-          Padding(
-            padding: const EdgeInsets.only(right: 4.0),
-            child: Icon(
-              isEditing? Icons.remove_red_eye : Icons.edit,
-              color: Colors.black,
+        child: Row(
+          children: <Widget>[
+            Padding(
+              padding: const EdgeInsets.only(right: 4.0),
+              child: Icon(
+                isEditing ? Icons.remove_red_eye : Icons.edit,
+                color: Colors.black,
+              ),
             ),
-          ),
-          Text(
-            isEditing ? 'View' : 'Edit',
-            style: TextStyle(
-              inherit: true,
-              color: Colors.black,
-            ),
-          )
-        ],
-      ),
-      onPressed: _toggleEdit
-    );
+            Text(
+              isEditing ? 'View' : 'Edit',
+              style: TextStyle(
+                inherit: true,
+                color: Colors.black,
+              ),
+            )
+          ],
+        ),
+        onPressed: _toggleEdit);
   }
 
   _toggleEdit() {
     setState(() {
-      isEditing = !isEditing; 
+      isEditing = !isEditing;
     });
   }
 
@@ -257,14 +252,15 @@ class _LookbookScreenState extends State<LookbookScreen> {
         ],
       ),
       onPressed: enabled ? _sortList : null,
-    );  
+    );
   }
 
   _sortList() {
     setState(() {
       isSortingByTop = !isSortingByTop;
     });
-    preferences.updatePreference(Preferences.LOOKBOOK_SORT_BY_TOP, isSortingByTop);
+    preferences.updatePreference(
+        Preferences.LOOKBOOK_SORT_BY_TOP, isSortingByTop);
     _outfitBloc.loadLookbookOutfits.add(LoadOutfits(
       userId: userId,
       sortByTop: isSortingByTop,
@@ -272,7 +268,7 @@ class _LookbookScreenState extends State<LookbookScreen> {
     ));
   }
 
-  Widget _outfitsGrid(bool isLoading, List<Outfit> outfits) { 
+  Widget _outfitsGrid(bool isLoading, List<Outfit> outfits) {
     return OutfitsGrid(
       leading: Column(
         children: <Widget>[
@@ -283,7 +279,8 @@ class _LookbookScreenState extends State<LookbookScreen> {
       isLoading: isLoading,
       outfits: outfits,
       customOverlay: isEditing ? _editOverlay : null,
-      emptyText: 'You have no outfits in this lookbook.\nGo to the inspiration page to find a suitable outfit to add to the lookbook!',
+      emptyText:
+          'You have no outfits in this lookbook.\nGo to the inspiration page to find a suitable outfit to add to the lookbook!',
       onRefresh: () async {
         _outfitBloc.loadMyOutfits.add(LoadOutfits(
           userId: userId,
@@ -292,14 +289,11 @@ class _LookbookScreenState extends State<LookbookScreen> {
           forceLoad: true,
         ));
       },
-      onReachEnd: () => _outfitBloc.loadLookbookOutfits.add(
-        LoadOutfits(
-          userId: userId,        
+      onReachEnd: () => _outfitBloc.loadLookbookOutfits.add(LoadOutfits(
+          userId: userId,
           sortByTop: isSortingByTop,
           lookbookId: lookbook?.lookbookId,
-          startAfterOutfit: outfits.length == 0 ? null : outfits.last
-        )
-      ),
+          startAfterOutfit: outfits.length == 0 ? null : outfits.last)),
     );
   }
 
@@ -323,27 +317,27 @@ class _LookbookScreenState extends State<LookbookScreen> {
     );
   }
 
-
-  _confirmRemoveOutfit(Outfit outfit){
+  _confirmRemoveOutfit(Outfit outfit) {
     return showDialog(
-      context: context,
-      builder: (secondContext) {
-        return YesNoDialog(
-          title: 'Remove from lookbook',
-          description: 'Are you sure you want to remove this outfit from your lookbook?',
-          yesText: 'Yes',
-          noText: 'Cancel',
-          onYes: () {
-            _outfitBloc.deleteSave.add(DeleteSave(
-              userId: userId,
-              save: outfit.save,
-            ));
-          },
-          onDone: () {
-            Navigator.pop(context);
-          },
-        );
-      }
-    ) ?? false;
+            context: context,
+            builder: (secondContext) {
+              return YesNoDialog(
+                title: 'Remove from lookbook',
+                description:
+                    'Are you sure you want to remove this outfit from your lookbook?',
+                yesText: 'Yes',
+                noText: 'Cancel',
+                onYes: () {
+                  _outfitBloc.deleteSave.add(DeleteSave(
+                    userId: userId,
+                    save: outfit.save,
+                  ));
+                },
+                onDone: () {
+                  Navigator.pop(context);
+                },
+              );
+            }) ??
+        false;
   }
 }

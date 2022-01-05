@@ -7,7 +7,6 @@ import '../../../../../front_end/helper_widgets.dart';
 import 'package:multi_image_picker/multi_image_picker.dart';
 
 class ProfilePicPage extends StatefulWidget {
-  
   final OnboardUser onboardUser;
   final ValueChanged<OnboardUser> onSave;
   final String dirPath;
@@ -37,37 +36,35 @@ class _ProfilePicPageState extends State<ProfilePicPage> {
         title: "Say cheeeeeese!",
         children: <Widget>[
           Container(
-            padding: EdgeInsets.symmetric(horizontal: 8),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: <Widget>[
-                Container(
-                  padding: EdgeInsets.all(10.0),
-                  child: Text(
-                    'Profile picture',
-                    style: Theme.of(context).textTheme.subtitle1,
+              padding: EdgeInsets.symmetric(horizontal: 8),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: <Widget>[
+                  Container(
+                    padding: EdgeInsets.all(10.0),
+                    child: Text(
+                      'Profile picture',
+                      style: Theme.of(context).textTheme.subtitle2,
+                    ),
                   ),
-                ),
-                Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: <Widget>[
-                    // _imageViewer(context),
-                    _buildProfilePicView(),
-                    _hasProfilePicture ? _compliment(context) : Container(),
-                  ],
-                )
-              ],
-            )
-          )
+                  Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: <Widget>[
+                      // _imageViewer(context),
+                      _buildProfilePicView(),
+                      _hasProfilePicture ? _compliment(context) : Container(),
+                    ],
+                  )
+                ],
+              ))
         ],
       ),
     );
   }
 
   bool get _hasProfilePicture => widget.onboardUser.profilePicUrl != null;
-
 
   Widget _compliment(BuildContext context) {
     return Padding(
@@ -105,48 +102,42 @@ class _ProfilePicPageState extends State<ProfilePicPage> {
     return Container(
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        boxShadow: [
-          BoxShadow(
-            blurRadius: 3,
-            color: Colors.black54
-          )
-        ],
+        boxShadow: [BoxShadow(blurRadius: 3, color: Colors.black54)],
         color: Colors.grey,
       ),
-      child: !loadingImages ? 
-      _innerTagData(
-        icon: Icon(
-          Icons.camera,
-          size: 48,
-          color: Colors.white,
-        ),
-        text: 'Upload Pic',
-      ) :
-      _innerTagData(
-        icon: Theme(
-          data: ThemeData(
-            accentColor: Colors.white
-          ),
-          child: CircularProgressIndicator(),
-        ),
-        text: 'Loading...',
-      ),
-      foregroundDecoration: loadingImages || widget.onboardUser.profilePicUrl==null ? null : BoxDecoration(
-        shape: BoxShape.circle,
-        image: DecorationImage(
-          fit: BoxFit.cover,
-          image: FileImage(
-            File(widget.onboardUser.profilePicUrl),
-          )
-        )
-      ),
+      child: !loadingImages
+          ? _innerTagData(
+              icon: Icon(
+                Icons.camera,
+                size: 48,
+                color: Colors.white,
+              ),
+              text: 'Upload Pic',
+            )
+          : _innerTagData(
+              icon: Theme(
+                data: ThemeData(accentColor: Colors.white),
+                child: CircularProgressIndicator(),
+              ),
+              text: 'Loading...',
+            ),
+      foregroundDecoration:
+          loadingImages || widget.onboardUser.profilePicUrl == null
+              ? null
+              : BoxDecoration(
+                  shape: BoxShape.circle,
+                  image: DecorationImage(
+                      fit: BoxFit.cover,
+                      image: FileImage(
+                        File(widget.onboardUser.profilePicUrl),
+                      ))),
     );
   }
 
   Widget _innerTagData({
     Widget icon,
     String text,
-  }){
+  }) {
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -156,14 +147,16 @@ class _ProfilePicPageState extends State<ProfilePicPage> {
             padding: const EdgeInsets.only(top: 8.0),
             child: Text(
               text,
-              style: Theme.of(context).textTheme.overline.apply(color: Colors.white),
+              style: Theme.of(context)
+                  .textTheme
+                  .headline6
+                  .apply(color: Colors.white),
             ),
           ),
         ],
       ),
     );
   }
-
 
   Widget _editProfilePicButton() {
     return Material(
@@ -190,20 +183,18 @@ class _ProfilePicPageState extends State<ProfilePicPage> {
     setState(() => loadingImages = true);
     List<String> currentImages = [];
     List<Asset> selectedAssets = [];
-    if(widget.onboardUser.profilePicUrl!=null){
+    if (widget.onboardUser.profilePicUrl != null) {
       currentImages.add(widget.onboardUser.profilePicUrl);
       selectedAssets.add(widget.selectedAsset);
     }
-    List<String> takenImages = await SelectImages.addImages(
-      context,
-      count: 1,
-      dirPath: widget.dirPath,
-      isStillOpen: () => mounted,
-      selectedAssets: selectedAssets,
-      currentImages: currentImages,
-      title: 'Select picture'
-    );
-    if(takenImages.isNotEmpty){
+    List<String> takenImages = await SelectImages.addImages(context,
+        count: 1,
+        dirPath: widget.dirPath,
+        isStillOpen: () => mounted,
+        selectedAssets: selectedAssets,
+        currentImages: currentImages,
+        title: 'Select picture');
+    if (takenImages.isNotEmpty) {
       widget.onboardUser.profilePicUrl = takenImages.first;
       widget.onUpdateAsset(selectedAssets.first);
       widget.onSave(widget.onboardUser);

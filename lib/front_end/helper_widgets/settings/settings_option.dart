@@ -1,20 +1,19 @@
 import 'package:flutter/material.dart';
 
 class SettingsOption extends StatelessWidget {
-
   final IconData icon;
-  final Color iconColor; 
+  final Color iconColor;
   final String name;
-  final Color textColor; 
+  final Color textColor;
   final Widget action;
   final bool centerText;
   final VoidCallback onTap;
 
   SettingsOption({
-    this.icon, 
-    this.iconColor = Colors.blue, 
-    this.name, 
-    this.textColor = Colors.black, 
+    this.icon,
+    this.iconColor = Colors.blue,
+    this.name,
+    this.textColor = Colors.black,
     this.action,
     this.centerText = false,
     this.onTap,
@@ -24,22 +23,25 @@ class SettingsOption extends StatelessWidget {
   Widget build(BuildContext context) {
     Widget leading = Padding(
       padding: const EdgeInsets.only(right: 8.0),
-      child: icon == null ? Container() : Icon(
-        icon,
-        color: iconColor,
-        size: 16,
-      ),
+      child: icon == null
+          ? Container()
+          : Icon(
+              icon,
+              color: iconColor,
+              size: 16,
+            ),
     );
     Widget endContent = Opacity(
       opacity: 0.0,
       child: leading,
     );
-    if(!centerText){
-      endContent = action != null ? action :
-      Icon(
-        Icons.navigate_next,
-        color: Colors.grey,
-      );
+    if (!centerText) {
+      endContent = action != null
+          ? action
+          : Icon(
+              Icons.navigate_next,
+              color: Colors.grey,
+            );
     }
     Widget body = Container(
       width: double.infinity,
@@ -50,22 +52,22 @@ class SettingsOption extends StatelessWidget {
           Expanded(
             child: Text(
               name,
-              style: Theme.of(context).textTheme.headline5.copyWith(
-                color: textColor,
-              ),
-              textAlign: centerText ? TextAlign.center :TextAlign.start,
+              style: Theme.of(context).textTheme.subtitle1.copyWith(
+                    color: textColor,
+                  ),
+              textAlign: centerText ? TextAlign.center : TextAlign.start,
             ),
           ),
           endContent,
         ],
       ),
     );
-    if(onTap!=null){
+    if (onTap != null) {
       body = InkWell(
         onTap: onTap,
         child: body,
       );
     }
-    return body; 
+    return body;
   }
 }

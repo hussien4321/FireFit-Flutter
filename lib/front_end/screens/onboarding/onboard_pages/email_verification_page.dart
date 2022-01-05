@@ -5,13 +5,11 @@ import 'package:rxdart/rxdart.dart';
 import 'onboard_details.dart';
 
 class EmailVerificationPage extends StatefulWidget {
-  
   OnboardUser onboardUser;
   Stream<bool> currentEmailVerificationStatus;
   VoidCallback refreshVerificationEmail;
   VoidCallback resendVerificationEmail;
   ValueChanged<OnboardUser> onSave;
-
 
   EmailVerificationPage({
     @required this.onboardUser,
@@ -25,8 +23,8 @@ class EmailVerificationPage extends StatefulWidget {
   _EmailVerificationPageState createState() => _EmailVerificationPageState();
 }
 
-class _EmailVerificationPageState extends State<EmailVerificationPage> with SnackbarMessages, SingleTickerProviderStateMixin {
-  
+class _EmailVerificationPageState extends State<EmailVerificationPage>
+    with SnackbarMessages, SingleTickerProviderStateMixin {
   bool isEmailVerified = false;
 
   static final int DURATION = 10;
@@ -37,20 +35,19 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> with Snac
   bool isRefreshing = false;
 
   @override
-  initState(){
+  initState() {
     resendController = new AnimationController(
-      vsync: this,
-      duration: Duration(seconds: DURATION)
-    );
+        vsync: this, duration: Duration(seconds: DURATION));
     resendController.addStatusListener((status) {
-      if(status == AnimationStatus.completed){
+      if (status == AnimationStatus.completed) {
         resendCoolingDown = false;
         resendController.reset();
       }
     });
-    resendAnimation = IntTween(begin: DURATION, end: 0).animate(resendController);
+    resendAnimation =
+        IntTween(begin: DURATION, end: 0).animate(resendController);
     resendController.addListener(() {
-      setState((){});
+      setState(() {});
     });
     super.initState();
   }
@@ -72,19 +69,18 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> with Snac
           Container(
             padding: EdgeInsets.all(10.0),
             child: RichText(
-              text: TextSpan(
-                children: [
-                  TextSpan(
-                    text: 'A verification email has been sent to ',
-                    style: Theme.of(context).textTheme.headline5
-                  ),
-                  TextSpan(
-                    text: widget.onboardUser.email,
-                    style: Theme.of(context).textTheme.headline5.apply(fontWeightDelta: 5),
-                  ),
-                ]
-              )
-            ),
+                text: TextSpan(children: [
+              TextSpan(
+                  text: 'A verification email has been sent to ',
+                  style: Theme.of(context).textTheme.subtitle1),
+              TextSpan(
+                text: widget.onboardUser.email,
+                style: Theme.of(context)
+                    .textTheme
+                    .subtitle1
+                    .apply(fontWeightDelta: 5),
+              ),
+            ])),
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -94,11 +90,12 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> with Snac
                   children: [
                     TextSpan(
                       text: 'Status: ',
-                      style: Theme.of(context).textTheme.headline5,
+                      style: Theme.of(context).textTheme.subtitle1,
                     ),
                     TextSpan(
                       text: isEmailVerified ? 'Verified' : 'Pending',
-                      style: Theme.of(context).textTheme.headline5.apply(color: isEmailVerified ? Colors.blue : Colors.grey ),
+                      style: Theme.of(context).textTheme.subtitle1.apply(
+                          color: isEmailVerified ? Colors.blue : Colors.grey),
                     ),
                   ],
                 ),
@@ -116,13 +113,13 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> with Snac
             child: Row(
               children: <Widget>[
                 Expanded(
-                  child: RaisedButton(
-                    child: Text(
-                      resendCoolingDown ? 'Email sent (wait ${resendAnimation.value}s to resend)' : 'Resend email'
-                    ),
-                    onPressed: isEmailVerified || resendCoolingDown ? null : _resend
-                  )
-                ),
+                    child: RaisedButton(
+                        child: Text(resendCoolingDown
+                            ? 'Email sent (wait ${resendAnimation.value}s to resend)'
+                            : 'Resend email'),
+                        onPressed: isEmailVerified || resendCoolingDown
+                            ? null
+                            : _resend)),
               ],
             ),
           ),
@@ -137,8 +134,9 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> with Snac
     });
     widget.refreshVerificationEmail();
     displayNoticeSnackBar(context, 'Refreshing verification status');
-    bool newVerificationStatus = await widget.currentEmailVerificationStatus.first;
-    if(newVerificationStatus){
+    bool newVerificationStatus =
+        await widget.currentEmailVerificationStatus.first;
+    if (newVerificationStatus) {
       isEmailVerified = true;
       widget.onSave(widget.onboardUser);
     }
@@ -151,7 +149,7 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> with Snac
     widget.resendVerificationEmail();
     displayNoticeSnackBar(context, 'Email sent');
     setState(() {
-      resendCoolingDown = true; 
+      resendCoolingDown = true;
     });
     resendController.forward();
   }

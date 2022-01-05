@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '../../../../front_end/helper_widgets.dart';
 
 class QuestionAndAnswer extends StatefulWidget {
-
   final String question, answer;
 
   QuestionAndAnswer({this.question, this.answer});
@@ -12,7 +11,6 @@ class QuestionAndAnswer extends StatefulWidget {
 }
 
 class _QuestionAndAnswerState extends State<QuestionAndAnswer> {
-
   bool isOpen = false;
 
   @override
@@ -31,6 +29,7 @@ class _QuestionAndAnswerState extends State<QuestionAndAnswer> {
       ],
     );
   }
+
   Widget _answer() {
     return Container(
       width: double.infinity,
@@ -38,10 +37,10 @@ class _QuestionAndAnswerState extends State<QuestionAndAnswer> {
       color: Colors.grey[100],
       child: Text(
         widget.answer,
-        style: Theme.of(context).textTheme.headline5.copyWith(
-          fontStyle: FontStyle.italic,
-          color: Colors.blue
-        ),
+        style: Theme.of(context)
+            .textTheme
+            .subtitle1
+            .copyWith(fontStyle: FontStyle.italic, color: Colors.blue),
       ),
     );
   }

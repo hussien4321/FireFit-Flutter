@@ -7,8 +7,8 @@ import '../../../../helpers/helpers.dart';
 import '../../../../helpers/helpers.dart';
 import '../../../../front_end/helper_widgets.dart';
 import 'dart:math';
-class WardrobeScreen extends StatefulWidget {
 
+class WardrobeScreen extends StatefulWidget {
   final ValueChanged<ScrollController> onScrollChange;
 
   WardrobeScreen({this.onScrollChange});
@@ -18,7 +18,6 @@ class WardrobeScreen extends StatefulWidget {
 }
 
 class _WardrobeScreenState extends State<WardrobeScreen> {
-
   OutfitBloc _outfitBloc;
   UserBloc _userBloc;
   String userId;
@@ -33,20 +32,21 @@ class _WardrobeScreenState extends State<WardrobeScreen> {
     super.initState();
     _generateRandomMessage();
   }
-  _generateRandomMessage(){
-    Random random =Random();
+
+  _generateRandomMessage() {
+    Random random = Random();
     List<String> allMessages = FashionMessages.MOTIVATIONAL_MESSAGES;
     motivationalMessage = allMessages[random.nextInt(allMessages.length)];
   }
-   
+
   @override
   Widget build(BuildContext context) {
     _initBlocs();
     return _outfitsGrid();
   }
-  
+
   _initBlocs() async {
-    if(_outfitBloc==null){
+    if (_outfitBloc == null) {
       _outfitBloc = OutfitBlocProvider.of(context);
       _userBloc = UserBlocProvider.of(context);
       userId = await _userBloc.existingAuthId.first;
@@ -55,25 +55,27 @@ class _WardrobeScreenState extends State<WardrobeScreen> {
   }
 
   _loadFiltersFromPreferences() async {
-    final newSortByTop = await preferences.getPreference(Preferences.WARDROBE_SORT_BY_TOP);
+    final newSortByTop =
+        await preferences.getPreference(Preferences.WARDROBE_SORT_BY_TOP);
     setState(() {
       isSortingByTop = newSortByTop;
     });
   }
 
-  Widget _wardrobeMotivation(){
+  Widget _wardrobeMotivation() {
     return Container(
       width: double.infinity,
       child: Padding(
         padding: const EdgeInsets.only(left: 8.0, right: 8, top: 8),
         child: Container(
-          child: Text( 
+          child: Text(
             motivationalMessage,
-            style: Theme.of(context).textTheme.headline5.copyWith(
-              color: Colors.deepOrange,
-              fontStyle: FontStyle.italic
-              // fontWeight: FontWeight.w300,
-            ),
+            style: Theme.of(context)
+                .textTheme
+                .subtitle1
+                .copyWith(color: Colors.deepOrange, fontStyle: FontStyle.italic
+                    // fontWeight: FontWeight.w300,
+                    ),
             textAlign: TextAlign.center,
           ),
         ),
@@ -93,17 +95,21 @@ class _WardrobeScreenState extends State<WardrobeScreen> {
       ),
     );
   }
-  Widget _outfitsCount(User user){
-    return user==null ? Container() : Text(
-      '${user.numberOfOutfits} Upload${user.numberOfOutfits==1?'':'s'}',
-      style: Theme.of(context).textTheme.overline.apply(
-        color: Colors.black54
-      ),
-    );
+
+  Widget _outfitsCount(User user) {
+    return user == null
+        ? Container()
+        : Text(
+            '${user.numberOfOutfits} Upload${user.numberOfOutfits == 1 ? '' : 's'}',
+            style: Theme.of(context)
+                .textTheme
+                .headline6
+                .apply(color: Colors.black54),
+          );
   }
 
   Widget _sortingButton(User user) {
-    bool enabled = user!=null && user.numberOfOutfits > 0;
+    bool enabled = user != null && user.numberOfOutfits > 0;
     return FlatButton(
       child: Row(
         children: <Widget>[
@@ -121,20 +127,20 @@ class _WardrobeScreenState extends State<WardrobeScreen> {
         ],
       ),
       onPressed: enabled ? _sortList : null,
-    ); 
+    );
   }
 
   _sortList() {
     setState(() {
       isSortingByTop = !isSortingByTop;
     });
-    preferences.updatePreference(Preferences.WARDROBE_SORT_BY_TOP, isSortingByTop);
+    preferences.updatePreference(
+        Preferences.WARDROBE_SORT_BY_TOP, isSortingByTop);
     _outfitBloc.loadMyOutfits.add(LoadOutfits(
       userId: userId,
       sortByTop: isSortingByTop,
     ));
   }
-
 
   Widget _outfitsGrid() {
     return UserStream(
@@ -150,7 +156,7 @@ class _WardrobeScreenState extends State<WardrobeScreen> {
             builder: (ctx, outfitsSnap) {
               bool isLoading = isLoadingSnap.data || isLoadingUser;
               List<Outfit> outfits = outfitsSnap.data;
-              if(outfits.isNotEmpty){
+              if (outfits.isNotEmpty) {
                 outfits = sortOutfits(outfits, isSortingByTop);
               }
               return OutfitsGrid(
@@ -161,7 +167,8 @@ class _WardrobeScreenState extends State<WardrobeScreen> {
                     _wardrobeSortOptions(streamUser),
                   ],
                 ),
-                emptyText: 'You have no outfits in your wardrobe, upload a new outfit to display it here',
+                emptyText:
+                    'You have no outfits in your wardrobe, upload a new outfit to display it here',
                 isLoading: isLoading,
                 outfits: outfitsSnap.data,
                 onRefresh: () async {
@@ -171,13 +178,11 @@ class _WardrobeScreenState extends State<WardrobeScreen> {
                     sortByTop: isSortingByTop,
                   ));
                 },
-                onReachEnd: () => (_outfitBloc.loadMyOutfits).add(
-                  LoadOutfits(
-                    userId: userId,
-                    startAfterOutfit: outfitsSnap.data.last,
-                    sortByTop: isSortingByTop,
-                  )
-                ),
+                onReachEnd: () => (_outfitBloc.loadMyOutfits).add(LoadOutfits(
+                  userId: userId,
+                  startAfterOutfit: outfitsSnap.data.last,
+                  sortByTop: isSortingByTop,
+                )),
               );
             },
           );

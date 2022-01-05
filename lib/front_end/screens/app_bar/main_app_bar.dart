@@ -21,10 +21,10 @@ import 'package:flutter/rendering.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 
 class MainAppBar extends StatefulWidget {
-
   final FirebaseMessaging messaging;
 
-  MainAppBar({Key key,
+  MainAppBar({
+    Key key,
     @required this.messaging,
   }) : super(key: key);
 
@@ -33,8 +33,10 @@ class MainAppBar extends StatefulWidget {
 }
 
 class _MainAppBarState extends State<MainAppBar> {
-  final GlobalKey<InnerDrawerState> _dmDrawerKey = GlobalKey<InnerDrawerState>();
-  final GlobalKey<InnerDrawerState> _menuDrawerKey = GlobalKey<InnerDrawerState>();
+  final GlobalKey<InnerDrawerState> _dmDrawerKey =
+      GlobalKey<InnerDrawerState>();
+  final GlobalKey<InnerDrawerState> _menuDrawerKey =
+      GlobalKey<InnerDrawerState>();
 
   Preferences _preferences = Preferences();
 
@@ -45,9 +47,10 @@ class _MainAppBarState extends State<MainAppBar> {
 
   List<StreamSubscription<dynamic>> _subscriptions;
 
-  OverlaySupportEntry _entry; 
+  OverlaySupportEntry _entry;
 
-  BehaviorSubject<bool> _isSliderOpenController =BehaviorSubject<bool>.seeded(false);
+  BehaviorSubject<bool> _isSliderOpenController =
+      BehaviorSubject<bool>.seeded(false);
 
   String userId;
 
@@ -58,16 +61,17 @@ class _MainAppBarState extends State<MainAppBar> {
   int currentIndex = 0;
 
   int numberOfPages = 4;
-  
+
   List<String> pages = AppConfig.MAIN_PAGES;
-  bool useSecondaryAdmobId = RemoteConfigHelpers.defaults[RemoteConfigHelpers.USE_SECONDARY_ADMOB_ID_KEY];
+  bool useSecondaryAdmobId = RemoteConfigHelpers
+      .defaults[RemoteConfigHelpers.USE_SECONDARY_ADMOB_ID_KEY];
 
   @override
   void initState() {
     super.initState();
     _loadSubscriptionStatus();
-    SystemChannels.lifecycle.setMessageHandler((msg){
-      if(msg==AppLifecycleState.resumed.toString()) {
+    SystemChannels.lifecycle.setMessageHandler((msg) {
+      if (msg == AppLifecycleState.resumed.toString()) {
         _loadNewNotifications();
         return null;
       }
@@ -78,30 +82,35 @@ class _MainAppBarState extends State<MainAppBar> {
   _loadRemoteConfig() async {
     await RemoteConfigHelpers.fetchValues();
     final remoteConfig = RemoteConfig.instance;
-    bool newUseSecondaryAdmobId = remoteConfig.getBool(RemoteConfigHelpers.USE_SECONDARY_ADMOB_ID_KEY);
-    if(useSecondaryAdmobId != newUseSecondaryAdmobId){
-      _preferences.updatePreference(Preferences.USE_SECONDARY_ADMOB_ID, newUseSecondaryAdmobId);
+    bool newUseSecondaryAdmobId =
+        remoteConfig.getBool(RemoteConfigHelpers.USE_SECONDARY_ADMOB_ID_KEY);
+    if (useSecondaryAdmobId != newUseSecondaryAdmobId) {
+      _preferences.updatePreference(
+          Preferences.USE_SECONDARY_ADMOB_ID, newUseSecondaryAdmobId);
       useSecondaryAdmobId = newUseSecondaryAdmobId;
     }
   }
 
   _loadSubscriptionStatus() async {
-    useSecondaryAdmobId = await _preferences.getPreference(Preferences.USE_SECONDARY_ADMOB_ID);
-    bool newHasSubscription = await _preferences.getPreference(Preferences.HAS_SUBSCRIPTION_ACTIVE);
+    useSecondaryAdmobId =
+        await _preferences.getPreference(Preferences.USE_SECONDARY_ADMOB_ID);
+    bool newHasSubscription =
+        await _preferences.getPreference(Preferences.HAS_SUBSCRIPTION_ACTIVE);
     setState(() {
       hasSubscription = newHasSubscription;
     });
-    if(hasSubscription){
+    if (hasSubscription) {
       await _verifySubscriptionIsStillActive();
     }
-    if(!hasSubscription){
+    if (!hasSubscription) {
       myInterstitial = createInterstitialAd();
     }
   }
-  
+
   _verifySubscriptionIsStillActive() async {
-    try{
-      bool newHasSubscription = await FlutterInappPurchase.instance.checkSubscribed(sku: AdmobTools.subscriptionId.first);
+    try {
+      bool newHasSubscription = await FlutterInappPurchase.instance
+          .checkSubscribed(sku: AdmobTools.subscriptionId.first);
       setState(() {
         hasSubscription = newHasSubscription;
       });
@@ -113,19 +122,18 @@ class _MainAppBarState extends State<MainAppBar> {
       adUnitId: AdmobTools.adUnitId,
       targetingInfo: AdmobTools.targetingInfo,
       listener: (MobileAdEvent event) {
-        if(event == MobileAdEvent.closed){
+        if (event == MobileAdEvent.closed) {
           myInterstitial = createInterstitialAd()..load();
         }
       },
     )..load();
   }
 
-
   _showAd() async {
-    if(!hasSubscription){
+    if (!hasSubscription) {
       bool isLoaded = await myInterstitial.isLoaded();
-      if(!isLoaded){
-        try{
+      if (!isLoaded) {
+        try {
           await myInterstitial.load();
         } on PlatformException {
           myInterstitial = createInterstitialAd();
@@ -136,13 +144,14 @@ class _MainAppBarState extends State<MainAppBar> {
   }
 
   _checkNotificationsPermission() async {
-    try{
+    try {
       await PermissionsChecker.checkNotificationsPermission();
     } on PlatformException {
-      PermissionDialog.launch(context, permissionType: PermissionType.NOTIFICATIONS);
+      PermissionDialog.launch(context,
+          permissionType: PermissionType.NOTIFICATIONS);
     }
   }
-  
+
   @override
   void dispose() {
     super.dispose();
@@ -152,77 +161,75 @@ class _MainAppBarState extends State<MainAppBar> {
     myInterstitial = null;
   }
 
-
   @override
   Widget build(BuildContext context) {
     _initBlocs();
     return Scaffold(
       resizeToAvoidBottomInset: false,
       body: _buildNotificationsScaffold(
-        body: _buildMenuScaffold(
-          body: IndexedStack(
-            index: currentIndex,
-            sizing: StackFit.expand,
-            children: <Widget>[
-              ExploreScreen(
-                onShowAd: _showAd,
-                hasSubscription: hasSubscription,
-                onUpdateSubscriptionStatus: _onUpdateSubscriptionStatus,
-              ),
-              FeedScreen(
-                onScrollChange: _onScrollChange,
-              ),
-              WardrobeScreen(
-                onScrollChange: _onScrollChange,
-              ),
-              LookbooksScreen(
-                hasSubscription: hasSubscription,
-                onUpdateSubscriptionStatus: _onUpdateSubscriptionStatus,
-                onScrollChange: _onScrollChange,
-              ),
-            ],
-          )
-        )
-      ),
+          body: _buildMenuScaffold(
+              body: IndexedStack(
+        index: currentIndex,
+        sizing: StackFit.expand,
+        children: <Widget>[
+          ExploreScreen(
+            onShowAd: _showAd,
+            hasSubscription: hasSubscription,
+            onUpdateSubscriptionStatus: _onUpdateSubscriptionStatus,
+          ),
+          FeedScreen(
+            onScrollChange: _onScrollChange,
+          ),
+          WardrobeScreen(
+            onScrollChange: _onScrollChange,
+          ),
+          LookbooksScreen(
+            hasSubscription: hasSubscription,
+            onUpdateSubscriptionStatus: _onUpdateSubscriptionStatus,
+            onScrollChange: _onScrollChange,
+          ),
+        ],
+      ))),
     );
   }
 
-  _onScrollChange(ScrollController controller){
+  _onScrollChange(ScrollController controller) {
     bool isAtStart = controller.offset == 0.0;
-    bool isScrollingDown = controller.position.userScrollDirection != ScrollDirection.forward;
-    
+    bool isScrollingDown =
+        controller.position.userScrollDirection != ScrollDirection.forward;
+
     _isScrollingDown(isScrollingDown && !isAtStart);
   }
 
-  _isScrollingDown(bool newIsScrollingDown){
-    if(newIsScrollingDown != hideBars){
+  _isScrollingDown(bool newIsScrollingDown) {
+    if (newIsScrollingDown != hideBars) {
       setState(() {
-       hideBars = newIsScrollingDown; 
+        hideBars = newIsScrollingDown;
       });
     }
   }
 
   _initBlocs() async {
-    if(_userBloc == null){
+    if (_userBloc == null) {
       _logCurrentScreen();
       _userBloc = UserBlocProvider.of(context);
-      _outfitBloc =OutfitBlocProvider.of(context);
+      _outfitBloc = OutfitBlocProvider.of(context);
       _notificationBloc = NotificationBlocProvider.of(context);
-      _commentBloc =CommentBlocProvider.of(context);
+      _commentBloc = CommentBlocProvider.of(context);
       _subscriptions = <StreamSubscription<dynamic>>[
         _tokenRefreshListener(),
         _logInStatusListener(),
         _showAdsListener(),
-      ]..addAll(_successToastListeners())
-      ..addAll(_uploadImagesListeners())
-      ..addAll(_errorListeners());
+      ]
+        ..addAll(_successToastListeners())
+        ..addAll(_uploadImagesListeners())
+        ..addAll(_errorListeners());
       _userBloc.loadCurrentUser.add(null);
       _userBloc.refreshVerificationEmail.add(null);
       userId = await _userBloc.existingAuthId.first;
       _registerNotificationToken();
-      _notificationBloc.loadStaticNotifications.add(LoadNotifications(
-        userId: userId
-      ));
+      _notificationBloc.loadStaticNotifications
+          .add(LoadNotifications(userId: userId));
       String token = await widget.messaging.getToken();
       _notificationBloc.updateNotificationToken.add(UpdateToken(
         userId: userId,
@@ -235,7 +242,7 @@ class _MainAppBarState extends State<MainAppBar> {
     }
   }
 
-  _registerNotificationToken() async { 
+  _registerNotificationToken() async {
     String notificationToken = await widget.messaging.getToken();
     return _notificationBloc.updateNotificationToken.add(UpdateToken(
       userId: userId,
@@ -243,61 +250,64 @@ class _MainAppBarState extends State<MainAppBar> {
     ));
   }
 
-  _logCurrentScreen() => AnalyticsEvents(context).logCustomScreen('/${AppConfig.MAIN_PAGES_PATHS[currentIndex]}');
+  _logCurrentScreen() => AnalyticsEvents(context)
+      .logCustomScreen('/${AppConfig.MAIN_PAGES_PATHS[currentIndex]}');
 
   dynamic _handleNotification(Map<String, dynamic> payload) {
     dynamic dataMessageType;
-    if(Platform.isAndroid){
+    if (Platform.isAndroid) {
       dataMessageType = payload['data'];
-      if(dataMessageType != null){
+      if (dataMessageType != null) {
         dataMessageType = dataMessageType['type'];
       }
     } else {
       dataMessageType = payload['type'];
     }
     bool isDataMessage = dataMessageType != null && !dataMessageType.isEmpty;
-    if(isDataMessage){
-      if(dataMessageType == "new-device"){
+    if (isDataMessage) {
+      if (dataMessageType == "new-device") {
         _userBloc.logOut.add(null);
       }
-    }else{
+    } else {
       _loadNewNotifications();
     }
   }
 
   _loadNewNotifications() {
-    _notificationBloc.loadLiveNotifications.add(LoadNotifications(
-      userId: userId
-    ));
+    _notificationBloc.loadLiveNotifications
+        .add(LoadNotifications(userId: userId));
   }
 
-  StreamSubscription _tokenRefreshListener() => widget.messaging.onTokenRefresh.listen((newToken) => _notificationBloc.updateNotificationToken.add(UpdateToken(
-    userId: userId,
-    token: newToken,
-  )));
-  
-  StreamSubscription _showAdsListener() { 
+  StreamSubscription _tokenRefreshListener() =>
+      widget.messaging.onTokenRefresh.listen((newToken) =>
+          _notificationBloc.updateNotificationToken.add(UpdateToken(
+            userId: userId,
+            token: newToken,
+          )));
+
+  StreamSubscription _showAdsListener() {
     return _outfitBloc.showAd.listen((i) => _showAd());
   }
 
-  StreamSubscription _logInStatusListener() { 
+  StreamSubscription _logInStatusListener() {
     return _userBloc.accountStatus.listen((accountStatus) {
-      if(accountStatus!=null && accountStatus != UserAccountStatus.LOGGED_IN){
-        if(accountStatus ==UserAccountStatus.LOGGED_OUT){
+      if (accountStatus != null &&
+          accountStatus != UserAccountStatus.LOGGED_IN) {
+        if (accountStatus == UserAccountStatus.LOGGED_OUT) {
           AnalyticsEvents(context).logOut();
         }
-        CustomNavigator.goToPageAtRoot(context, RouteConverters.getFromAccountStatus(accountStatus));
+        CustomNavigator.goToPageAtRoot(
+            context, RouteConverters.getFromAccountStatus(accountStatus));
       }
     });
   }
 
-  
-  List<StreamSubscription> _errorListeners() => [ 
-    _userBloc.hasError.listen((message) => _errorDialog(message)),
-    _outfitBloc.hasError.listen((message) => _errorDialog(message)),
-  ];
+  List<StreamSubscription> _errorListeners() => [
+        _userBloc.hasError.listen((message) => _errorDialog(message)),
+        _outfitBloc.hasError.listen((message) => _errorDialog(message)),
+      ];
 
-  _errorDialog(String message){
+  _errorDialog(String message) {
     ErrorDialog.launch(
       context,
       message: message,
@@ -305,84 +315,79 @@ class _MainAppBarState extends State<MainAppBar> {
   }
 
   List<StreamSubscription> _successToastListeners() => [
-    _userBloc.successMessage.listen((message) => toast(message)),
-    _outfitBloc.successMessage.listen((message) => toast(message)),
-    _notificationBloc.successMessage.listen((message) => toast(message)),
-    _commentBloc.successMessage.listen((message) => toast(message)),
-  ];
+        _userBloc.successMessage.listen((message) => toast(message)),
+        _outfitBloc.successMessage.listen((message) => toast(message)),
+        _notificationBloc.successMessage.listen((message) => toast(message)),
+        _commentBloc.successMessage.listen((message) => toast(message)),
+      ];
 
   List<StreamSubscription> _uploadImagesListeners() => [
-    _outfitBloc.isBackgroundLoading.listen((isLoading) {
-      if(isLoading){
-        _entry = _backgroundLoadingOverlay('Uploading Outfit');
-      }else{
-        _closeOverlay();
-      }
-    }),
-    _userBloc.isBackgroundLoading.listen((isLoading) {
-      if(isLoading){
-        _entry = _backgroundLoadingOverlay('Updating Profile');
-      }else{
-        _closeOverlay();
-      }
-    }),
-  ];
-  
+        _outfitBloc.isBackgroundLoading.listen((isLoading) {
+          if (isLoading) {
+            _entry = _backgroundLoadingOverlay('Uploading Outfit');
+          } else {
+            _closeOverlay();
+          }
+        }),
+        _userBloc.isBackgroundLoading.listen((isLoading) {
+          if (isLoading) {
+            _entry = _backgroundLoadingOverlay('Updating Profile');
+          } else {
+            _closeOverlay();
+          }
+        }),
+      ];
 
   Widget _buildNotificationsScaffold({Widget body}) {
     return InnerDrawer(
-      key: _dmDrawerKey,
-      onTapClose: true,
-      swipe: false,
-      offset: IDOffset.horizontal(0.7),
-      rightAnimationType: InnerDrawerAnimation.linear,
-      rightChild: NotificationsScreen(),
-      innerDrawerCallback: _updateMainScreenDimming,
-      scaffold: body
-    );
+        key: _dmDrawerKey,
+        onTapClose: true,
+        swipe: false,
+        offset: IDOffset.horizontal(0.7),
+        rightAnimationType: InnerDrawerAnimation.linear,
+        rightChild: NotificationsScreen(),
+        innerDrawerCallback: _updateMainScreenDimming,
+        scaffold: body);
   }
 
-  Widget _buildMenuScaffold({Widget body}){
+  Widget _buildMenuScaffold({Widget body}) {
     return InnerDrawer(
-      key: _menuDrawerKey,
-      onTapClose: true,
-      swipe: false,
-      offset: IDOffset.horizontal(0.6),
-      leftAnimationType: InnerDrawerAnimation.linear,
-      leftChild: MenuNavigationScreen(
-        index: currentIndex,
-        onPageSelected: (newIndex) {
-          if(currentIndex != newIndex){
-            currentIndex = newIndex;
-            _logCurrentScreen();
-          }
-        },
-        hasSubscription: hasSubscription,
-        onUpdateSubscriptionStatus: _onUpdateSubscriptionStatus,
-      ),
-      innerDrawerCallback: _updateMainScreenDimming,
-      scaffold: _buildScaffold(
-        body: body
-      )
-    );
+        key: _menuDrawerKey,
+        onTapClose: true,
+        swipe: false,
+        offset: IDOffset.horizontal(0.6),
+        leftAnimationType: InnerDrawerAnimation.linear,
+        leftChild: MenuNavigationScreen(
+          index: currentIndex,
+          onPageSelected: (newIndex) {
+            if (currentIndex != newIndex) {
+              currentIndex = newIndex;
+              _logCurrentScreen();
+            }
+          },
+          hasSubscription: hasSubscription,
+          onUpdateSubscriptionStatus: _onUpdateSubscriptionStatus,
+        ),
+        innerDrawerCallback: _updateMainScreenDimming,
+        scaffold: _buildScaffold(body: body));
   }
 
-  _onUpdateSubscriptionStatus(bool newSubscriptionStatus) => hasSubscription = newSubscriptionStatus;
+  _onUpdateSubscriptionStatus(bool newSubscriptionStatus) =>
+      hasSubscription = newSubscriptionStatus;
 
-  _updateMainScreenDimming(bool isOpen){
+  _updateMainScreenDimming(bool isOpen) {
     setState(() {
-        _isSliderOpenController.add(isOpen);
+      _isSliderOpenController.add(isOpen);
     });
   }
 
-  Widget _buildScaffold({Widget body}){
+  Widget _buildScaffold({Widget body}) {
     return Stack(
       children: <Widget>[
         StreamBuilder<bool>(
           stream: _userBloc.currentUser.map((user) => user.hasNewFeedOutfits),
           initialData: false,
-          builder: (context, hasFeedSnap) =>
-            StreamBuilder<bool>(
+          builder: (context, hasFeedSnap) => StreamBuilder<bool>(
               stream: _userBloc.currentUser.map((user) => user.hasNewUpload),
               initialData: false,
               builder: (context, hasNewUploadSnap) {
@@ -392,7 +397,7 @@ class _MainAppBarState extends State<MainAppBar> {
                   resizeToAvoidBottomPadding: false,
                   backgroundColor: Colors.white,
                   leading: _buildMenuButton(),
-                  title: 'FireFit',//pages[currentIndex],
+                  title: 'FireFit', //pages[currentIndex],
                   customTitle: _customTitle(),
                   allCaps: false,
                   actions: <Widget>[
@@ -402,15 +407,16 @@ class _MainAppBarState extends State<MainAppBar> {
                   elevation: 2.0,
                   appbarColor: Colors.grey[200],
                   body: body,
-                  bottomNavigationBar: _buildBottomNavBar(hasNewFeed, hasNewUpload),
+                  bottomNavigationBar:
+                      _buildBottomNavBar(hasNewFeed, hasNewUpload),
                 );
-              }
-            ),
+              }),
         ),
         _buildShading(),
       ],
     );
   }
+
   Widget _customTitle() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
@@ -425,10 +431,7 @@ class _MainAppBarState extends State<MainAppBar> {
           child: Text(
             'FireFit',
             style: TextStyle(
-              inherit: true,
-              fontSize: 20,
-              color: Colors.deepOrange[600]
-            ),
+                inherit: true, fontSize: 20, color: Colors.deepOrange[600]),
           ),
         )
       ],
@@ -438,65 +441,64 @@ class _MainAppBarState extends State<MainAppBar> {
   bool hideBars = false;
   Widget _buildBottomNavBar(bool hasNewFeed, bool hasNewUpload) {
     return AnimatedContainer(
-      decoration: BoxDecoration(
-        boxShadow: [
-          BoxShadow(
-            blurRadius: 1,
-            color: Colors.black38,
-            offset: Offset(0, 0)
-          )
-        ]
-      ),
-      duration: Duration(milliseconds: 100),
-      height: hideBars ? 0 : 52+MediaQuery.of(context).padding.bottom,
-      child: BottomNavigationBar(
-        showSelectedLabels: true,
-        showUnselectedLabels: true,
-        currentIndex: currentIndex,
-        selectedFontSize: 12,
-        unselectedFontSize: 12,
-        selectedItemColor: Colors.blue,
-        unselectedItemColor: Colors.grey[700],
-        unselectedLabelStyle: Theme.of(context).textTheme.caption.copyWith(color: Colors.black),
-        selectedLabelStyle: Theme.of(context).textTheme.caption.copyWith(color: Colors.blue),
-        type: BottomNavigationBarType.fixed,
-        onTap: _updatePageIndex,
-        backgroundColor: Colors.grey[200],
-        elevation: 6,
-        items: [
-          _buildBottomNavBarItem(
-            icon: FontAwesomeIcons.globeAmericas,
-            title: 'Inspiration',
-          ),
-          _buildBottomNavBarItem(
-            icon: FontAwesomeIcons.users,
-            title: 'Fashion Circle',
-            showNotificationBubble: hasNewFeed,
-          ),
-          _buildBottomNavBarItem(
-            icon: FontAwesomeIcons.personBooth,
-            title: 'My Wardrobe',
-            showNotificationBubble: hasNewUpload,
-          ),
-          _buildBottomNavBarItem(
-            icon: FontAwesomeIcons.bookReader,
-            title: 'Lookbooks',
-          ),
-        ]
-      )
-    );
+        decoration: BoxDecoration(boxShadow: [
+          BoxShadow(blurRadius: 1, color: Colors.black38, offset: Offset(0, 0))
+        ]),
+        duration: Duration(milliseconds: 100),
+        height: hideBars ? 0 : 52 + MediaQuery.of(context).padding.bottom,
+        child: BottomNavigationBar(
+            showSelectedLabels: true,
+            showUnselectedLabels: true,
+            currentIndex: currentIndex,
+            selectedFontSize: 12,
+            unselectedFontSize: 12,
+            selectedItemColor: Colors.blue,
+            unselectedItemColor: Colors.grey[700],
+            unselectedLabelStyle: Theme.of(context)
+                .textTheme
+                .caption
+                .copyWith(color: Colors.black),
+            selectedLabelStyle: Theme.of(context)
+                .textTheme
+                .caption
+                .copyWith(color: Colors.blue),
+            type: BottomNavigationBarType.fixed,
+            onTap: _updatePageIndex,
+            backgroundColor: Colors.grey[200],
+            elevation: 6,
+            items: [
+              _buildBottomNavBarItem(
+                icon: FontAwesomeIcons.globeAmericas,
+                title: 'Inspiration',
+              ),
+              _buildBottomNavBarItem(
+                icon: FontAwesomeIcons.users,
+                title: 'Fashion Circle',
+                showNotificationBubble: hasNewFeed,
+              ),
+              _buildBottomNavBarItem(
+                icon: FontAwesomeIcons.personBooth,
+                title: 'My Wardrobe',
+                showNotificationBubble: hasNewUpload,
+              ),
+              _buildBottomNavBarItem(
+                icon: FontAwesomeIcons.bookReader,
+                title: 'Lookbooks',
+              ),
+            ]));
   }
 
   _updatePageIndex(int newIndex) {
-    if(newIndex == 1) {
+    if (newIndex == 1) {
       _userBloc.clearNewFeed.add(null);
-    }else if(newIndex == 2) {
+    } else if (newIndex == 2) {
       _userBloc.markWardrobeSeen.add(null);
     }
     setState(() => currentIndex = newIndex);
   }
 
-  BottomNavigationBarItem _buildBottomNavBarItem({IconData icon, String title, bool showNotificationBubble = false}){
+  BottomNavigationBarItem _buildBottomNavBarItem(
+      {IconData icon, String title, bool showNotificationBubble = false}) {
     return BottomNavigationBarItem(
       backgroundColor: Colors.white,
       icon: Container(
@@ -506,43 +508,42 @@ class _MainAppBarState extends State<MainAppBar> {
           showBubble: showNotificationBubble,
         ),
       ),
-     label: title,
+      label: title,
     );
   }
 
   Widget _buildMenuButton() {
     return StreamBuilder<bool>(
-      stream: _isSliderOpenController,
-      initialData: false,
-      builder: (context, isOpen) {
-        return IconButton(
-          icon: Icon(
-            isOpen.data ? Icons.arrow_back : Icons.menu,
-          ),
-          onPressed: () => _menuDrawerKey.currentState.open(),
-        );
-      }
-    );
+        stream: _isSliderOpenController,
+        initialData: false,
+        builder: (context, isOpen) {
+          return IconButton(
+            icon: Icon(
+              isOpen.data ? Icons.arrow_back : Icons.menu,
+            ),
+            onPressed: () => _menuDrawerKey.currentState.open(),
+          );
+        });
   }
 
-  Widget _buildUploadButton(){
+  Widget _buildUploadButton() {
     return IconButton(
-      icon: Hero(
-        tag: MMKeys.uploadButtonHero,
-        child: Icon(Icons.add_a_photo),
-      ),
-      onPressed: () {
-        if(!_userBloc.isEmailVerified.value){
-          _requestEmailVerification();
-        } else {
-          CustomNavigator.goToUploadOutfitScreen(context,
-            hasSubscription: hasSubscription,
-            onUpdateSubscriptionStatus: _onUpdateSubscriptionStatus,
-            isOnWardrobePage: currentIndex == 2,
-          );
-        }
-      }
-    );
+        icon: Hero(
+          tag: MMKeys.uploadButtonHero,
+          child: Icon(Icons.add_a_photo),
+        ),
+        onPressed: () {
+          if (!_userBloc.isEmailVerified.value) {
+            _requestEmailVerification();
+          } else {
+            CustomNavigator.goToUploadOutfitScreen(
+              context,
+              hasSubscription: hasSubscription,
+              onUpdateSubscriptionStatus: _onUpdateSubscriptionStatus,
+              isOnWardrobePage: currentIndex == 2,
+            );
+          }
+        });
   }
 
   _backgroundLoadingOverlay(String message) {
@@ -552,15 +553,13 @@ class _MainAppBarState extends State<MainAppBar> {
         children: <Widget>[
           Text(
             '$message...',
-            style: Theme.of(context).textTheme.overline.copyWith(
-              color: Colors.blue,
-              fontWeight: FontWeight.w300
-            ),
+            style: Theme.of(context)
+                .textTheme
+                .headline6
+                .copyWith(color: Colors.blue, fontWeight: FontWeight.w300),
           ),
           Theme(
-            data: ThemeData(
-              accentColor: Colors.blue
-            ),
+            data: ThemeData(accentColor: Colors.blue),
             child: CircularProgressIndicator(),
           )
         ],
@@ -569,49 +568,44 @@ class _MainAppBarState extends State<MainAppBar> {
       autoDismiss: false,
     );
   }
+
   _closeOverlay() => _entry?.dismiss(animate: true);
 
   _requestEmailVerification() async {
     _userBloc.refreshVerificationEmail.add(null);
     String email = await _userBloc.verificationEmail.first;
     await VerificationDialog.launch(context,
-      actionName: 'upload an outfit',
-      emailAddress: email
-    );
+        actionName: 'upload an outfit', emailAddress: email);
     _userBloc.refreshVerificationEmail.add(null);
   }
 
   Widget _buildNotificationsButton() {
     return Center(
-      child: StreamBuilder<int>(
-        stream: _userBloc.currentUser.map((user) => user.numberOfNewNotifications),
-        initialData: 0,
-        builder: (ctx, countSnap) { 
-          int messages = 0;
-          if(countSnap.data != null){
-            messages =countSnap.data;
-          }
-          return IconButton( 
-            icon: NotificationIcon(
-              iconData: Icons.notifications,
-              messages: messages,
-            ),
-            onPressed: () => _dmDrawerKey.currentState.open()
-          );
-        }
-      )  
-    );
+        child: StreamBuilder<int>(
+            stream: _userBloc.currentUser
+                .map((user) => user.numberOfNewNotifications),
+            initialData: 0,
+            builder: (ctx, countSnap) {
+              int messages = 0;
+              if (countSnap.data != null) {
+                messages = countSnap.data;
+              }
+              return IconButton(
+                  icon: NotificationIcon(
+                    iconData: Icons.notifications,
+                    messages: messages,
+                  ),
+                  onPressed: () => _dmDrawerKey.currentState.open());
+            }));
   }
 
-  Widget _buildShading(){
+  Widget _buildShading() {
     return StreamBuilder<bool>(
-      stream: _isSliderOpenController,
-      initialData: false,
-      builder: (ctx, snap) {
-        return Container(
-          color: snap.data ? Colors.black.withOpacity(0.5) : null
-        );
-      }
-    );
+        stream: _isSliderOpenController,
+        initialData: false,
+        builder: (ctx, snap) {
+          return Container(
+              color: snap.data ? Colors.black.withOpacity(0.5) : null);
+        });
   }
 }

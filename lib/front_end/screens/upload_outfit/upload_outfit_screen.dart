@@ -15,19 +15,21 @@ import 'package:overlay_support/overlay_support.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 
 class UploadOutfitScreen extends StatefulWidget {
-
   final bool isOnWardrobePage;
   final bool hasSubscription;
   final ValueChanged<bool> onUpdateSubscriptionStatus;
 
-  UploadOutfitScreen({this.hasSubscription, this.onUpdateSubscriptionStatus, this.isOnWardrobePage});
+  UploadOutfitScreen(
+      {this.hasSubscription,
+      this.onUpdateSubscriptionStatus,
+      this.isOnWardrobePage});
 
   @override
   _UploadOutfitScreenState createState() => _UploadOutfitScreenState();
 }
 
-
-class _UploadOutfitScreenState extends State<UploadOutfitScreen> with LoadingAndErrorDialogs {
+class _UploadOutfitScreenState extends State<UploadOutfitScreen>
+    with LoadingAndErrorDialogs {
   List<Asset> images = List<Asset>();
 
   Preferences preferences = Preferences();
@@ -39,54 +41,61 @@ class _UploadOutfitScreenState extends State<UploadOutfitScreen> with LoadingAnd
   OutfitBloc _outfitBloc;
   UserBloc _userBloc;
   List<StreamSubscription<dynamic>> _subscriptions;
-  
+
   bool loadingImages = false;
   bool isOverlayShowing = false;
 
   String dirPath;
 
-  int dailyUploadLimit = RemoteConfigHelpers.defaults[RemoteConfigHelpers.UPLOAD_DAILY_LIMIT];
+  int dailyUploadLimit =
+      RemoteConfigHelpers.defaults[RemoteConfigHelpers.UPLOAD_DAILY_LIMIT];
   int todaysUploadCount = 0;
 
   bool hasSubscription;
 
-  bool get hasReachedMaxLimit => !hasSubscription && todaysUploadCount >= dailyUploadLimit;
+  bool get hasReachedMaxLimit =>
+      !hasSubscription && todaysUploadCount >= dailyUploadLimit;
 
   @override
   void initState() {
     super.initState();
     hasSubscription = widget.hasSubscription;
     final remoteConfig = RemoteConfig.instance;
-    dailyUploadLimit = remoteConfig.getInt(RemoteConfigHelpers.UPLOAD_DAILY_LIMIT);
+    dailyUploadLimit =
+        remoteConfig.getInt(RemoteConfigHelpers.UPLOAD_DAILY_LIMIT);
 
     uploadOutfit = UploadOutfit();
     uploadOutfit.isOnWardrobePage = widget.isOnWardrobePage;
-    uploadOutfit.title = "OOTD (${DateFormatter.dateToDMYFormat(DateTime.now())})";
+    uploadOutfit.title =
+        "OOTD (${DateFormatter.dateToDMYFormat(DateTime.now())})";
     titleTextEdit = TextEditingController(text: uploadOutfit.title);
     descriptionTextEdit = TextEditingController(text: uploadOutfit.description);
     _initTempGallery();
     _initPreferences();
   }
 
-  _initTempGallery() async{ 
-    Directory extDir = Platform.isIOS ? await getApplicationSupportDirectory()  : await getExternalStorageDirectory();
+  _initTempGallery() async {
+    Directory extDir = Platform.isIOS
+        ? await getApplicationSupportDirectory()
+        : await getExternalStorageDirectory();
     dirPath = '${extDir.path}/Pictures/temp';
     final dir = Directory(dirPath);
-    if(dir.existsSync()){
+    if (dir.existsSync()) {
       dir.deleteSync(recursive: true);
     }
     await Directory(dirPath).create(recursive: true);
   }
 
   _initPreferences() async {
-    String styleString = await preferences.getPreference(Preferences.CURRENT_CLOTHES_STYLE); 
+    String styleString =
+        await preferences.getPreference(Preferences.CURRENT_CLOTHES_STYLE);
     setState(() {
       uploadOutfit.style = styleString;
     });
   }
 
   @override
-  dispose(){
+  dispose() {
     _subscriptions?.forEach((subscription) => subscription.cancel());
     super.dispose();
   }
@@ -103,14 +112,17 @@ class _UploadOutfitScreenState extends State<UploadOutfitScreen> with LoadingAnd
       actions: <Widget>[
         IconButton(
           icon: Icon(Icons.send),
-          color: hasReachedMaxLimit ? Colors.red : uploadOutfit.canBeUploaded ? Colors.green : Colors.orange,
+          color: hasReachedMaxLimit
+              ? Colors.red
+              : uploadOutfit.canBeUploaded
+                  ? Colors.green
+                  : Colors.orange,
           onPressed: () {
-            if(hasReachedMaxLimit) {
+            if (hasReachedMaxLimit) {
               toast("Daily limit reached");
-            }
-            else if(uploadOutfit.canBeUploaded){
+            } else if (uploadOutfit.canBeUploaded) {
               _uploadOutfit();
-            }else{
+            } else {
               toast("Finish steps 1-3 first!");
             }
           },
@@ -121,46 +133,49 @@ class _UploadOutfitScreenState extends State<UploadOutfitScreen> with LoadingAnd
   }
 
   _goBack() {
-    if(uploadOutfit.imagesUploaded){
+    if (uploadOutfit.imagesUploaded) {
       return showDialog(
-        context: context,
-        builder: (secondContext) {
-            return YesNoDialog(
-            title: 'Cancel Upload?',
-            description: 'Are you sure you want to go back?\n\nDoing so will lose the current data',
-            yesText: 'Yes',
-            noText: 'No',
-            onYes: () {
-              Navigator.pop(context);
-            },
-            onDone: () {
-              Navigator.pop(context);
-            },
-          );
-        }
-      ) ?? false;
-    }else{
+              context: context,
+              builder: (secondContext) {
+                return YesNoDialog(
+                  title: 'Cancel Upload?',
+                  description:
+                      'Are you sure you want to go back?\n\nDoing so will lose the current data',
+                  yesText: 'Yes',
+                  noText: 'No',
+                  onYes: () {
+                    Navigator.pop(context);
+                  },
+                  onDone: () {
+                    Navigator.pop(context);
+                  },
+                );
+              }) ??
+          false;
+    } else {
       Navigator.pop(context);
     }
   }
 
   _initBlocs() async {
-    if(_outfitBloc==null){
+    if (_outfitBloc == null) {
       _outfitBloc = OutfitBlocProvider.of(context);
       _userBloc = UserBlocProvider.of(context);
       _userBloc.currentUser.first.then((user) => setState(() {
-        DateTime today = DateTime.now();
-        DateTime lastUploadDate = user.lastUploadDate;
-        int todaysCount = 0;
-        if(lastUploadDate!=null){
-          bool lastUploadTakenToday = today.year == lastUploadDate.year && today.month == lastUploadDate.month && today.day == lastUploadDate.day;
-          if(lastUploadTakenToday){
-            todaysCount = user.postsOnDay;
-          }
-          uploadOutfit.lastUploadDate = user.lastUploadDate;
-        }
-        setState(() => todaysUploadCount = todaysCount);
-      }));
+            DateTime today = DateTime.now();
+            DateTime lastUploadDate = user.lastUploadDate;
+            int todaysCount = 0;
+            if (lastUploadDate != null) {
+              bool lastUploadTakenToday = today.year == lastUploadDate.year &&
+                  today.month == lastUploadDate.month &&
+                  today.day == lastUploadDate.day;
+              if (lastUploadTakenToday) {
+                todaysCount = user.postsOnDay;
+              }
+              uploadOutfit.lastUploadDate = user.lastUploadDate;
+            }
+            setState(() => todaysUploadCount = todaysCount);
+          }));
       String userId = await _userBloc.existingAuthId.first;
       uploadOutfit.posterUserId = userId;
       _subscriptions = <StreamSubscription<dynamic>>[
@@ -171,37 +186,37 @@ class _UploadOutfitScreenState extends State<UploadOutfitScreen> with LoadingAnd
     }
   }
 
-  StreamSubscription _loadingListener(){
+  StreamSubscription _loadingListener() {
     return _outfitBloc.isLoading.listen((loadingStatus) {
-      if(loadingStatus && !isOverlayShowing){
+      if (loadingStatus && !isOverlayShowing) {
         startLoading("Uploading outfit", context);
         isOverlayShowing = true;
       }
-      if(!loadingStatus && isOverlayShowing){
+      if (!loadingStatus && isOverlayShowing) {
         isOverlayShowing = false;
         stopLoading(context);
       }
     });
   }
 
-  StreamSubscription _successListener(){
+  StreamSubscription _successListener() {
     return _outfitBloc.isSuccessful.listen((successStatus) {
-      if(successStatus){
+      if (successStatus) {
         AnalyticsEvents(context).outfitUploaded();
         Navigator.pop(context);
       }
     });
   }
 
-  StreamSubscription _errorListener(){
+  StreamSubscription _errorListener() {
     return _outfitBloc.hasError.listen((errorMessage) {
       toast(errorMessage);
     });
   }
 
   _uploadOutfit() => _outfitBloc.uploadOutfit.add(uploadOutfit);
-  
-  Widget _buildBody(){
+
+  Widget _buildBody() {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 8.0),
       child: SingleChildScrollView(
@@ -209,32 +224,24 @@ class _UploadOutfitScreenState extends State<UploadOutfitScreen> with LoadingAnd
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             _buildSummaryHeader(),
-            _buildHeader(
-              '1. Upload some pics (max 3)', 
-              isComplete: uploadOutfit.imagesUploaded
-            ),
+            _buildHeader('1. Upload some pics (max 3)',
+                isComplete: uploadOutfit.imagesUploaded),
             _buildImagesHolder(),
-            _buildHeader(
-              '2. Choose the style!', 
-              isComplete: uploadOutfit.styleUploaded
-            ),
+            _buildHeader('2. Choose the style!',
+                isComplete: uploadOutfit.styleUploaded),
             _buildStyleInput(),
-            _buildHeader(
-              '3. Give it a cool title', 
-              isComplete: uploadOutfit.titleUploaded
-            ),
+            _buildHeader('3. Give it a cool title',
+                isComplete: uploadOutfit.titleUploaded),
             _buildTitleField(),
-            _buildHeader(
-              '4. Describe it further (optional)', 
-              isComplete: uploadOutfit.descriptionUploaded
-            ),
+            _buildHeader('4. Describe it further (optional)',
+                isComplete: uploadOutfit.descriptionUploaded),
             _buildDescriptionField(),
           ],
         ),
       ),
     );
   }
-  
+
   Widget _buildSummaryHeader() {
     return Container(
       padding: EdgeInsets.only(top: 8.0, left: 32, right: 32, bottom: 8),
@@ -243,9 +250,10 @@ class _UploadOutfitScreenState extends State<UploadOutfitScreen> with LoadingAnd
           Expanded(
             child: Text(
               "Today's activity:",
-              style: Theme.of(context).textTheme.headline5.copyWith(
-                color: Colors.black54
-              ),
+              style: Theme.of(context)
+                  .textTheme
+                  .subtitle1
+                  .copyWith(color: Colors.black54),
               textAlign: TextAlign.start,
             ),
           ),
@@ -258,7 +266,7 @@ class _UploadOutfitScreenState extends State<UploadOutfitScreen> with LoadingAnd
             benefit: 'have unlimited daily uploads',
             onUpdateSubscriptionStatus: (newStatus) {
               widget.onUpdateSubscriptionStatus(newStatus);
-              setState(() => hasSubscription = newStatus); 
+              setState(() => hasSubscription = newStatus);
             },
           ),
         ],
@@ -268,20 +276,16 @@ class _UploadOutfitScreenState extends State<UploadOutfitScreen> with LoadingAnd
 
   Widget _buildStyleInput() {
     Style style = Style.fromStyleString(uploadOutfit.style);
-    return StyleBanner(
-      style: style, 
-      onTap: _selectNewStyle
-    );
+    return StyleBanner(style: style, onTap: _selectNewStyle);
   }
 
   _selectNewStyle() async {
-    String styleName = await Navigator.push(context, MaterialPageRoute(
-      builder: (context) => StyleSelectorScreen()
-    ));
-    if(!mounted || styleName == null) return;
-    preferences.updatePreference(Preferences.CURRENT_CLOTHES_STYLE, styleName); 
+    String styleName = await Navigator.push(context,
+        MaterialPageRoute(builder: (context) => StyleSelectorScreen()));
+    if (!mounted || styleName == null) return;
+    preferences.updatePreference(Preferences.CURRENT_CLOTHES_STYLE, styleName);
     setState(() {
-      uploadOutfit.style = styleName;    
+      uploadOutfit.style = styleName;
     });
   }
 
@@ -291,47 +295,45 @@ class _UploadOutfitScreenState extends State<UploadOutfitScreen> with LoadingAnd
       margin: EdgeInsets.only(bottom: 8.0),
       width: double.infinity,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20.0),
-        color: Colors.grey[350]
-      ),
+          borderRadius: BorderRadius.circular(20.0), color: Colors.grey[350]),
       child: TextField(
         controller: titleTextEdit,
         onChanged: (newTitle) {
-          if(newTitle.isEmpty){
-            newTitle=null;
+          if (newTitle.isEmpty) {
+            newTitle = null;
           }
-          setState((){
+          setState(() {
             uploadOutfit.title = newTitle;
           });
         },
         maxLength: 50,
         maxLengthEnforced: true,
         textCapitalization: TextCapitalization.words,
-        style: Theme.of(context).textTheme.overline.apply(color: Colors.black),
+        style: Theme.of(context).textTheme.headline5.apply(color: Colors.black),
         decoration: new InputDecoration.collapsed(
-          hintText: "Theme/mood of this look...",
-          hintStyle: Theme.of(context).textTheme.overline.apply(color: Colors.black.withOpacity(0.5))
-        ),
+            hintText: "Theme/mood of this look...",
+            hintStyle: Theme.of(context)
+                .textTheme
+                .headline5
+                .apply(color: Colors.black.withOpacity(0.5))),
       ),
     );
-  } 
+  }
 
   Widget _buildDescriptionField() {
     return Container(
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20.0),
-        color: Colors.grey[350]
-      ),
+          borderRadius: BorderRadius.circular(20.0), color: Colors.grey[350]),
       margin: EdgeInsets.only(bottom: 16.0),
       padding: EdgeInsets.all(8.0),
       width: double.infinity,
       child: TextField(
         controller: descriptionTextEdit,
         onChanged: (newDesc) {
-          if(newDesc.isEmpty){
-            newDesc=null;
+          if (newDesc.isEmpty) {
+            newDesc = null;
           }
-          setState((){
+          setState(() {
             uploadOutfit.description = newDesc;
           });
         },
@@ -339,16 +341,16 @@ class _UploadOutfitScreenState extends State<UploadOutfitScreen> with LoadingAnd
         maxLines: 5,
         maxLength: 500,
         maxLengthEnforced: true,
-        style: Theme.of(context).textTheme.headline5,
+        style: Theme.of(context).textTheme.subtitle1,
         decoration: new InputDecoration.collapsed(
-          hintText: "e.g:\nWhere did you get these clothes?\nWhat inspired this fit?\nWhat do you want feedback on?",
-          
+          hintText:
+              "e.g:\nWhere did you get these clothes?\nWhat inspired this fit?\nWhat do you want feedback on?",
         ),
       ),
     );
   }
 
-  Widget _buildHeader(String title, {bool isComplete}){
+  Widget _buildHeader(String title, {bool isComplete}) {
     return Container(
       padding: EdgeInsets.symmetric(vertical: 8.0),
       width: double.infinity,
@@ -357,7 +359,7 @@ class _UploadOutfitScreenState extends State<UploadOutfitScreen> with LoadingAnd
         children: <Widget>[
           Text(
             title,
-            style: Theme.of(context).textTheme.subtitle1,
+            style: Theme.of(context).textTheme.subtitle2,
           ),
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 8.0),
@@ -370,114 +372,118 @@ class _UploadOutfitScreenState extends State<UploadOutfitScreen> with LoadingAnd
       ),
     );
   }
-  
+
   Widget _buildImagesHolder() {
     List<Widget> tabs = [];
-    for(int i = 0; i < uploadOutfit.images.length ; i ++){
+    for (int i = 0; i < uploadOutfit.images.length; i++) {
       tabs.add(_displayImage(i));
     }
-    if(uploadOutfit.images.length < 3){
-      tabs.add(_remainingAddImageSpace(3-uploadOutfit.images.length));
+    if (uploadOutfit.images.length < 3) {
+      tabs.add(_remainingAddImageSpace(3 - uploadOutfit.images.length));
     }
-  
+
     return Container(
-      padding: EdgeInsets.symmetric(vertical: 4.0),
-      width: double.infinity,
-      height: 200.0,
-      child: Row(
-        mainAxisSize: MainAxisSize.max,
-        children: tabs,
-      )
-    );
+        padding: EdgeInsets.symmetric(vertical: 4.0),
+        width: double.infinity,
+        height: 200.0,
+        child: Row(
+          mainAxisSize: MainAxisSize.max,
+          children: tabs,
+        ));
   }
 
-  Widget _displayImage(int index){
+  Widget _displayImage(int index) {
     return Expanded(
-      flex: 1,
-      child: Stack(
-        children: <Widget>[
-          Container(
-            width: double.infinity,
-            margin: EdgeInsets.all(4.0),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20.0,),
-              border: Border.all(),
-              color: Colors.grey.withOpacity(0.5),
-            ),
-            child: SizedBox.expand(
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(20.0),
-                child: ImageGalleryPreview(
-                  title: 'Preview Fit',
-                  currentIndex: index,
-                  imageUrls: uploadOutfit.images,
-                  isLocal: true,
-                ),
-              ),
-            ),
-          ),
-          Positioned(
-            right:0,
-            child: Container(
+        flex: 1,
+        child: Stack(
+          children: <Widget>[
+            Container(
+              width: double.infinity,
+              margin: EdgeInsets.all(4.0),
               decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.black,
+                borderRadius: BorderRadius.circular(
+                  20.0,
+                ),
+                border: Border.all(),
+                color: Colors.grey.withOpacity(0.5),
               ),
-              child: GestureDetector(
-                onTap: () => _removeImage(index),
-                child: Icon(
-                  Icons.close,
-                  color: Colors.white,
+              child: SizedBox.expand(
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(20.0),
+                  child: ImageGalleryPreview(
+                    title: 'Preview Fit',
+                    currentIndex: index,
+                    imageUrls: uploadOutfit.images,
+                    isLocal: true,
+                  ),
                 ),
               ),
             ),
-          ),
-        ],
-      )
-    );
+            Positioned(
+              right: 0,
+              child: Container(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.black,
+                ),
+                child: GestureDetector(
+                  onTap: () => _removeImage(index),
+                  child: Icon(
+                    Icons.close,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ));
   }
 
-  _removeImage(int index){
-    if(!loadingImages){
+  _removeImage(int index) {
+    if (!loadingImages) {
       uploadOutfit.images.removeAt(index);
       images.removeAt(index);
       setState(() {});
     }
   }
 
-  Widget _remainingAddImageSpace(int remainingImages){
+  Widget _remainingAddImageSpace(int remainingImages) {
     return Expanded(
-      flex: remainingImages,
-      child: Container(
-        margin: EdgeInsets.all(4.0),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20.0,),
-          border: Border.all(),
-          color: Colors.grey.withOpacity(0.5),
-        ),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(20.0,),
-          onTap: loadingImages ? null : _addImages,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisAlignment: MainAxisAlignment.center,
-            mainAxisSize: MainAxisSize.max,
-            children: <Widget>[
-              loadingImages ? CircularProgressIndicator() : Hero(
-                tag: MMKeys.uploadButtonHero,
-                child: Icon(Icons.add_a_photo),
+        flex: remainingImages,
+        child: Container(
+            margin: EdgeInsets.all(4.0),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(
+                20.0,
               ),
-              Text(
-                loadingImages ? 'Loading...' : 'Add ${remainingImages==3?'an':(remainingImages==2?'another':'a final')} image',
-                textAlign: TextAlign.center,
-              )
-            ],
-          )
-        )
-      )
-    );
+              border: Border.all(),
+              color: Colors.grey.withOpacity(0.5),
+            ),
+            child: InkWell(
+                borderRadius: BorderRadius.circular(
+                  20.0,
+                ),
+                onTap: loadingImages ? null : _addImages,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.max,
+                  children: <Widget>[
+                    loadingImages
+                        ? CircularProgressIndicator()
+                        : Hero(
+                            tag: MMKeys.uploadButtonHero,
+                            child: Icon(Icons.add_a_photo),
+                          ),
+                    Text(
+                      loadingImages
+                          ? 'Loading...'
+                          : 'Add ${remainingImages == 3 ? 'an' : (remainingImages == 2 ? 'another' : 'a final')} image',
+                      textAlign: TextAlign.center,
+                    )
+                  ],
+                ))));
   }
-
 
   Future<void> _addImages() async {
     setState(() => loadingImages = true);
@@ -490,7 +496,7 @@ class _UploadOutfitScreenState extends State<UploadOutfitScreen> with LoadingAnd
       currentImages: uploadOutfit.images,
     );
     print('mounted:$mounted');
-    if(mounted){
+    if (mounted) {
       setState(() {
         uploadOutfit.images = takenImages;
         loadingImages = false;
@@ -498,5 +504,3 @@ class _UploadOutfitScreenState extends State<UploadOutfitScreen> with LoadingAnd
     }
   }
 }
-
-

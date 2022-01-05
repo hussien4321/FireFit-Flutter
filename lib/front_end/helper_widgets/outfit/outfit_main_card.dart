@@ -6,7 +6,6 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class OutfitMainCard extends StatelessWidget {
-
   final Outfit outfit;
 
   OutfitMainCard({this.outfit});
@@ -28,34 +27,29 @@ class OutfitMainCard extends StatelessWidget {
     );
   }
 
-  
-
   _openOutfit(BuildContext context, Outfit outfit) {
     CustomNavigator.goToOutfitDetailsScreen(context, outfitId: outfit.outfitId);
   }
 
-  Widget _outfitImage(Outfit outfit){
+  Widget _outfitImage(Outfit outfit) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.grey,
         image: DecorationImage(
-          fit: BoxFit.cover,
-          image: CachedNetworkImageProvider(outfit.images.first)
-        ),
+            fit: BoxFit.cover,
+            image: CachedNetworkImageProvider(outfit.images.first)),
       ),
     );
   }
-  Widget _outfitBasicInfo(BuildContext context, Outfit outfit){
+
+  Widget _outfitBasicInfo(BuildContext context, Outfit outfit) {
     return Align(
       alignment: Alignment.bottomCenter,
       child: Container(
         padding: const EdgeInsets.only(left: 8, bottom: 8, right: 8, top: 20),
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            colors: [
-              Colors.transparent,
-              Colors.black87
-            ],
+            colors: [Colors.transparent, Colors.black87],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),
@@ -71,10 +65,8 @@ class OutfitMainCard extends StatelessWidget {
                 Expanded(
                   child: Text(
                     outfit.title,
-                    style: Theme.of(context).textTheme.headline5.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold
-                    ),
+                    style: Theme.of(context).textTheme.subtitle1.copyWith(
+                        color: Colors.white, fontWeight: FontWeight.bold),
                     textAlign: TextAlign.start,
                     softWrap: true,
                     overflow: TextOverflow.fade,
@@ -82,46 +74,48 @@ class OutfitMainCard extends StatelessWidget {
                 ),
               ],
             ),
-            OutfitStats(outfit: outfit, size: 16,),
+            OutfitStats(
+              outfit: outfit,
+              size: 16,
+            ),
           ],
         ),
       ),
     );
-  } 
-  Widget _outfitTags(Outfit outfit){
+  }
+
+  Widget _outfitTags(Outfit outfit) {
     List<Widget> tags = [];
-    if(outfit.hasMultipleImages){
-      tags.add(
-        Icon(
-          Icons.photo_library,
-          color: Colors.white,
-          size: 16,
-        )
-      );
+    if (outfit.hasMultipleImages) {
+      tags.add(Icon(
+        Icons.photo_library,
+        color: Colors.white,
+        size: 16,
+      ));
     }
-    if(outfit.hasDescription){
-      tags.add(
-        Icon(
-          Icons.subject,
-          color: Colors.white,
-          size: 16,
-        )
-      );
+    if (outfit.hasDescription) {
+      tags.add(Icon(
+        Icons.subject,
+        color: Colors.white,
+        size: 16,
+      ));
     }
-    return !outfit.hasAdditionalInfo ? Container() : Align(
-      alignment: Alignment.topRight,
-      child: Container(
-        padding: const EdgeInsets.all(4),
-        decoration: BoxDecoration(
-          color: Colors.black45,
-          borderRadius: BorderRadius.only(bottomLeft: Radius.circular(4))
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: tags,
-        ),
-      ),
-    );
-  } 
+    return !outfit.hasAdditionalInfo
+        ? Container()
+        : Align(
+            alignment: Alignment.topRight,
+            child: Container(
+              padding: const EdgeInsets.all(4),
+              decoration: BoxDecoration(
+                  color: Colors.black45,
+                  borderRadius:
+                      BorderRadius.only(bottomLeft: Radius.circular(4))),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: tags,
+              ),
+            ),
+          );
+  }
 }

@@ -11,7 +11,6 @@ class FindUsersScreen extends StatefulWidget {
 }
 
 class _FindUsersScreenState extends State<FindUsersScreen> {
-  
   UserBloc _userBloc;
   TextEditingController usernameController = new TextEditingController();
   FocusNode usernameFocus = FocusNode();
@@ -22,13 +21,13 @@ class _FindUsersScreenState extends State<FindUsersScreen> {
   Widget build(BuildContext context) {
     _initBlocs();
     return CustomScaffold(
-      title:'Find User',
+      title: 'Find User',
       body: _content(),
     );
   }
 
-  _initBlocs(){
-    if(_userBloc==null){
+  _initBlocs() {
+    if (_userBloc == null) {
       _userBloc = UserBlocProvider.of(context);
     }
   }
@@ -37,21 +36,20 @@ class _FindUsersScreenState extends State<FindUsersScreen> {
     return Container(
       padding: EdgeInsets.only(left: 8, right: 8),
       child: StreamBuilder<bool>(
-        stream: _userBloc.isLoading,
-        initialData: false,
-        builder: (context, isLoadingSnap) {
-          return SingleChildScrollView(
-            child: Column(
-              children: <Widget>[
-                _introText(),
-                _usernameField(),
-                _searchButton(isLoadingSnap.data),
-                _searchResult(isLoadingSnap.data),
-              ],
-            ),
-          );
-        }
-      ),
+          stream: _userBloc.isLoading,
+          initialData: false,
+          builder: (context, isLoadingSnap) {
+            return SingleChildScrollView(
+              child: Column(
+                children: <Widget>[
+                  _introText(),
+                  _usernameField(),
+                  _searchButton(isLoadingSnap.data),
+                  _searchResult(isLoadingSnap.data),
+                ],
+              ),
+            );
+          }),
     );
   }
 
@@ -60,7 +58,7 @@ class _FindUsersScreenState extends State<FindUsersScreen> {
       padding: EdgeInsets.only(top: 16, bottom: 8),
       child: Text(
         'To search for a user, type in their unique username below',
-        style: Theme.of(context).textTheme.overline,
+        style: Theme.of(context).textTheme.headline6,
       ),
     );
   }
@@ -76,25 +74,26 @@ class _FindUsersScreenState extends State<FindUsersScreen> {
       textColor: Colors.black,
       title: 'Username',
       hintText: 'unique_name',
-      titleStyle: Theme.of(context).textTheme.subtitle1,
+      titleStyle: Theme.of(context).textTheme.subtitle2,
       textInputAction: TextInputAction.next,
-      textStyle: Theme.of(context).textTheme.overline,
+      textStyle: Theme.of(context).textTheme.headline4,
       prefix: Text(
         ' @',
-        style: Theme.of(context).textTheme.overline.copyWith(fontSize: 32),
+        style: Theme.of(context).textTheme.headline6.copyWith(fontSize: 32),
       ),
     );
   }
 
   _parseUsername(String newUsername) {
-    String formattedUsername =_getFormattedUsername(newUsername);
-    if(formattedUsername != newUsername){
+    String formattedUsername = _getFormattedUsername(newUsername);
+    if (formattedUsername != newUsername) {
       toast('Username can only contain letters, numbers & underscores');
       usernameController.text = formattedUsername;
       usernameFocus.unfocus();
     }
     setState(() {});
   }
+
   String _getFormattedUsername(String text) {
     text = text.replaceAll(RegExp("[^A-Za-z0-9_]"), "");
     return text;
@@ -104,18 +103,18 @@ class _FindUsersScreenState extends State<FindUsersScreen> {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8.0),
       child: RaisedButton(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8)
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         color: Colors.black87,
         child: Text(
           isLoading ? 'Searching...' : 'Search',
-          style: Theme.of(context).textTheme.headline5.copyWith(
-            inherit: true,
-            color: Colors.white
-          ),
+          style: Theme.of(context)
+              .textTheme
+              .subtitle1
+              .copyWith(inherit: true, color: Colors.white),
         ),
-        onPressed: !isLoading && usernameController.text?.isNotEmpty == true ? _search : null,
+        onPressed: !isLoading && usernameController.text?.isNotEmpty == true
+            ? _search
+            : null,
       ),
     );
   }
@@ -127,21 +126,23 @@ class _FindUsersScreenState extends State<FindUsersScreen> {
   }
 
   Widget _searchResult(bool isLoading) {
-    return isLoading || !hasSearched ?
-      Container() :
-      StreamBuilder<User>(
-        stream: _userBloc.searchedUser,
-        initialData: null,
-        builder: (ctx, snap) {
-          return snap.data == null ? _notFoundMessage() : _foundUser(snap.data);
-        },
-      );
+    return isLoading || !hasSearched
+        ? Container()
+        : StreamBuilder<User>(
+            stream: _userBloc.searchedUser,
+            initialData: null,
+            builder: (ctx, snap) {
+              return snap.data == null
+                  ? _notFoundMessage()
+                  : _foundUser(snap.data);
+            },
+          );
   }
 
   Widget _notFoundMessage() {
     return Text(
       'No user found 😢',
-      style: Theme.of(context).textTheme.headline5,
+      style: Theme.of(context).textTheme.subtitle1,
     );
   }
 
@@ -153,7 +154,7 @@ class _FindUsersScreenState extends State<FindUsersScreen> {
           padding: const EdgeInsets.only(left: 4.0, bottom: 2),
           child: Text(
             'Found User!',
-            style: Theme.of(context).textTheme.headline5,
+            style: Theme.of(context).textTheme.subtitle1,
           ),
         ),
         UserPreviewCard(user),

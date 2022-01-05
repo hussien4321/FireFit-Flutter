@@ -7,7 +7,6 @@ import '../../../../front_end/helper_widgets.dart';
 import '../../../../front_end/screens.dart';
 
 class FollowUsersScreen extends StatefulWidget {
-
   final bool isFollowers;
   final String selectedUserId;
   final int pagesSinceOutfitScreen;
@@ -25,7 +24,6 @@ class FollowUsersScreen extends StatefulWidget {
 }
 
 class _FollowUsersScreenState extends State<FollowUsersScreen> {
-  
   UserBloc _userBloc;
   String currentUserId;
 
@@ -39,14 +37,15 @@ class _FollowUsersScreenState extends State<FollowUsersScreen> {
     _controller = ScrollController();
     _controller.addListener(_scrollListener);
   }
+
   _scrollListener() {
-    if (_controller.offset >= (_controller.position.maxScrollExtent - 100) && !_controller.position.outOfRange) {
-      (widget.isFollowers ? _userBloc.loadFollowers : _userBloc.loadFollowing).add(
-        LoadUsers(
-          userId: widget.selectedUserId,
-          startAfterUser: lastUser,
-        )
-      );
+    if (_controller.offset >= (_controller.position.maxScrollExtent - 100) &&
+        !_controller.position.outOfRange) {
+      (widget.isFollowers ? _userBloc.loadFollowers : _userBloc.loadFollowing)
+          .add(LoadUsers(
+        userId: widget.selectedUserId,
+        startAfterUser: lastUser,
+      ));
     }
   }
 
@@ -55,75 +54,79 @@ class _FollowUsersScreenState extends State<FollowUsersScreen> {
     super.dispose();
     _controller.dispose();
   }
-  
+
   @override
   Widget build(BuildContext context) {
     _initBlocs();
     return CustomScaffold(
       title: widget.isFollowers ? 'Followers' : 'Following',
       body: Container(
-        child: StreamBuilder<bool>(
-          stream: _userBloc.isLoadingFollows,
-          initialData: true,
-          builder: (ctx, loadingSnap) {
-            return StreamBuilder<List<User>>(
-              stream: widget.isFollowers? _userBloc.followers : _userBloc.following,
-              initialData: [],
-              builder: (ctx, snap){
-                List<User> users = snap.data;
-                if(users.length > 0){
-                  lastUser = users.last;
-                }
-                return ListView(
-                  controller: _controller,
-                  children: users.map((user) => _followUserTab(user)).toList()..add(_userLoadTab(loadingSnap.data, users.isEmpty)),
+          child: StreamBuilder<bool>(
+              stream: _userBloc.isLoadingFollows,
+              initialData: true,
+              builder: (ctx, loadingSnap) {
+                return StreamBuilder<List<User>>(
+                  stream: widget.isFollowers
+                      ? _userBloc.followers
+                      : _userBloc.following,
+                  initialData: [],
+                  builder: (ctx, snap) {
+                    List<User> users = snap.data;
+                    if (users.length > 0) {
+                      lastUser = users.last;
+                    }
+                    return ListView(
+                      controller: _controller,
+                      children: users
+                          .map((user) => _followUserTab(user))
+                          .toList()
+                        ..add(_userLoadTab(loadingSnap.data, users.isEmpty)),
+                    );
+                  },
                 );
-              },
-            );
-          }
-        ) 
-      ),
+              })),
     );
   }
 
   _initBlocs() async {
-    if(_userBloc == null){
+    if (_userBloc == null) {
       _userBloc = UserBlocProvider.of(context);
-      LoadUsers loadUsers =LoadUsers(
+      LoadUsers loadUsers = LoadUsers(
         userId: widget.selectedUserId,
       );
-      if(widget.isFollowers){
+      if (widget.isFollowers) {
         _userBloc.loadFollowers.add(loadUsers);
-      }else{
+      } else {
         _userBloc.loadFollowing.add(loadUsers);
       }
-      currentUserId =await _userBloc.existingAuthId.first;
+      currentUserId = await _userBloc.existingAuthId.first;
     }
   }
 
-  Widget _userLoadTab(bool isLoading, bool isEmptyList){
+  Widget _userLoadTab(bool isLoading, bool isEmptyList) {
     String followName = widget.isFollowers ? 'followers' : 'following';
-    return !isLoading ? Container() : Container(
-      padding: EdgeInsets.all(8),
-      width: double.infinity,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          Padding(
-            padding: const EdgeInsets.only(right: 8.0),
-            child: CircularProgressIndicator(),
-          ),
-          Text(
-            'Loading ${isEmptyList?'':'more '}$followName',
-            style: Theme.of(context).textTheme.caption,
-          ),
-        ],
-      )
-    );
+    return !isLoading
+        ? Container()
+        : Container(
+            padding: EdgeInsets.all(8),
+            width: double.infinity,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Padding(
+                  padding: const EdgeInsets.only(right: 8.0),
+                  child: CircularProgressIndicator(),
+                ),
+                Text(
+                  'Loading ${isEmptyList ? '' : 'more '}$followName',
+                  style: Theme.of(context).textTheme.caption,
+                ),
+              ],
+            ));
   }
 
-  Widget _followUserTab(User user){
-    FollowUser followUser =FollowUser(
+  Widget _followUserTab(User user) {
+    FollowUser followUser = FollowUser(
       followed: user,
       followerUserId: currentUserId,
     );
@@ -149,40 +152,40 @@ class _FollowUsersScreenState extends State<FollowUsersScreen> {
                 size: 64,
               ),
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Text(
-                      user.name,
-                      style: Theme.of(context).textTheme.headline5
-                    ),
-                    Text(
-                      '@'+user.username,
-                      style: Theme.of(context).textTheme.caption,
-                    ),
-                  ],
-                )
-              ),
-              currentUserId == user.userId ? Container() :
-              RaisedButton(
-                child: Row(
-                  children: <Widget>[
-                    Padding(
-                      padding: const EdgeInsets.only(right: 4.0),
-                      child: Text(
-                        user.isFollowing ? 'Following' : 'Follow',
-                        style: Theme.of(context).textTheme.button.apply(color: Colors.white),
+                  child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text(user.name, style: Theme.of(context).textTheme.subtitle1),
+                  Text(
+                    '@' + user.username,
+                    style: Theme.of(context).textTheme.caption,
+                  ),
+                ],
+              )),
+              currentUserId == user.userId
+                  ? Container()
+                  : RaisedButton(
+                      child: Row(
+                        children: <Widget>[
+                          Padding(
+                            padding: const EdgeInsets.only(right: 4.0),
+                            child: Text(
+                              user.isFollowing ? 'Following' : 'Follow',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .button
+                                  .apply(color: Colors.white),
+                            ),
+                          ),
+                          Icon(
+                            user.isFollowing ? Icons.check : Icons.person_add,
+                            color: Colors.white,
+                          ),
+                        ],
                       ),
-                    ),
-                    Icon(
-                      user.isFollowing ? Icons.check : Icons.person_add,
-                      color: Colors.white,
-                    ),
-                  ],
-                ),
-                color: user.isFollowing ? Colors.purple : Colors.grey,
-                onPressed: () => _userBloc.followUser.add(followUser),
-              )
+                      color: user.isFollowing ? Colors.purple : Colors.grey,
+                      onPressed: () => _userBloc.followUser.add(followUser),
+                    )
             ],
           ),
         ),
@@ -190,9 +193,9 @@ class _FollowUsersScreenState extends State<FollowUsersScreen> {
     );
   }
 
-
-  _openProfile(User user){
-    CustomNavigator.goToProfileScreen(context, 
+  _openProfile(User user) {
+    CustomNavigator.goToProfileScreen(
+      context,
       userId: user.userId,
       pagesSinceProfileScreen: widget.pagesSinceProfileScreen,
       pagesSinceOutfitScreen: widget.pagesSinceOutfitScreen,

@@ -1,31 +1,32 @@
 import 'package:flutter/material.dart';
 
-
 abstract class LoadingAndErrorDialogs {
-
-  void startLoading(String message, BuildContext context){
+  void startLoading(String message, BuildContext context) {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder:(ctx) => WillPopScope(
+      builder: (ctx) => WillPopScope(
         onWillPop: () {},
         child: Dialog(
           child: Container(
-            padding: EdgeInsets.only(top:20.0, bottom: 20.0),
+            padding: EdgeInsets.only(top: 20.0, bottom: 20.0),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Theme(
-                  data: ThemeData(
-                    accentColor: Colors.blue
-                  ),
+                  data: ThemeData(accentColor: Colors.blue),
                   child: CircularProgressIndicator(),
                 ),
-                Padding(padding: EdgeInsets.only(bottom: 10.0),),
+                Padding(
+                  padding: EdgeInsets.only(bottom: 10.0),
+                ),
                 Text(
                   "$message...",
-                  style: Theme.of(context).textTheme.button.apply(color: Colors.blue),
+                  style: Theme.of(context)
+                      .textTheme
+                      .button
+                      .apply(color: Colors.blue),
                 ),
               ],
             ),
@@ -35,17 +36,16 @@ abstract class LoadingAndErrorDialogs {
     );
   }
 
-  void stopLoading(BuildContext context){
+  void stopLoading(BuildContext context) {
     Navigator.pop(context);
   }
 
-
-  void displayError(String message, BuildContext context){
+  void displayError(String message, BuildContext context) {
     showDialog(
       context: context,
       builder: (ctx) => Dialog(
         child: Container(
-          padding: EdgeInsets.only(top:20.0, bottom: 20.0),
+          padding: EdgeInsets.only(top: 20.0, bottom: 20.0),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             mainAxisAlignment: MainAxisAlignment.center,
@@ -53,17 +53,19 @@ abstract class LoadingAndErrorDialogs {
               Padding(
                 padding: const EdgeInsets.only(bottom: 16.0),
                 child: Center(
-                  child: Text(
-                    'Error',
-                    style: Theme.of(context).textTheme.overline,
-                  )
-                ),
+                    child: Text(
+                  'Error',
+                  style: Theme.of(context).textTheme.headline6,
+                )),
               ),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
                 child: Text(
                   "$message",
-                  style: Theme.of(context).textTheme.button.apply(color: Theme.of(context).errorColor),
+                  style: Theme.of(context)
+                      .textTheme
+                      .button
+                      .apply(color: Theme.of(context).errorColor),
                   textAlign: TextAlign.center,
                 ),
               ),

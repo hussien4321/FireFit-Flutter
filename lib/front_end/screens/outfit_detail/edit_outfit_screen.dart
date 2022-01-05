@@ -9,19 +9,18 @@ import '../../../../front_end/screens.dart';
 import 'dart:async';
 
 class EditOutfitScreen extends StatefulWidget {
-  
   final Outfit outfit;
-  
+
   EditOutfitScreen({
     @required this.outfit,
   });
-  
+
   @override
   _EditOutfitScreenState createState() => _EditOutfitScreenState();
 }
 
-class _EditOutfitScreenState extends State<EditOutfitScreen> with LoadingAndErrorDialogs {
-  
+class _EditOutfitScreenState extends State<EditOutfitScreen>
+    with LoadingAndErrorDialogs {
   OutfitBloc _outfitBloc;
   EditOutfit editOutfitData;
 
@@ -30,7 +29,7 @@ class _EditOutfitScreenState extends State<EditOutfitScreen> with LoadingAndErro
 
   TextEditingController _titleController = TextEditingController();
   TextEditingController _descriptionController = TextEditingController();
-  FocusNode descriptionFocus =FocusNode();
+  FocusNode descriptionFocus = FocusNode();
 
   @override
   void initState() {
@@ -40,9 +39,8 @@ class _EditOutfitScreenState extends State<EditOutfitScreen> with LoadingAndErro
     super.initState();
   }
 
-  
   @override
-  dispose(){
+  dispose() {
     _subscriptions?.forEach((subscription) => subscription.cancel());
     super.dispose();
   }
@@ -52,9 +50,7 @@ class _EditOutfitScreenState extends State<EditOutfitScreen> with LoadingAndErro
     _initBlocs();
     return CustomScaffold(
       title: 'Edit Outfit',
-      actions: <Widget>[
-        _saveOutfitButton()
-      ],
+      actions: <Widget>[_saveOutfitButton()],
       body: SingleChildScrollView(
         child: Container(
           padding: EdgeInsets.only(left: 8, right: 8, top: 8),
@@ -67,15 +63,14 @@ class _EditOutfitScreenState extends State<EditOutfitScreen> with LoadingAndErro
                 isUpdated: editOutfitData.style != widget.outfit.style,
               ),
               _buildStyleInput(),
-              _buildHeader(
-                'Title', 
-                isUpdated: editOutfitData.title != widget.outfit.title,
-                isEmpty: !editOutfitData.hasTitle
-              ),
+              _buildHeader('Title',
+                  isUpdated: editOutfitData.title != widget.outfit.title,
+                  isEmpty: !editOutfitData.hasTitle),
               _buildTitleField(),
               _buildHeader(
-                'Description', 
-                isUpdated: editOutfitData.description != widget.outfit.description,
+                'Description',
+                isUpdated:
+                    editOutfitData.description != widget.outfit.description,
               ),
               _buildDescriptionField(),
             ],
@@ -86,32 +81,32 @@ class _EditOutfitScreenState extends State<EditOutfitScreen> with LoadingAndErro
   }
 
   _initBlocs() {
-    if(_outfitBloc == null){
+    if (_outfitBloc == null) {
       _outfitBloc = OutfitBlocProvider.of(context);
       editOutfitData = EditOutfit.fromOutfit(widget.outfit);
       _subscriptions = <StreamSubscription<dynamic>>[
         _loadingListener(),
         _successListener(),
       ];
-
     }
   }
 
-  StreamSubscription _loadingListener(){
+  StreamSubscription _loadingListener() {
     return _outfitBloc.isLoading.listen((loadingStatus) {
-      if(loadingStatus && !isOverlayShowing){
+      if (loadingStatus && !isOverlayShowing) {
         startLoading("Updating outfit", context);
         isOverlayShowing = true;
       }
-      if(!loadingStatus && isOverlayShowing){
+      if (!loadingStatus && isOverlayShowing) {
         isOverlayShowing = false;
         stopLoading(context);
       }
     });
   }
-  StreamSubscription _successListener(){
+
+  StreamSubscription _successListener() {
     return _outfitBloc.isSuccessful.listen((successStatus) {
-      if(successStatus){
+      if (successStatus) {
         Navigator.pop(context);
       }
     });
@@ -127,15 +122,16 @@ class _EditOutfitScreenState extends State<EditOutfitScreen> with LoadingAndErro
 
   bool get hasNewData {
     return !(widget.outfit.title == editOutfitData.title &&
-    widget.outfit.description == editOutfitData.description &&
-    widget.outfit.style == editOutfitData.style);
+        widget.outfit.description == editOutfitData.description &&
+        widget.outfit.style == editOutfitData.style);
   }
 
   _editOutfit() {
-    _outfitBloc.editOutfit.add(editOutfitData);;
+    _outfitBloc.editOutfit.add(editOutfitData);
+    ;
   }
 
-  Widget _buildHeader(String title, {bool isUpdated, bool isEmpty = false}){
+  Widget _buildHeader(String title, {bool isUpdated, bool isEmpty = false}) {
     return Container(
       padding: EdgeInsets.symmetric(vertical: 8.0),
       width: double.infinity,
@@ -144,35 +140,34 @@ class _EditOutfitScreenState extends State<EditOutfitScreen> with LoadingAndErro
         children: <Widget>[
           Text(
             title,
-            style: Theme.of(context).textTheme.overline,
+            style: Theme.of(context).textTheme.headline5,
           ),
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 8.0),
-            child: isEmpty ? Container() : Icon(
-              isUpdated ? Icons.fiber_new : Icons.check,
-              color: isUpdated ? Colors.amber[800] : Colors.green,
-            ),
+            child: isEmpty
+                ? Container()
+                : Icon(
+                    isUpdated ? Icons.fiber_new : Icons.check,
+                    color: isUpdated ? Colors.amber[800] : Colors.green,
+                  ),
           ),
         ],
       ),
     );
   }
+
   Widget _buildStyleInput() {
     Style style = Style.fromStyleString(editOutfitData.style);
-    return StyleBanner(
-      style: style, 
-      onTap: _selectNewStyle
-    );
+    return StyleBanner(style: style, onTap: _selectNewStyle);
   }
 
   _selectNewStyle() async {
     String styleName = await CustomNavigator.goToStyleSelectorScreen(context);
-    if(!mounted || styleName == null) return;
+    if (!mounted || styleName == null) return;
     setState(() {
-      editOutfitData.style = styleName;    
+      editOutfitData.style = styleName;
     });
   }
-
 
   Widget _buildTitleField() {
     return Container(
@@ -180,36 +175,35 @@ class _EditOutfitScreenState extends State<EditOutfitScreen> with LoadingAndErro
       margin: EdgeInsets.only(bottom: 8.0),
       width: double.infinity,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20.0),
-        color: Colors.grey[350]
-      ),
+          borderRadius: BorderRadius.circular(20.0), color: Colors.grey[350]),
       child: TextField(
         controller: _titleController,
         onChanged: (newTitle) {
-          setState((){
-          editOutfitData.title = newTitle;
+          setState(() {
+            editOutfitData.title = newTitle;
           });
         },
         maxLength: 50,
         maxLengthEnforced: true,
-        onSubmitted: (t) => FocusScope.of(context).requestFocus(descriptionFocus),
+        onSubmitted: (t) =>
+            FocusScope.of(context).requestFocus(descriptionFocus),
         textCapitalization: TextCapitalization.words,
         textInputAction: TextInputAction.next,
-        style: Theme.of(context).textTheme.overline.apply(color: Colors.black),
+        style: Theme.of(context).textTheme.headline5.apply(color: Colors.black),
         decoration: new InputDecoration.collapsed(
-          hintText: "Theme/mood of this look...",
-          hintStyle: Theme.of(context).textTheme.overline.apply(color: Colors.black.withOpacity(0.5))
-        ),
+            hintText: "Theme/mood of this look...",
+            hintStyle: Theme.of(context)
+                .textTheme
+                .headline5
+                .apply(color: Colors.black.withOpacity(0.5))),
       ),
     );
-  } 
+  }
 
   Widget _buildDescriptionField() {
     return Container(
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20.0),
-        color: Colors.grey[350]
-      ),
+          borderRadius: BorderRadius.circular(20.0), color: Colors.grey[350]),
       margin: EdgeInsets.only(bottom: 16.0),
       padding: EdgeInsets.all(8.0),
       width: double.infinity,
@@ -217,10 +211,10 @@ class _EditOutfitScreenState extends State<EditOutfitScreen> with LoadingAndErro
         controller: _descriptionController,
         focusNode: descriptionFocus,
         onChanged: (newDesc) {
-          if(newDesc.isEmpty){
+          if (newDesc.isEmpty) {
             newDesc = null;
           }
-          setState((){
+          setState(() {
             editOutfitData.description = newDesc;
           });
         },
@@ -229,13 +223,12 @@ class _EditOutfitScreenState extends State<EditOutfitScreen> with LoadingAndErro
         maxLines: 5,
         maxLength: 500,
         maxLengthEnforced: true,
-        style: Theme.of(context).textTheme.headline5,
+        style: Theme.of(context).textTheme.subtitle1,
         decoration: new InputDecoration.collapsed(
-          hintText: "e.g:\nWhere did you get these clothes?\nWhat inspired this fit?\nWhat do you want feedback on?",
-          
+          hintText:
+              "e.g:\nWhere did you get these clothes?\nWhat inspired this fit?\nWhat do you want feedback on?",
         ),
       ),
     );
   }
-
 }

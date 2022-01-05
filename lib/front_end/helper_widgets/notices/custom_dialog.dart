@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 
 class CustomDialog extends StatelessWidget {
-
-  static Future<void> launch(BuildContext context, {String title, Widget content}) {
+  static Future<void> launch(BuildContext context,
+      {String title, Widget content}) {
     return showDialog(
       context: context,
       builder: (ctx) => CustomDialog(
@@ -27,9 +27,10 @@ class CustomDialog extends StatelessWidget {
         children: <Widget>[
           Text(
             title,
-            style: Theme.of(context).textTheme.overline.copyWith(
-              fontWeight: FontWeight.bold
-            ),
+            style: Theme.of(context)
+                .textTheme
+                .headline6
+                .copyWith(fontWeight: FontWeight.bold),
           ),
         ],
       ),
@@ -41,10 +42,10 @@ class CustomDialog extends StatelessWidget {
         FlatButton(
           child: Text(
             'Dismiss',
-            style: Theme.of(context).textTheme.subtitle1.copyWith(
-              color: Colors.grey,
-              fontWeight: FontWeight.bold
-            ),
+            style: Theme.of(context)
+                .textTheme
+                .subtitle2
+                .copyWith(color: Colors.grey, fontWeight: FontWeight.bold),
           ),
           onPressed: Navigator.of(context).pop,
         ),

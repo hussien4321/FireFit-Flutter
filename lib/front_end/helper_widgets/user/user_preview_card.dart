@@ -3,13 +3,15 @@ import '../../../../middleware/middleware.dart';
 import '../../../../front_end/helper_widgets.dart';
 
 class UserPreviewCard extends StatelessWidget {
-
   final User user;
   final bool isPoster;
   final int pagesSinceOutfitScreen;
   final int pagesSinceProfileScreen;
-  
-  UserPreviewCard(this.user, {this.isPoster = false, this.pagesSinceOutfitScreen = 0, this.pagesSinceProfileScreen = 0});
+
+  UserPreviewCard(this.user,
+      {this.isPoster = false,
+      this.pagesSinceOutfitScreen = 0,
+      this.pagesSinceProfileScreen = 0});
 
   @override
   Widget build(BuildContext context) {
@@ -36,18 +38,22 @@ class UserPreviewCard extends StatelessWidget {
                     mainAxisSize: MainAxisSize.max,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
-                      isPoster ? Text(
-                        'Posted by:',
-                        style: Theme.of(context).textTheme.caption,
-                      ) : Container(),
+                      isPoster
+                          ? Text(
+                              'Posted by:',
+                              style: Theme.of(context).textTheme.caption,
+                            )
+                          : Container(),
                       Text(
                         user.name,
-                        style: Theme.of(context).textTheme.overline,
+                        style: Theme.of(context).textTheme.headline6,
                       ),
-                      isPoster ? Container() : Text(
-                        '@${user.username}',
-                        style: Theme.of(context).textTheme.caption,
-                      ),
+                      isPoster
+                          ? Container()
+                          : Text(
+                              '@${user.username}',
+                              style: Theme.of(context).textTheme.caption,
+                            ),
                     ],
                   ),
                 ),
@@ -55,7 +61,10 @@ class UserPreviewCard extends StatelessWidget {
                   padding: EdgeInsets.all(8),
                   child: Text(
                     'View Profile',
-                    style: Theme.of(context).textTheme.button.apply(color: Colors.black),
+                    style: Theme.of(context)
+                        .textTheme
+                        .button
+                        .apply(color: Colors.black),
                   ),
                 )
               ],
@@ -67,11 +76,11 @@ class UserPreviewCard extends StatelessWidget {
   }
 
   _navigateToProfileScreen(BuildContext context) {
-    CustomNavigator.goToProfileScreen(context,
+    CustomNavigator.goToProfileScreen(
+      context,
       userId: user.userId,
       pagesSinceOutfitScreen: pagesSinceOutfitScreen,
       pagesSinceProfileScreen: pagesSinceProfileScreen,
     );
   }
-
 }

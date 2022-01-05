@@ -15,7 +15,7 @@ class _DMPreviewScreenState extends State<DMPreviewScreen> {
         automaticallyImplyLeading: false,
         title: Text(
           'Recent Messages (3)',
-          style: Theme.of(context).textTheme.overline,
+          style: Theme.of(context).textTheme.headline5,
         ),
         actions: <Widget>[
           IconButton(
@@ -26,19 +26,15 @@ class _DMPreviewScreenState extends State<DMPreviewScreen> {
         elevation: 0.0,
       ),
       body: Container(
-        child: ListView(
-          children: _buildDMPreviews()..add(
-            _buildDMexpand()
-          ) 
-        ),
+        child: ListView(children: _buildDMPreviews()..add(_buildDMexpand())),
       ),
     );
   }
 
-  List<Widget> _buildDMPreviews(){
+  List<Widget> _buildDMPreviews() {
     List<Widget> previews = [];
-    for(int i = 0; i < 6; i++){
-      previews.add(_buildDMfield(i+1));
+    for (int i = 0; i < 6; i++) {
+      previews.add(_buildDMfield(i + 1));
     }
     return previews;
   }
@@ -48,73 +44,65 @@ class _DMPreviewScreenState extends State<DMPreviewScreen> {
       child: InkWell(
         onTap: () {},
         child: Container(
-          margin: EdgeInsets.symmetric(horizontal: 8.0),
-          padding: EdgeInsets.symmetric(vertical: 8.0),
-          decoration: BoxDecoration(
-            border: BorderDirectional(
-              bottom: BorderSide(
-                color: Colors.grey.withOpacity(0.5)
-              )
-            )
-          ),
-          child: Row(
-            children: <Widget>[
-              Container(
-                margin: EdgeInsets.only(right: 8.0),
-                width: 50.0,
-                height: 50.0,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  image: DecorationImage(
-                    image: AssetImage('assets/profile$i.jpg'),
-                    fit: BoxFit.cover
-                  ),
-                  color: Colors.grey
+            margin: EdgeInsets.symmetric(horizontal: 8.0),
+            padding: EdgeInsets.symmetric(vertical: 8.0),
+            decoration: BoxDecoration(
+                border: BorderDirectional(
+                    bottom: BorderSide(color: Colors.grey.withOpacity(0.5)))),
+            child: Row(
+              children: <Widget>[
+                Container(
+                  margin: EdgeInsets.only(right: 8.0),
+                  width: 50.0,
+                  height: 50.0,
+                  decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      image: DecorationImage(
+                          image: AssetImage('assets/profile$i.jpg'),
+                          fit: BoxFit.cover),
+                      color: Colors.grey),
                 ),
-              ),
-              Expanded(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    Padding(
-                      padding: EdgeInsets.only(bottom: 8.0),
-                      child: Row(
-                        children: <Widget>[
-                          Expanded(
-                            child: Text(
+                Expanded(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      Padding(
+                        padding: EdgeInsets.only(bottom: 8.0),
+                        child: Row(
+                          children: <Widget>[
+                            Expanded(
+                                child: Text(
                               'Person Name $i',
+                              style: Theme.of(context).textTheme.subtitle2,
+                            )),
+                            Text(
+                              '12:43 PM',
                               style: Theme.of(context).textTheme.subtitle1,
-                            )
-                          ),
-                          Text(
-                            '12:43 PM',
-                            style: Theme.of(context).textTheme.headline5,
-                          ),
-                        ],
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                    Text(
-                      'Hey there just checking if you got my latest message',
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ),
-              )
-            ],
-          )
-        ),
+                      Text(
+                        'Hey there just checking if you got my latest message',
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                )
+              ],
+            )),
       ),
     );
   }
-  
+
   Widget _buildDMexpand() {
     return Container(
       width: double.infinity,
       child: FlatButton(
         padding: EdgeInsets.symmetric(vertical: 16.0),
-          child: Text('VIEW ALL MESSAGES'),
-          onPressed: () {},
-        ),
+        child: Text('VIEW ALL MESSAGES'),
+        onPressed: () {},
+      ),
     );
   }
 }

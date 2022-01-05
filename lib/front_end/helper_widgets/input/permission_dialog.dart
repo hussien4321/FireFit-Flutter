@@ -2,18 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'dart:async';
 
-enum PermissionType {
-  IMAGES,
-  NOTIFICATIONS
-} 
-class PermissionDialog extends StatelessWidget {
+enum PermissionType { IMAGES, NOTIFICATIONS }
 
-  static Future<void> launch(BuildContext context, {PermissionType permissionType}) {
+class PermissionDialog extends StatelessWidget {
+  static Future<void> launch(BuildContext context,
+      {PermissionType permissionType}) {
     return showDialog(
       context: context,
-      builder: (ctx) => PermissionDialog(
-        permissionType: permissionType
-      ),
+      builder: (ctx) => PermissionDialog(permissionType: permissionType),
     );
   }
 
@@ -30,10 +26,10 @@ class PermissionDialog extends StatelessWidget {
         children: <Widget>[
           Text(
             'Permission Denied',
-            style: Theme.of(context).textTheme.overline.copyWith(
-              color: Colors.red[900],
-              fontWeight: FontWeight.bold
-            ),
+            style: Theme.of(context)
+                .textTheme
+                .headline6
+                .copyWith(color: Colors.red[900], fontWeight: FontWeight.bold),
           ),
         ],
       ),
@@ -45,7 +41,7 @@ class PermissionDialog extends StatelessWidget {
             width: double.infinity,
             child: Text(
               'FireFit has been denied access to $permissionObject.\n\nPlease go to the app settings (below) to enable this permission$footer',
-              style: Theme.of(context).textTheme.headline5,
+              style: Theme.of(context).textTheme.subtitle1,
             ),
           ),
         ],
@@ -55,28 +51,27 @@ class PermissionDialog extends StatelessWidget {
         FlatButton(
           child: Text(
             'Close',
-            style: Theme.of(context).textTheme.subtitle1.copyWith(
-              color: Colors.grey,
-              fontWeight: FontWeight.bold
-            ),
+            style: Theme.of(context)
+                .textTheme
+                .subtitle2
+                .copyWith(color: Colors.grey, fontWeight: FontWeight.bold),
           ),
           onPressed: Navigator.of(context).pop,
         ),
         FlatButton(
-          child: Text(
-            'Settings',
-            style: Theme.of(context).textTheme.subtitle1.copyWith(
-              color: Colors.blue,
-              fontWeight: FontWeight.bold
+            child: Text(
+              'Settings',
+              style: Theme.of(context)
+                  .textTheme
+                  .subtitle2
+                  .copyWith(color: Colors.blue, fontWeight: FontWeight.bold),
             ),
-          ),
-          onPressed: () => _goToSettings(context) 
-        )
+            onPressed: () => _goToSettings(context))
       ],
     );
   }
 
-  String get permissionObject { 
+  String get permissionObject {
     switch (permissionType) {
       case PermissionType.IMAGES:
         return 'the image folder';
@@ -86,7 +81,8 @@ class PermissionDialog extends StatelessWidget {
         return 'unknown';
     }
   }
-  String get footer { 
+
+  String get footer {
     switch (permissionType) {
       case PermissionType.IMAGES:
         return ' and start uploading!';
@@ -96,7 +92,6 @@ class PermissionDialog extends StatelessWidget {
         return 'unknown';
     }
   }
-  
 
   _goToSettings(BuildContext context) {
     openAppSettings();

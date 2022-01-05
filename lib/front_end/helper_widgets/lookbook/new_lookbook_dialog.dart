@@ -7,12 +7,10 @@ import '../../../../middleware/middleware.dart';
 import 'package:overlay_support/overlay_support.dart';
 
 class NewLookbookDialog extends StatefulWidget {
-
   static Future<void> launch(BuildContext context, {Lookbook lookbookToEdit}) {
     return showDialog(
-      context: context,
-      builder: (ctx) => NewLookbookDialog(lookbookToEdit: lookbookToEdit)
-    );
+        context: context,
+        builder: (ctx) => NewLookbookDialog(lookbookToEdit: lookbookToEdit));
   }
 
   final Lookbook lookbookToEdit;
@@ -23,7 +21,6 @@ class NewLookbookDialog extends StatefulWidget {
 }
 
 class _NewLookbookDialogState extends State<NewLookbookDialog> {
-
   UserBloc _userBloc;
   OutfitBloc _outfitBloc;
 
@@ -43,8 +40,8 @@ class _NewLookbookDialogState extends State<NewLookbookDialog> {
   @override
   void initState() {
     super.initState();
-    setState(() => isEditing = widget.lookbookToEdit!=null);
-    if(isEditing){
+    setState(() => isEditing = widget.lookbookToEdit != null);
+    if (isEditing) {
       _nameController.text = lookbook.name;
       _descriptionController.text = lookbook.description;
     }
@@ -56,56 +53,61 @@ class _NewLookbookDialogState extends State<NewLookbookDialog> {
     return AlertDialog(
       elevation: 0,
       title: Text(
-        '${isEditing?'Edit':'New'} Lookbook',
-        style: Theme.of(context).textTheme.headline5.copyWith(
-          color: Colors.black,
-          fontWeight: FontWeight.bold
-        ),
+        '${isEditing ? 'Edit' : 'New'} Lookbook',
+        style: Theme.of(context)
+            .textTheme
+            .subtitle1
+            .copyWith(color: Colors.black, fontWeight: FontWeight.bold),
       ),
-     content: _content(),
+      content: _content(),
       actions: <Widget>[
         FlatButton(
           child: Text(
             'Cancel',
-            style: Theme.of(context).textTheme.subtitle1.copyWith(
-              color: Colors.black,
-              fontWeight: FontWeight.bold
-            ),
+            style: Theme.of(context)
+                .textTheme
+                .subtitle2
+                .copyWith(color: Colors.black, fontWeight: FontWeight.bold),
           ),
           onPressed: Navigator.of(context).pop,
         ),
         FlatButton(
           child: Text(
-            isEditing?'Update':'Create',
-            style: Theme.of(context).textTheme.subtitle1.copyWith(
-              color: canUpload ? Colors.blue : Colors.black54,
-              fontWeight: FontWeight.bold,
-            ),
+            isEditing ? 'Update' : 'Create',
+            style: Theme.of(context).textTheme.subtitle2.copyWith(
+                  color: canUpload ? Colors.blue : Colors.black54,
+                  fontWeight: FontWeight.bold,
+                ),
           ),
-          onPressed: canUpload ? (isEditing? _editLookbook: _createLookbook): null,
+          onPressed:
+              canUpload ? (isEditing ? _editLookbook : _createLookbook) : null,
         ),
       ],
     );
   }
 
   _initBlocs() async {
-    if(_outfitBloc==null){
+    if (_outfitBloc == null) {
       _updateUploadStatus();
       _outfitBloc = OutfitBlocProvider.of(context);
       _userBloc = UserBlocProvider.of(context);
       userId = await _userBloc.existingAuthId.first;
     }
   }
+
   _updateUploadStatus() {
-    
     setState(() {
-      canUpload= hasName && (!isEditing || (hasNewName || hasNewDescription)); 
+      canUpload = hasName && (!isEditing || (hasNewName || hasNewDescription));
     });
   }
-  bool get hasName =>  !(_nameController.text==null || _nameController.text.isEmpty); 
+
+  bool get hasName =>
+      !(_nameController.text == null || _nameController.text.isEmpty);
   bool get hasNewName => lookbook.name != _nameController.text;
   bool get hasNewDescription {
-    String currentDescription = _descriptionController.text.isEmpty ? null :_descriptionController.text;
+    String currentDescription = _descriptionController.text.isEmpty
+        ? null
+        : _descriptionController.text;
     return lookbook.description != currentDescription;
   }
 
@@ -149,10 +151,9 @@ class _NewLookbookDialogState extends State<NewLookbookDialog> {
             autofocus: true,
             controller: _nameController,
             onChanged: (t) => _updateUploadStatus(),
-            onSubmitted: (s) => FocusScope.of(context).requestFocus(descriptionFocus),
-            decoration: InputDecoration.collapsed(
-              hintText: 'Name'
-            ),
+            onSubmitted: (s) =>
+                FocusScope.of(context).requestFocus(descriptionFocus),
+            decoration: InputDecoration.collapsed(hintText: 'Name'),
             maxLength: 50,
             maxLengthEnforced: true,
             textCapitalization: TextCapitalization.words,
@@ -174,9 +175,8 @@ class _NewLookbookDialogState extends State<NewLookbookDialog> {
           focusNode: descriptionFocus,
           controller: _descriptionController,
           onChanged: (t) => _updateUploadStatus(),
-          decoration: InputDecoration.collapsed(
-            hintText: 'Description\n(optional)'
-          ),
+          decoration:
+              InputDecoration.collapsed(hintText: 'Description\n(optional)'),
           maxLines: 3,
           maxLength: 300,
           maxLengthEnforced: true,

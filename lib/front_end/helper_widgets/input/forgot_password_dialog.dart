@@ -5,8 +5,8 @@ import 'package:overlay_support/overlay_support.dart';
 import 'package:validate/validate.dart';
 
 class ForgotPasswordDialog extends StatefulWidget {
-
-  static Future<void> launch(BuildContext context, {ValueChanged<String> onSubmitEmail, String email}) {
+  static Future<void> launch(BuildContext context,
+      {ValueChanged<String> onSubmitEmail, String email}) {
     return showDialog(
       context: context,
       builder: (ctx) => ForgotPasswordDialog(
@@ -26,16 +26,16 @@ class ForgotPasswordDialog extends StatefulWidget {
 }
 
 class _ForgotPasswordDialogState extends State<ForgotPasswordDialog> {
-
   bool isConnected = true;
 
   TextEditingController _emailController = new TextEditingController();
-  
+
   @override
   void initState() {
     super.initState();
     _emailController.text = widget.email;
   }
+
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
@@ -45,9 +45,10 @@ class _ForgotPasswordDialogState extends State<ForgotPasswordDialog> {
         children: <Widget>[
           Text(
             'Reset Password',
-            style: Theme.of(context).textTheme.overline.copyWith(
-              fontWeight: FontWeight.bold
-            ),
+            style: Theme.of(context)
+                .textTheme
+                .headline6
+                .copyWith(fontWeight: FontWeight.bold),
           ),
         ],
       ),
@@ -71,20 +72,19 @@ class _ForgotPasswordDialogState extends State<ForgotPasswordDialog> {
         FlatButton(
           child: Text(
             'Cancel',
-            style: Theme.of(context).textTheme.subtitle1.copyWith(
-              color: Colors.grey,
-              fontWeight: FontWeight.bold
-            ),
+            style: Theme.of(context)
+                .textTheme
+                .subtitle2
+                .copyWith(color: Colors.grey, fontWeight: FontWeight.bold),
           ),
           onPressed: Navigator.of(context).pop,
         ),
         FlatButton(
           child: Text(
             'Submit',
-            style: Theme.of(context).textTheme.subtitle1.copyWith(
-              color: hasEmail ? Colors.blue : Colors.grey,
-              fontWeight: FontWeight.bold
-            ),
+            style: Theme.of(context).textTheme.subtitle2.copyWith(
+                color: hasEmail ? Colors.blue : Colors.grey,
+                fontWeight: FontWeight.bold),
           ),
           onPressed: hasEmail ? _submitEmail : null,
         ),
@@ -93,8 +93,9 @@ class _ForgotPasswordDialogState extends State<ForgotPasswordDialog> {
   }
 
   bool get hasEmail {
-    bool hasText = _emailController.text != null && _emailController.text.isNotEmpty;
-    if(!hasText) return false;
+    bool hasText =
+        _emailController.text != null && _emailController.text.isNotEmpty;
+    if (!hasText) return false;
     try {
       Validate.isEmail(_emailController.text);
       return true;
@@ -116,10 +117,7 @@ class _ForgotPasswordDialogState extends State<ForgotPasswordDialog> {
             decoration: InputDecoration.collapsed(
               hintText: 'Email',
             ),
-            style: TextStyle(
-              inherit: true,
-              color: Colors.blue
-            ),
+            style: TextStyle(inherit: true, color: Colors.blue),
             keyboardType: TextInputType.emailAddress,
           ),
           Container(
@@ -133,10 +131,9 @@ class _ForgotPasswordDialogState extends State<ForgotPasswordDialog> {
   }
 
   _submitEmail() {
-    String email =_emailController.text;
+    String email = _emailController.text;
     widget.onSubmitEmail(email);
     toast("Sending request...");
     Navigator.pop(context);
   }
-
 }

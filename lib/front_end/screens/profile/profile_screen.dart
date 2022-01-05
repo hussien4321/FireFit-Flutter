@@ -7,7 +7,6 @@ import '../../../../front_end/providers.dart';
 import '../../../../front_end/screens.dart';
 import '../../../../helpers/helpers.dart';
 
-
 enum UserOption { EDIT, REPORT, BLOCK }
 
 class ProfileScreen extends StatefulWidget {
@@ -16,28 +15,27 @@ class ProfileScreen extends StatefulWidget {
   final int pagesSinceProfileScreen;
 
   ProfileScreen({
-    this.userId, 
+    this.userId,
     this.pagesSinceOutfitScreen = 0,
     this.pagesSinceProfileScreen = 0,
-});
+  });
 
   @override
   _ProfileScreenState createState() => _ProfileScreenState();
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  
   UserBloc _userBloc;
   OutfitBloc _outfitBloc;
 
   ScrollController _controller;
 
-  FollowUser followUser =FollowUser();
-  
+  FollowUser followUser = FollowUser();
+
   String currentUserId;
 
   final double splashSize = 200;
-  final double profilePicSize = 100; 
+  final double profilePicSize = 100;
 
   List<Outfit> outfits = [];
 
@@ -50,15 +48,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _controller = ScrollController();
     _controller.addListener(_scrollListener);
   }
+
   _scrollListener() {
-    if (_controller.offset >= (_controller.position.maxScrollExtent-100) && !_controller.position.outOfRange) {
-      _outfitBloc.loadUserOutfits.add(
-        LoadOutfits(
-          userId: widget.userId,
-          startAfterOutfit: outfits.last,
-          sortByTop: isSortingByTop,
-        )
-      );
+    if (_controller.offset >= (_controller.position.maxScrollExtent - 100) &&
+        !_controller.position.outOfRange) {
+      _outfitBloc.loadUserOutfits.add(LoadOutfits(
+        userId: widget.userId,
+        startAfterOutfit: outfits.last,
+        sortByTop: isSortingByTop,
+      ));
     }
   }
 
@@ -74,59 +72,60 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       body: StreamBuilder<bool>(
-        stream: _userBloc.noUserFound,
-        initialData: false,
-        builder: (ctx, noUserFoundSnap) => StreamBuilder<bool>(
-          stream: _userBloc.isLoading,
+          stream: _userBloc.noUserFound,
           initialData: false,
-          builder: (ctx, loadingSnap) => StreamBuilder<bool>(
-            stream: _outfitBloc.isLoadingSelected,
-            initialData: false,
-            builder: (ctx, loadingOutfitsSnap) => StreamBuilder<User>(
-              stream: _userBloc.selectedUser,
-              builder: (ctx, snap) {
-                if(noUserFoundSnap.data){
-                  return _userNotFound();
-                }
-                if(loadingSnap.data || !snap.hasData || snap.data == null){
-                  return CustomScaffold(
-                    leading: _closeButton(),
-                    title: 'Loading Profile',
-                    body: Center(child: CircularProgressIndicator(),)
-                  );
-                }
-                if(followUser.followed == null){
-                  AnalyticsEvents(context).profileViewed(snap.data);
-                }
-                followUser.followed = snap.data;
-                return _profileScaffold(snap.data, loadingOutfitsSnap.data);
-              },
-            ),
-          )
-        )
-      ),
+          builder: (ctx, noUserFoundSnap) => StreamBuilder<bool>(
+              stream: _userBloc.isLoading,
+              initialData: false,
+              builder: (ctx, loadingSnap) => StreamBuilder<bool>(
+                    stream: _outfitBloc.isLoadingSelected,
+                    initialData: false,
+                    builder: (ctx, loadingOutfitsSnap) => StreamBuilder<User>(
+                      stream: _userBloc.selectedUser,
+                      builder: (ctx, snap) {
+                        if (noUserFoundSnap.data) {
+                          return _userNotFound();
+                        }
+                        if (loadingSnap.data ||
+                            !snap.hasData ||
+                            snap.data == null) {
+                          return CustomScaffold(
+                              leading: _closeButton(),
+                              title: 'Loading Profile',
+                              body: Center(
+                                child: CircularProgressIndicator(),
+                              ));
+                        }
+                        if (followUser.followed == null) {
+                          AnalyticsEvents(context).profileViewed(snap.data);
+                        }
+                        followUser.followed = snap.data;
+                        return _profileScaffold(
+                            snap.data, loadingOutfitsSnap.data);
+                      },
+                    ),
+                  ))),
     );
   }
-  
+
   _initBlocs() async {
-    if(_userBloc == null){
+    if (_userBloc == null) {
       _userBloc = UserBlocProvider.of(context);
       _outfitBloc = OutfitBlocProvider.of(context);
       _userBloc.selectUser.add(widget.userId);
       currentUserId = await _userBloc.existingAuthId.first;
       await _loadFiltersFromPreferences();
-      _outfitBloc.loadUserOutfits.add(
-        LoadOutfits(
-          userId: widget.userId,
-          sortByTop: isSortingByTop,
-        )
-      );
+      _outfitBloc.loadUserOutfits.add(LoadOutfits(
+        userId: widget.userId,
+        sortByTop: isSortingByTop,
+      ));
       followUser.followerUserId = currentUserId;
     }
   }
 
   _loadFiltersFromPreferences() async {
-    final newSortByTop = await preferences.getPreference(Preferences.SELECTED_USER_OUTFITS_SORT_BY_TOP);
+    final newSortByTop = await preferences
+        .getPreference(Preferences.SELECTED_USER_OUTFITS_SORT_BY_TOP);
     setState(() {
       isSortingByTop = newSortByTop;
     });
@@ -159,12 +158,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _profileScaffold(User user, bool isLoadingOutfits){
+  Widget _profileScaffold(User user, bool isLoadingOutfits) {
     return CustomScaffold(
       resizeToAvoidBottomPadding: false,
       leading: _closeButton(),
-      title: isCurrentUser ? "My Profile" :
-        "${user.name}'s Profile",
+      title: isCurrentUser ? "My Profile" : "${user.name}'s Profile",
       actions: <Widget>[
         _loadUserOptions(user),
       ],
@@ -175,16 +173,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
               matchSize: false,
               onRefresh: () async {
                 _userBloc.selectUser.add(widget.userId);
-                _outfitBloc.loadUserOutfits.add(
-                  LoadOutfits(
-                    userId: widget.userId,
-                    forceLoad: true,
-                    sortByTop: isSortingByTop,
-                  )
-                );
+                _outfitBloc.loadUserOutfits.add(LoadOutfits(
+                  userId: widget.userId,
+                  forceLoad: true,
+                  sortByTop: isSortingByTop,
+                ));
               },
               child: ListView(
-                physics: ClampingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+                physics: ClampingScrollPhysics(
+                    parent: AlwaysScrollableScrollPhysics()),
                 controller: _controller,
                 children: <Widget>[
                   _biometricInfo(user),
@@ -205,23 +202,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   bool get isCurrentUser => currentUserId == widget.userId;
-  
-  Widget _loadUserOptions(User user){
-    List<UserOption> availableOptions = UserOption.values.where((option) => _canShowOption(option)).toList();
-    return availableOptions.isEmpty ? Container() : PopupMenuButton<UserOption>(
-      onSelected: (option) => _optionAction(option, user),
-      itemBuilder: (BuildContext context) {
-        return availableOptions.map((UserOption option) {
-          return PopupMenuItem<UserOption>(
-            value: option,
-            child: Text(_optionToString(option)),
+
+  Widget _loadUserOptions(User user) {
+    List<UserOption> availableOptions =
+        UserOption.values.where((option) => _canShowOption(option)).toList();
+    return availableOptions.isEmpty
+        ? Container()
+        : PopupMenuButton<UserOption>(
+            onSelected: (option) => _optionAction(option, user),
+            itemBuilder: (BuildContext context) {
+              return availableOptions.map((UserOption option) {
+                return PopupMenuItem<UserOption>(
+                  value: option,
+                  child: Text(_optionToString(option)),
+                );
+              }).toList();
+            },
           );
-        }).toList();
-      },
-    );
   }
 
-  String _optionToString(UserOption option){
+  String _optionToString(UserOption option) {
     switch (option) {
       case UserOption.EDIT:
         return 'Edit';
@@ -234,7 +234,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
-  bool _canShowOption(UserOption option){
+  bool _canShowOption(UserOption option) {
     switch (option) {
       case UserOption.EDIT:
         return isCurrentUser;
@@ -247,7 +247,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
-  _optionAction(UserOption option, User user){
+  _optionAction(UserOption option, User user) {
     switch (option) {
       case UserOption.EDIT:
         _editUser(user);
@@ -263,32 +263,33 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
-
   _editUser(User user) {
-    CustomNavigator.goToEditUserScreen(context, user:user);
+    CustomNavigator.goToEditUserScreen(context, user: user);
   }
 
   _reportUser(User user) {
-    ReportDialog.launch(context,
+    ReportDialog.launch(
+      context,
       reportedUserId: user.userId,
     );
   }
 
   _blockUser(User user) {
-    BlockDialog.launch(context,
+    BlockDialog.launch(
+      context,
       blockingUserId: currentUserId,
       blockedUserId: user.userId,
       name: user.name,
     );
   }
 
-  Widget _spaceSeparator(){
+  Widget _spaceSeparator() {
     return Padding(
       padding: EdgeInsets.only(bottom: 24.0),
     );
   }
 
-  Widget _closeButtonStack({Widget child}){
+  Widget _closeButtonStack({Widget child}) {
     return Stack(
       children: <Widget>[
         child,
@@ -306,6 +307,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ],
     );
   }
+
   Widget _biometricInfo(User user) {
     return Padding(
       padding: const EdgeInsets.only(left: 8.0, right: 8, top: 8),
@@ -321,22 +323,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _profilePic(User user){
+  Widget _profilePic(User user) {
     return Center(
       child: Container(
-          margin: EdgeInsets.all(8.0),
-          width: profilePicSize,
-          height: profilePicSize,
-          child: ImagePreview(
-            title: 'Profile Picture',
-            imageUrl: user.profilePicUrl,
-            heroTag: user.profilePicUrl,
-          ),
-        ), 
+        margin: EdgeInsets.all(8.0),
+        width: profilePicSize,
+        height: profilePicSize,
+        child: ImagePreview(
+          title: 'Profile Picture',
+          imageUrl: user.profilePicUrl,
+          heroTag: user.profilePicUrl,
+        ),
+      ),
     );
   }
 
-  Widget _userInfo(User user){
+  Widget _userInfo(User user) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -349,10 +351,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
               child: Text(
                 user.name,
                 style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.normal,
-                  letterSpacing: 1.2
-                ),
+                    fontSize: 28,
+                    fontWeight: FontWeight.normal,
+                    letterSpacing: 1.2),
                 textAlign: TextAlign.center,
               ),
             ),
@@ -360,81 +361,80 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ],
         ),
         Text(
-          '@'+user.username,
+          '@' + user.username,
           style: Theme.of(context).textTheme.caption,
         ),
       ],
     );
   }
 
-  Widget _activityStatus(User user){
+  Widget _activityStatus(User user) {
     Color color = Colors.grey;
-    if(user.lastUploadDate != null){
+    if (user.lastUploadDate != null) {
       final recentDuration = DateTime.now().difference(user.lastUploadDate);
-      if(recentDuration.inDays<7){
+      if (recentDuration.inDays < 7) {
         color = Colors.green;
-      }else if(recentDuration.inDays < 14){
+      } else if (recentDuration.inDays < 14) {
         color = Colors.orange[700];
       }
     }
     return Padding(
-      padding: EdgeInsets.only(top : 4.0),
+      padding: EdgeInsets.only(top: 4.0),
       child: Text(
         'Last upload: ${user.lastUploadDate == null ? 'Never' : DateFormatter.dateToRecentOnlyFormat(user.lastUploadDate)}',
-        style: Theme.of(context).textTheme.caption.copyWith(
-          color: color
-        ),
+        style: Theme.of(context).textTheme.caption.copyWith(color: color),
       ),
     );
   }
 
-  Widget _overallStatistics(User user){
+  Widget _overallStatistics(User user) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: <Widget>[
         _buildStatisticTab(
-          count: user.numberOfFollowers, 
-          name: 'Follower${user.numberOfFollowers==1?'':'s'}',
+          count: user.numberOfFollowers,
+          name: 'Follower${user.numberOfFollowers == 1 ? '' : 's'}',
           onTap: () => _showFollowers(user.userId),
           isFollowersTab: true,
         ),
         _buildStatisticTab(
-          count: user.numberOfFollowing, 
+          count: user.numberOfFollowing,
           name: 'Following',
           onTap: () => _showFollowing(user.userId),
         ),
         _buildStatisticTab(
-          count: user.numberOfOutfits, 
-          name: 'Outfit${user.numberOfOutfits==1?'':'s'}'
-        ),
+            count: user.numberOfOutfits,
+            name: 'Outfit${user.numberOfOutfits == 1 ? '' : 's'}'),
         _buildStatisticTab(
-          count: user.numberOfFlames, 
-          name: 'Flame${user.numberOfFlames==1?'':'s'}', 
-          isEnd: true
-        ),
+            count: user.numberOfFlames,
+            name: 'Flame${user.numberOfFlames == 1 ? '' : 's'}',
+            isEnd: true),
       ],
     );
   }
-  Widget _buildStatisticTab({int count, String name, VoidCallback onTap, bool isFollowersTab = false, bool isEnd = false}){
+
+  Widget _buildStatisticTab(
+      {int count,
+      String name,
+      VoidCallback onTap,
+      bool isFollowersTab = false,
+      bool isEnd = false}) {
     return Expanded(
       child: Material(
         shape: CircleBorder(),
         child: InkWell(
           onTap: onTap,
           child: Container(
-            decoration: isEnd ? null :BoxDecoration(
-              border: BorderDirectional(
-                end: BorderSide(
-                  color: Colors.grey[300],
-                  width: 0.5
-                )
-              )
-            ),
+            decoration: isEnd
+                ? null
+                : BoxDecoration(
+                    border: BorderDirectional(
+                        end: BorderSide(color: Colors.grey[300], width: 0.5))),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
-                Text('$count', style: Theme.of(context).textTheme.overline),
-                Text(name, style: Theme.of(context).textTheme.headline5),
+                Text('$count', style: Theme.of(context).textTheme.headline6),
+                Text(name, style: Theme.of(context).textTheme.subtitle1),
               ],
             ),
           ),
@@ -443,32 +443,32 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  _showFollowing(String userId){
-    CustomNavigator.goToFollowUsersScreen(context,
+  _showFollowing(String userId) {
+    CustomNavigator.goToFollowUsersScreen(
+      context,
       selectedUserId: userId,
       isFollowers: false,
       pagesSinceOutfitScreen: widget.pagesSinceOutfitScreen,
-      pagesSinceProfileScreen: widget.pagesSinceProfileScreen+1,
+      pagesSinceProfileScreen: widget.pagesSinceProfileScreen + 1,
     );
   }
-  _showFollowers(String userId){
-    CustomNavigator.goToFollowUsersScreen(context,
+
+  _showFollowers(String userId) {
+    CustomNavigator.goToFollowUsersScreen(
+      context,
       selectedUserId: userId,
       isFollowers: true,
       pagesSinceOutfitScreen: widget.pagesSinceOutfitScreen,
-      pagesSinceProfileScreen: widget.pagesSinceProfileScreen+1,
+      pagesSinceProfileScreen: widget.pagesSinceProfileScreen + 1,
     );
   }
 
   Widget _buildOutfitDescription(User user) {
-    if(user.bio == null){
+    if (user.bio == null) {
       return Center(
         child: Text(
           "No bio has been added",
-          style: TextStyle(
-            color: Colors.grey,
-            fontStyle: FontStyle.italic
-          ),
+          style: TextStyle(color: Colors.grey, fontStyle: FontStyle.italic),
         ),
       );
     }
@@ -481,7 +481,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
           _sectionHeader("User Bio"),
           Text(
             user.bio,
-            style: Theme.of(context).textTheme.headline5.copyWith(color: Colors.blue[900]),
+            style: Theme.of(context)
+                .textTheme
+                .subtitle1
+                .copyWith(color: Colors.blue[900]),
           ),
         ],
       ),
@@ -492,22 +495,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        border: BorderDirectional(
-          bottom: BorderSide(
-            color: Colors.grey[300],
-            width: 0.5
-          )
-        )
-      ),
-      margin: const EdgeInsets.only(bottom:8.0),
-      child: Text(
-        header,
-        style: Theme.of(context).textTheme.headline5.apply(fontWeightDelta: 3)
-      ),
+          border: BorderDirectional(
+              bottom: BorderSide(color: Colors.grey[300], width: 0.5))),
+      margin: const EdgeInsets.only(bottom: 8.0),
+      child: Text(header,
+          style:
+              Theme.of(context).textTheme.subtitle1.apply(fontWeightDelta: 3)),
     );
   }
 
-  Widget _outfitsOverview(User user, bool isLoadingOutfits){
+  Widget _outfitsOverview(User user, bool isLoadingOutfits) {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 16.0),
       child: Column(
@@ -528,8 +525,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _sortingButton(User user){
-    bool enabled = user != null && user.numberOfOutfits != null && user.numberOfOutfits > 0;
+  Widget _sortingButton(User user) {
+    bool enabled = user != null &&
+        user.numberOfOutfits != null &&
+        user.numberOfOutfits > 0;
     return FlatButton(
       child: Row(
         children: <Widget>[
@@ -554,52 +553,51 @@ class _ProfileScreenState extends State<ProfileScreen> {
     setState(() {
       isSortingByTop = !isSortingByTop;
     });
-    preferences.updatePreference(Preferences.WARDROBE_SORT_BY_TOP, isSortingByTop);
+    preferences.updatePreference(
+        Preferences.WARDROBE_SORT_BY_TOP, isSortingByTop);
     _outfitBloc.loadUserOutfits.add(LoadOutfits(
       userId: widget.userId,
       sortByTop: isSortingByTop,
     ));
   }
 
-
   Widget _outfitsGrid(bool isLoading) {
     return StreamBuilder<List<Outfit>>(
-      stream: _outfitBloc.selectedOutfits,
-      initialData: [],
-      builder: (ctx, outfitsSnap) {
-        outfits =outfitsSnap.data;
-        if(outfits.isNotEmpty){
-          outfits = sortOutfits(outfits, isSortingByTop);
-        }
-        return OutfitsGrid(
-          emptyText: 'This user has no outfits, follow them to get notified when they upload one!',
-          isLoading: isLoading,
-          outfits: outfits,
-          hasFixedHeight: true,
-          physics: NeverScrollableScrollPhysics(),
-          pagesSinceProfileScreen: widget.pagesSinceProfileScreen+1,
-          pagesSinceOutfitScreen: widget.pagesSinceOutfitScreen,
-        );
-      }
-    );
+        stream: _outfitBloc.selectedOutfits,
+        initialData: [],
+        builder: (ctx, outfitsSnap) {
+          outfits = outfitsSnap.data;
+          if (outfits.isNotEmpty) {
+            outfits = sortOutfits(outfits, isSortingByTop);
+          }
+          return OutfitsGrid(
+            emptyText:
+                'This user has no outfits, follow them to get notified when they upload one!',
+            isLoading: isLoading,
+            outfits: outfits,
+            hasFixedHeight: true,
+            physics: NeverScrollableScrollPhysics(),
+            pagesSinceProfileScreen: widget.pagesSinceProfileScreen + 1,
+            pagesSinceOutfitScreen: widget.pagesSinceOutfitScreen,
+          );
+        });
   }
-  Widget _buildInteractButton(User user){
+
+  Widget _buildInteractButton(User user) {
     return Container(
       decoration: BoxDecoration(
         border: BorderDirectional(
-          start: BorderSide(
-            color: Colors.grey.withOpacity(0.5),
-            width: 0.5
-          )
-        ),
+            start: BorderSide(color: Colors.grey.withOpacity(0.5), width: 0.5)),
         gradient: LinearGradient(
-          colors: user.isFollowing ? [
-            Colors.purpleAccent,
-            Colors.deepOrangeAccent,
-          ] : [
-            Colors.grey[600],
-            Colors.grey,
-          ],
+          colors: user.isFollowing
+              ? [
+                  Colors.purpleAccent,
+                  Colors.deepOrangeAccent,
+                ]
+              : [
+                  Colors.grey[600],
+                  Colors.grey,
+                ],
           begin: Alignment.bottomLeft,
           end: Alignment.topRight,
         ),

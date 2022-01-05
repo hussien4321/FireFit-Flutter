@@ -6,13 +6,11 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../../../front_end/helper_widgets.dart';
 
 class BlockedUsersScreen extends StatefulWidget {
-
   @override
   _BlockedUsersScreenState createState() => _BlockedUsersScreenState();
 }
 
 class _BlockedUsersScreenState extends State<BlockedUsersScreen> {
-  
   UserBloc _userBloc;
   String currentUserId;
 
@@ -26,14 +24,14 @@ class _BlockedUsersScreenState extends State<BlockedUsersScreen> {
     _controller = ScrollController();
     _controller.addListener(_scrollListener);
   }
+
   _scrollListener() {
-    if (_controller.offset >= (_controller.position.maxScrollExtent - 100) && !_controller.position.outOfRange) {
-      _userBloc.loadBlockedUsers.add(
-        LoadUsers(
-          userId: currentUserId,
-          startAfterUser: lastUser,
-        )
-      );
+    if (_controller.offset >= (_controller.position.maxScrollExtent - 100) &&
+        !_controller.position.outOfRange) {
+      _userBloc.loadBlockedUsers.add(LoadUsers(
+        userId: currentUserId,
+        startAfterUser: lastUser,
+      ));
     }
   }
 
@@ -42,76 +40,77 @@ class _BlockedUsersScreenState extends State<BlockedUsersScreen> {
     super.dispose();
     _controller.dispose();
   }
-  
+
   @override
   Widget build(BuildContext context) {
     _initBlocs();
     return CustomScaffold(
       title: 'Blocked Users',
       body: Container(
-        child: StreamBuilder<bool>(
-          stream: _userBloc.isLoadingFollows,
-          initialData: true,
-          builder: (ctx, loadingSnap) {
-            return StreamBuilder<List<User>>(
-              stream: _userBloc.blockedUsers,
-              initialData: [],
-              builder: (ctx, snap){
-                List<User> users = snap.data;
-                if(users.length > 0){
-                  lastUser = users.last;
-                  return ListView(
-                    controller: _controller,
-                    children: users.map((user) => _blockedUserTab(user)).toList()..add(_userLoadTab(loadingSnap.data, users.isEmpty)),
-                  );
-                }else{
-                  return Center(
-                    child: Text(
-                      'No blocked users found',
-                      style: Theme.of(context).textTheme.caption,
-                    )
-                  );
-                }
-              },
-            );
-          }
-        ) 
-      ),
+          child: StreamBuilder<bool>(
+              stream: _userBloc.isLoadingFollows,
+              initialData: true,
+              builder: (ctx, loadingSnap) {
+                return StreamBuilder<List<User>>(
+                  stream: _userBloc.blockedUsers,
+                  initialData: [],
+                  builder: (ctx, snap) {
+                    List<User> users = snap.data;
+                    if (users.length > 0) {
+                      lastUser = users.last;
+                      return ListView(
+                        controller: _controller,
+                        children: users
+                            .map((user) => _blockedUserTab(user))
+                            .toList()
+                          ..add(_userLoadTab(loadingSnap.data, users.isEmpty)),
+                      );
+                    } else {
+                      return Center(
+                          child: Text(
+                        'No blocked users found',
+                        style: Theme.of(context).textTheme.caption,
+                      ));
+                    }
+                  },
+                );
+              })),
     );
   }
 
   _initBlocs() async {
-    if(_userBloc == null){
+    if (_userBloc == null) {
       _userBloc = UserBlocProvider.of(context);
-      currentUserId =await _userBloc.existingAuthId.first;
-      LoadUsers loadUsers =LoadUsers(
+      currentUserId = await _userBloc.existingAuthId.first;
+      LoadUsers loadUsers = LoadUsers(
         userId: currentUserId,
       );
       _userBloc.loadBlockedUsers.add(loadUsers);
     }
   }
 
-  Widget _userLoadTab(bool isLoading, bool isEmptyList){
-    return !isLoading ? Container() : Container(
-      padding: EdgeInsets.all(8),
-      width: double.infinity,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          Padding(
-            padding: const EdgeInsets.only(right: 8.0),
-            child: CircularProgressIndicator(),
-          ),
-          Text(
-            'Loading ${isEmptyList?'':'more '} users',
-            style: Theme.of(context).textTheme.caption,
-          ),
-        ],
-      )
-    );
+  Widget _userLoadTab(bool isLoading, bool isEmptyList) {
+    return !isLoading
+        ? Container()
+        : Container(
+            padding: EdgeInsets.all(8),
+            width: double.infinity,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Padding(
+                  padding: const EdgeInsets.only(right: 8.0),
+                  child: CircularProgressIndicator(),
+                ),
+                Text(
+                  'Loading ${isEmptyList ? '' : 'more '} users',
+                  style: Theme.of(context).textTheme.caption,
+                ),
+              ],
+            ));
   }
 
-  Widget _blockedUserTab(User user){
+  Widget _blockedUserTab(User user) {
     return Material(
       child: InkWell(
         onTap: () => _openProfile(user),
@@ -134,20 +133,16 @@ class _BlockedUsersScreenState extends State<BlockedUsersScreen> {
                 size: 64,
               ),
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Text(
-                      user.name,
-                      style: Theme.of(context).textTheme.headline5
-                    ),
-                    Text(
-                      '@'+user.username,
-                      style: Theme.of(context).textTheme.caption,
-                    ),
-                  ],
-                )
-              ),
+                  child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text(user.name, style: Theme.of(context).textTheme.subtitle1),
+                  Text(
+                    '@' + user.username,
+                    style: Theme.of(context).textTheme.caption,
+                  ),
+                ],
+              )),
               RaisedButton(
                 child: Row(
                   children: <Widget>[
@@ -155,7 +150,10 @@ class _BlockedUsersScreenState extends State<BlockedUsersScreen> {
                       padding: const EdgeInsets.only(right: 4.0),
                       child: Text(
                         'Unblock',
-                        style: Theme.of(context).textTheme.button.apply(color: Colors.white),
+                        style: Theme.of(context)
+                            .textTheme
+                            .button
+                            .apply(color: Colors.white),
                       ),
                     ),
                     Icon(
@@ -175,34 +173,34 @@ class _BlockedUsersScreenState extends State<BlockedUsersScreen> {
     );
   }
 
-  _openProfile(User user){
-    CustomNavigator.goToProfileScreen(context, 
+  _openProfile(User user) {
+    CustomNavigator.goToProfileScreen(
+      context,
       userId: user.userId,
     );
   }
 
-  _unblockUser(User user){
+  _unblockUser(User user) {
     UserBlock userBlock = UserBlock(
       blockingUserId: currentUserId,
       blockedUserId: user.userId,
     );
     return showDialog(
-      context: context,
-      builder: (secondContext) {
-        return YesNoDialog(
-          title: 'Unblock user',
-          description: 'Are you sure you want to unblock ${user.name}?',
-          yesText: 'Yes',
-          noText: 'Cancel',
-          onYes: () {
-            _userBloc.unblockUser.add(userBlock);
-            Navigator.pop(context);
-          },
-          onDone: () {
-            Navigator.pop(context);
-          },
-        );
-      }
-    );    
+        context: context,
+        builder: (secondContext) {
+          return YesNoDialog(
+            title: 'Unblock user',
+            description: 'Are you sure you want to unblock ${user.name}?',
+            yesText: 'Yes',
+            noText: 'Cancel',
+            onYes: () {
+              _userBloc.unblockUser.add(userBlock);
+              Navigator.pop(context);
+            },
+            onDone: () {
+              Navigator.pop(context);
+            },
+          );
+        });
   }
 }

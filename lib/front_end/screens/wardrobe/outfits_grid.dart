@@ -6,7 +6,6 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter/rendering.dart';
 
 class OutfitsGrid extends StatefulWidget {
-
   final Widget leading;
   final bool isLoading;
   final List<Outfit> outfits;
@@ -20,8 +19,17 @@ class OutfitsGrid extends StatefulWidget {
   final int pagesSinceProfileScreen;
   final ValueChanged<ScrollController> onScrollChange;
 
-  OutfitsGrid({this.leading, this.outfits, this.isLoading, this.onReachEnd, this.onRefresh, this.emptyText, this.customOverlay,     this.onScrollChange,
-    this.physics = const ClampingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+  OutfitsGrid({
+    this.leading,
+    this.outfits,
+    this.isLoading,
+    this.onReachEnd,
+    this.onRefresh,
+    this.emptyText,
+    this.customOverlay,
+    this.onScrollChange,
+    this.physics =
+        const ClampingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
     this.hasFixedHeight = false,
     this.pagesSinceOutfitScreen = 0,
     this.pagesSinceProfileScreen = 0,
@@ -32,8 +40,8 @@ class OutfitsGrid extends StatefulWidget {
 }
 
 typedef Widget OutfitOverlay(Outfit outfit);
-class _OutfitsGridState extends State<OutfitsGrid> {
 
+class _OutfitsGridState extends State<OutfitsGrid> {
   ScrollController _controller;
 
   @override
@@ -42,12 +50,14 @@ class _OutfitsGridState extends State<OutfitsGrid> {
     _controller = ScrollController();
     _controller.addListener(_scrollListener);
   }
+
   _scrollListener() {
-    if(widget.onScrollChange != null){
+    if (widget.onScrollChange != null) {
       widget.onScrollChange(_controller);
     }
-    if (_controller.offset >= (_controller.position.maxScrollExtent-100) && !_controller.position.outOfRange) {
-      if(widget.onReachEnd != null){
+    if (_controller.offset >= (_controller.position.maxScrollExtent - 100) &&
+        !_controller.position.outOfRange) {
+      if (widget.onReachEnd != null) {
         widget.onReachEnd();
       }
     }
@@ -62,10 +72,9 @@ class _OutfitsGridState extends State<OutfitsGrid> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 4.0),
-      width: double.infinity,
-      child: _buildScrollableGrid(context)
-    );
+        padding: EdgeInsets.symmetric(horizontal: 4.0),
+        width: double.infinity,
+        child: _buildScrollableGrid(context));
   }
 
   Widget _buildScrollableGrid(BuildContext ctx) {
@@ -75,23 +84,22 @@ class _OutfitsGridState extends State<OutfitsGrid> {
       shrinkWrap: true,
       controller: _controller,
       children: <Widget>[
-        widget.leading!=null ? widget.leading : Container(),
+        widget.leading != null ? widget.leading : Container(),
         Padding(
           padding: EdgeInsets.only(bottom: 4),
         ),
-        widget.outfits.isEmpty ? Container() : _displayGrid(hasRefresh), 
+        widget.outfits.isEmpty ? Container() : _displayGrid(hasRefresh),
         Container(
           padding: EdgeInsets.all(12.0),
-          child: widget.isLoading ? _loadingMoreNotice() : (widget.outfits.isEmpty ? _endOfListNotice() : Container()),
+          child: widget.isLoading
+              ? _loadingMoreNotice()
+              : (widget.outfits.isEmpty ? _endOfListNotice() : Container()),
         )
       ],
     );
-    if(hasRefresh){
+    if (hasRefresh) {
       return PullToRefreshOverlay(
-        matchSize: false,
-        onRefresh: widget.onRefresh,
-        child: content
-      );
+          matchSize: false, onRefresh: widget.onRefresh, child: content);
     }
     return content;
   }
@@ -99,25 +107,22 @@ class _OutfitsGridState extends State<OutfitsGrid> {
   _displayGrid(bool hasRefresh) {
     return GridView.builder(
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 3,
-        childAspectRatio: 1/2,
-        crossAxisSpacing: 4,
-        mainAxisSpacing: 4
-      ),
+          crossAxisCount: 3,
+          childAspectRatio: 1 / 2,
+          crossAxisSpacing: 4,
+          mainAxisSpacing: 4),
       physics: NeverScrollableScrollPhysics(),
       shrinkWrap: true,
       itemCount: widget.outfits.length,
-      itemBuilder: (ctx, i) => _buildSimpleOutfitView(widget.outfits[i%widget.outfits.length], ctx),
+      itemBuilder: (ctx, i) => _buildSimpleOutfitView(
+          widget.outfits[i % widget.outfits.length], ctx),
     );
   }
 
   Widget _buildSimpleOutfitView(Outfit outfit, BuildContext ctx) {
     return Container(
       decoration: BoxDecoration(
-        border: Border.all(
-          color: Colors.black45,
-          width: 0.5
-        ),
+        border: Border.all(color: Colors.black45, width: 0.5),
         borderRadius: BorderRadius.circular(8),
       ),
       child: ClipRRect(
@@ -133,7 +138,9 @@ class _OutfitsGridState extends State<OutfitsGrid> {
                 ),
               ),
               _outfitData(outfit),
-              widget.customOverlay == null ? Container() : widget.customOverlay(outfit),
+              widget.customOverlay == null
+                  ? Container()
+                  : widget.customOverlay(outfit),
             ],
           ),
         ),
@@ -147,31 +154,29 @@ class _OutfitsGridState extends State<OutfitsGrid> {
       right: 0,
       bottom: 0,
       child: Container(
-        padding: EdgeInsets.symmetric(vertical: 4, horizontal: 2),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              Colors.transparent,
-              Colors.black54
-            ],
+          padding: EdgeInsets.symmetric(vertical: 4, horizontal: 2),
+          decoration: BoxDecoration(
+              gradient: LinearGradient(
+            colors: [Colors.transparent, Colors.black54],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-          )
-        ),
-        child: OutfitStats(outfit: outfit,)
-      ),
+          )),
+          child: OutfitStats(
+            outfit: outfit,
+          )),
     );
   }
 
-  _openDetailedOutfit(Outfit outfit, BuildContext ctx){
-    CustomNavigator.goToOutfitDetailsScreen(ctx, 
+  _openDetailedOutfit(Outfit outfit, BuildContext ctx) {
+    CustomNavigator.goToOutfitDetailsScreen(
+      ctx,
       outfitId: outfit.outfitId,
       pagesSinceOutfitScreen: widget.pagesSinceOutfitScreen,
       pagesSinceProfileScreen: widget.pagesSinceProfileScreen,
     );
   }
 
-  Widget _loadingMoreNotice(){
+  Widget _loadingMoreNotice() {
     return Container(
       width: double.infinity,
       child: Row(
@@ -182,10 +187,11 @@ class _OutfitsGridState extends State<OutfitsGrid> {
             child: CircularProgressIndicator(),
           ),
           Text(
-            'Loading ${widget.outfits.isEmpty?'':'more '}fits...',
-            style: Theme.of(context).textTheme.subtitle1.copyWith(
-              color: Colors.black54
-            ),
+            'Loading ${widget.outfits.isEmpty ? '' : 'more '}fits...',
+            style: Theme.of(context)
+                .textTheme
+                .subtitle2
+                .copyWith(color: Colors.black54),
           )
         ],
       ),
@@ -198,9 +204,10 @@ class _OutfitsGridState extends State<OutfitsGrid> {
       child: Center(
         child: Text(
           widget.emptyText,
-          style: Theme.of(context).textTheme.subtitle1.copyWith(
-            color: Colors.black54
-          ),
+          style: Theme.of(context)
+              .textTheme
+              .subtitle2
+              .copyWith(color: Colors.black54),
           textAlign: TextAlign.center,
         ),
       ),

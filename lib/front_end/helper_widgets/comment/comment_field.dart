@@ -7,7 +7,6 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../../../helpers/helpers.dart';
 
 class CommentField extends StatefulWidget {
-
   final Comment comment;
   final int outfitId;
   final String userId;
@@ -21,7 +20,7 @@ class CommentField extends StatefulWidget {
   final ValueChanged<bool> onUpdateReplies;
 
   CommentField({
-    this.comment, 
+    this.comment,
     this.outfitId,
     this.userId,
     this.pagesSinceOutfitScreen = 0,
@@ -39,9 +38,7 @@ class CommentField extends StatefulWidget {
 }
 
 class _CommentFieldState extends State<CommentField> {
-
   CommentBloc _commentBloc;
-
 
   @override
   void initState() {
@@ -59,9 +56,9 @@ class _CommentFieldState extends State<CommentField> {
     );
   }
 
-  _initBlocs(){
-    if(_commentBloc==null){
-      _commentBloc =CommentBlocProvider.of(context);
+  _initBlocs() {
+    if (_commentBloc == null) {
+      _commentBloc = CommentBlocProvider.of(context);
     }
   }
 
@@ -71,8 +68,9 @@ class _CommentFieldState extends State<CommentField> {
       child: Column(
         children: <Widget>[
           InkWell(
-            highlightColor:  Colors.grey[700],
-            onLongPress: isCurrentUser(comment) ?  ()=>_confirmDelete(comment) : null,
+            highlightColor: Colors.grey[700],
+            onLongPress:
+                isCurrentUser(comment) ? () => _confirmDelete(comment) : null,
             child: Row(
               children: <Widget>[
                 Padding(
@@ -92,16 +90,13 @@ class _CommentFieldState extends State<CommentField> {
                     children: <Widget>[
                       Padding(
                         padding: EdgeInsets.only(left: 8.0, bottom: 2.0),
-                        child: Text(
-                          comment.commenter.name,
-                          style: Theme.of(context).textTheme.subtitle1
-                        ),
+                        child: Text(comment.commenter.name,
+                            style: Theme.of(context).textTheme.subtitle2),
                       ),
                       Container(
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(20.0),
-                          color: Colors.grey[350]
-                        ),
+                            borderRadius: BorderRadius.circular(20.0),
+                            color: Colors.grey[350]),
                         width: double.infinity,
                         padding: EdgeInsets.all(8.0),
                         child: Text(
@@ -111,94 +106,91 @@ class _CommentFieldState extends State<CommentField> {
                     ],
                   ),
                 ),
-                comment.commentId <= 0 ? 
-                Container(
-                  margin: EdgeInsets.only(top: 16, left: 8.0),
-                  child: Center(
-                    child: CircularProgressIndicator()
-                  )
-                ) : 
-                Padding(
-                  padding: const EdgeInsets.only(top: 16.0),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: <Widget>[
-                      IconButton(
-                        icon: Icon(
-                          comment.isLiked ? FontAwesomeIcons.solidHeart :  FontAwesomeIcons.heart,
-                          color: Colors.redAccent,
+                comment.commentId <= 0
+                    ? Container(
+                        margin: EdgeInsets.only(top: 16, left: 8.0),
+                        child: Center(child: CircularProgressIndicator()))
+                    : Padding(
+                        padding: const EdgeInsets.only(top: 16.0),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: <Widget>[
+                            IconButton(
+                              icon: Icon(
+                                comment.isLiked
+                                    ? FontAwesomeIcons.solidHeart
+                                    : FontAwesomeIcons.heart,
+                                color: Colors.redAccent,
+                              ),
+                              onPressed: () => _likeComment(comment),
+                            ),
+                          ],
                         ),
-                        onPressed: () => _likeComment(comment),
                       ),
-                    ],
-                  ),
-                ),
               ],
             ),
           ),
           Container(
-            padding: EdgeInsets.only(left: 48),
-            width: double.infinity,
-            child: Row(
-              children: <Widget>[
-                Text(
-                  DateFormatter.dateToRecentFormat(comment.uploadDate),
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey,
-                    fontStyle: FontStyle.italic
-                  )
-                ),
-                Padding(padding: EdgeInsets.only(right: 8.0),),
-                Text(
-                  '${comment.likesCount} like${comment.likesCount == 1 ? '': 's'}',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey,
-                    fontWeight: FontWeight.bold
+              padding: EdgeInsets.only(left: 48),
+              width: double.infinity,
+              child: Row(
+                children: <Widget>[
+                  Text(DateFormatter.dateToRecentFormat(comment.uploadDate),
+                      style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey,
+                          fontStyle: FontStyle.italic)),
+                  Padding(
+                    padding: EdgeInsets.only(right: 8.0),
                   ),
-                ),
-                _replyButton(comment),
-                comment.repliesCount>0 ? Expanded(child: _expandRepliesButton(comment)) : Container(),                  
-              ],
-            )
-          ),
+                  Text(
+                    '${comment.likesCount} like${comment.likesCount == 1 ? '' : 's'}',
+                    style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey,
+                        fontWeight: FontWeight.bold),
+                  ),
+                  _replyButton(comment),
+                  comment.repliesCount > 0
+                      ? Expanded(child: _expandRepliesButton(comment))
+                      : Container(),
+                ],
+              )),
         ],
       ),
     );
   }
-  bool isCurrentUser(Comment comment) => widget.userId == comment.commenter.userId;
 
-  _confirmDelete(Comment comment){
+  bool isCurrentUser(Comment comment) =>
+      widget.userId == comment.commenter.userId;
+
+  _confirmDelete(Comment comment) {
     DeleteComment deleteComment = DeleteComment(
       comment: comment,
       outfitId: widget.outfitId,
     );
     return showDialog(
-      context: context,
-      builder: (secondContext) {
-        return YesNoDialog(
-          title: 'Delete Comment',
-          description: 'Are you sure you want to delete this comment?',
-          yesText: 'Yes',
-          noText: 'Cancel',
-          onYes: () {
-            _commentBloc.deleteComment.add(deleteComment);
-          },
-          onDone: () {
-            Navigator.pop(context);
-          },
-        );
-      }
-    ) ?? false;
+            context: context,
+            builder: (secondContext) {
+              return YesNoDialog(
+                title: 'Delete Comment',
+                description: 'Are you sure you want to delete this comment?',
+                yesText: 'Yes',
+                noText: 'Cancel',
+                onYes: () {
+                  _commentBloc.deleteComment.add(deleteComment);
+                },
+                onDone: () {
+                  Navigator.pop(context);
+                },
+              );
+            }) ??
+        false;
   }
 
   _likeComment(Comment comment) {
-    CommentLike commentLike =CommentLike(
-      comment: comment,
-      outfitId: widget.outfitId,
-      userId: widget.userId
-    );
+    CommentLike commentLike = CommentLike(
+        comment: comment, outfitId: widget.outfitId, userId: widget.userId);
     _commentBloc.likeComment.add(commentLike);
   }
 
@@ -210,10 +202,7 @@ class _CommentFieldState extends State<CommentField> {
         child: Text(
           'Reply',
           style: TextStyle(
-            fontSize: 12,
-            color: Colors.blue,
-            fontWeight: FontWeight.bold
-          ),
+              fontSize: 12, color: Colors.blue, fontWeight: FontWeight.bold),
         ),
       ),
     );
@@ -236,15 +225,18 @@ class _CommentFieldState extends State<CommentField> {
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
                 Text(
-                  widget.isShowingReplies ? 'Hide replies' : 'Show ${comment.repliesCount} Repl${comment.repliesCount==1?'y':'ies'}',
+                  widget.isShowingReplies
+                      ? 'Hide replies'
+                      : 'Show ${comment.repliesCount} Repl${comment.repliesCount == 1 ? 'y' : 'ies'}',
                   style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.black,
-                    fontWeight: FontWeight.bold
-                  ),
+                      fontSize: 12,
+                      color: Colors.black,
+                      fontWeight: FontWeight.bold),
                 ),
                 Icon(
-                  widget.isShowingReplies ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
+                  widget.isShowingReplies
+                      ? Icons.keyboard_arrow_up
+                      : Icons.keyboard_arrow_down,
                   size: 18,
                 )
               ],
@@ -257,7 +249,7 @@ class _CommentFieldState extends State<CommentField> {
 
   _toggleReplies() {
     widget.onUpdateReplies(!widget.isShowingReplies);
-    if(!widget.isShowingReplies){
+    if (!widget.isShowingReplies) {
       _commentBloc.loadReplies.add(LoadComments(
         outfitId: widget.outfitId,
         userId: widget.userId,
@@ -268,16 +260,19 @@ class _CommentFieldState extends State<CommentField> {
 
   Widget _replies() {
     List<Comment> replies = new List<Comment>.from(widget.comments);
-    replies.removeWhere((comment) => comment.replyTo != widget.comment.commentId);
-    replies.sort((commentA, commentB) => commentA.uploadDate.compareTo(commentB.uploadDate));
+    replies
+        .removeWhere((comment) => comment.replyTo != widget.comment.commentId);
+    replies.sort((commentA, commentB) =>
+        commentA.uploadDate.compareTo(commentB.uploadDate));
     return Container(
       padding: const EdgeInsets.only(left: 8.0, right: 8),
       child: Column(
-        children: replies.map((reply) => _replyField(reply)).toList()..add(_replyEndTag(
-          isLoading: widget.isLoadingReply,
-          isComplete: replies.length >= widget.comment.repliesCount,
-          reply: replies.length == 0 ? null : replies.last,
-        )),
+        children: replies.map((reply) => _replyField(reply)).toList()
+          ..add(_replyEndTag(
+            isLoading: widget.isLoadingReply,
+            isComplete: replies.length >= widget.comment.repliesCount,
+            reply: replies.length == 0 ? null : replies.last,
+          )),
       ),
     );
   }
@@ -298,8 +293,9 @@ class _CommentFieldState extends State<CommentField> {
           child: Column(
             children: <Widget>[
               InkWell(
-                highlightColor:  Colors.blueGrey,
-                onLongPress: isCurrentUser(reply) ?  ()=>_confirmDelete(reply) : null,
+                highlightColor: Colors.blueGrey,
+                onLongPress:
+                    isCurrentUser(reply) ? () => _confirmDelete(reply) : null,
                 child: Row(
                   children: <Widget>[
                     Padding(
@@ -318,16 +314,13 @@ class _CommentFieldState extends State<CommentField> {
                         children: <Widget>[
                           Padding(
                             padding: EdgeInsets.only(left: 8.0, bottom: 2.0),
-                            child: Text(
-                              reply.commenter.name,
-                              style: Theme.of(context).textTheme.subtitle1
-                            ),
+                            child: Text(reply.commenter.name,
+                                style: Theme.of(context).textTheme.subtitle2),
                           ),
                           Container(
                             decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(20.0),
-                              color: Colors.grey[350]
-                            ),
+                                borderRadius: BorderRadius.circular(20.0),
+                                color: Colors.grey[350]),
                             width: double.infinity,
                             padding: EdgeInsets.all(8.0),
                             child: Text(
@@ -337,56 +330,52 @@ class _CommentFieldState extends State<CommentField> {
                         ],
                       ),
                     ),
-                    reply.commentId <= 0 ? 
-                    Container(
-                      margin: EdgeInsets.only(top: 16, left: 8.0),
-                      child: Center(
-                        child: CircularProgressIndicator()
-                      )
-                    ) : 
-                    Padding(
-                      padding: const EdgeInsets.only(top: 16.0),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: <Widget>[
-                          IconButton(
-                            icon: Icon(
-                              reply.isLiked ? FontAwesomeIcons.solidHeart :  FontAwesomeIcons.heart,
-                              color: Colors.redAccent,
+                    reply.commentId <= 0
+                        ? Container(
+                            margin: EdgeInsets.only(top: 16, left: 8.0),
+                            child: Center(child: CircularProgressIndicator()))
+                        : Padding(
+                            padding: const EdgeInsets.only(top: 16.0),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: <Widget>[
+                                IconButton(
+                                  icon: Icon(
+                                    reply.isLiked
+                                        ? FontAwesomeIcons.solidHeart
+                                        : FontAwesomeIcons.heart,
+                                    color: Colors.redAccent,
+                                  ),
+                                  onPressed: () => _likeComment(reply),
+                                ),
+                              ],
                             ),
-                            onPressed: () => _likeComment(reply),
                           ),
-                        ],
-                      ),
-                    ),
                   ],
                 ),
               ),
               Container(
-                padding: EdgeInsets.only(left: 48),
-                width: double.infinity,
-                child: Row(
-                  children: <Widget>[
-                    Text(
-                      DateFormatter.dateToRecentFormat(reply.uploadDate),
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey,
-                        fontStyle: FontStyle.italic
-                      )
-                    ),
-                    Padding(padding: EdgeInsets.only(right: 8.0),),
-                    Text(
-                      '${reply.likesCount} like${reply.likesCount == 1 ? '': 's'}',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey,
-                        fontWeight: FontWeight.bold
+                  padding: EdgeInsets.only(left: 48),
+                  width: double.infinity,
+                  child: Row(
+                    children: <Widget>[
+                      Text(DateFormatter.dateToRecentFormat(reply.uploadDate),
+                          style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey,
+                              fontStyle: FontStyle.italic)),
+                      Padding(
+                        padding: EdgeInsets.only(right: 8.0),
                       ),
-                    ),
-                  ],
-                )
-              ),
+                      Text(
+                        '${reply.likesCount} like${reply.likesCount == 1 ? '' : 's'}',
+                        style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey,
+                            fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  )),
             ],
           ),
         ),
@@ -395,32 +384,28 @@ class _CommentFieldState extends State<CommentField> {
   }
 
   Widget _replyEndTag({Comment reply, bool isLoading, bool isComplete}) {
-    if(isComplete){
+    if (isComplete) {
       return Container();
     }
     return Center(
-      child: Container(
-        margin: EdgeInsets.only(left: 48),
-        padding: const EdgeInsets.all(8.0),
-        child: isLoading ? _loadingTag() : _loadMoreTag(reply)
-      )
-    );
+        child: Container(
+            margin: EdgeInsets.only(left: 48),
+            padding: const EdgeInsets.all(8.0),
+            child: isLoading ? _loadingTag() : _loadMoreTag(reply)));
   }
 
   Widget _loadingTag() {
     return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Text(
-          'LOADING...',
-          style: Theme.of(context).textTheme.subtitle1,
-        )
-      )
-    );
+        child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(
+              'LOADING...',
+              style: Theme.of(context).textTheme.subtitle1,
+            )));
   }
-  
+
   Widget _loadMoreTag(Comment reply) {
-    return  InkWell(
+    return InkWell(
       onTap: () {
         _commentBloc.loadReplies.add(LoadComments(
           outfitId: widget.outfitId,
@@ -430,20 +415,18 @@ class _CommentFieldState extends State<CommentField> {
         ));
       },
       child: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Text(
-                'Load More',
-                style: Theme.of(context).textTheme.subtitle1,
-              ),
-              Icon(Icons.add_circle_outline)
-            ],
-          )
-        )
-      ),
+          child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Text(
+                    'Load More',
+                    style: Theme.of(context).textTheme.subtitle1,
+                  ),
+                  Icon(Icons.add_circle_outline)
+                ],
+              ))),
     );
   }
 }

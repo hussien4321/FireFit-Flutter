@@ -5,25 +5,24 @@ import '../../../../middleware/middleware.dart';
 import 'dart:async';
 
 class SubscriptionDialog extends StatefulWidget {
-
-  static Future<void> launch(BuildContext context, {
+  static Future<void> launch(
+    BuildContext context, {
     String title,
     String benefit,
     int initialPage = 0,
     ValueChanged<bool> onUpdateSubscriptionStatus,
   }) {
     return showDialog(
-      context: context,
-      builder: (ctx) => SubscriptionDialog(
-        title: title,
-        benefit: benefit,
-        initialPage: initialPage,
-        onUpdateSubscriptionStatus: onUpdateSubscriptionStatus,
-      )
-    );
+        context: context,
+        builder: (ctx) => SubscriptionDialog(
+              title: title,
+              benefit: benefit,
+              initialPage: initialPage,
+              onUpdateSubscriptionStatus: onUpdateSubscriptionStatus,
+            ));
   }
 
-  final String title, benefit; 
+  final String title, benefit;
   final int initialPage;
   final ValueChanged<bool> onUpdateSubscriptionStatus;
 
@@ -39,7 +38,6 @@ class SubscriptionDialog extends StatefulWidget {
 }
 
 class _SubscriptionDialogState extends State<SubscriptionDialog> {
-
   @override
   void initState() {
     super.initState();
@@ -51,37 +49,36 @@ class _SubscriptionDialogState extends State<SubscriptionDialog> {
       elevation: 0,
       title: Text(
         widget.title,
-        style: Theme.of(context).textTheme.overline.copyWith(
-          color: Colors.black,
-          fontWeight: FontWeight.bold
-        ),
+        style: Theme.of(context)
+            .textTheme
+            .headline6
+            .copyWith(color: Colors.black, fontWeight: FontWeight.bold),
       ),
       content: SingleChildScrollView(
         child: Text(
-          'Hi there 👋\n\nWould you like to ${widget.benefit}?\n\nYou can enjoy that and much more in FireFit+ 🙌\n\nIt also helps our team make FireFit even better ❤️'
-        ),
+            'Hi there 👋\n\nWould you like to ${widget.benefit}?\n\nYou can enjoy that and much more in FireFit+ 🙌\n\nIt also helps our team make FireFit even better ❤️'),
       ),
       actions: <Widget>[
         FlatButton(
           child: Text(
             'No thanks',
-            style: Theme.of(context).textTheme.subtitle1.copyWith(
-              color: Colors.grey,
-              fontWeight: FontWeight.normal
-            ),
+            style: Theme.of(context)
+                .textTheme
+                .subtitle2
+                .copyWith(color: Colors.grey, fontWeight: FontWeight.normal),
           ),
           onPressed: Navigator.of(context).pop,
         ),
         FlatButton(
           child: Text(
             'Get FireFit+',
-            style: Theme.of(context).textTheme.subtitle1.copyWith(
-              color: Color.fromRGBO(225, 173, 0, 1.0),
-              fontWeight: FontWeight.bold
-            ),
+            style: Theme.of(context).textTheme.subtitle2.copyWith(
+                color: Color.fromRGBO(225, 173, 0, 1.0),
+                fontWeight: FontWeight.bold),
           ),
           onPressed: () async {
-            await CustomNavigator.goToSubscriptionDetailsScreen(context,
+            await CustomNavigator.goToSubscriptionDetailsScreen(
+              context,
               initialPage: widget.initialPage,
               hasSubscription: false,
               onUpdateSubscriptionStatus: widget.onUpdateSubscriptionStatus,

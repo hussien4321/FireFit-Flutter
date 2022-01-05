@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 class CustomTextField extends StatelessWidget {
-
   final TextEditingController controller;
   final ValueChanged<String> onChanged, onSubmitted;
   final TextCapitalization textCapitalization;
@@ -33,8 +32,8 @@ class CustomTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    TextStyle selectedTextStyle = Theme.of(context).textTheme.overline;
-    if(textStyle != null){
+    TextStyle selectedTextStyle = Theme.of(context).textTheme.headline5;
+    if (textStyle != null) {
       selectedTextStyle = textStyle;
     }
     return Column(
@@ -48,12 +47,13 @@ class CustomTextField extends StatelessWidget {
             children: <Widget>[
               Text(
                 title,
-                style: titleStyle!=null ? titleStyle : Theme.of(context).textTheme.overline,
+                style: titleStyle != null
+                    ? titleStyle
+                    : Theme.of(context).textTheme.headline5,
               ),
               Padding(
-                padding: EdgeInsets.symmetric(horizontal: 8.0),
-                child: Container()
-              ) 
+                  padding: EdgeInsets.symmetric(horizontal: 8.0),
+                  child: Container())
             ],
           ),
         ),
@@ -62,9 +62,8 @@ class CustomTextField extends StatelessWidget {
           margin: EdgeInsets.only(bottom: 8.0),
           width: double.infinity,
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20.0),
-            color: Colors.grey[350]
-          ),
+              borderRadius: BorderRadius.circular(20.0),
+              color: Colors.grey[350]),
           child: TextField(
             autofocus: autofocus,
             focusNode: focusNode,
@@ -75,13 +74,15 @@ class CustomTextField extends StatelessWidget {
             textInputAction: textInputAction,
             maxLength: maxLength,
             maxLengthEnforced: true,
-            style: selectedTextStyle.apply(color: textColor != null ? textColor : Colors.black),
+            style: selectedTextStyle.apply(
+                color: textColor != null ? textColor : Colors.black),
             decoration: new InputDecoration.collapsed(
               hintText: hintText,
-              hintStyle: Theme.of(context).textTheme.overline.apply(color: Colors.black.withOpacity(0.5)),
-            ).copyWith(
-              prefixIcon: prefix
-            ),
+              hintStyle: Theme.of(context)
+                  .textTheme
+                  .headline5
+                  .apply(color: Colors.black.withOpacity(0.5)),
+            ).copyWith(prefixIcon: prefix),
           ),
         ),
       ],

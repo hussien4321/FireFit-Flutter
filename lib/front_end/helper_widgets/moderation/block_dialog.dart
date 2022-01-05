@@ -7,16 +7,15 @@ import '../../../../middleware/middleware.dart';
 import 'package:overlay_support/overlay_support.dart';
 
 class BlockDialog extends StatefulWidget {
-
-  static Future<void> launch(BuildContext context, {String blockingUserId, String blockedUserId, String name}) {
+  static Future<void> launch(BuildContext context,
+      {String blockingUserId, String blockedUserId, String name}) {
     return showDialog(
-      context: context,
-      builder: (ctx) => BlockDialog(
-        blockingUserId: blockingUserId,
-        blockedUserId: blockedUserId,
-        name: name,
-      )
-    );
+        context: context,
+        builder: (ctx) => BlockDialog(
+              blockingUserId: blockingUserId,
+              blockedUserId: blockedUserId,
+              name: name,
+            ));
   }
 
   final String blockingUserId;
@@ -34,7 +33,6 @@ class BlockDialog extends StatefulWidget {
 }
 
 class _BlockDialogState extends State<BlockDialog> {
-
   UserBloc _userBloc;
 
   UserBlock _userBlock = UserBlock();
@@ -53,30 +51,30 @@ class _BlockDialogState extends State<BlockDialog> {
       elevation: 0,
       title: Text(
         'Block user',
-        style: Theme.of(context).textTheme.overline.copyWith(
-          color: Colors.red,
-          fontWeight: FontWeight.bold
-        ),
+        style: Theme.of(context)
+            .textTheme
+            .headline5
+            .copyWith(color: Colors.red, fontWeight: FontWeight.bold),
       ),
-     content: _content(),
+      content: _content(),
       actions: <Widget>[
         FlatButton(
           child: Text(
             'Cancel',
-            style: Theme.of(context).textTheme.subtitle1.copyWith(
-              color: Colors.black,
-              fontWeight: FontWeight.bold
-            ),
+            style: Theme.of(context)
+                .textTheme
+                .subtitle2
+                .copyWith(color: Colors.black, fontWeight: FontWeight.bold),
           ),
           onPressed: Navigator.of(context).pop,
         ),
         FlatButton(
           child: Text(
             'Block',
-            style: Theme.of(context).textTheme.subtitle1.copyWith(
-              color: Colors.red,
-              fontWeight: FontWeight.bold,
-            ),
+            style: Theme.of(context).textTheme.subtitle2.copyWith(
+                  color: Colors.red,
+                  fontWeight: FontWeight.bold,
+                ),
           ),
           onPressed: _blockUser,
         ),
@@ -85,7 +83,7 @@ class _BlockDialogState extends State<BlockDialog> {
   }
 
   _initBlocs() async {
-    if(_userBloc==null){
+    if (_userBloc == null) {
       _userBloc = UserBlocProvider.of(context);
     }
   }
@@ -97,24 +95,14 @@ class _BlockDialogState extends State<BlockDialog> {
 
   Widget _content() {
     return RichText(
-      text: TextSpan(
-        children: [
-          TextSpan(
+      text: TextSpan(children: [
+        TextSpan(
             text: "Are you sure you want to block ${widget.name}?\n\n",
-            style: TextStyle(
-              inherit: true,
-              color: Colors.black
-            )
-          ),
-          TextSpan(
+            style: TextStyle(inherit: true, color: Colors.black)),
+        TextSpan(
             text: "Note: This will hide all outfits from this user",
-            style: TextStyle(
-              inherit: true,
-              color: Colors.grey
-            )
-          ),
-        ]
-      ),
+            style: TextStyle(inherit: true, color: Colors.grey)),
+      ]),
     );
   }
 }

@@ -11,19 +11,18 @@ import 'package:path_provider/path_provider.dart';
 import 'package:multi_image_picker/multi_image_picker.dart';
 
 class EditUserScreen extends StatefulWidget {
-  
   final User user;
-  
+
   EditUserScreen({
     @required this.user,
   });
-  
+
   @override
   _EditUserScreenState createState() => _EditUserScreenState();
 }
 
-class _EditUserScreenState extends State<EditUserScreen> with LoadingAndErrorDialogs {
-  
+class _EditUserScreenState extends State<EditUserScreen>
+    with LoadingAndErrorDialogs {
   UserBloc _userBloc;
   EditUser editUserData;
 
@@ -36,8 +35,7 @@ class _EditUserScreenState extends State<EditUserScreen> with LoadingAndErrorDia
 
   TextEditingController _nameController = TextEditingController();
   TextEditingController _bioController = TextEditingController();
-  FocusNode bioFocus =FocusNode();
-
+  FocusNode bioFocus = FocusNode();
 
   @override
   void initState() {
@@ -45,22 +43,23 @@ class _EditUserScreenState extends State<EditUserScreen> with LoadingAndErrorDia
     editUserData = EditUser.fromUser(widget.user);
     _nameController.text = editUserData.name;
     _bioController.text = editUserData.bio;
-    _initTempGallery();    
+    _initTempGallery();
   }
 
-  _initTempGallery() async{ 
-    Directory extDir = Platform.isIOS ? await getApplicationSupportDirectory()  : await getExternalStorageDirectory();
+  _initTempGallery() async {
+    Directory extDir = Platform.isIOS
+        ? await getApplicationSupportDirectory()
+        : await getExternalStorageDirectory();
     dirPath = '${extDir.path}/Pictures/temp';
     final dir = Directory(dirPath);
-    if(dir.existsSync()){
+    if (dir.existsSync()) {
       dir.deleteSync(recursive: true);
     }
     await Directory(dirPath).create(recursive: true);
   }
 
-  
   @override
-  dispose(){
+  dispose() {
     _subscriptions?.forEach((subscription) => subscription.cancel());
     super.dispose();
   }
@@ -70,9 +69,7 @@ class _EditUserScreenState extends State<EditUserScreen> with LoadingAndErrorDia
     _initBlocs();
     return CustomScaffold(
       title: "Edit Profile",
-      actions: <Widget>[
-        _saveOutfitButton()
-      ],
+      actions: <Widget>[_saveOutfitButton()],
       body: SingleChildScrollView(
         child: Container(
           padding: EdgeInsets.only(left: 8, right: 8, top: 8),
@@ -85,14 +82,12 @@ class _EditUserScreenState extends State<EditUserScreen> with LoadingAndErrorDia
                 isUpdated: editUserData.hasNewProfilePic,
               ),
               _buildProfilePicView(),
-              _buildHeader(
-                'Name', 
-                isUpdated: editUserData.name != widget.user.name,
-                isEmpty: !editUserData.hasName
-              ),
+              _buildHeader('Name',
+                  isUpdated: editUserData.name != widget.user.name,
+                  isEmpty: !editUserData.hasName),
               _buildNameField(),
               _buildHeader(
-                'Bio', 
+                'Bio',
                 isUpdated: editUserData.bio != widget.user.bio,
               ),
               _buildBioField(),
@@ -104,32 +99,32 @@ class _EditUserScreenState extends State<EditUserScreen> with LoadingAndErrorDia
   }
 
   _initBlocs() {
-    if(_userBloc == null){
+    if (_userBloc == null) {
       _userBloc = UserBlocProvider.of(context);
       editUserData = EditUser.fromUser(widget.user);
       _subscriptions = <StreamSubscription<dynamic>>[
         _loadingListener(),
         _successListener(),
       ];
-
     }
   }
 
-  StreamSubscription _loadingListener(){
+  StreamSubscription _loadingListener() {
     return _userBloc.isLoading.listen((loadingStatus) {
-      if(loadingStatus && !isOverlayShowing){
+      if (loadingStatus && !isOverlayShowing) {
         startLoading("Updating profile", context);
         isOverlayShowing = true;
       }
-      if(!loadingStatus && isOverlayShowing){
+      if (!loadingStatus && isOverlayShowing) {
         isOverlayShowing = false;
         stopLoading(context);
       }
     });
   }
-  StreamSubscription _successListener(){
+
+  StreamSubscription _successListener() {
     return _userBloc.isSuccessful.listen((successStatus) {
-      if(successStatus){
+      if (successStatus) {
         Navigator.pop(context);
       }
     });
@@ -145,15 +140,16 @@ class _EditUserScreenState extends State<EditUserScreen> with LoadingAndErrorDia
 
   bool get hasNewData {
     return !(widget.user.name == editUserData.name &&
-    widget.user.bio == editUserData.bio &&
-    widget.user.profilePicUrl == editUserData.profilePicUrl);
+        widget.user.bio == editUserData.bio &&
+        widget.user.profilePicUrl == editUserData.profilePicUrl);
   }
 
   _editUser() {
-    _userBloc.editUser.add(editUserData);;
+    _userBloc.editUser.add(editUserData);
+    ;
   }
 
-  Widget _buildHeader(String title, {bool isUpdated, bool isEmpty = false}){
+  Widget _buildHeader(String title, {bool isUpdated, bool isEmpty = false}) {
     return Container(
       padding: EdgeInsets.symmetric(vertical: 8.0),
       width: double.infinity,
@@ -162,14 +158,16 @@ class _EditUserScreenState extends State<EditUserScreen> with LoadingAndErrorDia
         children: <Widget>[
           Text(
             title,
-            style: Theme.of(context).textTheme.overline,
+            style: Theme.of(context).textTheme.headline5,
           ),
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 8.0),
-            child: isEmpty ? Container() : Icon(
-              isUpdated ? Icons.fiber_new : Icons.check,
-              color: isUpdated ? Colors.amber[800] : Colors.green,
-            ),
+            child: isEmpty
+                ? Container()
+                : Icon(
+                    isUpdated ? Icons.fiber_new : Icons.check,
+                    color: isUpdated ? Colors.amber[800] : Colors.green,
+                  ),
           ),
         ],
       ),
@@ -202,12 +200,7 @@ class _EditUserScreenState extends State<EditUserScreen> with LoadingAndErrorDia
     return Container(
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        boxShadow: [
-          BoxShadow(
-            blurRadius: 3,
-            color: Colors.black54
-          )
-        ],
+        boxShadow: [BoxShadow(blurRadius: 3, color: Colors.black54)],
         color: Colors.grey,
       ),
       child: Center(
@@ -215,32 +208,34 @@ class _EditUserScreenState extends State<EditUserScreen> with LoadingAndErrorDia
           mainAxisSize: MainAxisSize.min,
           children: <Widget>[
             Theme(
-              data: ThemeData(
-                accentColor: Colors.white
-              ),
+              data: ThemeData(accentColor: Colors.white),
               child: CircularProgressIndicator(),
             ),
             Padding(
               padding: const EdgeInsets.only(top: 8.0),
               child: Text(
                 'Loading...',
-                style: Theme.of(context).textTheme.bodyText2.apply(color: Colors.white),
+                style: Theme.of(context)
+                    .textTheme
+                    .bodyText2
+                    .apply(color: Colors.white),
               ),
             ),
           ],
         ),
       ),
-      foregroundDecoration: loadingImages ? null : BoxDecoration(
-        shape: BoxShape.circle,
-        image: DecorationImage(
-          fit: BoxFit.cover,
-          image: editUserData.hasNewProfilePic ? FileImage(
-            File(editUserData.profilePicUrl),
-          ): CachedNetworkImageProvider(
-            editUserData.profilePicUrl
-          )
-        )
-      ),
+      foregroundDecoration: loadingImages
+          ? null
+          : BoxDecoration(
+              shape: BoxShape.circle,
+              image: DecorationImage(
+                  fit: BoxFit.cover,
+                  image: editUserData.hasNewProfilePic
+                      ? FileImage(
+                          File(editUserData.profilePicUrl),
+                        )
+                      : CachedNetworkImageProvider(
+                          editUserData.profilePicUrl))),
     );
   }
 
@@ -269,20 +264,18 @@ class _EditUserScreenState extends State<EditUserScreen> with LoadingAndErrorDia
     setState(() => loadingImages = true);
     List<String> currentImages = [];
     List<Asset> selectedAssets = [];
-    if(editUserData.hasNewProfilePic){
+    if (editUserData.hasNewProfilePic) {
       currentImages.add(editUserData.profilePicUrl);
       selectedAssets.add(selectedAsset);
     }
-    List<String> takenImages = await SelectImages.addImages(
-      context,
-      count: 1,
-      dirPath: dirPath,
-      isStillOpen: () => mounted,
-      selectedAssets: selectedAssets,
-      currentImages: currentImages,
-      title: 'Select picture'
-    );
-    if(takenImages.isNotEmpty){
+    List<String> takenImages = await SelectImages.addImages(context,
+        count: 1,
+        dirPath: dirPath,
+        isStillOpen: () => mounted,
+        selectedAssets: selectedAssets,
+        currentImages: currentImages,
+        title: 'Select picture');
+    if (takenImages.isNotEmpty) {
       editUserData.profilePicUrl = takenImages.first;
       selectedAsset = selectedAssets.first;
     }
@@ -292,7 +285,6 @@ class _EditUserScreenState extends State<EditUserScreen> with LoadingAndErrorDia
     });
   }
 
-
   Widget _buildNameField() {
     return Flexible(
       child: Container(
@@ -300,14 +292,12 @@ class _EditUserScreenState extends State<EditUserScreen> with LoadingAndErrorDia
         margin: EdgeInsets.only(bottom: 8.0),
         width: double.infinity,
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20.0),
-          color: Colors.grey[350]
-        ),
+            borderRadius: BorderRadius.circular(20.0), color: Colors.grey[350]),
         child: TextField(
           controller: _nameController,
           onChanged: (newName) {
-            setState((){
-            editUserData.name = newName;
+            setState(() {
+              editUserData.name = newName;
             });
           },
           maxLength: 50,
@@ -315,22 +305,23 @@ class _EditUserScreenState extends State<EditUserScreen> with LoadingAndErrorDia
           onSubmitted: (t) => FocusScope.of(context).requestFocus(bioFocus),
           textCapitalization: TextCapitalization.words,
           textInputAction: TextInputAction.next,
-          style: Theme.of(context).textTheme.overline.apply(color: Colors.black),
+          style:
+              Theme.of(context).textTheme.headline5.apply(color: Colors.black),
           decoration: new InputDecoration.collapsed(
-            hintText: "Theme/mood of this look...",
-            hintStyle: Theme.of(context).textTheme.overline.apply(color: Colors.black.withOpacity(0.5))
-          ),
+              hintText: "Theme/mood of this look...",
+              hintStyle: Theme.of(context)
+                  .textTheme
+                  .headline5
+                  .apply(color: Colors.black.withOpacity(0.5))),
         ),
       ),
     );
-  } 
+  }
 
   Widget _buildBioField() {
     return Container(
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20.0),
-        color: Colors.grey[350]
-      ),
+          borderRadius: BorderRadius.circular(20.0), color: Colors.grey[350]),
       margin: EdgeInsets.only(bottom: 16.0),
       padding: EdgeInsets.all(8.0),
       width: double.infinity,
@@ -338,10 +329,10 @@ class _EditUserScreenState extends State<EditUserScreen> with LoadingAndErrorDia
         controller: _bioController,
         focusNode: bioFocus,
         onChanged: (newBio) {
-          if(newBio.isEmpty){
+          if (newBio.isEmpty) {
             newBio = null;
           }
-          setState((){
+          setState(() {
             editUserData.bio = newBio;
           });
         },
@@ -350,12 +341,12 @@ class _EditUserScreenState extends State<EditUserScreen> with LoadingAndErrorDia
         maxLines: 5,
         maxLength: 500,
         maxLengthEnforced: true,
-        style: Theme.of(context).textTheme.headline5,
+        style: Theme.of(context).textTheme.subtitle1,
         decoration: new InputDecoration.collapsed(
-          hintText: "e.g:\nDescribe your own fashion style, what kind of stuff you like to wear and maybe some of your favourite brands!",
+          hintText:
+              "e.g:\nDescribe your own fashion style, what kind of stuff you like to wear and maybe some of your favourite brands!",
         ),
       ),
     );
   }
-
 }

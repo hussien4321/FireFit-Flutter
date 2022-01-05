@@ -13,21 +13,21 @@ class ExploreScreenOriginal extends StatefulWidget {
 }
 
 class _ExploreScreenOriginalState extends State<ExploreScreenOriginal> {
-  
   final Color imageOverlayColor = Colors.white;
 
   LoadOutfits explore = LoadOutfits();
   String userId;
 
   int adCounter = 50;
-  int currentIndex=0;
+  int currentIndex = 0;
   int pageNumber = 1;
   int get previousIndex => currentIndex - 1;
   int get nextIndex => currentIndex + 1;
 
   bool isPaginationDropdownInFocus = false;
   bool isFilterDropdownInFocus = false;
-  bool get isAnyDropdownInFocus => isPaginationDropdownInFocus || isFilterDropdownInFocus;
+  bool get isAnyDropdownInFocus =>
+      isPaginationDropdownInFocus || isFilterDropdownInFocus;
 
   OutfitBloc _outfitBloc;
 
@@ -36,9 +36,9 @@ class _ExploreScreenOriginalState extends State<ExploreScreenOriginal> {
     super.initState();
   }
 
-  restartSearch(){
-    currentIndex=0;
-    pageNumber=1;
+  restartSearch() {
+    currentIndex = 0;
+    pageNumber = 1;
     _outfitBloc.exploreOutfits.add(explore);
   }
 
@@ -50,66 +50,67 @@ class _ExploreScreenOriginalState extends State<ExploreScreenOriginal> {
       height: double.infinity,
       color: Colors.transparent,
       child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(10.0))
-        ),
-        padding: EdgeInsets.only(top: 16.0),
-        child: _buildOutfitLiveStream()
-      ),
+          decoration: BoxDecoration(
+              borderRadius: BorderRadius.vertical(top: Radius.circular(10.0))),
+          padding: EdgeInsets.only(top: 16.0),
+          child: _buildOutfitLiveStream()),
     );
   }
 
-
   _initBlocs() async {
-    if(_outfitBloc==null){
+    if (_outfitBloc == null) {
       _outfitBloc = OutfitBlocProvider.of(context);
       userId = await UserBlocProvider.of(context).existingAuthId.first;
       explore.userId = userId;
       restartSearch();
     }
   }
+
   Widget _buildOutfitLiveStream() {
     return StreamBuilder<bool>(
-      stream: _outfitBloc.isLoadingItems,
-      initialData: true,
-      builder: (ctx, loadingSnap) {
-        return StreamBuilder<List<Outfit>>(
-          stream: _outfitBloc.exploredOutfits,
-          initialData: [],
-          builder: (ctx, snap) {
-            List<Outfit> outfits = snap.data;
-            return Column(
-              children: <Widget>[
-                _extraInfoBar(loadingSnap.data),
-                Expanded(
-                  child: Stack(
-                    children: <Widget>[
-                      _buildOutfitViewAndOptions(
-                        outfitView: OutfitFadingCard(
-                          previousOutfit: outfitAtIndex(outfits, previousIndex),
-                          currentOutfit: outfitAtIndex(outfits, currentIndex),
-                          nextOutfit: outfitAtIndex(outfits, nextIndex),
-                          thickness: 10,
-                          onPageSwitch: (isForward) => setState(() => pageNumber+=isForward?1:-1),
-                          onNextPicShown: () => _incrementIndexes(1),
-                          onPrevPicShown: () => _incrementIndexes(-1),
-                          backgroundColor: imageOverlayColor,
-                          isLoading: loadingSnap.data,
-                          enabled: !isAnyDropdownInFocus,
-                        ),
-                        options: _buildActionBar(outfitAtIndex(outfits, currentIndex)),
+        stream: _outfitBloc.isLoadingItems,
+        initialData: true,
+        builder: (ctx, loadingSnap) {
+          return StreamBuilder<List<Outfit>>(
+              stream: _outfitBloc.exploredOutfits,
+              initialData: [],
+              builder: (ctx, snap) {
+                List<Outfit> outfits = snap.data;
+                return Column(
+                  children: <Widget>[
+                    _extraInfoBar(loadingSnap.data),
+                    Expanded(
+                      child: Stack(
+                        children: <Widget>[
+                          _buildOutfitViewAndOptions(
+                            outfitView: OutfitFadingCard(
+                              previousOutfit:
+                                  outfitAtIndex(outfits, previousIndex),
+                              currentOutfit:
+                                  outfitAtIndex(outfits, currentIndex),
+                              nextOutfit: outfitAtIndex(outfits, nextIndex),
+                              thickness: 10,
+                              onPageSwitch: (isForward) => setState(
+                                  () => pageNumber += isForward ? 1 : -1),
+                              onNextPicShown: () => _incrementIndexes(1),
+                              onPrevPicShown: () => _incrementIndexes(-1),
+                              backgroundColor: imageOverlayColor,
+                              isLoading: loadingSnap.data,
+                              enabled: !isAnyDropdownInFocus,
+                            ),
+                            options: _buildActionBar(
+                                outfitAtIndex(outfits, currentIndex)),
+                          ),
+                          _searchManipulatorButtons(),
+                        ],
                       ),
-                      _searchManipulatorButtons(),
-                    ],
-                  ),
-                ),
-              ],
-            );
-          }
-        );
-      }
-    );
+                    ),
+                  ],
+                );
+              });
+        });
   }
+
   Widget _extraInfoBar(bool isLoading) {
     return Container(
       padding: EdgeInsets.only(left: 20.0, right: 20.0, bottom: 2.0),
@@ -122,40 +123,34 @@ class _ExploreScreenOriginalState extends State<ExploreScreenOriginal> {
       ),
     );
   }
+
   Widget _loadingBanner() {
     return Text(
       'Loading new outfits...',
-      style: TextStyle(
-        color: Colors.grey,
-        fontSize: 12.0
-      ),
+      style: TextStyle(color: Colors.grey, fontSize: 12.0),
     );
   }
-
 
   Widget _adCounter() {
     return Text(
       'Next ad in: $adCounter',
       style: TextStyle(
-        color: Colors.grey,
-        fontStyle: FontStyle.italic,
-        fontSize: 12.0
-      ),
+          color: Colors.grey, fontStyle: FontStyle.italic, fontSize: 12.0),
     );
   }
+
   Widget _buildOutfitViewAndOptions({
     Widget outfitView,
     Widget options,
-  }){
+  }) {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.vertical(top: Radius.circular(30.0)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.4),
-            blurRadius: 2,
-            offset: Offset(0, -1)
-          )
+              color: Colors.black.withOpacity(0.4),
+              blurRadius: 2,
+              offset: Offset(0, -1))
         ],
       ),
       child: ClipRRect(
@@ -164,9 +159,7 @@ class _ExploreScreenOriginalState extends State<ExploreScreenOriginal> {
           color: imageOverlayColor,
           child: Column(
             children: <Widget>[
-              Expanded(
-                child: outfitView
-              ),
+              Expanded(child: outfitView),
               options,
             ],
           ),
@@ -176,13 +169,13 @@ class _ExploreScreenOriginalState extends State<ExploreScreenOriginal> {
   }
 
   Outfit outfitAtIndex(List<Outfit> allOutfits, int index) {
-    if(allOutfits == null || allOutfits.length <= index || index < 0){
+    if (allOutfits == null || allOutfits.length <= index || index < 0) {
       return null;
     }
     return allOutfits[index];
   }
 
-  Widget _searchManipulatorButtons(){
+  Widget _searchManipulatorButtons() {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 8.0),
       child: Row(
@@ -201,7 +194,7 @@ class _ExploreScreenOriginalState extends State<ExploreScreenOriginal> {
     return DropdownButtons(
       child: Text(
         '$pageNumber',
-        style: Theme.of(context).textTheme.subtitle1.apply(color: Colors.white),
+        style: Theme.of(context).textTheme.subtitle2.apply(color: Colors.white),
       ),
       onFocusChanged: (isInFocus) {
         setState(() {
@@ -211,25 +204,24 @@ class _ExploreScreenOriginalState extends State<ExploreScreenOriginal> {
       enabled: !isFilterDropdownInFocus,
       options: <DropdownOption>[
         DropdownOption(
-          child: Icon(
-            Icons.repeat_one,
-            color: Colors.white,
-          ),
-          tag: "Refresh & Restart",
-          onPressed: restartSearch
-        ),
+            child: Icon(
+              Icons.repeat_one,
+              color: Colors.white,
+            ),
+            tag: "Refresh & Restart",
+            onPressed: restartSearch),
         DropdownOption(
-          child: Icon(
-            Icons.search,
-            color: Colors.white,
-          ),
-          tag: "Go To Page",
-          onPressed: restartSearch
-        ),
+            child: Icon(
+              Icons.search,
+              color: Colors.white,
+            ),
+            tag: "Go To Page",
+            onPressed: restartSearch),
       ],
       alignStart: true,
     );
   }
+
   Widget _buildFilterDropdown() {
     return DropdownButtons(
       child: Icon(
@@ -244,51 +236,49 @@ class _ExploreScreenOriginalState extends State<ExploreScreenOriginal> {
       enabled: !isPaginationDropdownInFocus,
       options: <DropdownOption>[
         DropdownOption(
-          child: Icon(
-            Icons.category,
-            color: Colors.white,
-          ),
-          tag: "Select Cateogry"
-        ),
+            child: Icon(
+              Icons.category,
+              color: Colors.white,
+            ),
+            tag: "Select Cateogry"),
         DropdownOption(
-          child: Icon(
-            Icons.show_chart,
-            color: Colors.white,
-          ),
-          tag: "Sort By Top"
-        ),
+            child: Icon(
+              Icons.show_chart,
+              color: Colors.white,
+            ),
+            tag: "Sort By Top"),
         DropdownOption(
-          child: Icon(
-            Icons.delete,
-            color: Colors.white,
-          ),
-          tag: "Undo Filters"
-        ),
+            child: Icon(
+              Icons.delete,
+              color: Colors.white,
+            ),
+            tag: "Undo Filters"),
       ],
       alignStart: false,
     );
   }
 
-
-  _incrementIndexes(int diff){
+  _incrementIndexes(int diff) {
     setState(() {
-      currentIndex+=diff;
+      currentIndex += diff;
     });
     _incrementAdCounter();
   }
-  _incrementAdCounter(){
+
+  _incrementAdCounter() {
     setState(() {
       adCounter--;
     });
-    if(adCounter==0){
+    if (adCounter == 0) {
       _displayAd();
       adCounter = 50;
     }
   }
+
   _displayAd() => print('ad displayed');
 
   Widget _buildActionBar(Outfit currentOutfit) {
-    OutfitRating outfitRating =OutfitRating(
+    OutfitRating outfitRating = OutfitRating(
       outfit: currentOutfit,
       userId: userId,
     );
@@ -300,7 +290,8 @@ class _ExploreScreenOriginalState extends State<ExploreScreenOriginal> {
     return Material(
       color: imageOverlayColor,
       child: Container(
-        padding: EdgeInsets.only(bottom: 16.0, left: 16.0, right: 16.0, top: 8.0),
+        padding:
+            EdgeInsets.only(bottom: 16.0, left: 16.0, right: 16.0, top: 8.0),
         child: Row(
           mainAxisSize: MainAxisSize.max,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -332,7 +323,7 @@ class _ExploreScreenOriginalState extends State<ExploreScreenOriginal> {
               largeIcon: true,
               disabled: allDisabled || currentOutfit?.userRating == -1,
               selected: currentOutfit?.userRating == 1,
-            // onPressed: () => _outfitBloc.likeOutfit.add(outfitRating),
+              // onPressed: () => _outfitBloc.likeOutfit.add(outfitRating),
             ),
             CustomFab(
               color: Colors.amberAccent,
@@ -346,16 +337,12 @@ class _ExploreScreenOriginalState extends State<ExploreScreenOriginal> {
     );
   }
 
-  _composeComment(Outfit outfit){
-    CustomNavigator.goToCommentsScreen(context, 
-      focusComment: true, 
-      outfitId: outfit.outfitId
-    );
+  _composeComment(Outfit outfit) {
+    CustomNavigator.goToCommentsScreen(context,
+        focusComment: true, outfitId: outfit.outfitId);
   }
 
   _openCurrentProfile(String userId) {
-    CustomNavigator.goToProfileScreen(context,
-      userId: userId
-    );
+    CustomNavigator.goToProfileScreen(context, userId: userId);
   }
 }

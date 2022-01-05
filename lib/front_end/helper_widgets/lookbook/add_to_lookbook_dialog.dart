@@ -7,14 +7,12 @@ import '../../../../middleware/middleware.dart';
 import 'package:overlay_support/overlay_support.dart';
 
 class AddToLookbookDialog extends StatefulWidget {
-
   static Future<void> launch(BuildContext context, {OutfitSave outfitSave}) {
     return showDialog(
-      context: context,
-      builder: (ctx) => AddToLookbookDialog(
-        outfitSave: outfitSave,
-      )
-    );
+        context: context,
+        builder: (ctx) => AddToLookbookDialog(
+              outfitSave: outfitSave,
+            ));
   }
 
   final OutfitSave outfitSave;
@@ -26,9 +24,7 @@ class AddToLookbookDialog extends StatefulWidget {
 }
 
 class _AddToLookbookDialogState extends State<AddToLookbookDialog> {
-
   OutfitBloc _outfitBloc;
-
 
   @override
   Widget build(BuildContext context) {
@@ -37,30 +33,30 @@ class _AddToLookbookDialogState extends State<AddToLookbookDialog> {
       elevation: 0,
       title: Text(
         'Add to Lookbook',
-        style: Theme.of(context).textTheme.headline5.copyWith(
-          color: Colors.black,
-          fontWeight: FontWeight.bold
-        ),
+        style: Theme.of(context)
+            .textTheme
+            .subtitle1
+            .copyWith(color: Colors.black, fontWeight: FontWeight.bold),
       ),
-     content: _content(),
+      content: _content(),
       actions: <Widget>[
         FlatButton(
           child: Text(
             'Cancel',
-            style: Theme.of(context).textTheme.subtitle1.copyWith(
-              color: Colors.black,
-              fontWeight: FontWeight.bold
-            ),
+            style: Theme.of(context)
+                .textTheme
+                .subtitle2
+                .copyWith(color: Colors.black, fontWeight: FontWeight.bold),
           ),
           onPressed: Navigator.of(context).pop,
         ),
         FlatButton(
           child: Text(
             'New Lookbook',
-            style: Theme.of(context).textTheme.subtitle1.copyWith(
-              color: Colors.blue,
-              fontWeight: FontWeight.bold
-            ),
+            style: Theme.of(context)
+                .textTheme
+                .subtitle2
+                .copyWith(color: Colors.blue, fontWeight: FontWeight.bold),
           ),
           onPressed: () => NewLookbookDialog.launch(context),
         ),
@@ -69,7 +65,7 @@ class _AddToLookbookDialogState extends State<AddToLookbookDialog> {
   }
 
   _initBlocs() {
-    if(_outfitBloc==null){
+    if (_outfitBloc == null) {
       _outfitBloc = OutfitBlocProvider.of(context);
     }
   }
@@ -78,12 +74,20 @@ class _AddToLookbookDialogState extends State<AddToLookbookDialog> {
     return LookbooksStream(
       loadingStream: _outfitBloc.isLoadingItems,
       lookbooksStream: _outfitBloc.lookbooks,
-      builder: (isLoading, lookbooks){
+      builder: (isLoading, lookbooks) {
         lookbooks.sort((a, b) => -a.createdAt.compareTo(b.createdAt));
-        return lookbooks.isEmpty ? _noLookbooksPrompt() : Column(
-          mainAxisSize: MainAxisSize.min,
-          children: lookbooks.map((lookbook) => _lookbookTag(lookbook ,lookbooks.indexWhere((l)=>l.lookbookId==lookbook.lookbookId)==0)).toList(),
-        );
+        return lookbooks.isEmpty
+            ? _noLookbooksPrompt()
+            : Column(
+                mainAxisSize: MainAxisSize.min,
+                children: lookbooks
+                    .map((lookbook) => _lookbookTag(
+                        lookbook,
+                        lookbooks.indexWhere(
+                                (l) => l.lookbookId == lookbook.lookbookId) ==
+                            0))
+                    .toList(),
+              );
       },
     );
   }
@@ -99,7 +103,7 @@ class _AddToLookbookDialogState extends State<AddToLookbookDialog> {
     );
   }
 
-  Widget _lookbookTag(Lookbook lookbook, bool isFirst){
+  Widget _lookbookTag(Lookbook lookbook, bool isFirst) {
     return Column(
       children: <Widget>[
         Padding(
@@ -120,7 +124,7 @@ class _AddToLookbookDialogState extends State<AddToLookbookDialog> {
                 maxLines: 2,
                 softWrap: true,
                 overflow: TextOverflow.ellipsis,
-                style: Theme.of(context).textTheme.headline5,
+                style: Theme.of(context).textTheme.subtitle1,
               ),
             ),
           ),
@@ -128,11 +132,11 @@ class _AddToLookbookDialogState extends State<AddToLookbookDialog> {
       ],
     );
   }
+
   _addOutfitToLookbook(Lookbook lookbook) {
     OutfitSave saveData = widget.outfitSave;
     saveData.lookbookId = lookbook.lookbookId;
     _outfitBloc.saveOutfit.add(saveData);
     Navigator.pop(context);
-
   }
 }

@@ -6,30 +6,27 @@ import '../../../../front_end/providers.dart';
 import 'package:overlay_support/overlay_support.dart';
 
 class VerificationDialog extends StatefulWidget {
-
-  static Future<void> launch(BuildContext context, {String actionName, String emailAddress}) {
+  static Future<void> launch(BuildContext context,
+      {String actionName, String emailAddress}) {
     return showGeneralDialog(
-      barrierColor: Colors.
-      black.withOpacity(0.5),
-      transitionBuilder: (context, a1, a2, widget) {  
-        final curvedValue = Curves.easeInOutBack.transform(a1.value) - 1.0;
-        return Transform(
-          transform: Matrix4.translationValues(0.0, curvedValue * 200, 0.0),
-          child: Opacity(
-            opacity: a1.value,
-            child: VerificationDialog(
-              actionName: actionName,
-              emailAddress: emailAddress,
-            )
-          ),
-        );
-      },
-      transitionDuration: Duration(milliseconds: 200),
-      barrierDismissible: true,
-      barrierLabel: '',
-      context: context,
-      pageBuilder: (context, animation1, animation2) {}
-    );
+        barrierColor: Colors.black.withOpacity(0.5),
+        transitionBuilder: (context, a1, a2, widget) {
+          final curvedValue = Curves.easeInOutBack.transform(a1.value) - 1.0;
+          return Transform(
+            transform: Matrix4.translationValues(0.0, curvedValue * 200, 0.0),
+            child: Opacity(
+                opacity: a1.value,
+                child: VerificationDialog(
+                  actionName: actionName,
+                  emailAddress: emailAddress,
+                )),
+          );
+        },
+        transitionDuration: Duration(milliseconds: 200),
+        barrierDismissible: true,
+        barrierLabel: '',
+        context: context,
+        pageBuilder: (context, animation1, animation2) {});
   }
 
   final String actionName;
@@ -42,12 +39,11 @@ class VerificationDialog extends StatefulWidget {
 }
 
 class _VerificationDialogState extends State<VerificationDialog> {
-
   bool isVerified = false;
 
   bool isSendingEmail = false;
   bool emailCooldown = false;
-  
+
   UserBloc _userBloc;
 
   @override
@@ -55,7 +51,6 @@ class _VerificationDialogState extends State<VerificationDialog> {
     super.initState();
     _refresh();
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -65,20 +60,20 @@ class _VerificationDialogState extends State<VerificationDialog> {
       title: Text(
         'Just one thing... 👋',
         textAlign: TextAlign.center,
-        style: Theme.of(context).textTheme.overline.copyWith(
-          color: Colors.black,
-          fontWeight: FontWeight.bold
-        ),
+        style: Theme.of(context)
+            .textTheme
+            .headline6
+            .copyWith(color: Colors.black, fontWeight: FontWeight.bold),
       ),
-     content: _content(),
+      content: _content(),
       actions: <Widget>[
         FlatButton(
           child: Text(
             'Close',
-            style: Theme.of(context).textTheme.subtitle1.copyWith(
-              color: Colors.black,
-              fontWeight: FontWeight.bold
-            ),
+            style: Theme.of(context)
+                .textTheme
+                .subtitle2
+                .copyWith(color: Colors.black, fontWeight: FontWeight.bold),
           ),
           onPressed: Navigator.of(context).pop,
         ),
@@ -87,7 +82,7 @@ class _VerificationDialogState extends State<VerificationDialog> {
   }
 
   _initBlocs() {
-    if(_userBloc==null){
+    if (_userBloc == null) {
       _userBloc = UserBlocProvider.of(context);
     }
   }
@@ -99,62 +94,54 @@ class _VerificationDialogState extends State<VerificationDialog> {
         mainAxisSize: MainAxisSize.min,
         children: <Widget>[
           Padding(
-            padding: const EdgeInsets.only(bottom: 16.0),
-            child: RichText(
-              text: TextSpan(
-                style: Theme.of(context).textTheme.headline5.copyWith(
-                  color: Colors.black,
-                ),
-                children: [
-                  TextSpan(
-                    text: "Before you can "
-                  ),
-                  TextSpan(
-                    text: widget.actionName,
-                    style: TextStyle(
-                      inherit: true,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black
-                    )
-                  ),
-                  TextSpan(
-                    text: ", we need you to verify your email "
-                  ),
-                  TextSpan(
-                    text: "${widget.emailAddress}\n\n",
-                    style: TextStyle(
-                      inherit: true,
-                      fontWeight: FontWeight.bold
-                    )
-                  ),
-                  TextSpan(
-                    text: "To do this:\n",
-                    style: TextStyle(
-                      inherit: true,
-                      fontWeight: FontWeight.bold
-                    )
-                  ),
-                  TextSpan(
-                    text: "1) Send a verification email using the button below ",
-                  ),
-                  TextSpan(
-                    text: "(might be in spam)\n",
-                    style: TextStyle(
-                      inherit: true,
-                      color: Colors.black54,
-                    )
-                  ),
-                  TextSpan(
-                    text: "2) Click the link in the email to verify\n3) Press the refresh status button to complete the process!",
-                  ),
-                ]
-              ),
-            )
-          ),
+              padding: const EdgeInsets.only(bottom: 16.0),
+              child: RichText(
+                text: TextSpan(
+                    style: Theme.of(context).textTheme.subtitle1.copyWith(
+                          color: Colors.black,
+                        ),
+                    children: [
+                      TextSpan(text: "Before you can "),
+                      TextSpan(
+                          text: widget.actionName,
+                          style: TextStyle(
+                              inherit: true,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black)),
+                      TextSpan(text: ", we need you to verify your email "),
+                      TextSpan(
+                          text: "${widget.emailAddress}\n\n",
+                          style: TextStyle(
+                              inherit: true, fontWeight: FontWeight.bold)),
+                      TextSpan(
+                          text: "To do this:\n",
+                          style: TextStyle(
+                              inherit: true, fontWeight: FontWeight.bold)),
+                      TextSpan(
+                        text:
+                            "1) Send a verification email using the button below ",
+                      ),
+                      TextSpan(
+                          text: "(might be in spam)\n",
+                          style: TextStyle(
+                            inherit: true,
+                            color: Colors.black54,
+                          )),
+                      TextSpan(
+                        text:
+                            "2) Click the link in the email to verify\n3) Press the refresh status button to complete the process!",
+                      ),
+                    ]),
+              )),
           _button(
-            text: emailCooldown ? 'Email sent!' : isSendingEmail ? 'Sending...' : 'Send verification email',
-            onPressed: isSendingEmail || emailCooldown ? null : _sendVerificatonEmail
-          ),
+              text: emailCooldown
+                  ? 'Email sent!'
+                  : isSendingEmail
+                      ? 'Sending...'
+                      : 'Send verification email',
+              onPressed: isSendingEmail || emailCooldown
+                  ? null
+                  : _sendVerificatonEmail),
           _verificationStatus(),
           isVerified ? Container() : _backgroundLoading(),
         ],
@@ -166,16 +153,11 @@ class _VerificationDialogState extends State<VerificationDialog> {
     return Container(
       width: double.infinity,
       child: RaisedButton(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8)
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         color: Colors.black87,
         child: Text(
           text,
-          style: TextStyle(
-            inherit: true,
-            color: Colors.white
-          ),
+          style: TextStyle(inherit: true, color: Colors.white),
         ),
         onPressed: onPressed,
       ),
@@ -183,7 +165,7 @@ class _VerificationDialogState extends State<VerificationDialog> {
   }
 
   Widget _verificationStatus() {
-    Color verificationColor = isVerified ? Colors.blue : Colors.red; 
+    Color verificationColor = isVerified ? Colors.blue : Colors.red;
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Row(
@@ -191,15 +173,13 @@ class _VerificationDialogState extends State<VerificationDialog> {
           Expanded(
             child: Text(
               'Current Status',
-              style: Theme.of(context).textTheme.subtitle1,
+              style: Theme.of(context).textTheme.subtitle2,
             ),
           ),
-          Text(
-            isVerified ? 'Verified' : 'Unverified',
-            style: Theme.of(context).textTheme.button.copyWith(
-              color: verificationColor,
-            )
-          ),
+          Text(isVerified ? 'Verified' : 'Unverified',
+              style: Theme.of(context).textTheme.button.copyWith(
+                    color: verificationColor,
+                  )),
           Icon(
             isVerified ? Icons.check : Icons.close,
             color: verificationColor,
@@ -216,17 +196,13 @@ class _VerificationDialogState extends State<VerificationDialog> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             Flexible(
-              child: Text(
-                'Checking for updates...',
-                style: Theme.of(context).textTheme.button.copyWith(
-                  color: Colors.black54,
-                )
-              ),
+              child: Text('Checking for updates...',
+                  style: Theme.of(context).textTheme.button.copyWith(
+                        color: Colors.black54,
+                      )),
             ),
             Theme(
-              data: ThemeData(
-                accentColor: Colors.black54
-              ),
+              data: ThemeData(accentColor: Colors.black54),
               child: Padding(
                 padding: EdgeInsets.only(left: 4),
                 child: Container(
@@ -244,7 +220,10 @@ class _VerificationDialogState extends State<VerificationDialog> {
           padding: EdgeInsets.only(top: 8.0),
           child: Text(
             'Could take up to 30 seconds',
-            style: Theme.of(context).textTheme.caption.copyWith(color: Colors.black38),
+            style: Theme.of(context)
+                .textTheme
+                .caption
+                .copyWith(color: Colors.black38),
           ),
         ),
       ],
@@ -253,31 +232,32 @@ class _VerificationDialogState extends State<VerificationDialog> {
 
   _sendVerificatonEmail() async {
     setState(() {
-     isSendingEmail=true; 
+      isSendingEmail = true;
     });
     await Future.delayed(Duration(seconds: 1));
     _userBloc.resendVerificationEmail.add(null);
     toast("Email Sent!");
     setState(() {
-     emailCooldown = true;
-     isSendingEmail = false; 
+      emailCooldown = true;
+      isSendingEmail = false;
     });
-    Future.delayed(Duration(seconds: 60), () => setState(() => emailCooldown=false));
+    Future.delayed(
+        Duration(seconds: 60), () => setState(() => emailCooldown = false));
   }
 
   _refresh() async {
     bool newIsVerified = false;
-    while(!newIsVerified){
-      if(!mounted){
+    while (!newIsVerified) {
+      if (!mounted) {
         return;
       }
       await Future.delayed(Duration(seconds: 3));
       _userBloc.refreshVerificationEmail.add(null);
       newIsVerified = await _userBloc.isEmailVerified.first;
     }
-    if(newIsVerified){
+    if (newIsVerified) {
       setState(() {
-        isVerified = newIsVerified; 
+        isVerified = newIsVerified;
       });
     }
   }
