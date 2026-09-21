@@ -14,7 +14,36 @@ The companion [FireFit backend](https://github.com/hussien4321/FireFit-BackEnd) 
 
 Offline-first · four-layer architecture · [Website](https://skilful-tape-240120.web.app)
 
+<img src="docs/screenshots/01-explore.png" width="30%" alt="Ranked discovery feed" /> <img src="docs/screenshots/03-rate.png" width="30%" alt="Rating an outfit" /> <img src="docs/screenshots/07-profile.png" width="30%" alt="User profile" />
+
 </div>
+
+---
+
+## Main features
+
+- **Outfit uploads** — up to three images per post, compressed on-device and tagged with one of six styles.
+- **5-point "flame" rating** on every outfit, with a running average tracked per user over time.
+- **Ranked discovery feed** ordered by a confidence-weighted score rather than a raw average.
+- **Search and filtering** by style, gender, country and time window.
+- **Follow system with push notifications** for new posts, ratings, comments and replies.
+- **Threaded comments** with likes and notifications to everyone in a thread.
+- **Lookbooks** — curated personal collections of saved outfits.
+- **Moderation** — block and report users and outfits.
+- **Offline-first browsing** served entirely from local SQLite.
+- **Full account lifecycle** — email and social sign-in, verification, and account deletion.
+
+FireFit has since been discontinued and removed from the stores; the client and backend are open-sourced as a portfolio piece.
+
+| Explore — "Hottest Fits" | Rate a fit | Outfit detail |
+|:---:|:---:|:---:|
+| ![Explore feed](docs/screenshots/01-explore.png) | ![Rating dialog](docs/screenshots/03-rate.png) | ![Outfit detail](docs/screenshots/04-outfit-detail.png) |
+| Ranked feed with style, gender, country and date filters | 5-flame rating with live average recalculation | Threaded advice, ratings breakdown, save-to-lookbook |
+
+| Upload an outfit | My Wardrobe | Lookbooks | Profile |
+|:---:|:---:|:---:|:---:|
+| ![Upload flow](docs/screenshots/02-upload.png) | ![Wardrobe grid](docs/screenshots/05-wardrobe.png) | ![Lookbooks](docs/screenshots/06-lookbooks.png) | ![Profile](docs/screenshots/08-profile-following.png) |
+| Up to 3 images, style tag, title, description | Every fit posted, with its score | Curated collections of saved looks | Followers, flames earned, upload streak |
 
 ---
 
@@ -33,6 +62,29 @@ Offline-first · four-layer architecture · [Website](https://skilful-tape-24012
 | Observability | Firebase Analytics + Crashlytics |
 | Monetisation | AdMob + in-app subscriptions |
 | Database (server) | Google Cloud SQL (MySQL) |
+
+---
+
+## Getting started
+
+> **Note:** this targets a pre-null-safety Dart SDK (`>=2.11.0 <3.0.0`) and depends on several Firebase plugin versions that have since been superseded. It builds against a Flutter 2.x toolchain and will not compile on current stable without a dependency upgrade pass.
+
+```bash
+git clone https://github.com/hussien4321/FireFit-Flutter.git
+cd FireFit-Flutter
+flutter pub get
+```
+
+Supply your own Firebase credentials, which are deliberately not committed:
+
+- `android/app/google-services.json`
+- `ios/Runner/GoogleService-Info.plist`
+
+Then deploy the [backend](https://github.com/hussien4321/FireFit-BackEnd) so the callable functions the client expects exist.
+
+```bash
+flutter run
+```
 
 ---
 
@@ -146,57 +198,6 @@ outfit:{outfitId}:{userId}:{imageIndex}:{imageCount}:{originalName}
 A Storage trigger on the backend parses that filename, resizes, normalises EXIF rotation, moves the file to its permanent path and updates SQL — and when `imageIndex == imageCount`, it flips the outfit's `has_images_uploaded` flag and fans out push notifications to every follower.
 
 Since all feed queries filter on that flag, a half-uploaded outfit is never visible to anyone. It's a publish barrier built out of a filename and a boolean, giving atomic-looking publication over a non-transactional multi-file upload.
-
----
-
-## Main features
-
-- **Outfit uploads** — up to three images per post, compressed on-device and tagged with one of six styles.
-- **5-point "flame" rating** on every outfit, with a running average tracked per user over time.
-- **Ranked discovery feed** ordered by a confidence-weighted score rather than a raw average.
-- **Search and filtering** by style, gender, country and time window.
-- **Follow system with push notifications** for new posts, ratings, comments and replies.
-- **Threaded comments** with likes and notifications to everyone in a thread.
-- **Lookbooks** — curated personal collections of saved outfits.
-- **Moderation** — block and report users and outfits.
-- **Offline-first browsing** served entirely from local SQLite.
-- **Full account lifecycle** — email and social sign-in, verification, and account deletion.
-
-FireFit has since been discontinued and removed from the stores; the client and backend are open-sourced as a portfolio piece.
-
-| Explore — "Hottest Fits" | Rate a fit | Outfit detail |
-|:---:|:---:|:---:|
-| ![Explore feed](docs/screenshots/01-explore.png) | ![Rating dialog](docs/screenshots/03-rate.png) | ![Outfit detail](docs/screenshots/04-outfit-detail.png) |
-| Ranked feed with style, gender, country and date filters | 5-flame rating with live average recalculation | Threaded advice, ratings breakdown, save-to-lookbook |
-
-| Upload an outfit | My Wardrobe | Lookbooks | Profile |
-|:---:|:---:|:---:|:---:|
-| ![Upload flow](docs/screenshots/02-upload.png) | ![Wardrobe grid](docs/screenshots/05-wardrobe.png) | ![Lookbooks](docs/screenshots/06-lookbooks.png) | ![Profile](docs/screenshots/08-profile-following.png) |
-| Up to 3 images, style tag, title, description | Every fit posted, with its score | Curated collections of saved looks | Followers, flames earned, upload streak |
-
-
----
-
-## Getting started
-
-> **Note:** this targets a pre-null-safety Dart SDK (`>=2.11.0 <3.0.0`) and depends on several Firebase plugin versions that have since been superseded. It builds against a Flutter 2.x toolchain and will not compile on current stable without a dependency upgrade pass.
-
-```bash
-git clone https://github.com/hussien4321/FireFit-Flutter.git
-cd FireFit-Flutter
-flutter pub get
-```
-
-Supply your own Firebase credentials, which are deliberately not committed:
-
-- `android/app/google-services.json`
-- `ios/Runner/GoogleService-Info.plist`
-
-Then deploy the [backend](https://github.com/hussien4321/FireFit-BackEnd) so the callable functions the client expects exist.
-
-```bash
-flutter run
-```
 
 ---
 
